@@ -12,6 +12,17 @@
 <body>
 
 <style>
+:root{
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --color-text-primary:#111827;
+  --color-text-secondary:#6b7280;
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f8fafc;
+  --color-border-tertiary:#e5e7eb;
+  --color-border-secondary:#d1d5db;
+  --border-radius-lg:14px;
+  --border-radius-md:10px;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font-sans);color:var(--color-text-primary);font-size:14px}
 .app{display:flex;min-height:100vh}
@@ -462,7 +473,6 @@ function renderAll(){
 function initFirebaseSync(){
   if(initializedFirebase) return;
   initializedFirebase = true;
-}
 
   if(!window.firebase || !firebaseConfigured()){
     console.warn('Firebase not configured yet. App uses local backup only.');
@@ -470,6 +480,7 @@ function initFirebaseSync(){
     renderAll();
     return;
   }
+
   try{
     firebase.initializeApp(FIREBASE_CONFIG);
     db = firebase.database();
@@ -480,9 +491,9 @@ function initFirebaseSync(){
       const remote = snapshot.val();
       if(!remote){
         applyingRemoteState = true;
-        persistLocalBackup();
         cloudRef.set(normalizeState(S)).finally(() => {
           applyingRemoteState = false;
+          persistLocalBackup();
           renderAll();
         });
         return;
