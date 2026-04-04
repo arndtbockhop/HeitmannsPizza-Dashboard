@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gastro Manager</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+</head>
+<body>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);color:var(--color-text-primary);font-size:14px}
+.app{display:flex;min-height:100vh}
+.sidebar{width:180px;min-width:180px;background:var(--color-background-secondary);border-right:0.5px solid var(--color-border-tertiary);padding:.75rem 0;display:flex;flex-direction:column;gap:2px}
+.logo{padding:0 .75rem .75rem;font-size:14px;font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:6px}
+.nav{padding:7px .75rem;font-size:13px;cursor:pointer;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;border-left:2px solid transparent}
+.nav:hover{background:var(--color-background-primary);color:var(--color-text-primary)}
+.nav.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;border-left-color:#185FA5}
+.main{flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:1.25rem}
+.page{display:none;flex-direction:column;gap:1.25rem}
+.page.active{display:flex}
+.ptitle{font-size:17px;font-weight:500}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.875rem 1rem}
+.ctitle{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.03em}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem}
+.mlabel{font-size:11px;color:var(--color-text-secondary);margin-bottom:3px}
+.mval{font-size:20px;font-weight:500}
+.btn{padding:6px 12px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;cursor:pointer;color:var(--color-text-primary)}
+.btn:hover{background:var(--color-background-secondary)}
+.btnp{background:#185FA5;color:#fff;border-color:#185FA5}
+.btnp:hover{background:#0C447C}
+.btnd{color:#A32D2D;border-color:#A32D2D}
+.btnd:hover{background:#FCEBEB}
+.row{display:flex;gap:10px;align-items:center}
+.rb{display:flex;justify-content:space-between;align-items:center}
+input,select,textarea{width:100%;padding:6px 9px;font-size:13px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans)}
+textarea{resize:vertical;min-height:70px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:11px;color:var(--color-text-secondary)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500}
+.bb{background:#E6F1FB;color:#0C447C}
+.bg{background:#EAF3DE;color:#27500A}
+.ba{background:#FAEEDA;color:#633806}
+.br{background:#FCEBEB;color:#791F1F}
+.bp{background:#EEEDFE;color:#3C3489}
+.evitem{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);cursor:pointer}
+.evitem:hover{background:var(--color-background-secondary)}
+.evdate{min-width:42px;text-align:center}
+.evday{font-size:18px;font-weight:500;line-height:1}
+.evmon{font-size:10px;color:var(--color-text-secondary)}
+.evinfo{flex:1}
+.evtitle{font-size:13px;font-weight:500}
+.evsub{font-size:11px;color:var(--color-text-secondary);margin-top:1px}
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;align-items:center;justify-content:center}
+.modal-ov.open{display:flex}
+.modal{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);padding:1.25rem;width:560px;max-width:96vw;max-height:88vh;overflow-y:auto}
+.mtitle{font-size:15px;font-weight:500;margin-bottom:1rem}
+.divider{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:.75rem 0}
+.ktbl{width:100%;border-collapse:collapse;font-size:12px}
+.ktbl th{text-align:left;padding:5px 6px;color:var(--color-text-secondary);font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary)}
+.ktbl td{padding:5px 6px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
+.ktbl td input{padding:4px 6px;font-size:12px}
+.sumbox{margin-top:.75rem;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:12px}
+.sumrow{display:flex;justify-content:space-between;margin-bottom:4px}
+.sumtotal{display:flex;justify-content:space-between;font-size:14px;font-weight:500;margin-top:6px;padding-top:6px;border-top:0.5px solid var(--color-border-tertiary)}
+.ldot{width:7px;height:7px;border-radius:50%;background:#639922;display:inline-block;margin-right:5px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pizza-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.pizza-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 10px;cursor:pointer;transition:border-color .15s}
+.pizza-card:hover{border-color:#185FA5;background:var(--color-background-secondary)}
+.pizza-card.selected{border-color:#185FA5;border-width:1.5px;background:#E6F1FB}
+.pizza-name{font-size:12px;font-weight:500}
+.pizza-cost{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.cal-h{font-size:10px;color:var(--color-text-secondary);text-align:center;padding:3px}
+.cal-d{min-height:56px;border:0.5px solid var(--color-border-tertiary);border-radius:5px;padding:3px;font-size:11px;cursor:pointer}
+.cal-d:hover{background:var(--color-background-secondary)}
+.cal-d.today{border-color:#185FA5}
+.cal-d.has-ev{background:#E6F1FB}
+.cal-dot{font-size:9px;color:#185FA5;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.catering-result{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:1rem}
+.cr-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.cr-total{display:flex;justify-content:space-between;padding:8px 0;font-size:15px;font-weight:500}
+.highlight{background:#E6F1FB;border-radius:var(--border-radius-md);padding:6px 10px;margin-top:6px;font-size:13px;font-weight:500;color:#0C447C;text-align:center}
+@media(max-width:640px){
+  .sidebar{width:52px;min-width:52px}
+  .logo{display:none}
+  .nav span{display:none}
+  .nav{padding:10px;justify-content:center}
+  .metrics{grid-template-columns:1fr 1fr}
+  .g2,.g3{grid-template-columns:1fr}
+  .modal{width:98vw;padding:1rem}
+  .pizza-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
+}
+</style>
+
+<div class="app">
+<div class="sidebar">
+  <div class="logo">Gastro Manager</div>
+  <div class="nav active" onclick="pg('dashboard',this)"><span>Dashboard</span></div>
+  <div class="nav" onclick="pg('kalender',this)"><span>Kalender</span></div>
+  <div class="nav" onclick="pg('pizza',this)"><span>Pizza-Kalk.</span></div>
+  <div class="nav" onclick="pg('catering',this)"><span>Catering</span></div>
+  <div class="nav" onclick="pg('einkauf',this)"><span>Einkauf</span></div>
+  <div class="nav" onclick="pg('kontakte',this)"><span>Kontakte</span></div>
+</div>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="rb"><div class="ptitle">Dashboard</div><div style="font-size:11px;color:var(--color-text-secondary)"><span class="ldot"></span>Live</div></div>
+  <div class="metrics">
+    <div class="metric"><div class="mlabel">Events (Monat)</div><div class="mval" id="m1">0</div></div>
+    <div class="metric"><div class="mlabel">Angebote</div><div class="mval" id="m2">0</div></div>
+    <div class="metric"><div class="mlabel">Kontakte</div><div class="mval" id="m3">0</div></div>
+    <div class="metric"><div class="mlabel">Einkauf pos.</div><div class="mval" id="m4">0</div></div>
+  </div>
+  <div class="card"><div class="ctitle">Nächste Events</div><div id="dash-ev"><div style="font-size:12px;color:var(--color-text-secondary)">Keine Events. Im Kalender hinzufügen.</div></div></div>
+  <div class="card"><div class="ctitle">Pinnwand</div><textarea id="pinnwand" placeholder="Notizen für alle..." oninput="savePin()"></textarea></div>
+</div>
+
+<!-- KALENDER -->
+<div class="page" id="page-kalender">
+  <div class="rb">
+    <div class="ptitle" id="cal-title">Kalender</div>
+    <div class="row"><button class="btn" onclick="cm(-1)">←</button><button class="btn" onclick="cm(1)">→</button><button class="btn btnp" onclick="openEvModal()">+ Event</button></div>
+  </div>
+  <div class="card">
+    <div class="cal-grid" id="cal-heads"></div>
+    <div class="cal-grid" style="margin-top:4px" id="cal-body"></div>
+  </div>
+  <div class="card"><div class="ctitle">Events diesen Monat</div><div id="cal-ev-list"></div></div>
+</div>
+
+<!-- PIZZA KALKULATION -->
+<div class="page" id="page-pizza">
+  <div class="rb"><div class="ptitle">Pizza-Kalkulation</div><button class="btn btnp" onclick="openPizzaModal()">+ Neues Angebot</button></div>
+  <div class="card">
+    <div class="ctitle">Gespeicherte Angebote</div>
+    <div id="pizza-angebote-list"><div style="font-size:12px;color:var(--color-text-secondary)">Noch keine Angebote.</div></div>
+  </div>
+</div>
+
+<!-- CATERING KALKULATION -->
+<div class="page" id="page-catering">
+  <div class="ptitle">Catering-Kalkulation</div>
+  <div class="g2">
+    <div class="card">
+      <div class="ctitle">Eingaben</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="fg"><label>Gästezahl</label><input type="number" id="ct-gaeste" value="30" oninput="calcCatering()"></div>
+        <div class="fg"><label>Strecke km (hin & zurück gesamt)</label><input type="number" id="ct-km" value="48" oninput="calcCatering()"></div>
+        <div class="fg"><label>Arbeitskräfte</label><input type="number" id="ct-pers" value="2" oninput="calcCatering()"></div>
+        <div class="fg"><label>Stundensatz €/h</label><input type="number" id="ct-std" value="18" oninput="calcCatering()"></div>
+        <div class="fg"><label>Wareneinsatz €/Gast</label><input type="number" id="ct-waren" value="3.5" step="0.1" oninput="calcCatering()"></div>
+        <div class="fg"><label>Zielmarge (Multiplikator)</label>
+          <select id="ct-marge" onchange="calcCatering()">
+            <option value="0.5">30–49 Pers. (0.5)</option>
+            <option value="0.6">50–69 Pers. (0.6)</option>
+            <option value="0.7">70–99 Pers. (0.7)</option>
+            <option value="0.85">100–149 Pers. (0.85)</option>
+            <option value="1.0">150–199 Pers. (1.0)</option>
+            <option value="1.2">200–299 Pers. (1.2)</option>
+            <option value="1.1">300–400 Pers. (1.1)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="ctitle">Fixkosten</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="fg"><label>Gaspauschale €</label><input type="number" id="ct-gas" value="10" oninput="calcCatering()"></div>
+          <div class="fg"><label>Entsorgung €</label><input type="number" id="ct-entsorg" value="15" oninput="calcCatering()"></div>
+          <div class="fg"><label>Miete Heitmann €</label><input type="number" id="ct-miete" value="45" oninput="calcCatering()"></div>
+          <div class="fg"><label>km-Satz €/km</label><input type="number" id="ct-kmsatz" value="0.8" step="0.01" oninput="calcCatering()"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ctitle">Personalstunden</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+          <div class="rb"><span style="color:var(--color-text-secondary)">Einkauf</span><span id="h-einkauf">2h</span></div>
+          <div class="rb"><span style="color:var(--color-text-secondary)">Teig vorbereiten</span><span id="h-teig">0.7h</span></div>
+          <div class="rb"><span style="color:var(--color-text-secondary)">Dips & Kleinkram</span><span id="h-dips">0.25h</span></div>
+          <div class="rb"><span style="color:var(--color-text-secondary)">Prepen</span><span id="h-prepen">1.5h</span></div>
+          <div class="rb"><span style="color:var(--color-text-secondary)">Beladen/Entladen</span><span id="h-beladen">1h</span></div>
+          <div class="rb"><span style="color:var(--color-text-secondary)">Aufbau/Abbau</span><span id="h-aufbau">1h</span></div>
+          <div class="rb"><span style="color:var(--color-text-secondary)">Service vor Ort</span><span id="h-service">2h</span></div>
+          <div class="rb"><span style="color:var(--color-text-secondary)">Aufräumen</span><span id="h-aufraeumen">1h</span></div>
+          <div style="border-top:0.5px solid var(--color-border-tertiary);margin-top:4px;padding-top:6px" class="rb"><span style="font-weight:500">Gesamt pro Pers.</span><span id="h-total-pers" style="font-weight:500">9.45h</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Ergebnis</div>
+    <div class="catering-result">
+      <div class="cr-row"><span>Gäste</span><span id="cr-gaeste">30</span></div>
+      <div class="cr-row"><span>Personalstunden gesamt</span><span id="cr-stunden">–</span></div>
+      <div class="cr-row"><span>Personalkosten</span><span id="cr-personal">–</span></div>
+      <div class="cr-row"><span>Wareneinsatz</span><span id="cr-waren">–</span></div>
+      <div class="cr-row"><span>km-Kosten</span><span id="cr-km">–</span></div>
+      <div class="cr-row"><span>Fixkosten</span><span id="cr-fix">–</span></div>
+      <div class="cr-row"><span>Marge</span><span id="cr-marge">–</span></div>
+      <div class="cr-total"><span>Zielpreis netto</span><span id="cr-netto" style="color:#185FA5">–</span></div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <div class="highlight" style="flex:1">Netto/Gast: <span id="cr-netto-gast">–</span></div>
+        <div class="highlight" style="flex:1;background:#EAF3DE;color:#27500A">Brutto/Gast: <span id="cr-brutto-gast">–</span></div>
+      </div>
+      <div class="highlight" style="margin-top:6px;background:#FAEEDA;color:#633806">Zielpreis brutto: <span id="cr-brutto">–</span></div>
+    </div>
+    <button class="btn btnp" style="margin-top:.75rem;width:100%" onclick="saveCateringAngebot()">Als Angebot speichern</button>
+  </div>
+  <div class="card" id="catering-angebote-card">
+    <div class="ctitle">Gespeicherte Angebote</div>
+    <div id="catering-angebote-list"><div style="font-size:12px;color:var(--color-text-secondary)">Noch keine Angebote.</div></div>
+  </div>
+</div>
+
+<!-- EINKAUF -->
+<div class="page" id="page-einkauf">
+  <div class="rb"><div class="ptitle">Einkauf & Warenbestand</div><button class="btn btnp" onclick="openEkModal()">+ Position</button></div>
+  <div class="card">
+    <table class="ktbl" style="width:100%">
+      <thead><tr><th>Artikel</th><th>Kat.</th><th>Menge</th><th>Einheit</th><th>€/E</th><th>Gesamt</th><th>Status</th><th></th></tr></thead>
+      <tbody id="ek-tbody"></tbody>
+      <tfoot><tr style="font-weight:500"><td colspan="5" style="padding:6px 6px;text-align:right;font-size:12px">Gesamt:</td><td style="padding:6px 6px" id="ek-total">0,00 €</td><td colspan="2"></td></tr></tfoot>
+    </table>
+  </div>
+</div>
+
+<!-- KONTAKTE -->
+<div class="page" id="page-kontakte">
+  <div class="rb"><div class="ptitle">Kontakte</div><button class="btn btnp" onclick="openKtModal()">+ Kontakt</button></div>
+  <div class="card"><div id="kt-list"><div style="font-size:12px;color:var(--color-text-secondary)">Noch keine Kontakte.</div></div></div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- EVENT MODAL -->
+<div class="modal-ov" id="ev-modal">
+<div class="modal">
+  <div class="mtitle" id="ev-modal-t">Neues Event</div>
+  <div class="g2">
+    <div class="fg"><label>Titel</label><input id="ev-t" placeholder="z.B. Hochzeit Meyer"/></div>
+    <div class="fg"><label>Typ</label><select id="ev-typ"><option>Catering</option><option>Restaurant</option><option>Event</option><option>Sonstiges</option></select></div>
+    <div class="fg"><label>Datum</label><input type="date" id="ev-dat"/></div>
+    <div class="fg"><label>Uhrzeit</label><input type="time" id="ev-uhr" value="18:00"/></div>
+    <div class="fg"><label>Ort</label><input id="ev-ort"/></div>
+    <div class="fg"><label>Personen</label><input type="number" id="ev-pers"/></div>
+    <div class="fg"><label>Kontakt</label><input id="ev-kt"/></div>
+    <div class="fg"><label>Budget €</label><input type="number" id="ev-bud"/></div>
+  </div>
+  <div class="fg" style="margin-top:10px"><label>Notizen / Wichtige Infos</label><textarea id="ev-not" placeholder="Menü, Sonderwünsche, Equipment, Anfahrt..."></textarea></div>
+  <div class="fg" style="margin-top:8px"><label>Status</label><select id="ev-stat"><option>Anfrage</option><option>Bestätigt</option><option>Abgeschlossen</option><option>Abgesagt</option></select></div>
+  <hr class="divider">
+  <div class="row" style="justify-content:flex-end;gap:8px">
+    <button class="btn" onclick="cm2('ev-modal')">Abbrechen</button>
+    <button class="btn btnp" onclick="saveEv()">Speichern</button>
+  </div>
+</div>
+</div>
+
+<!-- PIZZA ANGEBOT MODAL -->
+<div class="modal-ov" id="pizza-modal">
+<div class="modal">
+  <div class="mtitle">Pizza-Angebot erstellen</div>
+  <div class="g2">
+    <div class="fg"><label>Kundenname</label><input id="pz-kunde"/></div>
+    <div class="fg"><label>Datum</label><input type="date" id="pz-dat"/></div>
+  </div>
+  <hr class="divider">
+  <div class="ctitle" style="margin-bottom:8px">Pizzen auswählen & Anzahl eingeben</div>
+  <div class="pizza-grid" id="pizza-select-grid"></div>
+  <div style="margin-top:12px;font-size:13px;font-weight:500">Eingegebene Mengen:</div>
+  <div id="pizza-qty-inputs" style="margin-top:8px;display:flex;flex-direction:column;gap:6px"></div>
+  <hr class="divider">
+  <div class="g2">
+    <div class="fg"><label>Aufschlag %</label><input type="number" id="pz-aufschlag" value="0" oninput="calcPizza()"/></div>
+    <div class="fg"><label>MwSt %</label><input type="number" id="pz-mwst" value="7" oninput="calcPizza()"/></div>
+  </div>
+  <div class="sumbox" style="margin-top:10px">
+    <div class="sumrow"><span style="color:var(--color-text-secondary)">Materialkosten gesamt:</span><span id="pz-mat">0,00 €</span></div>
+    <div class="sumrow"><span style="color:var(--color-text-secondary)">Aufschlag:</span><span id="pz-auf">0,00 €</span></div>
+    <div class="sumrow"><span style="color:var(--color-text-secondary)">Netto:</span><span id="pz-netto">0,00 €</span></div>
+    <div class="sumrow"><span style="color:var(--color-text-secondary)">MwSt:</span><span id="pz-mwstv">0,00 €</span></div>
+    <div class="sumtotal"><span>Gesamt brutto:</span><span id="pz-total" style="color:#185FA5">0,00 €</span></div>
+  </div>
+  <div class="fg" style="margin-top:10px"><label>Notizen</label><textarea id="pz-not"></textarea></div>
+  <hr class="divider">
+  <div class="row" style="justify-content:flex-end;gap:8px">
+    <button class="btn" onclick="cm2('pizza-modal')">Abbrechen</button>
+    <button class="btn btnp" onclick="savePizzaAngebot()">Speichern</button>
+  </div>
+</div>
+</div>
+
+<!-- EVENT DETAIL -->
+<div class="modal-ov" id="det-modal">
+<div class="modal" id="det-content"></div>
+</div>
+
+<!-- EINKAUF MODAL -->
+<div class="modal-ov" id="ek-modal">
+<div class="modal">
+  <div class="mtitle">Einkaufsposition</div>
+  <div class="g2">
+    <div class="fg"><label>Artikel</label><input id="ek-art"/></div>
+    <div class="fg"><label>Kategorie</label><select id="ek-kat"><option>Mehl</option><option>Proteine</option><option>Milchprodukte</option><option>Gemüse</option><option>Sonstiges</option><option>Getränke</option></select></div>
+    <div class="fg"><label>Menge</label><input type="number" id="ek-menge" value="1"/></div>
+    <div class="fg"><label>Einheit</label><select id="ek-einh"><option>kg</option><option>g</option><option>L</option><option>Stk</option><option>Pkg</option></select></div>
+    <div class="fg"><label>Preis/Einheit €</label><input type="number" id="ek-preis" value="0" step="0.01"/></div>
+    <div class="fg"><label>Status</label><select id="ek-stat"><option>Geplant</option><option>Bestellt</option><option>Geliefert</option></select></div>
+  </div>
+  <hr class="divider">
+  <div class="row" style="justify-content:flex-end;gap:8px">
+    <button class="btn" onclick="cm2('ek-modal')">Abbrechen</button>
+    <button class="btn btnp" onclick="saveEk()">Hinzufügen</button>
+  </div>
+</div>
+</div>
+
+<!-- KONTAKT MODAL -->
+<div class="modal-ov" id="kt-modal">
+<div class="modal">
+  <div class="mtitle">Neuer Kontakt</div>
+  <div class="g2">
+    <div class="fg"><label>Name</label><input id="kt-name"/></div>
+    <div class="fg"><label>Firma</label><input id="kt-firma"/></div>
+    <div class="fg"><label>Telefon</label><input id="kt-tel"/></div>
+    <div class="fg"><label>E-Mail</label><input id="kt-email"/></div>
+    <div class="fg"><label>Typ</label><select id="kt-typ"><option>Kunde</option><option>Lieferant</option><option>Mitarbeiter</option></select></div>
+  </div>
+  <div class="fg" style="margin-top:8px"><label>Notizen</label><textarea id="kt-not"></textarea></div>
+  <hr class="divider">
+  <div class="row" style="justify-content:flex-end;gap:8px">
+    <button class="btn" onclick="cm2('kt-modal')">Abbrechen</button>
+    <button class="btn btnp" onclick="saveKt()">Speichern</button>
+  </div>
+</div>
+</div>
+
+<script>
+const PIZZEN = [
+  {name:'Margherita', kosten:1.182},
+  {name:'Pesto', kosten:1.020},
+  {name:'Salami', kosten:1.306},
+  {name:'Funghi', kosten:0.977},
+  {name:'Parma', kosten:2.353},
+  {name:'Tonno', kosten:1.135},
+  {name:'Verde', kosten:2.307},
+  {name:'Burrata', kosten:3.450},
+  {name:'Spicy Salami', kosten:2.265},
+  {name:'Mortadella e Pistachio', kosten:2.199},
+  {name:'Grillgemüse', kosten:1.480},
+  {name:'Special Margherita', kosten:2.655},
+  {name:'Gorgonzola Spinat', kosten:2.442},
+  {name:'Siziliana', kosten:1.414},
+  {name:'Kürbis', kosten:3.295}
+];
+
+const DEFAULT_STATE = () => ({
+  events: [],
+  kontakte: [],
+  einkauf: [],
+  pizzaAngebote: [],
+  cateringAngebote: [],
+  pin: '',
+  cy: new Date().getFullYear(),
+  cm: new Date().getMonth(),
+  editEvId: null
+});
+
+function loadLocalState(){
+  try{
+    return {
+      events: JSON.parse(localStorage.getItem('gm2_ev')||'[]'),
+      kontakte: JSON.parse(localStorage.getItem('gm2_kt')||'[]'),
+      einkauf: JSON.parse(localStorage.getItem('gm2_ek')||'[]'),
+      pizzaAngebote: JSON.parse(localStorage.getItem('gm2_pz')||'[]'),
+      cateringAngebote: JSON.parse(localStorage.getItem('gm2_ct')||'[]'),
+      pin: localStorage.getItem('gm2_pin')||'',
+      cy: new Date().getFullYear(),
+      cm: new Date().getMonth(),
+      editEvId: null
+    };
+  }catch(e){
+    console.error('Local load error:', e);
+    return DEFAULT_STATE();
+  }
+}
+
+function persistLocalBackup(){
+  localStorage.setItem('gm2_ev',JSON.stringify(S.events));
+  localStorage.setItem('gm2_kt',JSON.stringify(S.kontakte));
+  localStorage.setItem('gm2_ek',JSON.stringify(S.einkauf));
+  localStorage.setItem('gm2_pz',JSON.stringify(S.pizzaAngebote));
+  localStorage.setItem('gm2_ct',JSON.stringify(S.cateringAngebote));
+  localStorage.setItem('gm2_pin',S.pin||'');
+}
+
+function normalizeState(data){
+  const d = DEFAULT_STATE();
+  const merged = Object.assign({}, d, data || {});
+  merged.events = Array.isArray(merged.events) ? merged.events : [];
+  merged.kontakte = Array.isArray(merged.kontakte) ? merged.kontakte : [];
+  merged.einkauf = Array.isArray(merged.einkauf) ? merged.einkauf : [];
+  merged.pizzaAngebote = Array.isArray(merged.pizzaAngebote) ? merged.pizzaAngebote : [];
+  merged.cateringAngebote = Array.isArray(merged.cateringAngebote) ? merged.cateringAngebote : [];
+  merged.pin = typeof merged.pin === 'string' ? merged.pin : '';
+  merged.cy = Number.isInteger(merged.cy) ? merged.cy : new Date().getFullYear();
+  merged.cm = Number.isInteger(merged.cm) ? merged.cm : new Date().getMonth();
+  merged.editEvId = null;
+  return merged;
+}
+
+let S = loadLocalState();
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDdtoBbNee-dLRjr6YEEhzxM6GCmVE6wTs",
+  authDomain: "heitmannspizza-dashboard.firebaseapp.com",
+  databaseURL: "https://heitmannspizza-dashboard-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "heitmannspizza-dashboard",
+  storageBucket: "heitmannspizza-dashboard.firebasestorage.app",
+  messagingSenderId: "721999808738",
+  appId: "1:721999808738:web:ea6fd7bd018438e209f6bb"
+};
+
+let db = null;
+let cloudRef = null;
+let cloudSyncEnabled = false;
+let applyingRemoteState = false;
+let initializedFirebase = false;
+
+function firebaseConfigured(){
+  return FIREBASE_CONFIG.databaseURL && !String(FIREBASE_CONFIG.databaseURL).includes('HIER_DATABASE_URL_EINFUEGEN');
+}
+
+function renderAll(){
+  try{
+    updateDash();
+    renderCal();
+    renderEk();
+    renderKt();
+    renderPizzaAngebote();
+    renderCateringAngebote();
+    calcCatering();
+  }catch(e){
+    console.error('Render error:', e);
+  }
+}
+
+function initFirebaseSync(){
+  if(initializedFirebase) return;
+  initializedFirebase = true;
+}
+
+  if(!window.firebase || !firebaseConfigured()){
+    console.warn('Firebase not configured yet. App uses local backup only.');
+    persistLocalBackup();
+    renderAll();
+    return;
+  }
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    cloudRef = db.ref('gastroManager/sharedState');
+    cloudSyncEnabled = true;
+
+    cloudRef.on('value', (snapshot) => {
+      const remote = snapshot.val();
+      if(!remote){
+        applyingRemoteState = true;
+        persistLocalBackup();
+        cloudRef.set(normalizeState(S)).finally(() => {
+          applyingRemoteState = false;
+          renderAll();
+        });
+        return;
+      }
+      applyingRemoteState = true;
+      S = normalizeState(remote);
+      persistLocalBackup();
+      renderAll();
+      applyingRemoteState = false;
+    }, (error) => {
+      console.error('Firebase sync error:', error);
+      cloudSyncEnabled = false;
+      renderAll();
+    });
+
+  }catch(e){
+    console.error('Firebase init error:', e);
+    cloudSyncEnabled = false;
+    renderAll();
+  }
+}
+
+function sv(){
+  persistLocalBackup();
+  if(cloudSyncEnabled && cloudRef && !applyingRemoteState){
+    cloudRef.set(normalizeState(S)).catch(err => console.error('Cloud save error:', err));
+  }
+  updateDash();
+}
+function savePin(){S.pin=document.getElementById('pinnwand').value;sv()}
+
+
+function pg(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  if(id==='dashboard') updateDash();
+  if(id==='kalender') renderCal();
+  if(id==='einkauf') renderEk();
+  if(id==='kontakte') renderKt();
+  if(id==='pizza') renderPizzaAngebote();
+  if(id==='catering'){ renderCateringAngebote(); calcCatering(); }
+}
+function om(id){document.getElementById(id).classList.add('open')}
+function cm2(id){document.getElementById(id).classList.remove('open')}
+
+function fmt(n){return Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'}
+function sbadge(s){const m={Anfrage:'ba',Bestätigt:'bb',Abgeschlossen:'bg',Abgesagt:'br',Catering:'bb',Restaurant:'bg',Event:'ba',Sonstiges:'bp',Kunde:'bb',Lieferant:'bg',Mitarbeiter:'ba',Geplant:'ba',Bestellt:'bb',Geliefert:'bg',Mehl:'ba',Proteine:'br',Milchprodukte:'bb',Gemüse:'bg',Sonstiges:'bp'};return`<span class="badge ${m[s]||'bb'}">${s}</span>`}
+
+// DASHBOARD
+function updateDash(){
+  const now=new Date();
+  const thisM=S.events.filter(e=>e.dat&&new Date(e.dat).getMonth()===now.getMonth()&&new Date(e.dat).getFullYear()===now.getFullYear());
+  document.getElementById('m1').textContent=thisM.length;
+  document.getElementById('m2').textContent=S.pizzaAngebote.length+S.cateringAngebote.length;
+  document.getElementById('m3').textContent=S.kontakte.length;
+  document.getElementById('m4').textContent=S.einkauf.length;
+  document.getElementById('pinnwand').value=S.pin;
+  const up=[...S.events].filter(e=>e.dat>=now.toISOString().slice(0,10)).sort((a,b)=>a.dat>b.dat?1:-1).slice(0,3);
+  const el=document.getElementById('dash-ev');
+  if(!up.length){el.innerHTML='<div style="font-size:12px;color:var(--color-text-secondary)">Keine bevorstehenden Events.</div>';return}
+  el.innerHTML=up.map(e=>{const d=new Date(e.dat);return`<div class="evitem" onclick="showEvDet('${e.id}')"><div class="evdate"><div class="evday">${d.getDate()}</div><div class="evmon">${d.toLocaleDateString('de-DE',{month:'short'})}</div></div><div class="evinfo"><div class="evtitle">${e.t}</div><div class="evsub">${e.ort||''} ${e.pers?'· '+e.pers+' Pers.':''}</div></div>${sbadge(e.stat)}</div>`}).join('');
+}
+
+// KALENDER
+const MONATE=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const TAGE=['Mo','Di','Mi','Do','Fr','Sa','So'];
+function renderCal(){
+  const y=S.cy,m=S.cm;
+  document.getElementById('cal-title').textContent=MONATE[m]+' '+y;
+  document.getElementById('cal-heads').innerHTML=TAGE.map(d=>`<div class="cal-h">${d}</div>`).join('');
+  const first=new Date(y,m,1).getDay();
+  const off=(first===0)?6:first-1;
+  const days=new Date(y,m+1,0).getDate();
+  const today=new Date();
+  let h='';
+  for(let i=0;i<off;i++)h+='<div></div>';
+  for(let d=1;d<=days;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evs=S.events.filter(e=>e.dat===ds);
+    const isTd=d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear();
+    h+=`<div class="cal-d${isTd?' today':''}${evs.length?' has-ev':''}" onclick="${evs.length?`showEvDet('${evs[0].id}')`:'openEvModal()'}"><div style="font-weight:500;margin-bottom:2px">${d}</div>${evs.map(e=>`<div class="cal-dot">${e.t}</div>`).join('')}</div>`;
+  }
+  document.getElementById('cal-body').innerHTML=h;
+  const mel=document.getElementById('cal-ev-list');
+  const mevs=S.events.filter(e=>e.dat&&e.dat.startsWith(`${y}-${String(m+1).padStart(2,'0')}`));
+  if(!mevs.length){mel.innerHTML='<div style="font-size:12px;color:var(--color-text-secondary)">Keine Events in diesem Monat.</div>';return}
+  mel.innerHTML=mevs.sort((a,b)=>a.dat>b.dat?1:-1).map(e=>{const d=new Date(e.dat);return`<div class="evitem" onclick="showEvDet('${e.id}')"><div class="evdate"><div class="evday">${d.getDate()}</div><div class="evmon">${d.toLocaleDateString('de-DE',{month:'short'})}</div></div><div class="evinfo"><div class="evtitle">${e.t}</div><div class="evsub">${e.uhr||''} ${e.ort?'· '+e.ort:''}</div></div>${sbadge(e.stat)}</div>`}).join('');
+}
+function cm(d){S.cm+=d;if(S.cm>11){S.cm=0;S.cy++}if(S.cm<0){S.cm=11;S.cy--}renderCal()}
+
+// EVENTS
+function openEvModal(id){
+  S.editEvId=id||null;
+  const e=id?S.events.find(x=>x.id===id):null;
+  document.getElementById('ev-modal-t').textContent=e?'Event bearbeiten':'Neues Event';
+  ['t','typ','dat','uhr','ort','pers','kt','bud','not','stat'].forEach(f=>{const el=document.getElementById('ev-'+f);if(el)el.value=e?(e[f]||''):(f==='uhr'?'18:00':'')});
+  om('ev-modal');
+}
+function saveEv(){
+  const e={id:S.editEvId||Date.now().toString(),t:document.getElementById('ev-t').value||'Kein Titel',typ:document.getElementById('ev-typ').value,dat:document.getElementById('ev-dat').value,uhr:document.getElementById('ev-uhr').value,ort:document.getElementById('ev-ort').value,pers:document.getElementById('ev-pers').value,kt:document.getElementById('ev-kt').value,bud:document.getElementById('ev-bud').value,not:document.getElementById('ev-not').value,stat:document.getElementById('ev-stat').value};
+  if(S.editEvId){const i=S.events.findIndex(x=>x.id===S.editEvId);if(i>=0)S.events[i]=e}else S.events.push(e);
+  sv();cm2('ev-modal');renderCal();
+}
+function showEvDet(id){
+  const e=S.events.find(x=>x.id===id);if(!e)return;
+  document.getElementById('det-content').innerHTML=`<div class="rb" style="margin-bottom:.75rem"><div class="mtitle">${e.t}</div>${sbadge(e.stat)}</div><table style="width:100%;font-size:12px;border-collapse:collapse">${[['Typ',sbadge(e.typ)],['Datum',e.dat+' '+(e.uhr||'')],['Ort',e.ort||'–'],['Personen',e.pers||'–'],['Kontakt',e.kt||'–'],['Budget',e.bud?fmt(e.bud):'–']].map(([k,v])=>`<tr><td style="padding:5px 0;color:var(--color-text-secondary);width:90px">${k}</td><td style="padding:5px 0">${v}</td></tr>`).join('')}</table>${e.not?`<div style="margin-top:8px;padding:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:12px">${e.not.replace(/\n/g,'<br>')}</div>`:''}<hr class="divider"><div class="row" style="justify-content:flex-end;gap:8px"><button class="btn btnd" onclick="delEv('${id}')">Löschen</button><button class="btn" onclick="cm2('det-modal');openEvModal('${id}')">Bearbeiten</button><button class="btn btnp" onclick="cm2('det-modal')">Schließen</button></div>`;
+  om('det-modal');
+}
+function delEv(id){S.events=S.events.filter(e=>e.id!==id);sv();cm2('det-modal');renderCal()}
+
+// PIZZA KALKULATION
+let pzQty={};
+function openPizzaModal(){
+  pzQty={};
+  document.getElementById('pz-kunde').value='';
+  document.getElementById('pz-dat').value='';
+  document.getElementById('pz-not').value='';
+  document.getElementById('pz-aufschlag').value=0;
+  document.getElementById('pz-mwst').value=7;
+  renderPizzaGrid();
+  calcPizza();
+  om('pizza-modal');
+}
+function renderPizzaGrid(){
+  const grid=document.getElementById('pizza-select-grid');
+  const inputs=document.getElementById('pizza-qty-inputs');
+  grid.innerHTML=PIZZEN.map(p=>`<div class="pizza-card" id="pcard-${p.name.replace(/\s/g,'_')}" onclick="togglePizza('${p.name.replace(/\s/g,'_')}','${p.name}')"><div class="pizza-name">${p.name}</div><div class="pizza-cost">${fmt(p.kosten)}/Stk</div></div>`).join('');
+  inputs.innerHTML='';
+}
+function togglePizza(key,name){
+  const card=document.getElementById('pcard-'+key);
+  if(card.classList.contains('selected')){
+    card.classList.remove('selected');
+    delete pzQty[key];
+  } else {
+    card.classList.add('selected');
+    pzQty[key]={name,kosten:PIZZEN.find(p=>p.name===name).kosten,qty:1};
+  }
+  renderPizzaQtyInputs();
+  calcPizza();
+}
+function renderPizzaQtyInputs(){
+  const el=document.getElementById('pizza-qty-inputs');
+  const keys=Object.keys(pzQty);
+  if(!keys.length){el.innerHTML='<div style="font-size:12px;color:var(--color-text-secondary)">Pizzen oben auswählen...</div>';return}
+  el.innerHTML=keys.map(k=>`<div class="row"><span style="flex:1;font-size:12px">${pzQty[k].name}</span><input type="number" style="width:80px" value="${pzQty[k].qty}" min="0" oninput="pzQty['${k}'].qty=parseInt(this.value)||0;calcPizza()"><span style="font-size:11px;color:var(--color-text-secondary);min-width:80px;text-align:right">${fmt(pzQty[k].kosten)} × ${pzQty[k].qty}</span></div>`).join('');
+}
+function calcPizza(){
+  const mat=Object.values(pzQty).reduce((s,p)=>s+p.kosten*p.qty,0);
+  const aufP=parseFloat(document.getElementById('pz-aufschlag').value)||0;
+  const mwstP=parseFloat(document.getElementById('pz-mwst').value)||7;
+  const auf=mat*(aufP/100);
+  const netto=mat+auf;
+  const mwstV=netto*(mwstP/100);
+  const total=netto+mwstV;
+  document.getElementById('pz-mat').textContent=fmt(mat);
+  document.getElementById('pz-auf').textContent=fmt(auf);
+  document.getElementById('pz-netto').textContent=fmt(netto);
+  document.getElementById('pz-mwstv').textContent=fmt(mwstV);
+  document.getElementById('pz-total').textContent=fmt(total);
+}
+function savePizzaAngebot(){
+  const mat=Object.values(pzQty).reduce((s,p)=>s+p.kosten*p.qty,0);
+  const aufP=parseFloat(document.getElementById('pz-aufschlag').value)||0;
+  const mwstP=parseFloat(document.getElementById('pz-mwst').value)||7;
+  const total=mat*(1+aufP/100)*(1+mwstP/100);
+  S.pizzaAngebote.push({id:Date.now().toString(),kunde:document.getElementById('pz-kunde').value||'Unbekannt',dat:document.getElementById('pz-dat').value,pizzen:{...pzQty},aufschlag:aufP,mwst:mwstP,total,not:document.getElementById('pz-not').value});
+  sv();cm2('pizza-modal');renderPizzaAngebote();
+}
+function renderPizzaAngebote(){
+  const el=document.getElementById('pizza-angebote-list');
+  if(!S.pizzaAngebote.length){el.innerHTML='<div style="font-size:12px;color:var(--color-text-secondary)">Noch keine Angebote.</div>';return}
+  el.innerHTML=S.pizzaAngebote.map((a,i)=>{
+    const anzahl=Object.values(a.pizzen).reduce((s,p)=>s+p.qty,0);
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><div style="flex:1"><div style="font-size:13px;font-weight:500">${a.kunde}</div><div style="font-size:11px;color:var(--color-text-secondary)">${a.dat||''} · ${anzahl} Pizzen · MwSt ${a.mwst}%</div></div><div style="font-size:14px;font-weight:500">${fmt(a.total)}</div><button class="btn btnd" style="padding:3px 7px;font-size:11px" onclick="S.pizzaAngebote.splice(${i},1);sv();renderPizzaAngebote()">×</button></div>`;
+  }).join('');
+}
+
+// CATERING KALKULATION (aus deiner Excel-Datei)
+function calcCatering(){
+  const gaeste=parseInt(document.getElementById('ct-gaeste').value)||30;
+  const km=parseFloat(document.getElementById('ct-km').value)||48;
+  const pers=parseInt(document.getElementById('ct-pers').value)||2;
+  const std=parseFloat(document.getElementById('ct-std').value)||18;
+  const waren=parseFloat(document.getElementById('ct-waren').value)||3.5;
+  const marge=parseFloat(document.getElementById('ct-marge').value)||0.5;
+  const gas=parseFloat(document.getElementById('ct-gas').value)||10;
+  const entsorg=parseFloat(document.getElementById('ct-entsorg').value)||15;
+  const miete=parseFloat(document.getElementById('ct-miete').value)||45;
+  const kmsatz=parseFloat(document.getElementById('ct-kmsatz').value)||0.8;
+
+  // Stunden pro Person basierend auf Gästezahl (aus Excel)
+  let hEinkauf=2,hTeig=0.7,hDips=0.25,hPrepen=1.5,hBeladen=1,hAufbau=1,hService=2,hAufraeumen=1;
+  if(gaeste>=50&&gaeste<70){hTeig=0.7;hPrepen=1.5;hService=2.5;hAufraeumen=1}
+  else if(gaeste>=70&&gaeste<100){hTeig=1;hDips=0.35;hPrepen=2;hAufbau=1.5;hService=3;hAufraeumen=1.25}
+  else if(gaeste>=100&&gaeste<150){hTeig=1.2;hDips=0.4;hPrepen=2.5;hAufbau=1.5;hService=4;hAufraeumen=1.5}
+  else if(gaeste>=150&&gaeste<200){hTeig=1.5;hDips=0.5;hPrepen=3;hAufbau=2;hService=5;hAufraeumen=2}
+  else if(gaeste>=200&&gaeste<300){hTeig=2;hDips=0.6;hPrepen=3.5;hAufbau=2;hService=6;hAufraeumen=2}
+  else if(gaeste>=300){hTeig=2.5;hDips=0.8;hPrepen=4;hAufbau=2;hService=7;hAufraeumen=2.5}
+
+  const totalHP=hEinkauf+hTeig+hDips+hPrepen+hBeladen+hAufbau+hService+hAufraeumen;
+  const totalH=totalHP*pers;
+  const personalK=totalH*std;
+  const warenK=gaeste*waren;
+  const kmK=km*kmsatz;
+  const fixK=gas+entsorg+miete;
+  const basisK=personalK+warenK+kmK+fixK;
+  const margeK=basisK*marge;
+  const netto=basisK+margeK;
+  const brutto=netto*1.19;
+  const nettoGast=netto/gaeste;
+  const bruttoGast=brutto/gaeste;
+
+  // Anzeige Stunden
+  document.getElementById('h-einkauf').textContent=hEinkauf+'h';
+  document.getElementById('h-teig').textContent=hTeig+'h';
+  document.getElementById('h-dips').textContent=hDips+'h';
+  document.getElementById('h-prepen').textContent=hPrepen+'h';
+  document.getElementById('h-beladen').textContent=hBeladen+'h';
+  document.getElementById('h-aufbau').textContent=hAufbau+'h';
+  document.getElementById('h-service').textContent=hService+'h';
+  document.getElementById('h-aufraeumen').textContent=hAufraeumen+'h';
+  document.getElementById('h-total-pers').textContent=totalHP.toFixed(2)+'h';
+
+  // Anzeige Ergebnis
+  document.getElementById('cr-gaeste').textContent=gaeste;
+  document.getElementById('cr-stunden').textContent=totalH.toFixed(2)+' h';
+  document.getElementById('cr-personal').textContent=fmt(personalK);
+  document.getElementById('cr-waren').textContent=fmt(warenK);
+  document.getElementById('cr-km').textContent=fmt(kmK);
+  document.getElementById('cr-fix').textContent=fmt(fixK);
+  document.getElementById('cr-marge').textContent=fmt(margeK);
+  document.getElementById('cr-netto').textContent=fmt(netto);
+  document.getElementById('cr-brutto').textContent=fmt(brutto);
+  document.getElementById('cr-netto-gast').textContent=fmt(nettoGast);
+  document.getElementById('cr-brutto-gast').textContent=fmt(bruttoGast);
+
+  return {gaeste, km, pers, std, waren, marge, gas, entsorg, miete, kmsatz, totalHP, totalH, personalK, warenK, kmK, fixK, basisK, margeK, netto, brutto, nettoGast, bruttoGast};
+}
+
+function saveCateringAngebot(){
+  const r=calcCatering();
+  S.cateringAngebote.push({
+    id:Date.now().toString(),
+    dat:new Date().toISOString().slice(0,10),
+    gaeste:r.gaeste,
+    km:r.km,
+    pers:r.pers,
+    std:r.std,
+    waren:r.waren,
+    marge:r.marge,
+    gas:r.gas,
+    entsorg:r.entsorg,
+    miete:r.miete,
+    kmsatz:r.kmsatz,
+    netto:r.netto,
+    brutto:r.brutto,
+    nettoGast:r.nettoGast,
+    bruttoGast:r.bruttoGast
+  });
+  sv();
+  renderCateringAngebote();
+}
+
+function renderCateringAngebote(){
+  const el=document.getElementById('catering-angebote-list');
+  if(!el) return;
+  if(!S.cateringAngebote.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--color-text-secondary)">Noch keine Angebote.</div>';
+    return;
+  }
+  el.innerHTML=S.cateringAngebote.map((a,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${a.gaeste} Gäste</div>
+        <div style="font-size:11px;color:var(--color-text-secondary)">${a.dat||''} · ${a.pers} Pers. · ${a.km} km</div>
+      </div>
+      <div style="font-size:14px;font-weight:500">${fmt(a.brutto)}</div>
+      <button class="btn btnd" style="padding:3px 7px;font-size:11px" onclick="S.cateringAngebote.splice(${i},1);sv();renderCateringAngebote()">×</button>
+    </div>
+  `).join('');
+}
+
+// EINKAUF
+function openEkModal(){
+  ['art','menge','preis'].forEach(id=>{ const el=document.getElementById('ek-'+id); if(el) el.value=(id==='menge'?1:0); });
+  document.getElementById('ek-art').value='';
+  document.getElementById('ek-kat').value='Mehl';
+  document.getElementById('ek-einh').value='kg';
+  document.getElementById('ek-stat').value='Geplant';
+  om('ek-modal');
+}
+
+function saveEk(){
+  const item={
+    id:Date.now().toString(),
+    art:document.getElementById('ek-art').value||'Artikel',
+    kat:document.getElementById('ek-kat').value,
+    menge:parseFloat(document.getElementById('ek-menge').value)||0,
+    einh:document.getElementById('ek-einh').value,
+    preis:parseFloat(document.getElementById('ek-preis').value)||0,
+    stat:document.getElementById('ek-stat').value
+  };
+  S.einkauf.push(item);
+  sv();
+  cm2('ek-modal');
+  renderEk();
+}
+
+function renderEk(){
+  const tb=document.getElementById('ek-tbody');
+  const totalEl=document.getElementById('ek-total');
+  if(!tb||!totalEl) return;
+  if(!S.einkauf.length){
+    tb.innerHTML='<tr><td colspan="8" style="font-size:12px;color:var(--color-text-secondary);padding:10px 6px">Noch keine Positionen.</td></tr>';
+    totalEl.textContent='0,00 €';
+    return;
+  }
+  let total=0;
+  tb.innerHTML=S.einkauf.map((it,i)=>{
+    const sum=(Number(it.menge)||0)*(Number(it.preis)||0);
+    total+=sum;
+    return `<tr>
+      <td>${it.art}</td>
+      <td>${sbadge(it.kat)}</td>
+      <td>${it.menge}</td>
+      <td>${it.einh}</td>
+      <td>${fmt(it.preis)}</td>
+      <td>${fmt(sum)}</td>
+      <td>${sbadge(it.stat)}</td>
+      <td><button class="btn btnd" style="padding:3px 7px;font-size:11px" onclick="S.einkauf.splice(${i},1);sv();renderEk()">×</button></td>
+    </tr>`;
+  }).join('');
+  totalEl.textContent=fmt(total);
+}
+
+// KONTAKTE
+function openKtModal(){
+  ['name','firma','tel','email','not'].forEach(id=>{const el=document.getElementById('kt-'+id); if(el) el.value='';});
+  document.getElementById('kt-typ').value='Kunde';
+  om('kt-modal');
+}
+
+function saveKt(){
+  S.kontakte.push({
+    id:Date.now().toString(),
+    name:document.getElementById('kt-name').value||'Unbekannt',
+    firma:document.getElementById('kt-firma').value,
+    tel:document.getElementById('kt-tel').value,
+    email:document.getElementById('kt-email').value,
+    typ:document.getElementById('kt-typ').value,
+    not:document.getElementById('kt-not').value
+  });
+  sv();
+  cm2('kt-modal');
+  renderKt();
+}
+
+function renderKt(){
+  const el=document.getElementById('kt-list');
+  if(!el) return;
+  if(!S.kontakte.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--color-text-secondary)">Noch keine Kontakte.</div>';
+    return;
+  }
+  el.innerHTML=S.kontakte.map((k,i)=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+      <div style="flex:1">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:2px">
+          <div style="font-size:13px;font-weight:500">${k.name}</div>
+          ${sbadge(k.typ)}
+        </div>
+        <div style="font-size:11px;color:var(--color-text-secondary)">
+          ${(k.firma||'')}${k.tel?' · '+k.tel:''}${k.email?' · '+k.email:''}
+        </div>
+        ${k.not?`<div style="font-size:12px;margin-top:5px">${k.not}</div>`:''}
+      </div>
+      <button class="btn btnd" style="padding:3px 7px;font-size:11px" onclick="S.kontakte.splice(${i},1);sv();renderKt()">×</button>
+    </div>
+  `).join('');
+}
+
+// INIT
+(function init(){
+  try{
+    persistLocalBackup();
+    renderAll();
+    initFirebaseSync();
+  }catch(e){
+    console.error('Init error:', e);
+  }
+})();
+</script>
+
+</body>
+</html>
