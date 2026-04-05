@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Heitmanns Pizza v-old2</title>
+<title>Heitmanns Pizzav2</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
@@ -133,7 +133,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .action-row{display:flex;gap:6px;align-items:center}
 
 
-.mobile-bottom-nav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:320;background:rgba(255,255,255,.98);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:8px 10px calc(8px + env(safe-area-inset-bottom));overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap}
+.mobile-bottom-nav{display:none;position:fixed;left:0;right:0;top:0;z-index:320;background:rgba(255,255,255,.98);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:calc(8px + env(safe-area-inset-top)) 10px 8px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap}
 .mobile-bottom-nav::-webkit-scrollbar{display:none}
 .mobile-bottom-nav-inner{display:inline-flex;gap:6px;min-width:max-content}
 .mobile-bottom-nav button{padding:8px 12px;min-height:46px;font-size:12px;border-radius:10px;flex:0 0 auto}
@@ -148,7 +148,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   .sidebar{width:100%;min-width:100%;border-right:none;border-bottom:1px solid var(--border);padding:10px 0 8px;display:block;overflow:hidden;white-space:normal}
   .sidebar-logo{padding:0 16px 0;border-bottom:none;margin-bottom:0;display:block;font-size:16px}
   .sidebar .nav-item,.live-badge{display:none}
-  .main{padding:12px 12px calc(88px + env(safe-area-inset-bottom))}
+  .main{padding:76px 12px 12px}
   .page{gap:12px}
   .page-header{flex-direction:column;align-items:stretch;gap:10px}
   .page-title{font-size:18px}
@@ -176,7 +176,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   .mobile-bottom-nav{display:block}
 }
 @media (max-width: 520px){
-  .main{padding:10px}
+  .main{padding:76px 10px 10px}
   .card{padding:12px}
   .card-title{margin-bottom:10px}
   .pizza-qty input,.drink-controls input{width:64px}
