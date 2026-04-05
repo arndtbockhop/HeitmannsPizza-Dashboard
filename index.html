@@ -61,7 +61,7 @@ textarea{resize:vertical}
 .event-title-text{font-size:14px;font-weight:500}
 .event-sub{font-size:12px;color:var(--muted);margin-top:2px;word-break:break-word}
 .linkish{color:var(--blue);cursor:pointer;text-decoration:underline}
-.contact-item{flex-wrap:wrap;}display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px}
+.contact-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;flex-wrap:wrap;}
 .avatar{width:38px;height:38px;min-width:38px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--blue)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .cal-header-cell{text-align:center;font-size:11px;color:var(--muted);padding:4px}
@@ -196,10 +196,7 @@ table{width:100%}
   .metric-value{font-size:22px}
   .form-grid{grid-template-columns:1fr}
   .pizza-grid{grid-template-columns:1fr}
-  .event-item,.contact-item{flex-wrap:wrap;}
-    padding:12px;gap:10px;align-items:flex-start;
-    border-radius:12px
-  }
+  .event-item,.contact-item{padding:12px;gap:10px;align-items:flex-start;border-radius:12px;flex-wrap:wrap;}
   .event-date{min-width:40px}
   .event-day{font-size:20px}
   .toolbar{flex-direction:column;align-items:stretch}
@@ -252,7 +249,7 @@ table{width:100%}
   .card-title{margin-bottom:10px}
   .inline-badges{gap:4px}
   .pizza-qty input,.drink-controls input{width:68px}
-  .event-item,.contact-item{flex-wrap:wrap;}padding:10px}
+  .event-item,.contact-item{padding:10px;flex-wrap:wrap;}
   .result-row{gap:10px;align-items:flex-start}
   .result-row span:last-child{text-align:right}
 }
@@ -318,6 +315,7 @@ img,table,input,select,textarea,button{
 
 .brand-logo{display:flex;align-items:center;justify-content:center;width:100%}
 .brand-svg{width:52px;height:52px;display:block}
+.brand-logo-img{width:60px;height:60px;border-radius:50%;object-fit:cover;display:block;margin:auto;box-shadow:0 4px 12px rgba(0,0,0,.15)}
 .mobile-bottom-nav{display:none}
 .metric-value{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .assignment-badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;background:#f1f5f9;color:#334155;font-size:11px;font-weight:600}
@@ -326,6 +324,7 @@ img,table,input,select,textarea,button{
 .compact-muted{font-size:12px;color:var(--muted)}
 @media (max-width:900px){
   .brand-svg{width:40px;height:40px}
+  .brand-logo-img{width:42px;height:42px}
   .mobile-bottom-nav{
     display:grid;
     grid-template-columns:repeat(5,1fr);
@@ -350,20 +349,7 @@ img,table,input,select,textarea,button{
 <body>
 <div class="app">
 <div class="sidebar mobile-scroll">
-  <div class="sidebar-logo">
-  <div class="brand-logo" aria-label="Heitmanns Pizza Logo">
-    <svg viewBox="0 0 120 120" class="brand-svg" role="img" aria-hidden="true">
-      <defs>
-        <linearGradient id="hpgrad" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stop-color="#2563eb"/>
-          <stop offset="100%" stop-color="#1d4ed8"/>
-        </linearGradient>
-      </defs>
-      <rect x="8" y="8" width="104" height="104" rx="28" fill="url(#hpgrad)"/>
-      <path d="M34 34h14v20h24V34h14v52H72V67H48v19H34z" fill="#fff"/>
-    </svg>
-  </div>
-</div>
+  <div class="sidebar-logo"><img src="logo_512.png" class="brand-logo-img" alt="Heitmanns Pizza Logo"></div>
   <div class="nav-item active" onclick="showPage('dashboard',this)">Dashboard</div>
   <div class="nav-item" onclick="showPage('kalender',this)">Kalender</div>
   <div class="nav-item" onclick="showPage('events',this)">Events</div>
@@ -1917,15 +1903,20 @@ function renderSales(){
     if(!q) return true;
     return [s.name,s.date,s.notes].filter(Boolean).join(' ').toLowerCase().includes(q);
   }).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-}
 
-  if(!arr.length){ el.innerHTML='<div style="color:var(--muted);font-size:13px">Noch keine Verkäufe.</div>'; return; }
+  if(!arr.length){
+    el.innerHTML='<div style="color:var(--muted);font-size:13px">Noch keine Verkäufe.</div>';
+    return;
+  }
+
   el.innerHTML=arr.map(s=>{
     const revenue=parseCurrencyValue(s.revenue);
     const cost=getContextCostSum('sale', s.id);
-    const gain=(s.profitManual!=='' && s.profitManual!==null && s.profitManual!==undefined) ? Number(s.profitManual||0) : (revenue-cost);
-    const eventName=s.eventRef?state.events.find(x=>x.id===s.eventRef)?.title:'';
-    const cateringName=s.cateringRef?state.cateringAngebote.find(x=>x.id===s.cateringRef)?.name:'';
+    const gain=(s.profitManual!=='' && s.profitManual!==null && s.profitManual!==undefined)
+      ? Number(s.profitManual||0)
+      : (revenue-cost);
+    const eventName=s.eventRef ? (state.events.find(x=>x.id===s.eventRef)?.title || '') : '';
+    const cateringName=s.cateringRef ? (state.cateringAngebote.find(x=>x.id===s.cateringRef)?.name || '') : '';
     return `<div class="sale-card">
       <div class="sale-top">
         <div><strong>${s.name}</strong><div class="compact-muted">${s.date||''}</div></div>
