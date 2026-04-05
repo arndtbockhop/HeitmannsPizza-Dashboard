@@ -192,9 +192,23 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   .inline-badges{gap:4px}
 }
 
+
+.sync-banner{display:none;position:sticky;top:0;z-index:600;padding:10px 14px;font-size:12px;border-bottom:1px solid var(--border)}
+.sync-banner.show{display:block}
+.sync-banner.ok{background:#ecfdf5;color:#166534}
+.sync-banner.warn{background:#fffbeb;color:#92400e}
+.sync-banner.err{background:#fef2f2;color:#991b1b}
+.copy-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9}
+.copy-row:last-child{border-bottom:none}
+.copy-row-main{min-width:0;flex:1}
+.copy-row-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.copy-row-value{font-size:13px;word-break:break-word}
+.contact-clickable{cursor:pointer}
+
 </style>
 </head>
 <body>
+<div id="sync-banner" class="sync-banner"></div>
 <div class="app">
 <div class="sidebar mobile-scroll">
   <div class="sidebar-logo">Heitmanns Pizza</div>
@@ -780,42 +794,75 @@ function applyDataPayload(d){
   renderAll();
   saveLocalBackup();
 }
+function setSyncBanner(msg, kind='ok'){
+  const el=document.getElementById('sync-banner');
+  if(!el) return;
+  el.className='sync-banner show ' + kind;
+  el.textContent=msg;
+}
+function clearSyncBanner(){
+  const el=document.getElementById('sync-banner');
+  if(!el) return;
+  el.className='sync-banner';
+  el.textContent='';
+}
+function hasPayloadData(d){
+  return ['events','kontakte','einkauf','cateringAngebote','pinnwand','notes','pizzaMengen','dipMengen','drinkMengen']
+    .some(k => d[k] && ((Array.isArray(d[k]) && d[k].length) || (typeof d[k]==='object' && Object.keys(d[k]).length) || (typeof d[k]==='string' && d[k].trim())));
+}
 function listenAll(){
-  db.ref('/').on('value',snap=>{
-    const d=snap.val()||{};
-    const hasAnyData = ['events','kontakte','einkauf','cateringAngebote','pinnwand','notes','pizzaMengen','dipMengen','drinkMengen']
-      .some(k => d[k] && ((Array.isArray(d[k]) && d[k].length) || (typeof d[k]==='object' && Object.keys(d[k]).length) || (typeof d[k]==='string' && d[k].trim())));
-    if(hasAnyData){
-      applyDataPayload(d);
-    }else{
+  try{
+    db.ref('/').on('value',snap=>{
+      const d=snap.val()||{};
+      if(hasPayloadData(d)){
+        applyDataPayload(d);
+        setSyncBanner('Mit Firebase verbunden', 'ok');
+      }else{
+        const backup=readLocalBackup();
+        if(backup && backup.data){
+          applyDataPayload(backup.data);
+          setSyncBanner('Firebase leer – lokales Backup verwendet', 'warn');
+        }else{
+          applyDataPayload({});
+          setSyncBanner('Firebase leer – keine lokalen Daten vorhanden', 'warn');
+        }
+      }
+      updateBackupStatus();
+    },err=>{
+      console.error('Firebase read error', err);
       const backup=readLocalBackup();
       if(backup && backup.data){
         applyDataPayload(backup.data);
-        showToast('Lokales Backup geladen');
+        setSyncBanner('Firebase-Fehler – lokales Backup geladen', 'err');
       }else{
-        applyDataPayload({});
+        setSyncBanner('Firebase-Fehler – keine lokalen Daten verfügbar', 'err');
       }
-    }
-    updateBackupStatus();
-  },err=>{
-    console.error('Firebase read error', err);
+      updateBackupStatus();
+    });
+  }catch(e){
+    console.error('listenAll failed', e);
     const backup=readLocalBackup();
     if(backup && backup.data){
       applyDataPayload(backup.data);
-      showToast('Firebase Fehler – lokales Backup geladen');
+      setSyncBanner('Initialisierung fehlgeschlagen – lokales Backup geladen', 'err');
+    }else{
+      setSyncBanner('Initialisierung fehlgeschlagen', 'err');
     }
-    updateBackupStatus();
-  });
+  }
 }
 function push(key,val){
   try{
     saveLocalBackup();
-    db.ref(key).set(val).catch(err=>{
+    db.ref(key).set(val).then(()=>{
+      setSyncBanner('Änderungen gespeichert', 'ok');
+    }).catch(err=>{
       console.error('Firebase write error', err);
+      setSyncBanner('Cloud-Speichern fehlgeschlagen – lokal gesichert', 'warn');
       showToast('Speichern lokal gesichert, Cloud-Fehler');
     });
   }catch(e){
     console.error('Push failed', e);
+    setSyncBanner('Speichern fehlgeschlagen – lokal gesichert', 'warn');
     showToast('Speichern lokal gesichert');
   }
 }
@@ -842,7 +889,7 @@ function exportAllData(){
   a.click();
   a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  showToast('Backup exportiert');
+  showToast('Backup exportiert'); setSyncBanner('Backup exportiert', 'ok');
 }
 function importAllData(event){
   const file=event.target.files && event.target.files[0];
@@ -853,7 +900,7 @@ function importAllData(event){
       const parsed=JSON.parse(reader.result);
       const data=parsed.data || parsed;
       applyDataPayload(data);
-      pushAllData(buildBackupPayload(),'Backup importiert');
+      pushAllData(buildBackupPayload(),'Backup importiert'); setSyncBanner('Backup importiert', 'ok');
     }catch(e){
       console.error(e);
       showToast('Import fehlgeschlagen');
@@ -870,7 +917,7 @@ function restoreFromLocalBackup(){
     return;
   }
   applyDataPayload(backup.data);
-  pushAllData(buildBackupPayload(),'Lokales Backup wiederhergestellt');
+  pushAllData(buildBackupPayload(),'Lokales Backup wiederhergestellt'); setSyncBanner('Lokales Backup wiederhergestellt', 'ok');
 }
 
 function normalizeEvent(ev){
@@ -1104,7 +1151,7 @@ function showEventDetail(id){
       <tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${formatEventDateRange(ev)}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Ort</td><td>${ev.ort||'–'}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr>
-      <tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td>${kontaktLink}</td></tr>
+      <tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td><span class="linkish" onclick="openKontaktById('${ev.contactId||''}')">${ev.kontakt||'–'}</span></td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Catering-Angebot</td><td>${angebotLink}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${ev.angebot?fmt(ev.angebot):'–'}</td></tr>
     </table>
@@ -1176,14 +1223,19 @@ function openDayDetail(ds){
 function showKontaktDetail(id){
   const k=state.kontakte.find(x=>x.id===id);
   if(!k) return;
-  const phone=k.tel?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">Telefon</div><div class="copy-row-value">${k.tel}</div></div><button onclick="copyText(${JSON.stringify('')} + ${JSON.stringify('')} + '${k.tel.replace(/'/g, "\'")}', 'Telefon kopiert')">Kopieren</button></div>`:'';
-  const email=k.email?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">E-Mail</div><div class="copy-row-value">${k.email}</div></div><button onclick="copyText('${k.email.replace(/'/g, "\'")}', 'E-Mail kopiert')">Kopieren</button></div>`:'';
-  const adresse=k.adresse?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">Adresse</div><div class="copy-row-value">${k.adresse}</div></div><button onclick="copyText('${k.adresse.replace(/'/g, "\'")}', 'Adresse kopiert')">Kopieren</button></div>`:'';
+  const phone=k.tel?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">Telefon</div><div class="copy-row-value">${k.tel}</div></div><button onclick="copyText(${JSON.stringify('')} + \`${k.tel.replace('`','\`')}\`, 'Telefon kopiert')">Kopieren</button></div>`:'';
+  const email=k.email?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">E-Mail</div><div class="copy-row-value">${k.email}</div></div><button onclick="copyText(${JSON.stringify('')} + \`${k.email.replace('`','\`')}\`, 'E-Mail kopiert')">Kopieren</button></div>`:'';
+  const adresse=k.adresse?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">Adresse</div><div class="copy-row-value">${k.adresse}</div></div><button onclick="copyText(${JSON.stringify('')} + \`${k.adresse.replace('`','\`')}\`, 'Adresse kopiert')">Kopieren</button></div>`:'';
   document.getElementById('detail-content').innerHTML=`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">${k.name}</div>${statusBadge(k.typ||'Kunde')}</div>
-    ${k.firma?`<div style="font-size:13px;color:var(--muted);margin-bottom:12px">${k.firma}</div>`:''}
-    <div style="display:flex;flex-direction:column;gap:10px">${phone}${email}${adresse}${k.notizen?`<div style="padding:10px;background:#f8fafc;border-radius:10px;font-size:13px">${k.notizen}</div>`:''}</div>
-    <div class="modal-footer"><button onclick="closeModal('detail-modal');openKontaktModal('${k.id}')">Bearbeiten</button><button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button></div>`;
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">${k.name}</div>${statusBadge(k.typ)}</div>
+    ${k.firma?`<div style="font-size:13px;color:var(--muted);margin-bottom:10px">${k.firma}</div>`:''}
+    <div>${phone}${email}${adresse}</div>
+    ${k.notizen?`<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px;white-space:pre-wrap">${k.notizen}</div>`:''}
+    <div class="modal-footer">
+      <button class="btn-danger" onclick="deleteKontakt('${k.id}')">Löschen</button>
+      <button onclick="closeModal('detail-modal');openKontaktModal('${k.id}')">Bearbeiten</button>
+      <button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button>
+    </div>`;
   openModal('detail-modal');
 }
 
@@ -2129,6 +2181,30 @@ renderAll();
   };
   renderEinkauf();
 })();
+</script>
+
+
+<script>
+window.addEventListener('error', function(e){
+  try{
+    const el=document.getElementById('sync-banner');
+    if(el){
+      el.className='sync-banner show err';
+      el.textContent='Fehler in der App – bitte Seite neu laden oder Backup exportieren';
+    }
+    console.error('Global app error:', e.error || e.message || e);
+  }catch(_){}
+});
+window.addEventListener('unhandledrejection', function(e){
+  try{
+    const el=document.getElementById('sync-banner');
+    if(el){
+      el.className='sync-banner show err';
+      el.textContent='Unerwarteter Fehler – bitte Seite neu laden';
+    }
+    console.error('Unhandled promise rejection:', e.reason || e);
+  }catch(_){}
+});
 </script>
 
 </body>
