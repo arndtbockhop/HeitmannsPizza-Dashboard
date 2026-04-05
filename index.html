@@ -139,6 +139,14 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .mobile-bottom-nav button{padding:8px 12px;min-height:46px;font-size:12px;border-radius:10px;flex:0 0 auto}
 .mobile-bottom-nav button.active{background:var(--blue-light);color:var(--blue);border-color:#bfdbfe;font-weight:600}
 
+.contact-clickable{cursor:pointer}
+.contact-clickable:hover{background:#f8fafc;border-color:#cbd5e1}
+.copy-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
+.copy-row-main{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.copy-row-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.copy-row-value{font-size:13px;word-break:break-word}
+@media (max-width:900px){.copy-row{align-items:flex-start;flex-direction:column}.copy-row button{width:100%}}
+
 
 /* MOBILE OPTIMIZATION */
 .mobile-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -483,7 +491,8 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
     <div class="form-group"><label>Titel</label><input id="ev-title" placeholder="z.B. Hochzeit Meyer"/></div>
     <div class="form-group"><label>Typ</label><select id="ev-type"><option>Catering</option><option>Event</option><option>Sonstiges</option></select></div>
     <div class="form-group"><label>Firma</label><select id="ev-company"><option value="HP">HP</option><option value="HPC">HPC</option></select></div>
-    <div class="form-group"><label>Datum</label><input type="date" id="ev-date"/></div>
+    <div class="form-group"><label>Von Datum</label><input type="date" id="ev-date"/></div>
+    <div class="form-group"><label>Bis Datum</label><input type="date" id="ev-end-date"/></div>
     <div class="form-group"><label>Uhrzeit</label><input type="time" id="ev-time" value="18:00"/></div>
     <div class="form-group"><label>Ort / Adresse</label><input id="ev-ort" placeholder="Ort oder Adresse"/></div>
     <div class="form-group"><label>Personen</label><input type="number" id="ev-personen" placeholder="Gästeanzahl"/></div>
@@ -870,7 +879,8 @@ function normalizeEvent(ev){
     contactId: ev.contactId || ev.kontaktId || '',
     kontakt: ev.kontakt || ev.contactName || '',
     cateringAngebotId: ev.cateringAngebotId || '',
-    cateringAngebotName: ev.cateringAngebotName || ''
+    cateringAngebotName: ev.cateringAngebotName || '',
+    endDate: ev.endDate || ev.date || ''
   });
 }
 function normalizeKontakt(k){ return Object.assign({firma:'',tel:'',email:'',adresse:'',typ:'Kunde',notizen:''},k); }
@@ -920,12 +930,7 @@ function populatePizzaMultiSelect(){
 }
 function openKontaktById(id){
   if(!id) return;
-  const navItem=document.querySelector(`.nav-item[onclick="showPage('kontakte',this)"]`);
-  showPage('kontakte',navItem);
-  setTimeout(()=>{
-    const row=document.getElementById('kontakt-'+id);
-    if(row){ row.scrollIntoView({behavior:'smooth', block:'center'}); row.style.outline='2px solid var(--blue)'; setTimeout(()=>row.style.outline='',1500); }
-  },50);
+  showKontaktDetail(id);
 }
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────
@@ -1036,14 +1041,15 @@ function openEventModal(id){
   document.getElementById('event-modal-title').textContent=ev?'Event bearbeiten':'Neues Event';
   populateKontaktSelect('ev-kontakt-id', ev?ev.contactId:'');
   populateCateringAngebotSelect('ev-catering-angebot-id', ev?ev.cateringAngebotId:'');
-  const defaults={title:'',type:'Catering',company:'HP',date:'',time:'18:00',ort:'',personen:'',angebot:'',notizen:'',status:'Pending...',cateringAngebotId:''};
+  const defaults={title:'',type:'Catering',company:'HP',date:'',endDate:'',time:'18:00',ort:'',personen:'',angebot:'',notizen:'',status:'Pending...',cateringAngebotId:''};
   const source=Object.assign({}, defaults, ev||{});
-  ['title','type','company','date','time','ort','personen','angebot','notizen','status'].forEach(f=>{
+  ['title','type','company','date','endDate','time','ort','personen','angebot','notizen','status'].forEach(f=>{
     const el=document.getElementById('ev-'+f);
     if(el) el.value=source[f] ?? '';
   });
   document.getElementById('ev-kontakt-id').value=source.contactId||'';
   document.getElementById('ev-catering-angebot-id').value=source.cateringAngebotId||'';
+  if(document.getElementById('ev-end-date') && !document.getElementById('ev-end-date').value && source.date){document.getElementById('ev-end-date').value=source.date;}
   openModal('event-modal');
 }
 function saveEvent(){
@@ -1057,6 +1063,7 @@ function saveEvent(){
     type:document.getElementById('ev-type').value,
     company:document.getElementById('ev-company').value||'HP',
     date:document.getElementById('ev-date').value,
+    endDate:(document.getElementById('ev-end-date').value || document.getElementById('ev-date').value),
     time:document.getElementById('ev-time').value,
     ort:document.getElementById('ev-ort').value,
     personen:document.getElementById('ev-personen').value,
@@ -1087,14 +1094,14 @@ function deleteEvent(id){
 function showEventDetail(id){
   const ev=normalizeEvent(state.events.find(e=>e.id===id)||{});
   if(!ev.id) return;
-  const kontaktLink = ev.contactId ? `<span class="linkish" onclick="closeModal('detail-modal');openKontaktById('${ev.contactId}')">${ev.kontakt||'Kontakt öffnen'}</span>` : '–';
+  const kontaktLink = ev.contactId ? `<span class="linkish" onclick="closeModal('detail-modal');showKontaktDetail('${ev.contactId}')">${ev.kontakt||'Kontakt öffnen'}</span>` : '–';
   const angebotLink = ev.cateringAngebotId ? `<span>${ev.cateringAngebotName||'Angebot verknüpft'}</span>` : '–';
   document.getElementById('detail-content').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">${ev.title}${companyChip(ev.company)}</div>${statusBadge(ev.status)}</div>
     <table style="font-size:13px">
       <tr><td style="color:var(--muted);padding:5px 0;width:120px">Typ</td><td>${statusBadge(ev.type)}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Firma</td><td>${companyChip(ev.company)}</td></tr>
-      <tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${ev.date||'–'} ${ev.time||''}</td></tr>
+      <tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${formatEventDateRange(ev)}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Ort</td><td>${ev.ort||'–'}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td>${kontaktLink}</td></tr>
@@ -1121,6 +1128,65 @@ function renderAllEvents(){
   el.innerHTML=s.length?s.map(ev=>eventItemHTML(ev)).join(''):'<div style="color:var(--muted);font-size:13px">Keine passenden Events.</div>';
 }
 
+
+function dateInRange(ds,start,end){
+  if(!start) return false;
+  const s=start;
+  const e=end||start;
+  return ds>=s && ds<=e;
+}
+function eventsOnDate(ds){
+  return state.events.filter(e=>dateInRange(ds,e.date,e.endDate)).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99') || (a.title||'').localeCompare(b.title||''));
+}
+function formatEventDateRange(ev){
+  if(!ev.date) return '–';
+  if(ev.endDate && ev.endDate!==ev.date) return `${ev.date} bis ${ev.endDate}${ev.time ? ' · ' + ev.time : ''}`;
+  return `${ev.date}${ev.time ? ' · ' + ev.time : ''}`;
+}
+function groupEventsByDay(events){
+  const map=new Map();
+  events.forEach(ev=>{
+    if(!ev.date) return;
+    const end=ev.endDate||ev.date;
+    let cur=ev.date;
+    while(cur<=end){
+      if(!map.has(cur)) map.set(cur,[]);
+      map.get(cur).push(ev);
+      const d=new Date(cur+'T00:00:00');
+      d.setDate(d.getDate()+1);
+      cur=d.toISOString().slice(0,10);
+    }
+  });
+  return [...map.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
+}
+function openDayDetail(ds){
+  const evs=eventsOnDate(ds);
+  const title=new Date(ds+'T00:00:00').toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('detail-content').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">Termine am ${title}</div><span class="badge badge-blue">${evs.length} ${evs.length===1?'Termin':'Termine'}</span></div>
+    ${evs.length?`<div class="event-list">${evs.map(ev=>`
+      <div class="event-item" style="cursor:default">
+        <div class="event-date"><div class="event-day">${ev.time?ev.time.slice(0,2):'–'}</div><div class="event-month">${ev.time?ev.time.slice(3,5):'ganzt.'}</div></div>
+        <div class="event-info"><div class="event-title-text">${ev.title}${companyChip(ev.company)}</div><div class="event-sub">${ev.ort||''}${ev.personen?' · '+ev.personen+' Pers.':''}${ev.endDate&&ev.endDate!==ev.date?' · bis '+ev.endDate:''}</div></div>
+        <div class="action-row"><button class="btn-sm" onclick="closeModal('detail-modal');showEventDetail('${ev.id}')">Ansehen</button><button class="btn-sm" onclick="closeModal('detail-modal');openEventModal('${ev.id}')">Bearbeiten</button></div>
+      </div>`).join('')}</div>`:'<div style="color:var(--muted);font-size:13px">Keine Termine.</div>'}
+    <div class="modal-footer"><button onclick="closeModal('detail-modal');openEventModal()">+ Event</button><button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button></div>`;
+  openModal('detail-modal');
+}
+function showKontaktDetail(id){
+  const k=state.kontakte.find(x=>x.id===id);
+  if(!k) return;
+  const phone=k.tel?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">Telefon</div><div class="copy-row-value">${k.tel}</div></div><button onclick="copyText(${JSON.stringify('')} + ${JSON.stringify('')} + '${k.tel.replace(/'/g, "\'")}', 'Telefon kopiert')">Kopieren</button></div>`:'';
+  const email=k.email?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">E-Mail</div><div class="copy-row-value">${k.email}</div></div><button onclick="copyText('${k.email.replace(/'/g, "\'")}', 'E-Mail kopiert')">Kopieren</button></div>`:'';
+  const adresse=k.adresse?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">Adresse</div><div class="copy-row-value">${k.adresse}</div></div><button onclick="copyText('${k.adresse.replace(/'/g, "\'")}', 'Adresse kopiert')">Kopieren</button></div>`:'';
+  document.getElementById('detail-content').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">${k.name}</div>${statusBadge(k.typ||'Kunde')}</div>
+    ${k.firma?`<div style="font-size:13px;color:var(--muted);margin-bottom:12px">${k.firma}</div>`:''}
+    <div style="display:flex;flex-direction:column;gap:10px">${phone}${email}${adresse}${k.notizen?`<div style="padding:10px;background:#f8fafc;border-radius:10px;font-size:13px">${k.notizen}</div>`:''}</div>
+    <div class="modal-footer"><button onclick="closeModal('detail-modal');openKontaktModal('${k.id}')">Bearbeiten</button><button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button></div>`;
+  openModal('detail-modal');
+}
+
 // ── CALENDAR ──────────────────────────────────────────────────────────────
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 function renderCalendar(){
@@ -1131,21 +1197,31 @@ function renderCalendar(){
   let html='';for(let i=0;i<offset;i++)html+='<div></div>';
   for(let d=1;d<=days;d++){
     const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const evs=state.events.filter(e=>e.date===ds);
+    const evs=eventsOnDate(ds);
     const isToday=d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear();
-    const companyClass = evs.length ? (' '+((evs[0].company||'HP').toLowerCase())) : '';
-    html+=`<div class="cal-day${isToday?' today':''}${evs.length?' has-event':''}${companyClass}" onclick="${evs.length?`showEventDetail('${evs[0].id}')`:'openEventModal()'}"><div style="font-weight:600;font-size:12px">${d}</div>${evs.map(e=>`<div class="cal-event-tag">${e.title}</div>`).join('')}</div>`;
+    const companyClass=evs.length?(' '+((evs[0].company||'HP').toLowerCase())):'';
+    let tagHtml='';
+    if(evs.length===1){ tagHtml=`<div class="cal-event-tag">${evs[0].title}</div>`; }
+    else if(evs.length>1){ tagHtml=`<div class="cal-event-tag">${evs[0].title}</div><div class="cal-event-tag">+${evs.length-1} weitere</div>`; }
+    html+=`<div class="cal-day${isToday?' today':''}${evs.length?' has-event':''}${companyClass}" onclick="${evs.length?`openDayDetail('${ds}')`:'openEventModal()'}"><div style="font-weight:600;font-size:12px">${d}${evs.length>1?` <span style="font-size:10px;color:var(--blue)">(${evs.length})</span>`:''}</div>${tagHtml}</div>`;
   }
   document.getElementById('cal-body').innerHTML=html;
-  const currentMonthStart = new Date(y, m, 1);
-  const nextMonthStart = new Date(y, m + 1, 1);
-  const monthAfterNextStart = new Date(y, m + 2, 1);
-  const me=state.events.filter(e=>{
+  const currentMonthStart=new Date(y,m,1);
+  const monthAfterNextStart=new Date(y,m+2,1);
+  const visibleEvents=state.events.filter(e=>{
     if(!e.date) return false;
-    const eventDate = new Date(e.date);
-    return eventDate >= currentMonthStart && eventDate < monthAfterNextStart;
+    const start=new Date(e.date);
+    const end=new Date(e.endDate||e.date);
+    return start<monthAfterNextStart && end>=currentMonthStart;
   });
-  document.getElementById('cal-event-list').innerHTML=me.length?me.sort((a,b)=>a.date>b.date?1:-1).map(ev=>eventItemHTML(ev)).join(''):'<div style="color:var(--muted);font-size:13px">Keine Events in diesem oder im nächsten Monat.</div>';
+  const grouped=groupEventsByDay(visibleEvents).filter(([ds])=>{
+    const d=new Date(ds+'T00:00:00');
+    return d>=currentMonthStart && d<monthAfterNextStart;
+  });
+  document.getElementById('cal-event-list').innerHTML=grouped.length?grouped.map(([ds,evs])=>{
+    const label=new Date(ds+'T00:00:00').toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
+    return `<div class="card" style="padding:12px 14px;margin-bottom:8px"><div class="card-title" style="margin-bottom:10px">${label}</div><div class="event-list">${evs.sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99') || (a.title||'').localeCompare(b.title||'')).map(ev=>`<div class="event-item" onclick="showEventDetail('${ev.id}')"><div class="event-date"><div class="event-day">${ev.time?ev.time.slice(0,2):'–'}</div><div class="event-month">${ev.time?ev.time.slice(3,5):'ganzt.'}</div></div><div class="event-info"><div class="event-title-text">${ev.title}${companyChip(ev.company)}</div><div class="event-sub">${ev.ort||''}${ev.personen?' · '+ev.personen+' Pers.':''}${ev.endDate&&ev.endDate!==ev.date?' · bis '+ev.endDate:''}</div></div><div>${statusBadge(ev.status)}</div></div>`).join('')}</div></div>`;
+  }).join(''):'<div style="color:var(--muted);font-size:13px">Keine Events in diesem oder im nächsten Monat.</div>';
 }
 function changeMonth(d){state.calMonth+=d;if(state.calMonth>11){state.calMonth=0;state.calYear++;}if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar();}
 
@@ -1713,7 +1789,7 @@ function renderKontakte(){
   });
   if(!filtered.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Keine passenden Kontakte.</div>';return;}
   el.innerHTML=filtered.map(k=>`
-    <div class="contact-item" id="kontakt-${k.id}">
+    <div class="contact-item contact-clickable" id="kontakt-${k.id}" onclick="showKontaktDetail('${k.id}')">
       <div class="avatar">${k.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
       <div style="flex:1">
         <div style="font-weight:500">${k.name}${k.firma?` <span style="color:var(--muted);font-weight:400">· ${k.firma}</span>`:''}</div>
@@ -1721,7 +1797,7 @@ function renderKontakte(){
         ${k.adresse?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${k.adresse}</div>`:''}
         ${k.notizen?`<div style="font-size:12px;color:var(--muted);margin-top:4px">${k.notizen}</div>`:''}
       </div>
-      <div style="display:flex;gap:6px;align-items:center">
+      <div style="display:flex;gap:6px;align-items:center" onclick="event.stopPropagation()">
         ${statusBadge(k.typ)}
         <button class="btn-sm" onclick="openKontaktModal('${k.id}')">Bearbeiten</button>
         <button class="btn-danger btn-sm" onclick="deleteKontakt('${k.id}')">×</button>
