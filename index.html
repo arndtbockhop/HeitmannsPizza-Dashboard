@@ -81,7 +81,7 @@ textarea{resize:vertical}
 .company-chip.hpc{background:#fef3c7;color:#b45309}
 .cal-event-tag{font-size:10px;color:var(--blue);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px; background: rgba(255,255,255,0.6); padding: 1px 3px; border-radius: 4px;}
 
-/* === BULLETPROOF MODAL FÜR TASTATUR (FLEXBOX) === */
+/* === KUGELSICHERES MODAL SYSTEM === */
 .modal-overlay { 
   display:none; position:fixed; inset:0; 
   background:rgba(0,0,0,.5); z-index:9999; 
@@ -91,10 +91,8 @@ textarea{resize:vertical}
 .modal-overlay.open { display:flex; }
 .modal {
   background: var(--card); width: 100%; max-width: 580px;
-  max-height: 100%; /* Kann durch das padding nicht über den Rand ragen */
-  display: flex; flex-direction: column;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  max-height: 100%; display: flex; flex-direction: column;
+  border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 .modal-title { 
   padding: 16px 20px; font-size: 18px; font-weight: 600; 
@@ -331,7 +329,11 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 
 <div class="page" id="page-einkauf">
   <div class="page-header"><div class="page-title">Zentrale Einkaufsliste</div>
-    <div style="display:flex;gap:8px"><button onclick="copyEinkaufTable()">📋 Kopieren</button><button class="btn-primary" onclick="openEinkaufModal()">+ Position</button></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-danger" onclick="clearEinkauf()">🗑️ Leeren</button>
+      <button onclick="copyEinkaufTable()">📋 Kopieren</button>
+      <button class="btn-primary" onclick="openEinkaufModal()">+ Position</button>
+    </div>
   </div>
   <div class="card" style="margin-bottom:12px"><div class="toolbar"><input class="search-input" id="einkauf-search" placeholder="Suchen..." oninput="renderEinkauf()"></div></div>
   <div id="einkauf-kategorien"><div class="card" style="color:var(--muted);font-size:13px">Keine Positionen.</div></div>
@@ -418,7 +420,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
       <div class="form-group"><label>Art.-Nr.</label><input id="ek-artikelnummer"/></div>
       <div class="form-group"><label>Lieferant</label><select id="ek-lieferant"><option value="Andronaco">Andronaco</option><option value="Bührings">Bührings</option><option value="Metro">Metro</option><option value="Edeka">Edeka</option><option value="Sonstige">Sonstige</option></select></div>
       <div class="form-group"><label>Menge</label><input type="number" id="ek-menge" value="1" step="0.01"/></div>
-      <div class="form-group"><label>Einheit</label><select id="ek-einheit"><option>kg</option><option>Stk</option></select></div>
+      <div class="form-group"><label>Einheit</label><select id="ek-einheit"><option>kg</option><option>g</option><option>Stk</option><option>L</option></select></div>
       <div class="form-group"><label>Preis Netto/E €</label><input type="number" id="ek-preis" value="0" step="0.01"/></div>
     </div>
   </div>
@@ -435,7 +437,7 @@ const firebaseConfig={apiKey:"AIzaSyDdtoBbNee-dLRjr6YEEhzxM6GCmVE6wTs",authDomai
 firebase.initializeApp(firebaseConfig); const db=firebase.database();
 
 // ── ART & REZEPTE STRENG NACH EXCEL (CSV) ─────────────────────────────────
-// p_ex = Netto, p_inc = Brutto pro KG.
+// p_ex = Netto, p_inc = Brutto pro KG (oder Stück)
 const ART = {
   "Farina Pizzeria Rossa Caputo 5164": { p_ex: 0.9596, p_inc: 1.0268, sup: "Andronaco", grp: "Teig", artnr: "5164" },
   "Semola di Grano Duro Rimancinata": { p_ex: 1.5899, p_inc: 1.7013, sup: "Andronaco", grp: "Teig", artnr: "" },
@@ -729,59 +731,73 @@ function copyDipList(){
   copyList(calcDipIngredients(), `DIPS EINKAUFSLISTE (${aq} Aioli, ${hq} Hot Honey)`);
 }
 
-function addOrMergeEinkauf(item){
-  const normalized=normalizeEinkaufItem(Object.assign({id:Date.now().toString()+Math.random()}, item));
-  const existing=state.einkauf.find(e=>{
-    const k1=[e.artikel||'',e.kategorie||'',e.einheit||'',Number(e.preis||0).toFixed(4),e.lieferant||''].join('|').toLowerCase();
-    const k2=[normalized.artikel||'',normalized.kategorie||'',normalized.einheit||'',Number(normalized.preis||0).toFixed(4),normalized.lieferant||''].join('|').toLowerCase();
-    return k1===k2;
-  });
-  if(existing){
-    existing.menge=Number((Number(existing.menge||0)+Number(normalized.menge||0)).toFixed(3));
-    if(!existing.artikelnummer && normalized.artikelnummer) existing.artikelnummer=normalized.artikelnummer;
-  } else {
-    state.einkauf.push(normalized);
-  }
-}
-
+// ── SICHERE FIREBASE TRANSAKTIONEN FÜR EINKAUFSLISTE ──────────────────────
 function saveToEinkauf(){
   const raw = calcPizzaIngredients();
   if(!totalPizzaCount()) return showToast('Keine Pizzen.');
-  for(const[artKey,grams] of Object.entries(raw)){
-     if(grams<0.1) continue;
-     const a = ART[artKey]||{};
-     addOrMergeEinkauf({
-       artikel: artKey,
-       artikelnummer: a.artnr||'',
-       lieferant: a.sup||'Andronaco',
-       kategorie: a.grp||'Sonstiges',
-       menge: parseFloat((grams/1000).toFixed(3)),
-       einheit: 'kg',
-       preis: a.p_ex||0 // Zentrale Liste speichert Netto-Preis pro Einheit!
-     });
-  }
-  updateStateObj('einkauf',state.einkauf);
-  showToast('Pizza-Kalkulation in Zentrale Einkaufsliste übernommen!');
+  
+  db.ref('einkauf').transaction(currentData => {
+      let arr = currentData || [];
+      for(const[artKey,grams] of Object.entries(raw)){
+         if(grams<0.1) continue;
+         const a = ART[artKey]||{};
+         const kg = grams/1000;
+         const lieferant = a.sup || 'Andronaco';
+         
+         const eIdx = arr.findIndex(e => e && e.artikel === artKey && e.lieferant === lieferant);
+         if(eIdx >= 0){
+             arr[eIdx].menge = Number((Number(arr[eIdx].menge||0) + kg).toFixed(3));
+         } else {
+             arr.push({
+                 id: Date.now().toString() + Math.random().toString().slice(2,8),
+                 artikel: artKey,
+                 artikelnummer: a.artnr||'',
+                 lieferant: lieferant,
+                 kategorie: a.grp||'Sonstiges',
+                 menge: parseFloat(kg.toFixed(3)),
+                 einheit: 'kg',
+                 preis: a.p_ex||0
+             });
+         }
+      }
+      return arr.filter(x=>x!=null);
+  }, (error, committed) => {
+      if(!error && committed) showToast('Pizza-Zutaten in Einkaufsliste übernommen!');
+  });
 }
 
 function saveDipsToEinkauf(){
   const raw = calcDipIngredients();
   if(Object.keys(raw).length===0) return showToast('Keine Dips.');
-  for(const[artKey,grams] of Object.entries(raw)){
-     if(grams<0.1) continue;
-     const a = ART[artKey]||{};
-     addOrMergeEinkauf({
-       artikel: artKey,
-       artikelnummer: a.artnr||'',
-       lieferant: a.sup||'Andronaco',
-       kategorie: a.grp||'Sonstiges',
-       menge: parseFloat((grams/1000).toFixed(3)),
-       einheit: 'kg',
-       preis: a.p_ex||0
-     });
-  }
-  updateStateObj('einkauf',state.einkauf);
-  showToast('Dips in Zentrale Einkaufsliste übernommen!');
+  
+  db.ref('einkauf').transaction(currentData => {
+      let arr = currentData || [];
+      for(const[artKey,grams] of Object.entries(raw)){
+         if(grams<0.1) continue;
+         const a = ART[artKey]||{};
+         const kg = grams/1000;
+         const lieferant = a.sup || 'Andronaco';
+         
+         const eIdx = arr.findIndex(e => e && e.artikel === artKey && e.lieferant === lieferant);
+         if(eIdx >= 0){
+             arr[eIdx].menge = Number((Number(arr[eIdx].menge||0) + kg).toFixed(3));
+         } else {
+             arr.push({
+                 id: Date.now().toString() + Math.random().toString().slice(2,8),
+                 artikel: artKey,
+                 artikelnummer: a.artnr||'',
+                 lieferant: lieferant,
+                 kategorie: a.grp||'Sonstiges',
+                 menge: parseFloat(kg.toFixed(3)),
+                 einheit: 'kg',
+                 preis: a.p_ex||0
+             });
+         }
+      }
+      return arr.filter(x=>x!=null);
+  }, (error, committed) => {
+      if(!error && committed) showToast('Dips in Einkaufsliste übernommen!');
+  });
 }
 
 // ── NOTIZEN ───────────────────────────────────────────────────────────────
@@ -803,6 +819,13 @@ function renderCateringAngebote(){const el=document.getElementById('cat-saved-li
 function openEinkaufModal(id){state.editEinkaufId=id||null;const i=id?state.einkauf.find(e=>e.id===id):null;document.getElementById('einkauf-modal-title').textContent=i?'Bearbeiten':'Neu';['ek-artikel','ek-artikelnummer','ek-kat','ek-einheit'].forEach(f=>document.getElementById(f).value=i?i[f.replace('ek-','')]:(f==='ek-kat'?'Teig':(f==='ek-einheit'?'kg':'')));document.getElementById('ek-lieferant').value=i?.lieferant||'Andronaco';document.getElementById('ek-menge').value=i?.menge??1;document.getElementById('ek-preis').value=i?.preis??0;openModal('einkauf-modal');}
 function saveEinkauf(){const i={id:state.editEinkaufId||Date.now().toString(),artikel:document.getElementById('ek-artikel').value||'?',artikelnummer:document.getElementById('ek-artikelnummer').value||'',lieferant:document.getElementById('ek-lieferant').value||'Andronaco',kategorie:document.getElementById('ek-kat').value,menge:parseFloat(document.getElementById('ek-menge').value)||0,einheit:document.getElementById('ek-einheit').value,preis:parseFloat(document.getElementById('ek-preis').value)||0};pushArrayItemSafe('einkauf',i);closeModal('einkauf-modal');}
 function deleteEinkauf(id){removeArrayItemSafe('einkauf',id);}
+
+function clearEinkauf(){
+  if(confirm('Möchtest du die gesamte Einkaufsliste wirklich löschen?')) {
+    db.ref('einkauf').set([]);
+    showToast('Einkaufsliste geleert');
+  }
+}
 
 function renderEinkauf() {
   const c = document.getElementById('einkauf-kategorien');
@@ -832,9 +855,12 @@ function renderEinkauf() {
                  <div class="ing-group-title" style="margin-bottom:8px; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">${kat}</div>`;
                  
         katItems.forEach(e=>{
+            const refArt = ART[e.artikel];
             const isKG = e.einheit === 'kg';
             const price_netto = Number(e.preis||0);
-            const price_brutto = price_netto * 1.07; // Standard MwSt auf Zentralliste
+            
+            // Reale Brutto-Preise ziehen, wenn im System, sonst +7% Standard als Fallback
+            const price_brutto = (refArt && refArt.p_inc) ? refArt.p_inc : (price_netto * 1.07);
             const sum_netto = Number(e.menge||0) * price_netto;
             const sum_brutto = Number(e.menge||0) * price_brutto;
             
@@ -880,7 +906,24 @@ function renderEinkauf() {
   c.innerHTML=ht;
 }
 
-function copyEinkaufTable(){let tx='EINKAUFSLISTE\n================\n\n';const q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();const flt=state.einkauf.filter(e=>{if(!q)return true;return[e.artikel,e.artikelnummer,e.lieferant,e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q);});const sups=[...new Set(flt.map(e=>e.lieferant||'Unbekannt'))].sort();sups.forEach(cd=>{const is=flt.filter(e=>(e.lieferant||'Unbekannt')===cd);if(!is.length)return;tx+=`\nLIEFERANT: ${(SUPPLIER_LABELS[cd]||cd).toUpperCase()}\n`;is.sort((a,b)=>a.kategorie.localeCompare(b.kategorie)||a.artikel.localeCompare(b.artikel)).forEach(e=>{const s_net=e.menge*(e.preis||0); const s=s_net*1.07; tx+=`${e.artikel}${e.artikelnummer?` [Art: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${s>0?' – '+fmt(s):''}\n`;});});copyText(tx,'Kopiert!');}
+function copyEinkaufTable(){
+  let tx='EINKAUFSLISTE\n================\n\n';
+  const q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();
+  const flt=state.einkauf.filter(e=>{if(!q)return true;return[e.artikel,e.artikelnummer,e.lieferant,e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q);});
+  const sups=[...new Set(flt.map(e=>e.lieferant||'Unbekannt'))].sort();
+  sups.forEach(cd=>{
+    const items=flt.filter(e=>(e.lieferant||'Unbekannt')===cd);
+    if(!items.length)return;
+    tx+=`\nLIEFERANT: ${(SUPPLIER_LABELS[cd]||cd).toUpperCase()}\n`;
+    items.sort((a,b)=>a.kategorie.localeCompare(b.kategorie)||a.artikel.localeCompare(b.artikel)).forEach(e=>{
+      const refArt = ART[e.artikel];
+      const p_inc = (refArt && refArt.p_inc) ? refArt.p_inc : (Number(e.preis||0) * 1.07);
+      const s = e.menge * p_inc;
+      tx+=`${e.artikel}${e.artikelnummer?` [Art: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.einheit==='kg'?fmtKG(e.menge*1000):e.menge+' '+e.einheit}${s>0?' – '+fmt(s):''}\n`;
+    });
+  });
+  copyText(tx,'Kopiert!');
+}
 
 // ── KONTAKTE ─────────────────────────────────────────────────────────────
 function openKontaktModal(id){state.editKontaktId=id||null;const k=id?state.kontakte.find(x=>x.id===id):null;document.getElementById('kontakt-modal-title').textContent=k?'Bearbeiten':'Neu';['kt-name','kt-firma','kt-tel','kt-email','kt-adresse','kt-notizen'].forEach(f=>document.getElementById(f).value=k?k[f.replace('kt-','')]:'');document.getElementById('kt-typ').value=k?.typ||'Kunde';openModal('kontakt-modal');}
