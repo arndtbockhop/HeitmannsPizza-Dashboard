@@ -81,29 +81,34 @@ textarea{resize:vertical}
 .company-chip.hpc{background:#fef3c7;color:#b45309}
 .cal-event-tag{font-size:10px;color:var(--blue);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px; background: rgba(255,255,255,0.6); padding: 1px 3px; border-radius: 4px;}
 
-/* === MODAL BOTTOM-SHEET LÖSUNG (Tastatur-sicher) === */
-.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9999; align-items:flex-end; justify-content:center; padding: 0; }
+/* === KUGELSICHERES MODAL SYSTEM FÜR TASTATUREN === */
+.modal-overlay { 
+  display:none; position:fixed; inset:0; 
+  background:rgba(0,0,0,.5); z-index:9999; 
+  align-items:center; justify-content:center; 
+  padding: 16px; 
+}
 .modal-overlay.open { display:flex; }
 .modal {
-  background: var(--card); width: 100%; max-width: 600px;
-  max-height: 90vh; /* Wichtig: Kein 100vh, lässt Platz für Tastatur! */
+  background: var(--card); width: 100%; max-width: 580px;
+  max-height: 100%; /* Begrenzt durch das Overlay-Padding */
   display: flex; flex-direction: column;
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -10px 25px rgba(0,0,0,0.1);
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
-.modal-title { font-size: 17px; font-weight: 600; padding: 20px 24px 16px 24px; border-bottom: 1px solid var(--border); background: var(--card); flex-shrink: 0; border-radius: 16px 16px 0 0; }
-.modal-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 24px; }
-.modal-footer {
+.modal-title { 
+  padding: 16px 20px; border-bottom: 1px solid var(--border); 
+  font-size: 18px; font-weight: 600; flex-shrink: 0; 
+}
+.modal-body { 
+  padding: 16px 20px; 
+  overflow-y: auto; -webkit-overflow-scrolling: touch; 
+  flex: 1; /* Nimmt den restlichen Platz ein */
+}
+.modal-footer { 
+  padding: 16px 20px; border-top: 1px solid var(--border); 
   display: flex; justify-content: flex-end; gap: 8px; 
-  padding: 16px 24px calc(16px + env(safe-area-inset-bottom)) 24px; 
-  background: var(--card); border-top: 1px solid var(--border); 
-  flex-shrink: 0; position: sticky; bottom: 0;
-}
-@media (min-width: 600px) {
-  .modal-overlay { align-items: center; padding: 20px; }
-  .modal { border-radius: 16px; }
-  .modal-title { border-radius: 16px 16px 0 0; }
-  .modal-footer { padding: 16px 24px; border-radius: 0 0 16px 16px; }
+  flex-shrink: 0; 
 }
 
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -126,7 +131,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .ing-group:last-child{margin-bottom:0}
 .ing-group-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
 .ing-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:13px}
-.ing-amount{font-weight:500;color:var(--blue);min-width:80px;text-align:right}
+.ing-amount{font-weight:500;color:var(--blue);min-width:90px;text-align:right}
 
 .note-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9}
 .note-row:last-child{border-bottom:none}
@@ -535,7 +540,7 @@ function normalizeKontakt(k){return Object.assign({firma:'',tel:'',email:'',adre
 function normalizeEinkaufItem(e){return Object.assign({kategorie:'Sonstiges',menge:0,einheit:'Stk',preis:0,artikelnummer:'',lieferant:'Andronaco'},e);}
 function contactLinkHTML(id,n){return id?`<span class="linkish" onclick="openContactInfo('${id}'); event.stopPropagation();">${n||'Kontakt'}</span>`:'–';}
 function fmt(n){return Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
-function fmtG(g){return g>=1000?(g/1000).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg':Math.round(g).toLocaleString('de-DE')+' g';}
+function fmtKG(g){return (g/1000).toLocaleString('de-DE',{minimumFractionDigits:3,maximumFractionDigits:3})+' kg';}
 function statusBadge(s){const m={Catering:'badge-blue',Event:'badge-amber',Sonstiges:'badge-amber','Pending...':'badge-amber',Secured:'badge-green',Possibility:'badge-blue',Kunde:'badge-blue',Lieferant:'badge-green',Mitarbeiter:'badge-amber'};return `<span class="badge ${m[s]||'badge-amber'}">${s}</span>`;}
 function showToast(m){const w=document.getElementById('toast-wrap'),t=document.createElement('div');t.className='toast';t.textContent=m||'Gespeichert';w.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),220);},2200);}
 function copyText(t,m){navigator.clipboard.writeText(t).then(()=>showToast(m||'Kopiert!'));}
@@ -636,7 +641,7 @@ function renderPizzaResult(){
     const si=bySup[sup].sort((a,b)=>a.grp.localeCompare(b.grp)||a.artKey.localeCompare(b.artKey));
     html+=`<div class="ing-group"><div class="ing-group-title">${sup}</div>`;
     si.forEach(i=>{
-       html+=`<div class="ing-row"><span>${i.artKey}${i.artnr?` <span style="color:var(--muted);font-size:11px">[${i.artnr}]</span>`:''}</span><span class="ing-amount">${fmtG(i.grams)}</span><span style="font-size:11px;color:var(--muted);min-width:60px;text-align:right">${i.cost>0?fmt(i.cost):''}</span></div>`;
+       html+=`<div class="ing-row"><span>${i.artKey}${i.artnr?` <span style="color:var(--muted);font-size:11px">[${i.artnr}]</span>`:''}</span><span class="ing-amount">${fmtKG(i.grams)}</span><span style="font-size:11px;color:var(--muted);min-width:60px;text-align:right">${i.cost>0?fmt(i.cost):''}</span></div>`;
     });
     html+='</div>';
   });
@@ -668,7 +673,7 @@ function copyPizzaList(){
   sups.forEach(sup=>{
     text+=`\n[ ${sup.toUpperCase()} ]\n`;
     bySup[sup].sort((a,b)=>a.grp.localeCompare(b.grp)||a.artKey.localeCompare(b.artKey)).forEach(i=>{
-       text+=`${i.artKey}: ${fmtG(i.grams)}${i.cost>0?' ('+fmt(i.cost)+')':''}\n`;
+       text+=`${i.artKey}: ${fmtKG(i.grams)}${i.cost>0?' ('+fmt(i.cost)+')':''}\n`;
     });
   });
   if(state.notes.pizza.length){text+='\n─── NOTIZEN ────────────────────\n';state.notes.pizza.forEach(n=>{text+=`• ${n.text}\n`;});}
@@ -698,7 +703,7 @@ function renderDipsResult(){
 
   let html='<div class="ing-wrap"><div class="ing-group-title">Zutaten</div>';
   items.sort((a,b)=>a.artKey.localeCompare(b.artKey)).forEach(i=>{
-     html+=`<div class="ing-row"><span>${i.artKey}</span><span class="ing-amount">${fmtG(i.grams)}</span><span style="font-size:11px;color:var(--muted);min-width:60px;text-align:right">${i.cost>0?fmt(i.cost):''}</span></div>`;
+     html+=`<div class="ing-row"><span>${i.artKey}</span><span class="ing-amount">${fmtKG(i.grams)}</span><span style="font-size:11px;color:var(--muted);min-width:60px;text-align:right">${i.cost>0?fmt(i.cost):''}</span></div>`;
   });
   html+=`</div><div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Geschätzte Warenkosten:</span><span style="color:var(--blue)">${fmt(gesamtkosten)}</span></div>`;
   el.innerHTML=html;
@@ -719,7 +724,7 @@ function copyDipList(){
     items.push({artKey,grams,cost:(grams/1000)*a.ppkg});
   }
   items.sort((a,b)=>a.artKey.localeCompare(b.artKey)).forEach(i=>{
-    text += `${i.artKey}: ${fmtG(i.grams)}${i.cost>0?' ('+fmt(i.cost)+')':''}\n`;
+    text += `${i.artKey}: ${fmtKG(i.grams)}${i.cost>0?' ('+fmt(i.cost)+')':''}\n`;
   });
   if(state.notes.dip.length){text+='\n─── NOTIZEN ────────────────────\n';state.notes.dip.forEach(n=>{text+=`• ${n.text}\n`;});}
   copyText(text,'Dip-Liste kopiert!');
@@ -752,8 +757,8 @@ function saveToEinkauf(){
        artikelnummer: a.artnr||'',
        lieferant: a.sup||'Andronaco',
        kategorie: a.grp||'Sonstiges',
-       menge: kg>=1 ? parseFloat(kg.toFixed(3)) : Math.round(grams),
-       einheit: kg>=1 ? 'kg' : 'g',
+       menge: parseFloat(kg.toFixed(3)),
+       einheit: 'kg',
        preis: a.ppkg||0
      });
   }
@@ -773,8 +778,8 @@ function saveDipsToEinkauf(){
        artikelnummer: a.artnr||'',
        lieferant: a.sup||'Andronaco',
        kategorie: a.grp||'Sonstiges',
-       menge: kg>=1 ? parseFloat(kg.toFixed(3)) : Math.round(grams),
-       einheit: kg>=1 ? 'kg' : 'g',
+       menge: parseFloat(kg.toFixed(3)),
+       einheit: 'kg',
        preis: a.ppkg||0
      });
   }
