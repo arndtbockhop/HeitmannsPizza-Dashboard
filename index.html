@@ -132,11 +132,58 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .toast.show{opacity:1;transform:translateY(0)}
 .action-row{display:flex;gap:6px;align-items:center}
 
+
+
+/* MOBILE OPTIMIZATION */
+.mobile-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media (max-width: 900px){
+  body{font-size:13px}
+  .app{flex-direction:column;min-height:100dvh}
+  .sidebar{width:100%;min-width:100%;border-right:none;border-bottom:1px solid var(--border);padding:8px 0;display:block;overflow-x:auto;white-space:nowrap}
+  .sidebar-logo{padding:0 12px 8px;border-bottom:none;margin-bottom:0;display:block}
+  .nav-item{display:inline-flex;border-left:none;border-bottom:3px solid transparent;padding:10px 12px;font-size:13px}
+  .nav-item.active{border-left-color:transparent;border-bottom-color:var(--blue)}
+  .live-badge{display:none}
+  .main{padding:12px}
+  .page{gap:12px}
+  .page-header{flex-direction:column;align-items:stretch;gap:10px}
+  .page-title{font-size:18px}
+  .card{padding:14px}
+  .metrics{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .pizza-grid{grid-template-columns:1fr}
+  .event-item,.contact-item{padding:10px;gap:10px}
+  .event-date{min-width:38px}
+  .event-day{font-size:20px}
+  .toolbar{flex-direction:column;align-items:stretch}
+  .search-input{max-width:none;width:100%}
+  table{display:block;overflow-x:auto;white-space:nowrap;width:100%}
+  thead,tbody,tfoot,tr{white-space:nowrap}
+  .cal-grid{gap:3px}
+  .cal-day{min-height:58px;padding:4px 5px;font-size:11px}
+  .cal-event-tag{font-size:9px}
+  .modal{width:100vw;max-width:100vw;max-height:100dvh;height:100dvh;border-radius:0;padding:16px}
+  .modal-title{font-size:16px}
+  .modal-footer{position:sticky;bottom:0;background:var(--card);padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+  input,select,textarea,button{font-size:16px}
+  .result-bar{font-size:12px;padding:10px 12px}
+  .drink-item{display:grid;grid-template-columns:1fr;gap:6px;align-items:start}
+  .drink-controls{justify-content:flex-start}
+}
+@media (max-width: 520px){
+  .main{padding:10px}
+  .card{padding:12px}
+  .card-title{margin-bottom:10px}
+  .pizza-qty input,.drink-controls input{width:64px}
+  .action-row{flex-wrap:wrap}
+  .inline-badges{gap:4px}
+}
+
 </style>
 </head>
 <body>
 <div class="app">
-<div class="sidebar">
+<div class="sidebar mobile-scroll">
   <div class="sidebar-logo">Gastro Manager</div>
   <div class="nav-item active" onclick="showPage('dashboard',this)">Dashboard</div>
   <div class="nav-item" onclick="showPage('kalender',this)">Kalender</div>
@@ -877,7 +924,7 @@ function showEventDetail(id){
       <tr><td style="color:var(--muted);padding:5px 0">Catering-Angebot</td><td>${angebotLink}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${ev.angebot?fmt(ev.angebot):'–'}</td></tr>
     </table>
-    TEMP_PLACEHOLDER
+    ${ev.notizen?`<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px">${ev.notizen.replace(/\n/g,'<br>')}</div>`:''}
     <div class="modal-footer">
       <button class="btn-danger" onclick="deleteEvent('${id}')">Löschen</button>
       <button onclick="closeModal('detail-modal');openEventModal('${id}')">Bearbeiten</button>
@@ -1511,5 +1558,323 @@ renderKontakte();
 renderEinkauf();
 listenAll();
 </script>
+
+<div style="display:none">
+  <div id="drinks-grid"></div>
+  <div id="drinks-total-cost"></div>
+  <div id="drinks-result"></div>
+  <div id="drink-notes-list"></div>
+</div>
+
+<script>
+(function(){
+const EXCEL_ARTICLES = {"Farina Pizzeria Rossa Caputo 5164": {"group": "Mehl", "price_inc": 25.6693, "pack_size": 25, "pack_unit": "kg", "supplier": "A", "article_no": 5164, "unit_price_inc": 1.026772}, "Semola di Grano Duro Rimancinata": {"group": "Mehl", "price_inc": 1.7013000000000003, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 1.7013000000000003}, "Thunf. Öl": {"group": "Proteine", "price_inc": 9.2983, "pack_size": 2.5, "pack_unit": "kg", "supplier": "A", "article_no": 3140, "unit_price_inc": 3.71932}, "Salami 55mm Tulip": {"group": "Proteine", "price_inc": 8.7633, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 1403, "unit_price_inc": 8.7633}, "Prosciutto Crudo geschnitten": {"group": "Proteine", "price_inc": 11.4383, "pack_size": 0.5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 22.8766}, "Prosciutto Crudo con Interfoglio": {"group": "Proteine", "price_inc": 10.475299999999999, "pack_size": 0.5, "pack_unit": "kg", "supplier": "A", "article_no": 1438, "unit_price_inc": 20.950599999999998}, "Salami napoli picante": {"group": "Proteine", "price_inc": 13.5783, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 1406, "unit_price_inc": 13.5783}, "Mortadella": {"group": "Proteine", "price_inc": 13.8993, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 15499, "unit_price_inc": 13.8993}, "Kochschinken": {"group": "Proteine", "price_inc": 7.4793, "pack_size": 7.8, "pack_unit": "kg", "supplier": "A", "article_no": 1413, "unit_price_inc": 7.4793}, "Sardellen": {"group": "Proteine", "price_inc": 26.61625, "pack_size": 0.08, "pack_unit": "kg", "supplier": "A", "article_no": 3175, "unit_price_inc": 26.61625}, "Pancetta": {"group": "Proteine", "price_inc": 7.49, "pack_size": 0.3, "pack_unit": "kg", "supplier": "E", "article_no": null, "unit_price_inc": 24.966417}, "Grana Padano 16M": {"group": "Milchprodukte", "price_inc": 40.7563, "pack_size": 2, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 20.37815}, "Fior di Latte Taglio Napoli latteria Sorrentina": {"group": "Milchprodukte", "price_inc": 17.858300000000003, "pack_size": 2, "pack_unit": "kg", "supplier": "A", "article_no": 11498, "unit_price_inc": 8.929150000000002}, "Fior di Latte Taglio Napoli Zappa": {"group": "Milchprodukte", "price_inc": 27.2743, "pack_size": 3, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 9.091433333333333}, "Burrata Nonno Nanni": {"group": "Milchprodukte", "price_inc": 2.1293, "pack_size": 0.125, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 17.0344}, "Aro Schmand 24%": {"group": "Milchprodukte", "price_inc": 27.8093, "pack_size": 5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 5.56186}, "Greco Feta 48%": {"group": "Milchprodukte", "price_inc": 19.249299999999998, "pack_size": 2, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 9.624649999999999}, "Grana Padano DOP 1/8 Colla": {"group": "Milchprodukte", "price_inc": 15.8253, "pack_size": 4, "pack_unit": "kg", "supplier": "A", "article_no": 13156, "unit_price_inc": 15.8253}, "Hirtenkäse": {"group": "Milchprodukte", "price_inc": 14.43, "pack_size": 1.8, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 8.016666666666666}, "Gorgonzola": {"group": "Milchprodukte", "price_inc": 11.759300000000001, "pack_size": 1.5, "pack_unit": "kg", "supplier": "A", "article_no": 1132, "unit_price_inc": 7.839533333333334}, "Ricotta di pecora Fresca": {"group": "Milchprodukte", "price_inc": 8.0143, "pack_size": 1.5, "pack_unit": "kg", "supplier": "A", "article_no": 1386, "unit_price_inc": 5.342866666666667}, "Stracciatella": {"group": "Milchprodukte", "price_inc": 3.6273000000000004, "pack_size": 0.25, "pack_unit": "kg", "supplier": "A", "article_no": 11151, "unit_price_inc": 14.5092}, "Zwiebeln RONL": {"group": "Gemüse", "price_inc": 3.1993000000000005, "pack_size": 1.5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 2.132866666666667}, "Zwiebeln rot ": {"group": "Gemüse", "price_inc": 13.8993, "pack_size": 10, "pack_unit": "kg", "supplier": "A", "article_no": "O445", "unit_price_inc": 1.38993}, "Knoblauch GES": {"group": "Gemüse", "price_inc": 6.944300000000001, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": "O475", "unit_price_inc": 6.944300000000001}, "Pelati Andronaco": {"group": "Gemüse", "price_inc": 3.1993000000000005, "pack_size": 2.5, "pack_unit": "kg", "supplier": "A", "article_no": 30163, "unit_price_inc": 1.2797200000000002}, "Polpa Andronaco": {"group": "Gemüse", "price_inc": 13.8993, "pack_size": 10, "pack_unit": "kg", "supplier": "A", "article_no": 30164, "unit_price_inc": 1.38993}, "Polpa cour di pomodoro Cirio": {"group": "Gemüse", "price_inc": 13.8993, "pack_size": 5, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 2.77986}, "Basilikum frisch": {"group": "Gemüse", "price_inc": 16.0393, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": "O902", "unit_price_inc": 16.0393}, "Rucola frisch": {"group": "Gemüse", "price_inc": 7.4793, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": "O106", "unit_price_inc": 7.4793}, "Blattspiat Miniportioniert": {"group": "Gemüse", "price_inc": 5.6603, "pack_size": 2.5, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 2.26412}, "Eiswürfel": {"group": "Gemüse", "price_inc": 5.1051, "pack_size": 5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 1.02102}, "Spinat frisch": {"group": "Gemüse", "price_inc": 19.249299999999998, "pack_size": 5.5, "pack_unit": "Kg", "supplier": "A", "article_no": null, "unit_price_inc": 3.499872727272727}, "Pilze frisch": {"group": "Gemüse", "price_inc": 4.8, "pack_size": 1, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 4.8}, "Cherrytomaten": {"group": "Gemüse", "price_inc": 5.874300000000001, "pack_size": 3, "pack_unit": "kg", "supplier": "A", "article_no": "O312", "unit_price_inc": 5.874300000000001}, "Champignon": {"group": "Gemüse", "price_inc": 3.9483, "pack_size": 3, "pack_unit": "kg", "supplier": "A", "article_no": "O500", "unit_price_inc": 1.3161}, "Zucchini": {"group": "Gemüse", "price_inc": 9.6193, "pack_size": 5, "pack_unit": "kg", "supplier": "A", "article_no": "O204", "unit_price_inc": 1.9238600000000001}, "Paprika": {"group": "Gemüse", "price_inc": 15.515, "pack_size": 5, "pack_unit": "kg", "supplier": null, "article_no": "O214", "unit_price_inc": 3.103}, "Aro Rapsöl": {"group": "Sonstiges", "price_inc": 4.1623, "pack_size": 2.5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 1.66492}, "Aro Zucker Raffinade": {"group": "Sonstiges", "price_inc": 0.8881, "pack_size": 1, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 0.8881}, "Aro Honig": {"group": "Sonstiges", "price_inc": 11.224300000000001, "pack_size": 1.5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 7.482866666666667}, "Bührings Eier Freiland": {"group": "Sonstiges", "price_inc": 4, "pack_size": null, "pack_unit": "kg", "supplier": "B", "article_no": null, "unit_price_inc": null}, "Hefe Omas Ur-Hefe": {"group": "Sonstiges", "price_inc": 0.18190000000000003, "pack_size": 0.042, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 4.3309523809523816}, "Aro Eiswürfel": {"group": "Sonstiges", "price_inc": 5.1051, "pack_size": 5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 1.02102}, "Olio extra virgin san Giovanni Desantes": {"group": "Sonstiges", "price_inc": 8.5493, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 8.5493}, "Wallnusskerne Andronaco": {"group": "Sonstiges", "price_inc": 19.249299999999998, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 19.249299999999998}, "Crema di Balsamico": {"group": "Sonstiges", "price_inc": 5.1253, "pack_size": 0.5, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 10.2506}, "Apfel essig ": {"group": "Sonstiges", "price_inc": 1.5515, "pack_size": 0.5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 3.103}, "Pesto alla genovese": {"group": "Sonstiges", "price_inc": 4.8043000000000005, "pack_size": 0.5, "pack_unit": "kg", "supplier": "A", "article_no": 3456, "unit_price_inc": 9.608600000000001}, "Salz": {"group": "Sonstiges", "price_inc": 8.5493, "pack_size": 25, "pack_unit": "kg", "supplier": "A", "article_no": 6391, "unit_price_inc": 0.341972}, "Pomodoro Secchi in olio": {"group": "Sonstiges", "price_inc": 15.6113, "pack_size": 2.9, "pack_unit": "Kg", "supplier": "A", "article_no": 34329, "unit_price_inc": 5.383206896551723}, "Kuehne Senf ": {"group": "Sonstiges", "price_inc": 1.5943, "pack_size": 0.25, "pack_unit": "Kg", "supplier": "M", "article_no": null, "unit_price_inc": 6.3772}, "Metro Chef Chiliflocken ": {"group": "Sonstiges", "price_inc": 8.0143, "pack_size": 0.37, "pack_unit": "Kg", "supplier": "M", "article_no": null, "unit_price_inc": 21.66027027027027}, "Orange": {"group": "Sonstiges", "price_inc": 6.409300000000001, "pack_size": 3, "pack_unit": "Kg", "supplier": "M", "article_no": null, "unit_price_inc": 2.1364333333333336}, "Eier (Bührings)": {"group": "Sonstiges", "price_inc": 4, "pack_size": 10, "pack_unit": "stk", "supplier": "B", "article_no": null, "unit_price_inc": 6.666666666666667}, "Limette": {"group": "Sonstiges", "price_inc": 3.1993000000000005, "pack_size": 1, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 3.1993000000000005}, "Chilipulver": {"group": "Sonstiges", "price_inc": 5.874300000000001, "pack_size": 0.39, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 15.062307692307694}, "Chilischoten": {"group": "Sonstiges", "price_inc": 8.8703, "pack_size": 0.19, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 46.68578947368421}, "Peperoncini Piccanti in olio": {"group": "Sonstiges", "price_inc": 22.4593, "pack_size": 3.1, "pack_unit": "kg", "supplier": "A", "article_no": 3431, "unit_price_inc": 7.244935483870967}, "Oliven schwarz in Scheiben": {"group": "Sonstiges", "price_inc": 11.010299999999999, "pack_size": 4.25, "pack_unit": "kg", "supplier": "A", "article_no": 30108, "unit_price_inc": 2.5906588235294112}, "Pistazien": {"group": "Sonstiges", "price_inc": 48.139300000000006, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 6028, "unit_price_inc": 48.139300000000006}, "Oregano eigenmarke Andronaco": {"group": "Sonstiges", "price_inc": 10.689300000000001, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 60196, "unit_price_inc": 10.689300000000001}, "VioLife": {"group": "Sonstiges", "price_inc": 2.49, "pack_size": 0.18, "pack_unit": "kg", "supplier": "E", "article_no": null, "unit_price_inc": 13.833333333333334}, "Kapern": {"group": "Sonstiges", "price_inc": 8.055283018867925, "pack_size": 0.53, "pack_unit": "kg", "supplier": "A", "article_no": 34470, "unit_price_inc": 8.055283018867925}, "G&G Kürbiskerne ": {"group": "Sonstiges", "price_inc": 2.29, "pack_size": 0.25, "pack_unit": "kg", "supplier": "E", "article_no": null, "unit_price_inc": 9.16}};
+const EXCEL_BASE_RECIPES = {"teig": [["Farina Pizzeria Rossa Caputo 5164", 156.789], ["Aro Zucker Raffinade", 2.349], ["Salz", 5.184], ["Hefe Omas Ur-Hefe", 0.621], ["Aro Eiswürfel", 23.517]], "tomatensauce": [["Polpa Andronaco", 83.2], ["Pelati Andronaco", 44.85], ["Salz", 0.65], ["Aro Zucker Raffinade", 0.52], ["Basilikum frisch", 0.78]], "spinatcreme": [["Blattspiat Miniportioniert", 94.9], ["Aro Schmand 24%", 14.3], ["Salz", 1.3], ["Knoblauch GES", 1.3], ["Hirtenkäse", 15.6], ["Aro Zucker Raffinade", 2.6]], "schmandcreme": [["Aro Schmand 24%", 90.55], ["Knoblauch GES", 1.55], ["Grana Padano DOP 1/8 Colla", 6.4], ["Salz", 1.5]], "chilli_ricotta": [["Ricotta di pecora Fresca", 39.08], ["Chilipulver", 0.44], ["Salz", 0.48]], "grillgemuese": [["Zucchini", 46.08], ["Paprika", 70.08], ["Olio extra virgin san Giovanni Desantes", 2.4], ["Salz", 1.44]], "konfierte_tomaten": [["Cherrytomaten", 144.576], ["Knoblauch GES", 1.92], ["Olio extra virgin san Giovanni Desantes", 7.232], ["Salz", 2.416], ["Aro Zucker Raffinade", 1.92], ["Oregano eigenmarke Andronaco", 0.24]], "hot_honey": [["Aro Honig", 44.5], ["Metro Chef Chiliflocken ", 1.75], ["Apfel essig ", 2.9], ["Chilipulver", 0.85]], "aioli": [["Aro Rapsöl", 36.375], ["Eier (Bührings)", 8.75], ["Apfel essig ", 0.5], ["Aro Zucker Raffinade", 0.76], ["Salz", 0.4], ["Kuehne Senf ", 1.85], ["Knoblauch GES", 1.365]], "aioli_auto": [["Aro Rapsöl", 36.375], ["Eier (Bührings)", 8.75], ["Aro Zucker Raffinade", 0.76], ["Salz", 0.4], ["Kuehne Senf ", 1.85], ["Knoblauch GES", 1.365]], "karam_zwiebeln": [["Zwiebeln rot ", 120.0]], "karam_walnuesse": [["Wallnusskerne Andronaco", 25.0]], "kuerbiscreme": [["Aro Schmand 24%", 135.825], ["Knoblauch GES", 2.325], ["Grana Padano DOP 1/8 Colla", 9.6], ["Salz", 2.25]]};
+const EXCEL_PIZZAS = {"Margherita": {"price": 0.9955161658000002, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 80]]}, "Pesto": {"price": 0.8339194158000003, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Pesto alla genovese", 25]]}, "Salami": {"price": 1.1195024158000002, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Salami 55mm Tulip", 60]]}, "Funghi": {"price": 0.7911194158000002, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Champignon", 50]]}, "Parma": {"price": 2.1665402158, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Prosciutto Crudo con Interfoglio", 50], ["Rucola frisch", 40], ["Crema di Balsamico", 8], ["Pesto alla genovese", 15]]}, "Tonno": {"price": 0.9490995658000001, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Thunf. Öl", 75], ["Zwiebeln rot ", 55]]}, "Verde": {"price": 1.8508145153333335, "parts": [["teig", 1], ["spinatcreme", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 30], ["Hirtenkäse", 50], ["karam_zwiebeln", 1.1666666666666667], ["karam_walnuesse", 1]]}, "Burrata": {"price": 3.2637778037310348, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Pesto alla genovese", 15], ["Pomodoro Secchi in olio", 20], ["Rucola frisch", 40], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Burrata Nonno Nanni", 125]]}, "Spicy Salami": {"price": 2.0784483858522784, "parts": [["teig", 1], ["tomatensauce", 0.5769230769230769], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 55], ["Salami napoli picante", 75], ["chilli_ricotta", 1], ["hot_honey", 0.2], ["Peperoncini Piccanti in olio", 10]]}, "Mortadella e Pistachio": {"price": 2.0127812158000005, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Mortadella", 50], ["Stracciatella", 30], ["Pistazien", 6]]}, "Pizza Grillgemüse": {"price": 1.2935672169349561, "parts": [["teig", 1], ["tomatensauce", 1], ["grillgemuese", 1], ["Oliven schwarz in Scheiben", 20], ["Pomodoro Secchi in olio", 20], ["VioLife", 35]]}, "Special Margherita": {"price": 2.0386911947520003, "parts": [["teig", 1], ["schmandcreme", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["konfierte_tomaten", 1], ["Olio extra virgin san Giovanni Desantes", 10]]}, "Speciale": {"price": 1.0137329158000001, "parts": [["teig", 1], ["tomatensauce", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["Kochschinken", 50], ["Champignon", 35]]}, "Siziliana": {"price": 1.2280663021485019, "parts": [["teig", 1], ["tomatensauce", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["Zwiebeln rot ", 20], ["Sardellen", 20], ["Kapern", 6], ["Oliven schwarz in Scheiben", 10]]}, "Gorgonzola e Spinacchi": {"price": 1.8255435493333336, "parts": [["teig", 1], ["schmandcreme", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["Blattspiat Miniportioniert", 60], ["Gorgonzola", 40], ["Cherrytomaten", 60]]}, "Kürbis": {"price": 0.048043, "parts": [["teig", 1], ["kuerbiscreme", 1], ["Grana Padano DOP 1/8 Colla", 9], ["Fior di Latte Taglio Napoli latteria Sorrentina", 30], ["Hirtenkäse", 30], ["Pancetta", 60], ["karam_zwiebeln", 1], ["G&G Kürbiskerne ", 5], ["Crema di Balsamico", 5]]}};
+
+const SUPPLIER_LABELS = {A:'Andronaco',B:'Bührings',E:'Edeka',F:'Famila',H:'Hol Ab',L:'Lütauer',M:'Metro'};
+const SUPPLIER_ORDER = {A:1,B:2,E:3,F:4,H:5,L:6,M:7};
+Object.assign(LIEFERANTEN, SUPPLIER_LABELS);
+function fmtQty(g){
+  return g>=1000 ? (g/1000).toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2})+' kg' : Math.round(g).toLocaleString('de-DE')+' g';
+}
+function catFromGroup(group){
+  const map={'Mehl':'Teig','Proteine':'Belag','Milchprodukte':'Milchprodukte / Käse','Gemüse':'Gemüse & Kräuter','Sonstiges':'Sonstiges','Lebensmittel':'Sonstiges'};
+  return map[group] || 'Sonstiges';
+}
+function unitPriceInc(name){
+  const m=EXCEL_ARTICLES[name];
+  return m && m.unit_price_inc ? Number(m.unit_price_inc) : 0;
+}
+function ensureSupplierOptions(){
+  const sel=document.getElementById('ek-lieferant');
+  if(!sel) return;
+  const current=sel.value;
+  sel.innerHTML = Object.keys(SUPPLIER_LABELS).map(code => `<option value="${code}">${code} = ${SUPPLIER_LABELS[code]}</option>`).join('');
+  if(current && SUPPLIER_LABELS[current]) sel.value=current;
+}
+function expandRecipePart(name, factor, totals){
+  if(EXCEL_BASE_RECIPES[name]){
+    EXCEL_BASE_RECIPES[name].forEach(([article, grams]) => {
+      totals[article] = (totals[article]||0) + Number(grams) * Number(factor);
+    });
+  } else {
+    totals[name] = (totals[name]||0) + Number(factor);
+  }
+}
+function totalPizzaCount(){
+  return Object.values(pizzaMengen).reduce((s,v)=>s+(Number(v)||0),0);
+}
+function aggregateExcelShopping(includeAutoDips=true){
+  const totals = {};
+  Object.entries(pizzaMengen).forEach(([pizza, qty]) => {
+    qty = Number(qty)||0;
+    if(!qty || !EXCEL_PIZZAS[pizza]) return;
+    EXCEL_PIZZAS[pizza].parts.forEach(([part, amount]) => {
+      expandRecipePart(part, Number(amount)*qty, totals);
+    });
+  });
+  if(includeAutoDips){
+    const total = totalPizzaCount();
+    if(total>0){
+      expandRecipePart('aioli_auto', total*0.35, totals);
+      expandRecipePart('hot_honey', total*0.15, totals);
+    }
+  }
+  return totals;
+}
+function aggregateManualDips(){
+  const totals={};
+  const aioli = Number(dipMengen.aioli)||0;
+  const hh = Number(dipMengen.hothoney)||0;
+  if(aioli>0) expandRecipePart('aioli', aioli, totals);
+  if(hh>0) expandRecipePart('hot_honey', hh, totals);
+  return totals;
+}
+function enrichArticles(totals){
+  return Object.entries(totals).map(([name, grams]) => {
+    const meta = EXCEL_ARTICLES[name] || {};
+    const kg = Number(grams)/1000;
+    const unitPrice = unitPriceInc(name);
+    const cost = unitPrice ? unitPrice*kg : 0;
+    let packs = null;
+    if(meta.pack_size && meta.pack_unit && String(meta.pack_unit).toLowerCase().startsWith('kg')){
+      packs = kg / Number(meta.pack_size);
+    }
+    return {
+      article:name,
+      grams:Number(grams),
+      kg,
+      category:catFromGroup(meta.group),
+      supplier:meta.supplier || '',
+      supplierLabel: SUPPLIER_LABELS[meta.supplier] || meta.supplier || '–',
+      articleNo: meta.article_no || '',
+      packSize: meta.pack_size || '',
+      packUnit: meta.pack_unit || '',
+      packs,
+      cost
+    };
+  }).sort((a,b) => {
+    const so=(SUPPLIER_ORDER[a.supplier]||99)-(SUPPLIER_ORDER[b.supplier]||99);
+    if(so!==0) return so;
+    const co=(a.category||'').localeCompare(b.category||'');
+    if(co!==0) return co;
+    return (a.article||'').localeCompare(b.article||'');
+  });
+}
+
+renderPizzaGrid = function() {
+  const cards = Object.keys(EXCEL_PIZZAS).map(name => `
+    <div class="pizza-card">
+      <div class="pizza-card-name">${name}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">${fmt(EXCEL_PIZZAS[name].price)} / Pizza</div>
+      <div class="pizza-qty">
+        <button onclick="changePizza('${name}',-1)">−</button>
+        <input type="number" min="0" value="${pizzaMengen[name]||0}" id="pqty-${name.replace(/\s/g,'_').replace(/[()]/g,'')}" onchange="setPizza('${name}',this.value)"/>
+        <button onclick="changePizza('${name}',1)">+</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('pizza-grid').innerHTML = cards;
+  updatePizzaTotal();
+};
+
+renderPizzaResult = function() {
+  const total = totalPizzaCount();
+  const el = document.getElementById('ingredient-result');
+  if(!el) return;
+  if(!total){
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px">Gib oben die Anzahl Pizzen ein.</div>';
+    return;
+  }
+  const rows = enrichArticles(aggregateExcelShopping(true));
+  let totalCost = 0;
+  let html = '<div class="ing-wrap">';
+  let currentSupplier = '';
+  rows.forEach(row => {
+    totalCost += row.cost || 0;
+    const header = row.supplierLabel || 'Ohne Lieferant';
+    if(header !== currentSupplier){
+      if(currentSupplier) html += '</div>';
+      html += `<div class="ing-group"><div class="ing-group-title">${header}</div>`;
+      currentSupplier = header;
+    }
+    const packTxt = row.packs!=null ? ` · ${row.packs.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} Pkg` : '';
+    html += `<div class="ing-row">
+      <span>${row.article}${row.articleNo ? ` <span style="color:var(--muted);font-size:11px">[${row.articleNo}]</span>` : ''}</span>
+      <span class="ing-amount">${fmtQty(row.grams)}</span>
+      <span style="font-size:11px;color:var(--muted);min-width:140px;text-align:right">${packTxt}</span>
+      <span style="font-size:11px;color:var(--muted);min-width:70px;text-align:right">${row.cost ? fmt(row.cost) : ''}</span>
+    </div>`;
+  });
+  if(currentSupplier) html += '</div>';
+  const autoAioli = (0.35*total).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const autoHot = (0.15*total).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  html += `</div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted)">Automatisch berücksichtigt nach Excel: Aioli ${autoAioli} Schälchen, Hot Honey ${autoHot} Schälchen.</div>
+    <div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Geschätzte Warenkosten nach Excel:</span><span style="color:var(--blue)">${fmt(totalCost)}</span></div>`;
+  el.innerHTML = html;
+};
+
+copyPizzaList = function() {
+  const total = totalPizzaCount();
+  if(!total) return showToast('Keine Pizzen eingegeben.');
+  const rows = enrichArticles(aggregateExcelShopping(true));
+  let text = 'PIZZA EINKAUFSLISTE – ' + total + ' Pizzen (Excel)\n' + '='.repeat(42) + '\n\n';
+  Object.entries(pizzaMengen).filter(([,v])=>Number(v)>0).forEach(([name,v]) => {
+    text += `${name}: ${v}x · ${fmt(EXCEL_PIZZAS[name].price)}\n`;
+  });
+  text += `\nAuto-Dips: Aioli ${(0.35*total).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} · Hot Honey ${(0.15*total).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})}\n`;
+  let currentSupplier='';
+  rows.forEach(r => {
+    if(r.supplierLabel!==currentSupplier){
+      currentSupplier=r.supplierLabel;
+      text += `\n${currentSupplier.toUpperCase()}\n`;
+    }
+    text += `${r.article}${r.articleNo?` [${r.articleNo}]`:''}: ${fmtQty(r.grams)}${r.packs!=null?` · ${r.packs.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} Pkg`:''}${r.cost?` · ${fmt(r.cost)}`:''}\n`;
+  });
+  copyText(text,'Excel-Einkaufsliste kopiert!');
+};
+
+saveToEinkauf = function() {
+  const total = totalPizzaCount();
+  if(!total) return showToast('Keine Pizzen eingegeben.');
+  const totals = aggregateExcelShopping(true);
+  Object.entries(totals).forEach(([name, grams]) => {
+    const meta = EXCEL_ARTICLES[name] || {};
+    const kg = Number(grams)/1000;
+    addOrMergeEinkauf({
+      artikel: name,
+      artikelnummer: meta.article_no || '',
+      lieferant: meta.supplier || randomLieferantCode(),
+      kategorie: catFromGroup(meta.group),
+      menge: Number(kg.toFixed(3)),
+      einheit: 'kg',
+      preis: unitPriceInc(name) || 0
+    });
+  });
+  push('einkauf', state.einkauf);
+  showToast('Pizza-Kalkulation nach Excel in Einkaufsliste übernommen!');
+};
+
+renderDipsResult = function() {
+  document.getElementById('dip-aioli-total').textContent=dipMengen.aioli||0;
+  document.getElementById('dip-hothoney-total').textContent=dipMengen.hothoney||0;
+  const el=document.getElementById('dip-result');
+  if(!el) return;
+  if(!dipMengen.aioli&&!dipMengen.hothoney){
+    el.innerHTML='<div style="color:var(--muted);font-size:13px">Gib oben die Anzahl Dips ein.</div>';
+    return;
+  }
+  const rows = enrichArticles(aggregateManualDips());
+  let totalCost = 0;
+  let html = '<div class="ing-wrap">';
+  let currentSupplier = '';
+  rows.forEach(row => {
+    totalCost += row.cost || 0;
+    const header = row.supplierLabel || 'Ohne Lieferant';
+    if(header !== currentSupplier){
+      if(currentSupplier) html += '</div>';
+      html += `<div class="ing-group"><div class="ing-group-title">${header}</div>`;
+      currentSupplier = header;
+    }
+    html += `<div class="ing-row">
+      <span>${row.article}${row.articleNo ? ` <span style="color:var(--muted);font-size:11px">[${row.articleNo}]</span>` : ''}</span>
+      <span class="ing-amount">${fmtQty(row.grams)}</span>
+      <span style="font-size:11px;color:var(--muted);min-width:70px;text-align:right">${row.cost ? fmt(row.cost) : ''}</span>
+    </div>`;
+  });
+  if(currentSupplier) html += '</div>';
+  html += `</div><div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Geschätzte Warenkosten nach Excel:</span><span style="color:var(--blue)">${fmt(totalCost)}</span></div>`;
+  el.innerHTML = html;
+};
+
+copyDipList = function() {
+  if(!dipMengen.aioli&&!dipMengen.hothoney) return showToast('Keine Dips eingegeben.');
+  const rows = enrichArticles(aggregateManualDips());
+  let text = 'DIPS EINKAUFSLISTE (Excel)\n' + '='.repeat(28) + '\n\n' + `Aioli: ${dipMengen.aioli||0} Stk.\nHot Honey: ${dipMengen.hothoney||0} Stk.\n`;
+  let currentSupplier='';
+  rows.forEach(r => {
+    if(r.supplierLabel!==currentSupplier){
+      currentSupplier=r.supplierLabel;
+      text += `\n${currentSupplier.toUpperCase()}\n`;
+    }
+    text += `${r.article}${r.articleNo?` [${r.articleNo}]`:''}: ${fmtQty(r.grams)}${r.cost?` · ${fmt(r.cost)}`:''}\n`;
+  });
+  copyText(text,'Dip-Liste kopiert!');
+};
+
+// page removed, keep safe
+renderDrinksGrid = function(){};
+renderDrinksResult = function(){};
+updateDrinkTotal = function(){};
+
+ensureSupplierOptions();
+renderAll();
+})();
+</script>
+
+
+<script>
+(function(){
+  const ALL_SUPPLIER_CODES = ['A','B','E','F','H','L','M'];
+  renderEinkauf = function(){
+    const container=document.getElementById('einkauf-kategorien');
+    const q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();
+    const filtered=state.einkauf.filter(e=>{
+      if(!q) return true;
+      return [e.artikel,e.artikelnummer,e.lieferant,lieferantName(e.lieferant),e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q);
+    });
+    if(!filtered.length){container.innerHTML='<div class="card" style="color:var(--muted);font-size:13px">Keine passenden Positionen.</div>';return;}
+    let html='',gesamtTotal=0;
+    ALL_SUPPLIER_CODES.forEach(code=>{
+      const items=filtered.filter(e=>(e.lieferant||'')===code).sort((a,b)=>{
+        const katCmp=(a.kategorie||'').localeCompare(b.kategorie||'');
+        if(katCmp!==0) return katCmp;
+        return (a.artikel||'').localeCompare(b.artikel||'');
+      });
+      if(!items.length) return;
+      let supplierTotal=0;
+      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
+      items.forEach(e=>{
+        const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
+        html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
+      });
+      html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe ${lieferantName(code)}:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
+    });
+    const unknownItems=filtered.filter(e=>!ALL_SUPPLIER_CODES.includes(e.lieferant||'')).sort((a,b)=>(a.artikel||'').localeCompare(b.artikel||''));
+    if(unknownItems.length){
+      let supplierTotal=0;
+      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant – Unbekannt</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
+      unknownItems.forEach(e=>{
+        const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
+        html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
+      });
+      html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe Unbekannt:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
+    }
+    html+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;background:var(--blue-light)"><span style="font-weight:600;font-size:15px">Gesamtsumme</span><span style="font-weight:700;font-size:18px;color:var(--blue)">${fmt(gesamtTotal)}</span></div>`;
+    container.innerHTML=html;
+  };
+  copyEinkaufTable = function(){
+    let text='EINKAUFSLISTE NACH LIEFERANT\n'+'='.repeat(35)+'\n\n';
+    const q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();
+    ALL_SUPPLIER_CODES.forEach(code=>{
+      const items=state.einkauf.filter(e=>(e.lieferant||'')===code && (!q || [e.artikel,e.artikelnummer,e.lieferant,lieferantName(e.lieferant),e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q)));
+      if(!items.length)return;
+      text+=`\nLIEFERANT ${code} – ${lieferantName(code).toUpperCase()}\n`;
+      items.sort((a,b)=>{
+        const katCmp=(a.kategorie||'').localeCompare(b.kategorie||'');
+        if(katCmp!==0) return katCmp;
+        return (a.artikel||'').localeCompare(b.artikel||'');
+      }).forEach(e=>{
+        const s=e.menge*(e.preis||0);
+        text+=`${e.artikel}${e.artikelnummer?` [Art.-Nr.: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${s>0?' – '+fmt(s):''}\n`;
+      });
+    });
+    copyText(text,'Einkaufsliste kopiert!');
+  };
+  renderEinkauf();
+})();
+</script>
+
 </body>
 </html>
