@@ -737,7 +737,27 @@ const EK_KAT_MAP={
 
 // ── FIREBASE SYNC ─────────────────────────────────────────────────────────
 const LOCAL_BACKUP_KEY='heitmanns_pizza_backup_v1';
+const COLLECTION_KEYS = new Set(['events','kontakte','einkauf','cateringAngebote']);
+let lastCloudIds = {events:new Set(), kontakte:new Set(), einkauf:new Set(), cateringAngebote:new Set()};
 
+function arrayToMap(arr){
+  const out={};
+  (Array.isArray(arr)?arr:[]).forEach(item=>{
+    if(item && item.id!=null) out[item.id]=item;
+  });
+  return out;
+}
+function mapToArray(val){
+  if(!val) return [];
+  if(Array.isArray(val)) return val.filter(Boolean);
+  if(typeof val==='object') return Object.entries(val).map(([id,item])=>{
+    if(item && typeof item==='object' && item!==null){
+      return Object.assign({id}, item.id ? {} : {id});
+    }
+    return null;
+  }).filter(Boolean);
+  return [];
+}
 function buildBackupPayload(){
   return {
     events: state.events || [],
@@ -779,10 +799,10 @@ function updateBackupStatus(){
 }
 function applyDataPayload(d){
   d=d||{};
-  state.events=(d.events||[]).map(normalizeEvent);
-  state.kontakte=(d.kontakte||[]).map(normalizeKontakt);
-  state.einkauf=(d.einkauf||[]).map(normalizeEinkaufItem);
-  state.cateringAngebote=d.cateringAngebote||[];
+  state.events=mapToArray(d.events).map(normalizeEvent);
+  state.kontakte=mapToArray(d.kontakte).map(normalizeKontakt);
+  state.einkauf=mapToArray(d.einkauf).map(normalizeEinkaufItem);
+  state.cateringAngebote=mapToArray(d.cateringAngebote);
   state.pinnwand=d.pinnwand||'';
   state.notes=Object.assign({pizza:[],dip:[],drink:[],catpizza:[],catmisc:[]},d.notes||{});
   Object.keys(pizzaMengen).forEach(k=>pizzaMengen[k]=0);
@@ -810,10 +830,17 @@ function hasPayloadData(d){
   return ['events','kontakte','einkauf','cateringAngebote','pinnwand','notes','pizzaMengen','dipMengen','drinkMengen']
     .some(k => d[k] && ((Array.isArray(d[k]) && d[k].length) || (typeof d[k]==='object' && Object.keys(d[k]).length) || (typeof d[k]==='string' && d[k].trim())));
 }
+function updateLastCloudIds(d){
+  ['events','kontakte','einkauf','cateringAngebote'].forEach(key=>{
+    const ids = new Set(mapToArray(d[key]).map(item=>String(item.id)));
+    lastCloudIds[key]=ids;
+  });
+}
 function listenAll(){
   try{
     db.ref('/').on('value',snap=>{
       const d=snap.val()||{};
+      updateLastCloudIds(d);
       if(hasPayloadData(d)){
         applyDataPayload(d);
         setSyncBanner('Mit Firebase verbunden', 'ok');
@@ -850,10 +877,23 @@ function listenAll(){
     }
   }
 }
+function syncCollection(key, arr){
+  const safeArr=(Array.isArray(arr)?arr:[]).filter(item=>item && item.id!=null);
+  const map=arrayToMap(safeArr);
+  const nextIds=new Set(Object.keys(map));
+  const updates={};
+  Object.entries(map).forEach(([id,item])=>{ updates[`${key}/${id}`]=item; });
+  const knownIds = lastCloudIds[key] || new Set();
+  knownIds.forEach(id=>{ if(!nextIds.has(String(id))) updates[`${key}/${id}`]=null; });
+  return db.ref('/').update(updates).then(()=>{
+    lastCloudIds[key]=nextIds;
+  });
+}
 function push(key,val){
   try{
     saveLocalBackup();
-    db.ref(key).set(val).then(()=>{
+    const op = COLLECTION_KEYS.has(key) ? syncCollection(key,val) : db.ref(key).set(val);
+    Promise.resolve(op).then(()=>{
       setSyncBanner('Änderungen gespeichert', 'ok');
     }).catch(err=>{
       console.error('Firebase write error', err);
@@ -869,7 +909,14 @@ function push(key,val){
 function pushAllData(payload, successMsg='Daten wiederhergestellt'){
   try{
     saveLocalBackup();
-    db.ref('/').set(payload).then(()=>{
+    const fullPayload = Object.assign({}, payload, {
+      events: arrayToMap(payload.events||[]),
+      kontakte: arrayToMap(payload.kontakte||[]),
+      einkauf: arrayToMap(payload.einkauf||[]),
+      cateringAngebote: arrayToMap(payload.cateringAngebote||[])
+    });
+    db.ref('/').set(fullPayload).then(()=>{
+      updateLastCloudIds(fullPayload);
       showToast(successMsg);
     }).catch(err=>{
       console.error(err);
