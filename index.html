@@ -139,14 +139,6 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .mobile-bottom-nav button{padding:8px 12px;min-height:46px;font-size:12px;border-radius:10px;flex:0 0 auto}
 .mobile-bottom-nav button.active{background:var(--blue-light);color:var(--blue);border-color:#bfdbfe;font-weight:600}
 
-.contact-clickable{cursor:pointer}
-.contact-clickable:hover{background:#f8fafc;border-color:#cbd5e1}
-.copy-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
-.copy-row-main{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
-.copy-row-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.copy-row-value{font-size:13px;word-break:break-word}
-@media (max-width:900px){.copy-row{align-items:flex-start;flex-direction:column}.copy-row button{width:100%}}
-
 
 /* MOBILE OPTIMIZATION */
 .mobile-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -192,23 +184,9 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   .inline-badges{gap:4px}
 }
 
-
-.sync-banner{display:none;position:sticky;top:0;z-index:600;padding:10px 14px;font-size:12px;border-bottom:1px solid var(--border)}
-.sync-banner.show{display:block}
-.sync-banner.ok{background:#ecfdf5;color:#166534}
-.sync-banner.warn{background:#fffbeb;color:#92400e}
-.sync-banner.err{background:#fef2f2;color:#991b1b}
-.copy-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9}
-.copy-row:last-child{border-bottom:none}
-.copy-row-main{min-width:0;flex:1}
-.copy-row-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
-.copy-row-value{font-size:13px;word-break:break-word}
-.contact-clickable{cursor:pointer}
-
 </style>
 </head>
 <body>
-<div id="sync-banner" class="sync-banner"></div>
 <div class="app">
 <div class="sidebar mobile-scroll">
   <div class="sidebar-logo">Heitmanns Pizza</div>
@@ -238,20 +216,6 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
     <div class="metric" onclick="navTo('kontakte')"><div class="metric-label">Kontakte</div><div class="metric-value" id="m-kontakte">0</div></div>
     
   </div>
-
-  <div class="card">
-    <div class="card-title">Datensicherung</div>
-    <div class="toolbar">
-      <button onclick="exportAllData()">Backup exportieren</button>
-      <button onclick="document.getElementById('import-file').click()">Backup importieren</button>
-      <button onclick="restoreFromLocalBackup()">Lokales Backup wiederherstellen</button>
-    </div>
-    <input type="file" id="import-file" accept="application/json" style="display:none" onchange="importAllData(event)">
-    <div style="font-size:12px;color:var(--muted);margin-top:10px">
-      Letztes lokales Backup: <span id="backup-status">–</span>
-    </div>
-  </div>
-
   <div class="card">
     <div class="card-title">Nächste Events</div>
     <div class="event-list" id="dash-events"></div>
@@ -505,8 +469,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
     <div class="form-group"><label>Titel</label><input id="ev-title" placeholder="z.B. Hochzeit Meyer"/></div>
     <div class="form-group"><label>Typ</label><select id="ev-type"><option>Catering</option><option>Event</option><option>Sonstiges</option></select></div>
     <div class="form-group"><label>Firma</label><select id="ev-company"><option value="HP">HP</option><option value="HPC">HPC</option></select></div>
-    <div class="form-group"><label>Von Datum</label><input type="date" id="ev-date"/></div>
-    <div class="form-group"><label>Bis Datum</label><input type="date" id="ev-end-date"/></div>
+    <div class="form-group"><label>Datum</label><input type="date" id="ev-date"/></div>
     <div class="form-group"><label>Uhrzeit</label><input type="time" id="ev-time" value="18:00"/></div>
     <div class="form-group"><label>Ort / Adresse</label><input id="ev-ort" placeholder="Ort oder Adresse"/></div>
     <div class="form-group"><label>Personen</label><input type="number" id="ev-personen" placeholder="Gästeanzahl"/></div>
@@ -736,236 +699,22 @@ const EK_KAT_MAP={
 };
 
 // ── FIREBASE SYNC ─────────────────────────────────────────────────────────
-const LOCAL_BACKUP_KEY='heitmanns_pizza_backup_v1';
-const COLLECTION_KEYS = new Set(['events','kontakte','einkauf','cateringAngebote']);
-let lastCloudIds = {events:new Set(), kontakte:new Set(), einkauf:new Set(), cateringAngebote:new Set()};
-
-function arrayToMap(arr){
-  const out={};
-  (Array.isArray(arr)?arr:[]).forEach(item=>{
-    if(item && item.id!=null) out[item.id]=item;
-  });
-  return out;
-}
-function mapToArray(val){
-  if(!val) return [];
-  if(Array.isArray(val)) return val.filter(Boolean);
-  if(typeof val==='object') return Object.entries(val).map(([id,item])=>{
-    if(item && typeof item==='object' && item!==null){
-      return Object.assign({}, item, item.id ? {} : {id});
-    }
-    return null;
-  }).filter(Boolean);
-  return [];
-}
-function buildBackupPayload(){
-  return {
-    events: state.events || [],
-    kontakte: state.kontakte || [],
-    einkauf: state.einkauf || [],
-    cateringAngebote: state.cateringAngebote || [],
-    pinnwand: state.pinnwand || '',
-    notes: state.notes || {pizza:[],dip:[],drink:[],catpizza:[],catmisc:[]},
-    pizzaMengen: pizzaMengen || {},
-    dipMengen: dipMengen || {aioli:0,hothoney:0},
-    drinkMengen: drinkMengen || {}
-  };
-}
-function saveLocalBackup(){
-  try{
-    const payload = { savedAt: new Date().toISOString(), data: buildBackupPayload() };
-    localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(payload));
-    updateBackupStatus();
-  }catch(e){
-    console.error('Local backup failed', e);
-  }
-}
-function readLocalBackup(){
-  try{
-    const raw = localStorage.getItem(LOCAL_BACKUP_KEY);
-    return raw ? JSON.parse(raw) : null;
-  }catch(e){
-    console.error('Read local backup failed', e);
-    return null;
-  }
-}
-function updateBackupStatus(){
-  const el=document.getElementById('backup-status');
-  if(!el) return;
-  const backup=readLocalBackup();
-  if(!backup || !backup.savedAt){ el.textContent='Kein lokales Backup'; return; }
-  const d=new Date(backup.savedAt);
-  el.textContent=d.toLocaleString('de-DE');
-}
-function applyDataPayload(d){
-  d=d||{};
-  state.events=mapToArray(d.events).map(normalizeEvent);
-  state.kontakte=mapToArray(d.kontakte).map(normalizeKontakt);
-  state.einkauf=mapToArray(d.einkauf).map(normalizeEinkaufItem);
-  state.cateringAngebote=mapToArray(d.cateringAngebote);
-  state.pinnwand=d.pinnwand||'';
-  state.notes=Object.assign({pizza:[],dip:[],drink:[],catpizza:[],catmisc:[]},d.notes||{});
-  Object.keys(pizzaMengen).forEach(k=>pizzaMengen[k]=0);
-  if(d.pizzaMengen) Object.assign(pizzaMengen,d.pizzaMengen);
-  dipMengen={aioli:0,hothoney:0};
-  if(d.dipMengen) Object.assign(dipMengen,d.dipMengen);
-  Object.keys(drinkMengen).forEach(k=>drinkMengen[k]=0);
-  if(d.drinkMengen) Object.assign(drinkMengen,d.drinkMengen);
-  renderAll();
-  saveLocalBackup();
-}
-function setSyncBanner(msg, kind='ok'){
-  const el=document.getElementById('sync-banner');
-  if(!el) return;
-  el.className='sync-banner show ' + kind;
-  el.textContent=msg;
-}
-function clearSyncBanner(){
-  const el=document.getElementById('sync-banner');
-  if(!el) return;
-  el.className='sync-banner';
-  el.textContent='';
-}
-function hasPayloadData(d){
-  return ['events','kontakte','einkauf','cateringAngebote','pinnwand','notes','pizzaMengen','dipMengen','drinkMengen']
-    .some(k => d[k] && ((Array.isArray(d[k]) && d[k].length) || (typeof d[k]==='object' && Object.keys(d[k]).length) || (typeof d[k]==='string' && d[k].trim())));
-}
-function updateLastCloudIds(d){
-  ['events','kontakte','einkauf','cateringAngebote'].forEach(key=>{
-    const ids = new Set(mapToArray(d[key]).map(item=>String(item.id)));
-    lastCloudIds[key]=ids;
-  });
-}
 function listenAll(){
-  try{
-    db.ref('/').on('value',snap=>{
-      const d=snap.val()||{};
-      updateLastCloudIds(d);
-      if(hasPayloadData(d)){
-        applyDataPayload(d);
-        setSyncBanner('Mit Firebase verbunden', 'ok');
-      }else{
-        const backup=readLocalBackup();
-        if(backup && backup.data){
-          applyDataPayload(backup.data);
-          setSyncBanner('Firebase leer – lokales Backup verwendet', 'warn');
-        }else{
-          applyDataPayload({});
-          setSyncBanner('Firebase leer – keine lokalen Daten vorhanden', 'warn');
-        }
-      }
-      updateBackupStatus();
-    },err=>{
-      console.error('Firebase read error', err);
-      const backup=readLocalBackup();
-      if(backup && backup.data){
-        applyDataPayload(backup.data);
-        setSyncBanner('Firebase-Fehler – lokales Backup geladen', 'err');
-      }else{
-        setSyncBanner('Firebase-Fehler – keine lokalen Daten verfügbar', 'err');
-      }
-      updateBackupStatus();
-    });
-  }catch(e){
-    console.error('listenAll failed', e);
-    const backup=readLocalBackup();
-    if(backup && backup.data){
-      applyDataPayload(backup.data);
-      setSyncBanner('Initialisierung fehlgeschlagen – lokales Backup geladen', 'err');
-    }else{
-      setSyncBanner('Initialisierung fehlgeschlagen', 'err');
-    }
-  }
-}
-function syncCollection(key, arr){
-  const safeArr=(Array.isArray(arr)?arr:[]).filter(item=>item && item.id!=null);
-  const map=arrayToMap(safeArr);
-  const nextIds=new Set(Object.keys(map));
-  const updates={};
-  Object.entries(map).forEach(([id,item])=>{ updates[`${key}/${id}`]=item; });
-  const knownIds = lastCloudIds[key] || new Set();
-  knownIds.forEach(id=>{ if(!nextIds.has(String(id))) updates[`${key}/${id}`]=null; });
-  return db.ref('/').update(updates).then(()=>{
-    lastCloudIds[key]=nextIds;
+  db.ref('/').on('value',snap=>{
+    const d=snap.val()||{};
+    state.events=(d.events||[]).map(normalizeEvent);
+    state.kontakte=(d.kontakte||[]).map(normalizeKontakt);
+    state.einkauf=(d.einkauf||[]).map(normalizeEinkaufItem);
+    state.cateringAngebote=d.cateringAngebote||[];
+    state.pinnwand=d.pinnwand||'';
+    state.notes=Object.assign({pizza:[],dip:[],drink:[],catpizza:[],catmisc:[]},d.notes||{});
+    if(d.pizzaMengen) Object.assign(pizzaMengen,d.pizzaMengen);
+    if(d.dipMengen) Object.assign(dipMengen,d.dipMengen);
+    if(d.drinkMengen) Object.assign(drinkMengen,d.drinkMengen);
+    renderAll();
   });
 }
-function push(key,val){
-  try{
-    saveLocalBackup();
-    const op = COLLECTION_KEYS.has(key) ? syncCollection(key,val) : db.ref(key).set(val);
-    Promise.resolve(op).then(()=>{
-      setSyncBanner('Änderungen gespeichert', 'ok');
-    }).catch(err=>{
-      console.error('Firebase write error', err);
-      setSyncBanner('Cloud-Speichern fehlgeschlagen – lokal gesichert', 'warn');
-      showToast('Speichern lokal gesichert, Cloud-Fehler');
-    });
-  }catch(e){
-    console.error('Push failed', e);
-    setSyncBanner('Speichern fehlgeschlagen – lokal gesichert', 'warn');
-    showToast('Speichern lokal gesichert');
-  }
-}
-function pushAllData(payload, successMsg='Daten wiederhergestellt'){
-  try{
-    saveLocalBackup();
-    const fullPayload = Object.assign({}, payload, {
-      events: arrayToMap(payload.events||[]),
-      kontakte: arrayToMap(payload.kontakte||[]),
-      einkauf: arrayToMap(payload.einkauf||[]),
-      cateringAngebote: arrayToMap(payload.cateringAngebote||[])
-    });
-    db.ref('/').set(fullPayload).then(()=>{
-      updateLastCloudIds(fullPayload);
-      showToast(successMsg);
-    }).catch(err=>{
-      console.error(err);
-      showToast('Cloud-Wiederherstellung fehlgeschlagen');
-    });
-  }catch(e){
-    console.error(e);
-  }
-}
-function exportAllData(){
-  const payload={ exportedAt:new Date().toISOString(), data: buildBackupPayload() };
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='heitmanns-pizza-backup.json';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  showToast('Backup exportiert'); setSyncBanner('Backup exportiert', 'ok');
-}
-function importAllData(event){
-  const file=event.target.files && event.target.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=function(){
-    try{
-      const parsed=JSON.parse(reader.result);
-      const data=parsed.data || parsed;
-      applyDataPayload(data);
-      pushAllData(buildBackupPayload(),'Backup importiert'); setSyncBanner('Backup importiert', 'ok');
-    }catch(e){
-      console.error(e);
-      showToast('Import fehlgeschlagen');
-    }finally{
-      event.target.value='';
-    }
-  };
-  reader.readAsText(file);
-}
-function restoreFromLocalBackup(){
-  const backup=readLocalBackup();
-  if(!backup || !backup.data){
-    showToast('Kein lokales Backup gefunden');
-    return;
-  }
-  applyDataPayload(backup.data);
-  pushAllData(buildBackupPayload(),'Lokales Backup wiederhergestellt'); setSyncBanner('Lokales Backup wiederhergestellt', 'ok');
-}
+function push(key,val){db.ref(key).set(val);}
 
 function normalizeEvent(ev){
   return Object.assign({}, ev, {
@@ -973,8 +722,7 @@ function normalizeEvent(ev){
     contactId: ev.contactId || ev.kontaktId || '',
     kontakt: ev.kontakt || ev.contactName || '',
     cateringAngebotId: ev.cateringAngebotId || '',
-    cateringAngebotName: ev.cateringAngebotName || '',
-    endDate: ev.endDate || ev.date || ''
+    cateringAngebotName: ev.cateringAngebotName || ''
   });
 }
 function normalizeKontakt(k){ return Object.assign({firma:'',tel:'',email:'',adresse:'',typ:'Kunde',notizen:''},k); }
@@ -1024,7 +772,12 @@ function populatePizzaMultiSelect(){
 }
 function openKontaktById(id){
   if(!id) return;
-  showKontaktDetail(id);
+  const navItem=document.querySelector(`.nav-item[onclick="showPage('kontakte',this)"]`);
+  showPage('kontakte',navItem);
+  setTimeout(()=>{
+    const row=document.getElementById('kontakt-'+id);
+    if(row){ row.scrollIntoView({behavior:'smooth', block:'center'}); row.style.outline='2px solid var(--blue)'; setTimeout(()=>row.style.outline='',1500); }
+  },50);
 }
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────
@@ -1048,7 +801,6 @@ function renderAll(){
   calcCatering();
   document.getElementById('pinnwand').value=state.pinnwand;
   document.getElementById('today-date').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
-  updateBackupStatus();
   // sync qty inputs
   Object.entries(pizzaMengen).forEach(([k,v])=>{const el=document.getElementById('pqty-'+k.replace(/\s/g,'_').replace(/[()]/g,''));if(el)el.value=v;});
   Object.entries(dipMengen).forEach(([k,v])=>{const el=document.getElementById('dqty-'+k);if(el)el.value=v;});
@@ -1135,15 +887,14 @@ function openEventModal(id){
   document.getElementById('event-modal-title').textContent=ev?'Event bearbeiten':'Neues Event';
   populateKontaktSelect('ev-kontakt-id', ev?ev.contactId:'');
   populateCateringAngebotSelect('ev-catering-angebot-id', ev?ev.cateringAngebotId:'');
-  const defaults={title:'',type:'Catering',company:'HP',date:'',endDate:'',time:'18:00',ort:'',personen:'',angebot:'',notizen:'',status:'Pending...',cateringAngebotId:''};
+  const defaults={title:'',type:'Catering',company:'HP',date:'',time:'18:00',ort:'',personen:'',angebot:'',notizen:'',status:'Pending...',cateringAngebotId:''};
   const source=Object.assign({}, defaults, ev||{});
-  ['title','type','company','date','endDate','time','ort','personen','angebot','notizen','status'].forEach(f=>{
+  ['title','type','company','date','time','ort','personen','angebot','notizen','status'].forEach(f=>{
     const el=document.getElementById('ev-'+f);
     if(el) el.value=source[f] ?? '';
   });
   document.getElementById('ev-kontakt-id').value=source.contactId||'';
   document.getElementById('ev-catering-angebot-id').value=source.cateringAngebotId||'';
-  if(document.getElementById('ev-end-date') && !document.getElementById('ev-end-date').value && source.date){document.getElementById('ev-end-date').value=source.date;}
   openModal('event-modal');
 }
 function saveEvent(){
@@ -1157,7 +908,6 @@ function saveEvent(){
     type:document.getElementById('ev-type').value,
     company:document.getElementById('ev-company').value||'HP',
     date:document.getElementById('ev-date').value,
-    endDate:(document.getElementById('ev-end-date').value || document.getElementById('ev-date').value),
     time:document.getElementById('ev-time').value,
     ort:document.getElementById('ev-ort').value,
     personen:document.getElementById('ev-personen').value,
@@ -1188,17 +938,17 @@ function deleteEvent(id){
 function showEventDetail(id){
   const ev=normalizeEvent(state.events.find(e=>e.id===id)||{});
   if(!ev.id) return;
-  const kontaktLink = ev.contactId ? `<span class="linkish" onclick="closeModal('detail-modal');showKontaktDetail('${ev.contactId}')">${ev.kontakt||'Kontakt öffnen'}</span>` : '–';
+  const kontaktLink = ev.contactId ? `<span class="linkish" onclick="closeModal('detail-modal');openKontaktById('${ev.contactId}')">${ev.kontakt||'Kontakt öffnen'}</span>` : '–';
   const angebotLink = ev.cateringAngebotId ? `<span>${ev.cateringAngebotName||'Angebot verknüpft'}</span>` : '–';
   document.getElementById('detail-content').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">${ev.title}${companyChip(ev.company)}</div>${statusBadge(ev.status)}</div>
     <table style="font-size:13px">
       <tr><td style="color:var(--muted);padding:5px 0;width:120px">Typ</td><td>${statusBadge(ev.type)}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Firma</td><td>${companyChip(ev.company)}</td></tr>
-      <tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${formatEventDateRange(ev)}</td></tr>
+      <tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${ev.date||'–'} ${ev.time||''}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Ort</td><td>${ev.ort||'–'}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr>
-      <tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td><span class="linkish" onclick="openKontaktById('${ev.contactId||''}')">${ev.kontakt||'–'}</span></td></tr>
+      <tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td>${kontaktLink}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Catering-Angebot</td><td>${angebotLink}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${ev.angebot?fmt(ev.angebot):'–'}</td></tr>
     </table>
@@ -1222,70 +972,6 @@ function renderAllEvents(){
   el.innerHTML=s.length?s.map(ev=>eventItemHTML(ev)).join(''):'<div style="color:var(--muted);font-size:13px">Keine passenden Events.</div>';
 }
 
-
-function dateInRange(ds,start,end){
-  if(!start) return false;
-  const s=start;
-  const e=end||start;
-  return ds>=s && ds<=e;
-}
-function eventsOnDate(ds){
-  return state.events.filter(e=>dateInRange(ds,e.date,e.endDate)).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99') || (a.title||'').localeCompare(b.title||''));
-}
-function formatEventDateRange(ev){
-  if(!ev.date) return '–';
-  if(ev.endDate && ev.endDate!==ev.date) return `${ev.date} bis ${ev.endDate}${ev.time ? ' · ' + ev.time : ''}`;
-  return `${ev.date}${ev.time ? ' · ' + ev.time : ''}`;
-}
-function groupEventsByDay(events){
-  const map=new Map();
-  events.forEach(ev=>{
-    if(!ev.date) return;
-    const end=ev.endDate||ev.date;
-    let cur=ev.date;
-    while(cur<=end){
-      if(!map.has(cur)) map.set(cur,[]);
-      map.get(cur).push(ev);
-      const d=new Date(cur+'T00:00:00');
-      d.setDate(d.getDate()+1);
-      cur=d.toISOString().slice(0,10);
-    }
-  });
-  return [...map.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
-}
-function openDayDetail(ds){
-  const evs=eventsOnDate(ds);
-  const title=new Date(ds+'T00:00:00').toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  document.getElementById('detail-content').innerHTML=`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">Termine am ${title}</div><span class="badge badge-blue">${evs.length} ${evs.length===1?'Termin':'Termine'}</span></div>
-    ${evs.length?`<div class="event-list">${evs.map(ev=>`
-      <div class="event-item" style="cursor:default">
-        <div class="event-date"><div class="event-day">${ev.time?ev.time.slice(0,2):'–'}</div><div class="event-month">${ev.time?ev.time.slice(3,5):'ganzt.'}</div></div>
-        <div class="event-info"><div class="event-title-text">${ev.title}${companyChip(ev.company)}</div><div class="event-sub">${ev.ort||''}${ev.personen?' · '+ev.personen+' Pers.':''}${ev.endDate&&ev.endDate!==ev.date?' · bis '+ev.endDate:''}</div></div>
-        <div class="action-row"><button class="btn-sm" onclick="closeModal('detail-modal');showEventDetail('${ev.id}')">Ansehen</button><button class="btn-sm" onclick="closeModal('detail-modal');openEventModal('${ev.id}')">Bearbeiten</button></div>
-      </div>`).join('')}</div>`:'<div style="color:var(--muted);font-size:13px">Keine Termine.</div>'}
-    <div class="modal-footer"><button onclick="closeModal('detail-modal');openEventModal()">+ Event</button><button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button></div>`;
-  openModal('detail-modal');
-}
-function showKontaktDetail(id){
-  const k=state.kontakte.find(x=>x.id===id);
-  if(!k) return;
-  const phone=k.tel?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">Telefon</div><div class="copy-row-value">${k.tel}</div></div><button onclick="copyText(${JSON.stringify('')} + \`${k.tel.replace('`','\`')}\`, 'Telefon kopiert')">Kopieren</button></div>`:'';
-  const email=k.email?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">E-Mail</div><div class="copy-row-value">${k.email}</div></div><button onclick="copyText(${JSON.stringify('')} + \`${k.email.replace('`','\`')}\`, 'E-Mail kopiert')">Kopieren</button></div>`:'';
-  const adresse=k.adresse?`<div class="copy-row"><div class="copy-row-main"><div class="copy-row-label">Adresse</div><div class="copy-row-value">${k.adresse}</div></div><button onclick="copyText(${JSON.stringify('')} + \`${k.adresse.replace('`','\`')}\`, 'Adresse kopiert')">Kopieren</button></div>`:'';
-  document.getElementById('detail-content').innerHTML=`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">${k.name}</div>${statusBadge(k.typ)}</div>
-    ${k.firma?`<div style="font-size:13px;color:var(--muted);margin-bottom:10px">${k.firma}</div>`:''}
-    <div>${phone}${email}${adresse}</div>
-    ${k.notizen?`<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px;white-space:pre-wrap">${k.notizen}</div>`:''}
-    <div class="modal-footer">
-      <button class="btn-danger" onclick="deleteKontakt('${k.id}')">Löschen</button>
-      <button onclick="closeModal('detail-modal');openKontaktModal('${k.id}')">Bearbeiten</button>
-      <button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button>
-    </div>`;
-  openModal('detail-modal');
-}
-
 // ── CALENDAR ──────────────────────────────────────────────────────────────
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 function renderCalendar(){
@@ -1296,31 +982,21 @@ function renderCalendar(){
   let html='';for(let i=0;i<offset;i++)html+='<div></div>';
   for(let d=1;d<=days;d++){
     const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const evs=eventsOnDate(ds);
+    const evs=state.events.filter(e=>e.date===ds);
     const isToday=d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear();
-    const companyClass=evs.length?(' '+((evs[0].company||'HP').toLowerCase())):'';
-    let tagHtml='';
-    if(evs.length===1){ tagHtml=`<div class="cal-event-tag">${evs[0].title}</div>`; }
-    else if(evs.length>1){ tagHtml=`<div class="cal-event-tag">${evs[0].title}</div><div class="cal-event-tag">+${evs.length-1} weitere</div>`; }
-    html+=`<div class="cal-day${isToday?' today':''}${evs.length?' has-event':''}${companyClass}" onclick="${evs.length?`openDayDetail('${ds}')`:'openEventModal()'}"><div style="font-weight:600;font-size:12px">${d}${evs.length>1?` <span style="font-size:10px;color:var(--blue)">(${evs.length})</span>`:''}</div>${tagHtml}</div>`;
+    const companyClass = evs.length ? (' '+((evs[0].company||'HP').toLowerCase())) : '';
+    html+=`<div class="cal-day${isToday?' today':''}${evs.length?' has-event':''}${companyClass}" onclick="${evs.length?`showEventDetail('${evs[0].id}')`:'openEventModal()'}"><div style="font-weight:600;font-size:12px">${d}</div>${evs.map(e=>`<div class="cal-event-tag">${e.title}</div>`).join('')}</div>`;
   }
   document.getElementById('cal-body').innerHTML=html;
-  const currentMonthStart=new Date(y,m,1);
-  const monthAfterNextStart=new Date(y,m+2,1);
-  const visibleEvents=state.events.filter(e=>{
+  const currentMonthStart = new Date(y, m, 1);
+  const nextMonthStart = new Date(y, m + 1, 1);
+  const monthAfterNextStart = new Date(y, m + 2, 1);
+  const me=state.events.filter(e=>{
     if(!e.date) return false;
-    const start=new Date(e.date);
-    const end=new Date(e.endDate||e.date);
-    return start<monthAfterNextStart && end>=currentMonthStart;
+    const eventDate = new Date(e.date);
+    return eventDate >= currentMonthStart && eventDate < monthAfterNextStart;
   });
-  const grouped=groupEventsByDay(visibleEvents).filter(([ds])=>{
-    const d=new Date(ds+'T00:00:00');
-    return d>=currentMonthStart && d<monthAfterNextStart;
-  });
-  document.getElementById('cal-event-list').innerHTML=grouped.length?grouped.map(([ds,evs])=>{
-    const label=new Date(ds+'T00:00:00').toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
-    return `<div class="card" style="padding:12px 14px;margin-bottom:8px"><div class="card-title" style="margin-bottom:10px">${label}</div><div class="event-list">${evs.sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99') || (a.title||'').localeCompare(b.title||'')).map(ev=>`<div class="event-item" onclick="showEventDetail('${ev.id}')"><div class="event-date"><div class="event-day">${ev.time?ev.time.slice(0,2):'–'}</div><div class="event-month">${ev.time?ev.time.slice(3,5):'ganzt.'}</div></div><div class="event-info"><div class="event-title-text">${ev.title}${companyChip(ev.company)}</div><div class="event-sub">${ev.ort||''}${ev.personen?' · '+ev.personen+' Pers.':''}${ev.endDate&&ev.endDate!==ev.date?' · bis '+ev.endDate:''}</div></div><div>${statusBadge(ev.status)}</div></div>`).join('')}</div></div>`;
-  }).join(''):'<div style="color:var(--muted);font-size:13px">Keine Events in diesem oder im nächsten Monat.</div>';
+  document.getElementById('cal-event-list').innerHTML=me.length?me.sort((a,b)=>a.date>b.date?1:-1).map(ev=>eventItemHTML(ev)).join(''):'<div style="color:var(--muted);font-size:13px">Keine Events in diesem oder im nächsten Monat.</div>';
 }
 function changeMonth(d){state.calMonth+=d;if(state.calMonth>11){state.calMonth=0;state.calYear++;}if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar();}
 
@@ -1888,7 +1564,7 @@ function renderKontakte(){
   });
   if(!filtered.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Keine passenden Kontakte.</div>';return;}
   el.innerHTML=filtered.map(k=>`
-    <div class="contact-item contact-clickable" id="kontakt-${k.id}" onclick="showKontaktDetail('${k.id}')">
+    <div class="contact-item" id="kontakt-${k.id}">
       <div class="avatar">${k.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
       <div style="flex:1">
         <div style="font-weight:500">${k.name}${k.firma?` <span style="color:var(--muted);font-weight:400">· ${k.firma}</span>`:''}</div>
@@ -1896,7 +1572,7 @@ function renderKontakte(){
         ${k.adresse?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${k.adresse}</div>`:''}
         ${k.notizen?`<div style="font-size:12px;color:var(--muted);margin-top:4px">${k.notizen}</div>`:''}
       </div>
-      <div style="display:flex;gap:6px;align-items:center" onclick="event.stopPropagation()">
+      <div style="display:flex;gap:6px;align-items:center">
         ${statusBadge(k.typ)}
         <button class="btn-sm" onclick="openKontaktModal('${k.id}')">Bearbeiten</button>
         <button class="btn-danger btn-sm" onclick="deleteKontakt('${k.id}')">×</button>
@@ -1909,7 +1585,6 @@ calcCatering();
 renderKontakte();
 renderEinkauf();
 updateMobileNav('dashboard');
-updateBackupStatus();
 listenAll();
 </script>
 
@@ -2228,30 +1903,6 @@ renderAll();
   };
   renderEinkauf();
 })();
-</script>
-
-
-<script>
-window.addEventListener('error', function(e){
-  try{
-    const el=document.getElementById('sync-banner');
-    if(el){
-      el.className='sync-banner show err';
-      el.textContent='Fehler in der App – bitte Seite neu laden oder Backup exportieren';
-    }
-    console.error('Global app error:', e.error || e.message || e);
-  }catch(_){}
-});
-window.addEventListener('unhandledrejection', function(e){
-  try{
-    const el=document.getElementById('sync-banner');
-    if(el){
-      el.className='sync-banner show err';
-      el.textContent='Unerwarteter Fehler – bitte Seite neu laden';
-    }
-    console.error('Unhandled promise rejection:', e.reason || e);
-  }catch(_){}
-});
 </script>
 
 </body>
