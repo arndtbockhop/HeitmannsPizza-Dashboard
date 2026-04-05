@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Gastro Manager – Heitmanns Pizza</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -135,48 +135,136 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 
 
 /* MOBILE OPTIMIZATION */
-.mobile-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.mobile-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.mobile-scroll::-webkit-scrollbar{display:none}
+.sidebar{position:relative;z-index:20}
+.main{padding-bottom:max(24px,env(safe-area-inset-bottom))}
+button,input,select,textarea{touch-action:manipulation}
+.card{overflow:hidden}
+table{width:100%}
+.modal{overscroll-behavior:contain}
+.page-header > *{min-width:0}
+.event-title-text,.event-sub,.drink-name,.card-title{word-break:break-word}
+.action-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.einkauf-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -2px}
+.einkauf-table-wrap table{min-width:760px}
+
 @media (max-width: 900px){
-  body{font-size:13px}
+  html,body{height:100%}
+  body{font-size:14px;-webkit-text-size-adjust:100%}
   .app{flex-direction:column;min-height:100dvh}
-  .sidebar{width:100%;min-width:100%;border-right:none;border-bottom:1px solid var(--border);padding:8px 0;display:block;overflow-x:auto;white-space:nowrap}
-  .sidebar-logo{padding:0 12px 8px;border-bottom:none;margin-bottom:0;display:block}
-  .nav-item{display:inline-flex;border-left:none;border-bottom:3px solid transparent;padding:10px 12px;font-size:13px}
-  .nav-item.active{border-left-color:transparent;border-bottom-color:var(--blue)}
+  .sidebar{
+    width:100%;min-width:100%;
+    position:sticky;top:0;
+    border-right:none;border-bottom:1px solid var(--border);
+    padding:0;
+    display:block;
+    overflow-x:auto;white-space:nowrap;
+    background:rgba(255,255,255,.96);
+    backdrop-filter:saturate(180%) blur(10px);
+    box-shadow:0 4px 16px rgba(15,23,42,.06)
+  }
+  .sidebar-logo{
+    position:sticky;left:0;display:inline-flex;align-items:center;
+    padding:12px 14px 10px;
+    border-bottom:none;margin-bottom:0;
+    background:linear-gradient(90deg,#fff 85%,rgba(255,255,255,0));
+    z-index:2
+  }
+  .nav-item{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;
+    border-left:none;border-bottom:3px solid transparent;
+    padding:12px 14px;
+    font-size:13px;
+    color:var(--muted)
+  }
+  .nav-item.active{
+    border-left-color:transparent;border-bottom-color:var(--blue);
+    background:transparent;
+    color:var(--blue)
+  }
   .live-badge{display:none}
-  .main{padding:12px}
+  .main{padding:12px 12px max(18px,env(safe-area-inset-bottom))}
   .page{gap:12px}
   .page-header{flex-direction:column;align-items:stretch;gap:10px}
-  .page-title{font-size:18px}
-  .card{padding:14px}
+  .page-header button,.page-header .btn-primary,.page-header .btn-danger,.page-header .btn-green{width:100%}
+  .page-title{font-size:18px;line-height:1.2}
+  .card{padding:14px;border-radius:14px}
   .metrics{grid-template-columns:1fr}
+  .metric{padding:14px 14px}
+  .metric-value{font-size:22px}
   .form-grid{grid-template-columns:1fr}
   .pizza-grid{grid-template-columns:1fr}
-  .event-item,.contact-item{padding:10px;gap:10px}
-  .event-date{min-width:38px}
+  .event-item,.contact-item{
+    padding:12px;gap:10px;align-items:flex-start;
+    border-radius:12px
+  }
+  .event-date{min-width:40px}
   .event-day{font-size:20px}
   .toolbar{flex-direction:column;align-items:stretch}
+  .toolbar > *{width:100%}
   .search-input{max-width:none;width:100%}
-  table{display:block;overflow-x:auto;white-space:nowrap;width:100%}
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;width:100%}
   thead,tbody,tfoot,tr{white-space:nowrap}
   .cal-grid{gap:3px}
-  .cal-day{min-height:58px;padding:4px 5px;font-size:11px}
-  .cal-event-tag{font-size:9px}
-  .modal{width:100vw;max-width:100vw;max-height:100dvh;height:100dvh;border-radius:0;padding:16px}
-  .modal-title{font-size:16px}
-  .modal-footer{position:sticky;bottom:0;background:var(--card);padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+  .cal-day{min-height:62px;padding:5px 4px;font-size:11px}
+  .cal-event-tag{font-size:9px;line-height:1.15}
+  .modal{
+    width:100vw;max-width:100vw;
+    max-height:100dvh;height:100dvh;
+    border-radius:0;padding:16px 14px calc(16px + env(safe-area-inset-bottom));
+    margin:0
+  }
+  .modal-title{font-size:16px;line-height:1.25}
+  .modal-footer{
+    position:sticky;bottom:0;left:0;right:0;
+    background:linear-gradient(180deg,rgba(255,255,255,.92),#fff 30%);
+    margin-left:-14px;margin-right:-14px;
+    padding:12px 14px calc(10px + env(safe-area-inset-bottom));
+    gap:8px;
+    display:grid;
+    grid-template-columns:1fr
+  }
+  .modal-footer button{width:100%;min-height:44px}
   input,select,textarea,button{font-size:16px}
+  input,select,textarea{min-height:44px}
+  textarea{min-height:96px}
   .result-bar{font-size:12px;padding:10px 12px}
-  .drink-item{display:grid;grid-template-columns:1fr;gap:6px;align-items:start}
-  .drink-controls{justify-content:flex-start}
+  .drink-item{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:6px;align-items:start;
+    padding:10px 0
+  }
+  .drink-controls{justify-content:flex-start;flex-wrap:wrap}
+  .drink-price,.drink-total{min-width:0;text-align:left}
+  .avatar{width:34px;height:34px;min-width:34px}
+  .toast-wrap{
+    right:12px;left:12px;bottom:max(12px,env(safe-area-inset-bottom))
+  }
+  .toast{width:100%}
 }
-@media (max-width: 520px){
-  .main{padding:10px}
+
+@media (max-width: 640px){
+  .main{padding:10px 10px max(16px,env(safe-area-inset-bottom))}
   .card{padding:12px}
   .card-title{margin-bottom:10px}
-  .pizza-qty input,.drink-controls input{width:64px}
-  .action-row{flex-wrap:wrap}
   .inline-badges{gap:4px}
+  .pizza-qty input,.drink-controls input{width:68px}
+  .event-item,.contact-item{padding:10px}
+  .result-row{gap:10px;align-items:flex-start}
+  .result-row span:last-child{text-align:right}
+}
+
+@media (max-width: 480px){
+  .sidebar-logo{padding:11px 12px 9px;font-size:14px}
+  .nav-item{padding:11px 12px;font-size:12px}
+  .page-title{font-size:17px}
+  .metric-value{font-size:20px}
+  .cal-day{min-height:56px}
+  .modal{padding:14px 12px calc(14px + env(safe-area-inset-bottom))}
+  .modal-footer{margin-left:-12px;margin-right:-12px;padding:12px 12px calc(10px + env(safe-area-inset-bottom))}
 }
 
 </style>
@@ -793,11 +881,16 @@ function showPage(id,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const target=document.getElementById('page-'+id);
   if(target) target.classList.add('active');
-  if(el) el.classList.add('active');
+  if(el){
+    el.classList.add('active');
+    try{ el.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); }catch(_){}
+  }
   if(id==='kontakte') renderKontakte();
   if(id==='einkauf') renderEinkauf();
   if(id==='events') renderAllEvents();
   if(id==='kalender') renderCalendar();
+  const main=document.querySelector('.main');
+  if(window.innerWidth<=900 && main){ main.scrollTo({top:0, behavior:'smooth'}); }
 }
 function navTo(id){
   const navItem=document.querySelector(`.nav-item[onclick="showPage('${id}',this)"]`);
@@ -1425,22 +1518,22 @@ function renderEinkauf(){
     });
     if(!items.length) return;
     let supplierTotal=0;
-    html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
+    html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><div class="einkauf-table-wrap"><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
     items.forEach(e=>{
       const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
       html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
     });
-    html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe ${lieferantName(code)}:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
+    html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe ${lieferantName(code)}:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div></div>`;
   });
   const unknownItems=filtered.filter(e=>!supplierCodes.includes(e.lieferant||'')).sort((a,b)=>(a.artikel||'').localeCompare(b.artikel||''));
   if(unknownItems.length){
     let supplierTotal=0;
-    html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant – Unbekannt</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
+    html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant – Unbekannt</div><div class="einkauf-table-wrap"><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
     unknownItems.forEach(e=>{
       const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
       html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
     });
-    html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe Unbekannt:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
+    html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe Unbekannt:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div></div>`;
   }
   html+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;background:var(--blue-light)"><span style="font-weight:600;font-size:15px">Gesamtsumme</span><span style="font-weight:700;font-size:18px;color:var(--blue)">${fmt(gesamtTotal)}</span></div>`;
   container.innerHTML=html;
@@ -1834,22 +1927,22 @@ renderAll();
       });
       if(!items.length) return;
       let supplierTotal=0;
-      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
+      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><div class="einkauf-table-wrap"><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
       items.forEach(e=>{
         const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
         html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
       });
-      html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe ${lieferantName(code)}:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
+      html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe ${lieferantName(code)}:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div></div>`;
     });
     const unknownItems=filtered.filter(e=>!ALL_SUPPLIER_CODES.includes(e.lieferant||'')).sort((a,b)=>(a.artikel||'').localeCompare(b.artikel||''));
     if(unknownItems.length){
       let supplierTotal=0;
-      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant – Unbekannt</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
+      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant – Unbekannt</div><div class="einkauf-table-wrap"><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
       unknownItems.forEach(e=>{
         const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
         html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
       });
-      html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe Unbekannt:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
+      html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe Unbekannt:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div></div>`;
     }
     html+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;background:var(--blue-light)"><span style="font-weight:600;font-size:15px">Gesamtsumme</span><span style="font-weight:700;font-size:18px;color:var(--blue)">${fmt(gesamtTotal)}</span></div>`;
     container.innerHTML=html;
