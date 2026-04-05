@@ -133,9 +133,16 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .action-row{display:flex;gap:6px;align-items:center}
 
 
-.mobile-bottom-nav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:300;background:rgba(255,255,255,.98);backdrop-filter:blur(10px);border-top:1px solid var(--border);grid-template-columns:repeat(5,1fr);gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
+.mobile-bottom-nav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:320;background:rgba(255,255,255,.98);backdrop-filter:blur(10px);border-top:1px solid var(--border);grid-template-columns:repeat(5,1fr);gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
 .mobile-bottom-nav button{padding:8px 6px;min-height:46px;font-size:12px;border-radius:10px}
 .mobile-bottom-nav button.active{background:var(--blue-light);color:var(--blue);border-color:#bfdbfe;font-weight:600}
+.more-sheet{display:none;position:fixed;inset:0;z-index:340;background:rgba(0,0,0,.35);align-items:flex-end;justify-content:center}
+.more-sheet.open{display:flex}
+.more-sheet-panel{background:var(--card);width:100%;max-width:560px;border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));border:1px solid var(--border);box-shadow:0 -10px 30px rgba(0,0,0,.12)}
+.more-sheet-handle{width:42px;height:5px;border-radius:999px;background:#cbd5e1;margin:0 auto 12px}
+.more-sheet-title{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:12px;text-align:center;text-transform:uppercase;letter-spacing:.06em}
+.more-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.more-grid button{min-height:48px;border-radius:12px}
 
 
 /* MOBILE OPTIMIZATION */
@@ -146,7 +153,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   .sidebar{width:100%;min-width:100%;border-right:none;border-bottom:1px solid var(--border);padding:10px 0 8px;display:block;overflow:hidden;white-space:normal}
   .sidebar-logo{padding:0 16px 0;border-bottom:none;margin-bottom:0;display:block;font-size:16px}
   .sidebar .nav-item,.live-badge{display:none}
-  .main{padding:12px 12px calc(88px + env(safe-area-inset-bottom));}
+  .main{padding:12px 12px calc(88px + env(safe-area-inset-bottom))}
   .page{gap:12px}
   .page-header{flex-direction:column;align-items:stretch;gap:10px}
   .page-title{font-size:18px}
@@ -445,11 +452,24 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 </div><!-- /main -->
 
 <div class="mobile-bottom-nav" id="mobile-bottom-nav">
-  <button onclick="showPage('dashboard', document.querySelector(`.nav-item[onclick=&quot;showPage('dashboard',this)&quot;]`))">Home</button>
-  <button onclick="showPage('kalender', document.querySelector(`.nav-item[onclick=&quot;showPage('kalender',this)&quot;]`))">Kalender</button>
-  <button onclick="showPage('events', document.querySelector(`.nav-item[onclick=&quot;showPage('events',this)&quot;]`))">Events</button>
-  <button onclick="showPage('catering', document.querySelector(`.nav-item[onclick=&quot;showPage('catering',this)&quot;]`))">Catering</button>
-  <button onclick="showPage('einkauf', document.querySelector(`.nav-item[onclick=&quot;showPage('einkauf',this)&quot;]`))">Einkauf</button>
+  <button onclick="navTo('dashboard')" data-page="dashboard">Home</button>
+  <button onclick="navTo('events')" data-page="events">Events</button>
+  <button onclick="navTo('catering')" data-page="catering">Catering</button>
+  <button onclick="navTo('einkauf')" data-page="einkauf">Einkauf</button>
+  <button onclick="openMoreSheet()" data-page="more">Mehr</button>
+</div>
+
+<div class="more-sheet" id="more-sheet" onclick="if(event.target===this)closeMoreSheet()">
+  <div class="more-sheet-panel">
+    <div class="more-sheet-handle"></div>
+    <div class="more-sheet-title">Weitere Bereiche</div>
+    <div class="more-grid">
+      <button onclick="closeMoreSheet(); navTo('kalender')">Kalender</button>
+      <button onclick="closeMoreSheet(); navTo('pizza')">Pizza-Kalk.</button>
+      <button onclick="closeMoreSheet(); navTo('dips')">Dips</button>
+      <button onclick="closeMoreSheet(); navTo('kontakte')">Kontakte</button>
+    </div>
+  </div>
 </div>
 
 </div><!-- /app -->
@@ -800,19 +820,27 @@ function renderAll(){
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────
+function updateMobileNav(id){
+  document.querySelectorAll('#mobile-bottom-nav button').forEach(b=>b.classList.remove('active'));
+  const btn=document.querySelector(`#mobile-bottom-nav button[data-page="${id}"]`);
+  if(btn) btn.classList.add('active');
+}
+function openMoreSheet(){
+  const s=document.getElementById('more-sheet');
+  if(s) s.classList.add('open');
+}
+function closeMoreSheet(){
+  const s=document.getElementById('more-sheet');
+  if(s) s.classList.remove('open');
+}
 function showPage(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.querySelectorAll('#mobile-bottom-nav button').forEach(b=>b.classList.remove('active'));
   const target=document.getElementById('page-'+id);
   if(target) target.classList.add('active');
   if(el) el.classList.add('active');
-  const map={dashboard:0,kalender:1,events:2,catering:3,einkauf:4};
-  const idx=map[id];
-  if(idx!==undefined){
-    const btns=document.querySelectorAll('#mobile-bottom-nav button');
-    if(btns[idx]) btns[idx].classList.add('active');
-  }
+  updateMobileNav(id);
+  closeMoreSheet();
   if(id==='kontakte') renderKontakte();
   if(id==='einkauf') renderEinkauf();
   if(id==='events') renderAllEvents();
@@ -1575,7 +1603,7 @@ document.getElementById('today-date').textContent=new Date().toLocaleDateString(
 calcCatering();
 renderKontakte();
 renderEinkauf();
-const _mb=document.querySelector('#mobile-bottom-nav button'); if(_mb) _mb.classList.add('active');
+updateMobileNav('dashboard');
 listenAll();
 </script>
 
