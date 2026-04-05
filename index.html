@@ -62,7 +62,11 @@ textarea{resize:vertical}
 .event-title-text{font-size:14px;font-weight:500; cursor:pointer;}
 .event-sub{font-size:12px;color:var(--muted);margin-top:2px}
 .linkish{color:var(--blue);cursor:pointer;text-decoration:underline}
-.contact-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px}
+
+.contact-item { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--border); border-radius:10px; }
+.contact-info { flex:1; min-width: 200px; }
+.contact-actions { display:flex; gap:6px; align-items:center; justify-content: flex-end; }
+
 .avatar{width:38px;height:38px;min-width:38px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--blue)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .cal-header-cell{text-align:center;font-size:11px;color:var(--muted);padding:4px}
@@ -77,12 +81,31 @@ textarea{resize:vertical}
 .company-chip.hpc{background:#fef3c7;color:#b45309}
 .cal-event-tag{font-size:10px;color:var(--blue);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px; background: rgba(255,255,255,0.6); padding: 1px 3px; border-radius: 4px;}
 
-/* MODAL - EINFACHES SCROLLING MIT PUFFER */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:var(--card);border-radius:14px;padding:24px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto;border:1px solid var(--border); position:relative;}
-.modal-title{font-size:17px;font-weight:600;margin-bottom:18px}
-.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+/* SAUBERES MODAL (FLEXBOX) - Kein Überlappen! */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:200; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal {
+  background: var(--card); border-radius: 14px;
+  width: 580px; max-width: 96vw; max-height: 90vh;
+  border: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+}
+.modal-title {
+  font-size: 17px; font-weight: 600; 
+  padding: 20px 24px 16px 24px; 
+  border-bottom: 1px solid var(--border);
+  background: var(--card); flex-shrink: 0;
+}
+.modal-body {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 20px 24px;
+}
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 8px; 
+  padding: 16px 24px; background: var(--card); 
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
 
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;padding:8px 10px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)}
@@ -90,20 +113,25 @@ td{padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .total-row td{font-weight:600;background:#f8fafc}
-/* PIZZA */
+
+/* PIZZA & ZUTATEN */
 .pizza-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:10px;margin-bottom:16px}
 .pizza-card{border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--card)}
 .pizza-card-name{font-weight:500;font-size:13px;margin-bottom:8px}
 .pizza-qty{display:flex;align-items:center;gap:8px}
 .pizza-qty button{padding:4px 10px;font-size:18px;font-weight:600;min-width:40px;}
 .pizza-qty input{width:60px;text-align:center;padding:5px}
+
 .ing-wrap{background:#f8fafc;border-radius:10px;padding:14px;border:1px solid var(--border)}
 .ing-group{margin-bottom:14px}
+.ing-group:last-child{margin-bottom:0}
 .ing-group-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
 .ing-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:13px}
 .ing-amount{font-weight:500;color:var(--blue);min-width:80px;text-align:right}
+
 .note-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9}
 .note-row:last-child{border-bottom:none}
+
 /* CATERING */
 .cat-section{background:#f8fafc;border-radius:10px;padding:16px;border:1px solid var(--border);margin-bottom:12px}
 .cat-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:12px}
@@ -125,7 +153,6 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .mobile-bottom-nav-inner{display:inline-flex;gap:6px;min-width:max-content}
 .mobile-bottom-nav button{padding:8px 12px;min-height:46px;font-size:12px;border-radius:10px;flex:0 0 auto}
 .mobile-bottom-nav button.active{background:var(--blue-light);color:var(--blue);border-color:#bfdbfe;font-weight:600}
-
 .info-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9;}
 .info-row:last-child { border-bottom: none;}
 
@@ -147,20 +174,17 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   .metrics{grid-template-columns:1fr}
   .form-grid{grid-template-columns:1fr}
   .pizza-grid{grid-template-columns:1fr}
-  .event-item,.contact-item{padding:10px;gap:10px}
-  .event-date{min-width:38px}
-  .event-day{font-size:20px}
   .toolbar{flex-direction:column;align-items:stretch}
   .search-input{max-width:none;width:100%}
-  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;width:100%}
-  thead,tbody,tfoot,tr{white-space:nowrap}
   .cal-grid{gap:3px}
   .cal-day{min-height:58px;padding:4px 5px;font-size:11px}
   .cal-event-tag{font-size:9px}
   
-  /* LÖSUNG FÜR DEN SPEICHERN BUTTON: Ein großer Puffer unten! */
-  .modal{width:100%;max-width:100%;height:100dvh;max-height:100dvh;border-radius:0;padding:16px; padding-bottom: 120px;}
-  .modal-title{font-size:18px}
+  /* MOBILES MODAL (VOLLBILD MIT FLEX) */
+  .modal { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; border: none; }
+  .modal-title { padding: 16px; font-size: 18px; }
+  .modal-body { padding: 16px; padding-bottom: 80px; /* Sicherer Puffer am Ende des Scrolls */ }
+  .modal-footer { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) 16px; }
   
   .result-bar{font-size:13px;padding:12px}
   .mobile-bottom-nav{display:block}
@@ -308,7 +332,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   <div class="page-header"><div class="page-title">Einkaufsliste</div>
     <div style="display:flex;gap:8px"><button onclick="copyEinkaufTable()">📋 Kopieren</button><button class="btn-primary" onclick="openEinkaufModal()">+ Position</button></div>
   </div>
-  <div class="card" style="margin-bottom:12px"><div class="toolbar"><input class="search-input" id="einkauf-search" placeholder="Suchen..." oninput="renderEinkauf()"></div></div>
+  <div class="card" style="margin-bottom:12px"><div class="toolbar"><input class="search-input" id="einkauf-search" placeholder="Artikel, Art.-Nr. oder Lieferant suchen..." oninput="renderEinkauf()"></div></div>
   <div id="einkauf-kategorien"><div class="card" style="color:var(--muted);font-size:13px">Keine Positionen.</div></div>
 </div>
 
@@ -331,21 +355,23 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 </div><div class="modal-overlay" id="event-modal">
 <div class="modal">
   <div class="modal-title" id="event-modal-title">Neues Event</div>
-  <div class="form-grid">
-    <div class="form-group"><label>Titel</label><input id="ev-title" placeholder="z.B. Hochzeit Meyer"/></div>
-    <div class="form-group"><label>Typ</label><select id="ev-type"><option>Catering</option><option>Event</option><option>Sonstiges</option></select></div>
-    <div class="form-group"><label>Firma</label><select id="ev-company"><option value="HP">HP</option><option value="HPC">HPC</option></select></div>
-    <div class="form-group"><label>Start</label><input type="date" id="ev-date"/></div>
-    <div class="form-group"><label>Ende (optional)</label><input type="date" id="ev-endDate"/></div>
-    <div class="form-group"><label>Uhrzeit</label><input type="time" id="ev-time" value="18:00"/></div>
-    <div class="form-group"><label>Ort</label><input id="ev-ort" placeholder="Adresse"/></div>
-    <div class="form-group"><label>Personen</label><input type="number" id="ev-personen" placeholder="0"/></div>
-    <div class="form-group"><label>Kontakt</label><select id="ev-kontakt-id"></select></div>
-    <div class="form-group"><label>Angebot</label><select id="ev-catering-angebot-id" onchange="handleEventOfferSelection()"></select></div>
-    <div class="form-group"><label>Summe €</label><input type="number" id="ev-angebot" placeholder="0"/></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="form-group"><label>Titel</label><input id="ev-title" placeholder="z.B. Hochzeit Meyer"/></div>
+      <div class="form-group"><label>Typ</label><select id="ev-type"><option>Catering</option><option>Event</option><option>Sonstiges</option></select></div>
+      <div class="form-group"><label>Firma</label><select id="ev-company"><option value="HP">HP</option><option value="HPC">HPC</option></select></div>
+      <div class="form-group"><label>Start</label><input type="date" id="ev-date"/></div>
+      <div class="form-group"><label>Ende (optional)</label><input type="date" id="ev-endDate"/></div>
+      <div class="form-group"><label>Uhrzeit</label><input type="time" id="ev-time" value="18:00"/></div>
+      <div class="form-group"><label>Ort</label><input id="ev-ort" placeholder="Adresse"/></div>
+      <div class="form-group"><label>Personen</label><input type="number" id="ev-personen" placeholder="0"/></div>
+      <div class="form-group"><label>Kontakt</label><select id="ev-kontakt-id"></select></div>
+      <div class="form-group"><label>Angebot</label><select id="ev-catering-angebot-id" onchange="handleEventOfferSelection()"></select></div>
+      <div class="form-group"><label>Summe €</label><input type="number" id="ev-angebot" placeholder="0"/></div>
+    </div>
+    <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="ev-notizen" style="min-height:80px"></textarea></div>
+    <div class="form-group" style="margin-top:12px"><label>Status</label><select id="ev-status"><option>Pending...</option><option>Secured</option><option>Possibility</option></select></div>
   </div>
-  <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="ev-notizen" style="min-height:80px"></textarea></div>
-  <div class="form-group" style="margin-top:12px"><label>Status</label><select id="ev-status"><option>Pending...</option><option>Secured</option><option>Possibility</option></select></div>
   <div class="modal-footer"><button onclick="closeModal('event-modal')">Abbrechen</button><button class="btn-primary" onclick="saveEvent()">Speichern</button></div>
 </div>
 </div>
@@ -353,23 +379,30 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <div class="modal-overlay" id="kontakt-modal">
 <div class="modal">
   <div class="modal-title" id="kontakt-modal-title">Neuer Kontakt</div>
-  <div class="form-grid">
-    <div class="form-group"><label>Name</label><input id="kt-name"/></div><div class="form-group"><label>Firma</label><input id="kt-firma"/></div>
-    <div class="form-group"><label>Telefon</label><input id="kt-tel"/></div><div class="form-group"><label>E-Mail</label><input id="kt-email"/></div>
-    <div class="form-group"><label>Adresse</label><input id="kt-adresse"/></div><div class="form-group"><label>Typ</label><select id="kt-typ"><option>Kunde</option><option>Lieferant</option><option>Mitarbeiter</option><option>Sonstiges</option></select></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="form-group"><label>Name</label><input id="kt-name"/></div><div class="form-group"><label>Firma</label><input id="kt-firma"/></div>
+      <div class="form-group"><label>Telefon</label><input id="kt-tel"/></div><div class="form-group"><label>E-Mail</label><input id="kt-email"/></div>
+      <div class="form-group"><label>Adresse</label><input id="kt-adresse"/></div><div class="form-group"><label>Typ</label><select id="kt-typ"><option>Kunde</option><option>Lieferant</option><option>Mitarbeiter</option><option>Sonstiges</option></select></div>
+    </div>
+    <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="kt-notizen" style="min-height:70px"></textarea></div>
   </div>
-  <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="kt-notizen" style="min-height:70px"></textarea></div>
   <div class="modal-footer"><button onclick="closeModal('kontakt-modal')">Abbrechen</button><button class="btn-primary" onclick="saveKontakt()">Speichern</button></div>
 </div>
 </div>
 
 <div class="modal-overlay" id="contact-info-modal">
 <div class="modal">
-  <div class="modal-title" id="ci-name" style="margin-bottom: 8px;">Name</div><div id="ci-firma" style="color:var(--muted); font-size:13px; margin-bottom: 16px;"></div>
-  <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Telefon</div><div id="ci-tel" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-tel', 'Telefonnummer')">📋</button></div>
-  <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">E-Mail</div><div id="ci-email" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-email', 'E-Mail')">📋</button></div>
-  <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Adresse</div><div id="ci-adresse" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-adresse', 'Adresse')">📋</button></div>
-  <div style="margin-top: 16px;"><div style="font-size:11px; color:var(--muted); margin-bottom: 4px;">Notizen</div><div id="ci-notizen" style="font-size:13px; background:#f8fafc; padding:10px; border-radius:8px; min-height:40px;"></div></div>
+  <div class="modal-title" style="padding-bottom: 8px;">
+    <div id="ci-name" style="margin-bottom: 4px;">Name</div>
+    <div id="ci-firma" style="color:var(--muted); font-size:13px; font-weight:400;"></div>
+  </div>
+  <div class="modal-body">
+    <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Telefon</div><div id="ci-tel" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-tel', 'Telefonnummer')">📋</button></div>
+    <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">E-Mail</div><div id="ci-email" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-email', 'E-Mail')">📋</button></div>
+    <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Adresse</div><div id="ci-adresse" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-adresse', 'Adresse')">📋</button></div>
+    <div style="margin-top: 16px;"><div style="font-size:11px; color:var(--muted); margin-bottom: 4px;">Notizen</div><div id="ci-notizen" style="font-size:13px; background:#f8fafc; padding:10px; border-radius:8px; min-height:40px;"></div></div>
+  </div>
   <div class="modal-footer"><button class="btn-primary" onclick="closeModal('contact-info-modal')">Schließen</button></div>
 </div>
 </div>
@@ -377,14 +410,16 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <div class="modal-overlay" id="einkauf-modal">
 <div class="modal">
   <div class="modal-title" id="einkauf-modal-title">Position</div>
-  <div class="form-grid">
-    <div class="form-group"><label>Artikel</label><input id="ek-artikel"/></div>
-    <div class="form-group"><label>Kategorie</label><select id="ek-kat"><option>Teig</option><option>Milchprodukte / Käse</option><option>Sauce / Basis</option><option>Belag</option><option>Gemüse & Kräuter</option><option>Dips</option><option>Getränke</option><option>Sonstiges</option></select></div>
-    <div class="form-group"><label>Art.-Nr.</label><input id="ek-artikelnummer"/></div>
-    <div class="form-group"><label>Lieferant</label><select id="ek-lieferant"><option value="Andronaco">Andronaco</option><option value="Bührings">Bührings</option><option value="Metro">Metro</option><option value="Edeka">Edeka</option></select></div>
-    <div class="form-group"><label>Menge</label><input type="number" id="ek-menge" value="1" step="0.01"/></div>
-    <div class="form-group"><label>Einheit</label><select id="ek-einheit"><option>kg</option><option>g</option><option>L</option><option>ml</option><option>Stk</option><option>Pkg</option><option>Kiste</option></select></div>
-    <div class="form-group"><label>Preis/E €</label><input type="number" id="ek-preis" value="0" step="0.01"/></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="form-group"><label>Artikel</label><input id="ek-artikel"/></div>
+      <div class="form-group"><label>Kategorie</label><select id="ek-kat"><option>Teig</option><option>Milchprodukte / Käse</option><option>Sauce / Basis</option><option>Belag</option><option>Gemüse & Kräuter</option><option>Dips</option><option>Getränke</option><option>Sonstiges</option></select></div>
+      <div class="form-group"><label>Art.-Nr.</label><input id="ek-artikelnummer"/></div>
+      <div class="form-group"><label>Lieferant</label><select id="ek-lieferant"><option value="Andronaco">Andronaco</option><option value="Bührings">Bührings</option><option value="Metro">Metro</option><option value="Edeka">Edeka</option><option value="Sonstige">Sonstige</option></select></div>
+      <div class="form-group"><label>Menge</label><input type="number" id="ek-menge" value="1" step="0.01"/></div>
+      <div class="form-group"><label>Einheit</label><select id="ek-einheit"><option>kg</option><option>g</option><option>L</option><option>ml</option><option>Stk</option><option>Pkg</option><option>Kiste</option></select></div>
+      <div class="form-group"><label>Preis/E €</label><input type="number" id="ek-preis" value="0" step="0.01"/></div>
+    </div>
   </div>
   <div class="modal-footer"><button onclick="closeModal('einkauf-modal')">Abbrechen</button><button class="btn-primary" onclick="saveEinkauf()">Speichern</button></div>
 </div>
@@ -519,14 +554,14 @@ function openEventModal(id){state.editEventId=id||null;const ev=id?normalizeEven
 function handleEventOfferSelection(){const s=document.getElementById('ev-catering-angebot-id');if(!s)return;const a=state.cateringAngebote.find(x=>x.id===s.value);if(!a)return;const aI=document.getElementById('ev-angebot'),pI=document.getElementById('ev-personen');if(aI&&a.bruttoGesamt)aI.value=String(a.bruttoGesamt).replace(/[^0-9.\-]/g,'')||aI.value;if(pI&&(!pI.value||pI.value==='0')&&a.gaeste)pI.value=a.gaeste;}
 function saveEvent(){const cId=document.getElementById('ev-kontakt-id').value||'';const aId=document.getElementById('ev-catering-angebot-id').value||'';const lK=state.kontakte.find(k=>k.id===cId);const lA=state.cateringAngebote.find(a=>a.id===aId);const ev=normalizeEvent({id:state.editEventId||Date.now().toString(),title:document.getElementById('ev-title').value||'Ohne Titel',type:document.getElementById('ev-type').value,company:document.getElementById('ev-company').value||'HP',date:document.getElementById('ev-date').value,endDate:document.getElementById('ev-endDate').value,time:document.getElementById('ev-time').value,ort:document.getElementById('ev-ort').value,personen:document.getElementById('ev-personen').value,contactId:cId,kontakt:lK?lK.name:'',cateringAngebotId:aId,cateringAngebotName:lA?(lA.name||'Angebot'):'',angebot:document.getElementById('ev-angebot').value,notizen:document.getElementById('ev-notizen').value,status:document.getElementById('ev-status').value});pushArrayItemSafe('events',ev);closeModal('event-modal');showToast('Gespeichert');}
 function deleteEvent(id){removeArrayItemSafe('events',id);closeModal('detail-modal');showToast('Gelöscht');}
-function showEventDetail(id){const ev=normalizeEvent(state.events.find(e=>e.id===id)||{});if(!ev.id)return;const kL=contactLinkHTML(ev.contactId,ev.kontakt);let dS=ev.date||'–';if(ev.endDate&&ev.endDate!==ev.date)dS+=` bis ${ev.endDate}`;document.getElementById('detail-content').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">${ev.title} <span class="company-chip ${(ev.company||'HP').toLowerCase()}">${ev.company||'HP'}</span></div>${statusBadge(ev.status)}</div><table style="font-size:13px"><tr><td style="color:var(--muted);padding:5px 0;width:120px">Typ</td><td>${statusBadge(ev.type)}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${dS} ${ev.time||''}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Ort</td><td>${ev.ort||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td>${kL}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${ev.angebot?fmt(ev.angebot):'–'}</td></tr></table>${ev.notizen?`<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px">${ev.notizen.replace(/\n/g,'<br>')}</div>`:''}<div class="modal-footer"><button class="btn-danger" onclick="deleteEvent('${id}')">Löschen</button><button onclick="closeModal('detail-modal');openEventModal('${id}')">Bearbeiten</button><button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button></div>`;openModal('detail-modal');}
+function showEventDetail(id){const ev=normalizeEvent(state.events.find(e=>e.id===id)||{});if(!ev.id)return;const kL=contactLinkHTML(ev.contactId,ev.kontakt);let dS=ev.date||'–';if(ev.endDate&&ev.endDate!==ev.date)dS+=` bis ${ev.endDate}`;document.getElementById('detail-content').innerHTML=`<div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;margin:0;padding-bottom:16px;"><div style="margin:0">${ev.title} <span class="company-chip ${(ev.company||'HP').toLowerCase()}">${ev.company||'HP'}</span></div>${statusBadge(ev.status)}</div><div class="modal-body"><table style="font-size:13px"><tr><td style="color:var(--muted);padding:5px 0;width:120px">Typ</td><td>${statusBadge(ev.type)}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${dS} ${ev.time||''}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Ort</td><td>${ev.ort||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td>${kL}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${ev.angebot?fmt(ev.angebot):'–'}</td></tr></table>${ev.notizen?`<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px">${ev.notizen.replace(/\n/g,'<br>')}</div>`:''}</div><div class="modal-footer"><button class="btn-danger" onclick="deleteEvent('${id}')">Löschen</button><button onclick="closeModal('detail-modal');openEventModal('${id}')">Bearbeiten</button><button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button></div>`;openModal('detail-modal');}
 function renderAllEvents(){const q=(document.getElementById('events-search')?.value||'').trim().toLowerCase();const s=[...state.events].filter(ev=>{if(!q)return true;return [ev.title,ev.type,ev.ort,ev.kontakt,ev.company,ev.status,ev.date].filter(Boolean).join(' ').toLowerCase().includes(q);}).sort((a,b)=>(a.date||'').localeCompare(b.date||''));document.getElementById('all-events-list').innerHTML=s.length?s.map(eventItemHTML).join(''):'<div style="color:var(--muted);font-size:13px">Nichts gefunden.</div>';}
 
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 function renderCalendar(){const y=state.calYear,m=state.calMonth;document.getElementById('cal-title').textContent=MONTHS[m]+' '+y;document.getElementById('cal-headers').innerHTML=['Mo','Di','Mi','Do','Fr','Sa','So'].map(d=>`<div class="cal-header-cell">${d}</div>`).join('');const f=new Date(y,m,1).getDay(),off=(f===0)?6:f-1,dts=new Date(y,m+1,0).getDate(),tdy=new Date();let ht='';for(let i=0;i<off;i++)ht+='<div></div>';for(let d=1;d<=dts;d++){const cD=new Date(y,m,d);cD.setHours(0,0,0,0);const es=state.events.filter(e=>{if(!e.date)return false;const st=new Date(e.date);st.setHours(0,0,0,0);const en=e.endDate?new Date(e.endDate):st;en.setHours(0,0,0,0);return cD>=st&&cD<=en;});const isT=d===tdy.getDate()&&m===tdy.getMonth()&&y===tdy.getFullYear();const cC=es.length?(' '+((es[0].company||'HP').toLowerCase())):'';ht+=`<div class="cal-day${isT?' today':''}${es.length?' has-event':''}${cC}" onclick="${es.length?`showEventDetail('${es[0].id}')`:'openEventModal()'}"><div style="font-weight:600;font-size:12px">${d}</div>${es.map(e=>`<div class="cal-event-tag">${e.title}</div>`).join('')}</div>`;}document.getElementById('cal-body').innerHTML=ht;const cM=new Date(y,m,1),nM=new Date(y,m+2,1);const mE=state.events.filter(e=>{if(!e.date)return false;const st=new Date(e.date);st.setHours(0,0,0,0);const en=e.endDate?new Date(e.endDate):st;en.setHours(0,0,0,0);return en>=cM&&st<nM;});document.getElementById('cal-event-list').innerHTML=mE.length?mE.sort((a,b)=>a.date>b.date?1:-1).map(eventItemHTML).join(''):'<div style="color:var(--muted);font-size:13px">Keine Events.</div>';}
 function changeMonth(d){state.calMonth+=d;if(state.calMonth>11){state.calMonth=0;state.calYear++;}if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar();}
 
-// ── PIZZA & DIPS ENGINE AUS ORIGINAL-DATEI ────────────────────────────────
+// ── PIZZA & DIPS ENGINE ────────────────────────────────────────────────
 function addG(acc,k,g){if(!acc[k])acc[k]=0;acc[k]+=g;}
 function expand100(acc,recipe,grams){for(const[k,p100]of Object.entries(recipe))addG(acc,k,grams*p100/100);}
 function totalPizzaCount(){return Object.values(pizzaMengen).reduce((s,v)=>s+(Number(v)||0),0);}
@@ -546,7 +581,7 @@ function calcPizzaAndDipsIngredients(){
     for(const[k,g]of Object.entries(TEIG)) addG(raw,k,qty*g);
     for(const[k,g]of Object.entries(p.ing)){
       if(k==='__ts') expand100(raw,TOMATENSAUCE,qty*g);
-      else if(k==='__ts_roh') {} // Skip
+      else if(k==='__ts_roh') {} 
       else if(k==='__sp') expand100(raw,SPINATCREME,qty*g);
       else if(k==='__sc') expand100(raw,SCHMANDCREME,qty*g);
       else if(k==='__kt') expand100(raw,KONFIERT,qty*g);
@@ -592,7 +627,7 @@ function renderPizzaAndDipsResult(){
     });
     ht+='</div>';
   });
-  ht+=`</div><div style="margin-top:10px;font-size:12px;color:var(--muted)">Hinweis: Es werden nur manuell eingetragene Dips auf die Liste gesetzt (kein Auto-Zwang).</div><div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Geschätzte Warenkosten:</span><span style="color:var(--blue)">${fmt(tC)}</span></div>`;
+  ht+=`</div><div style="margin-top:10px;font-size:12px;color:var(--muted)">Hinweis: Es werden nur manuell eingetragene Dips auf die Liste gesetzt.</div><div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Geschätzte Warenkosten:</span><span style="color:var(--blue)">${fmt(tC)}</span></div>`;
   el.innerHTML=ht;
 }
 
@@ -648,18 +683,88 @@ function editCateringAngebot(id){const a=state.cateringAngebote.find(x=>x.id===i
 function deleteCateringAngebot(id){removeArrayItemSafe('cateringAngebote',id);if(state.editCateringAngebotId===id)resetCateringOfferForm();}
 function renderCateringAngebote(){const el=document.getElementById('cat-saved-list');if(!state.cateringAngebote.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Nichts da.</div>';return;}el.innerHTML=state.cateringAngebote.map(a=>`<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f1f5f9"><div style="flex:1"><div style="font-weight:600">${a.name||'Angebot'} · ${a.gaeste} P · ${a.datum}</div><div style="font-size:12px;color:var(--muted)">Netto ${a.nettoGast} · Brutto ${a.bruttoGesamt}</div>${a.pizzaNotizen&&a.pizzaNotizen.length?`<div style="font-size:11px;color:var(--muted);margin-top:6px">🍕 ${a.pizzaNotizen.map(n=>n.text).join(', ')}</div>`:''}${a.sonstigeNotizen&&a.sonstigeNotizen.length?`<div style="font-size:11px;color:var(--muted);margin-top:4px">📝 ${a.sonstigeNotizen.map(n=>n.text).join(' | ')}</div>`:''}</div><div style="display:flex;gap:6px"><button class="btn-sm" onclick="editCateringAngebot('${a.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteCateringAngebot('${a.id}')">×</button></div></div>`).join('');}
 
-// ── EINKAUFSLISTE ─────────────────────────────────────────────────────────
+// ── EINKAUFSLISTE NEU GESTALTET ─────────────────────────────────────────
 function openEinkaufModal(id){state.editEinkaufId=id||null;const i=id?state.einkauf.find(e=>e.id===id):null;document.getElementById('einkauf-modal-title').textContent=i?'Bearbeiten':'Neu';['ek-artikel','ek-artikelnummer','ek-kat','ek-einheit'].forEach(f=>document.getElementById(f).value=i?i[f.replace('ek-','')]:(f==='ek-kat'?'Teig':(f==='ek-einheit'?'kg':'')));document.getElementById('ek-lieferant').value=i?.lieferant||'Andronaco';document.getElementById('ek-menge').value=i?.menge??1;document.getElementById('ek-preis').value=i?.preis??0;openModal('einkauf-modal');}
 function saveEinkauf(){const i={id:state.editEinkaufId||Date.now().toString(),artikel:document.getElementById('ek-artikel').value||'?',artikelnummer:document.getElementById('ek-artikelnummer').value||'',lieferant:document.getElementById('ek-lieferant').value||'Andronaco',kategorie:document.getElementById('ek-kat').value,menge:parseFloat(document.getElementById('ek-menge').value)||0,einheit:document.getElementById('ek-einheit').value,preis:parseFloat(document.getElementById('ek-preis').value)||0};pushArrayItemSafe('einkauf',i);closeModal('einkauf-modal');}
 function deleteEinkauf(id){removeArrayItemSafe('einkauf',id);}
-function renderEinkauf(){const c=document.getElementById('einkauf-kategorien'),q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();const flt=state.einkauf.filter(e=>{if(!q)return true;return[e.artikel,e.artikelnummer,e.lieferant,e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q);});if(!flt.length){c.innerHTML='<div class="card" style="color:var(--muted);font-size:13px">Nichts gefunden.</div>';return;}let ht='',gT=0;const sups=[...new Set(flt.map(e=>e.lieferant||'Unbekannt'))].sort();sups.forEach(cd=>{const is=flt.filter(e=>(e.lieferant||'Unbekannt')===cd).sort((a,b)=>a.kategorie.localeCompare(b.kategorie)||a.artikel.localeCompare(b.artikel));if(!is.length)return;let sT=0;ht+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant: ${cd}</div><table><thead><tr><th>Artikel</th><th>Art.-Nr.</th><th>Kategorie</th><th>Menge</th><th>EH</th><th>Preis</th><th>Gesamt</th><th></th></tr></thead><tbody>`;is.forEach(e=>{const s=Number(e.menge||0)*Number(e.preis||0);sT+=s;gT+=s;ht+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;});ht+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe:</td><td>${sT>0?fmt(sT):'–'}</td><td></td></tr></tfoot></table></div>`;});ht+=`<div class="card" style="display:flex;justify-content:space-between;background:var(--blue-light)"><span style="font-weight:600">Gesamt</span><span style="font-weight:700;color:var(--blue)">${fmt(gT)}</span></div>`;c.innerHTML=ht;}
+
+function renderEinkauf() {
+  const c = document.getElementById('einkauf-kategorien');
+  const q = (document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();
+  const flt = state.einkauf.filter(e=>{
+    if(!q) return true;
+    return [e.artikel,e.artikelnummer,e.lieferant,e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q);
+  });
+  if(!flt.length){c.innerHTML='<div class="card" style="color:var(--muted);font-size:13px">Nichts gefunden.</div>';return;}
+  
+  let ht='', gT=0;
+  const sups=[...new Set(flt.map(e=>e.lieferant||'Unbekannt'))].sort();
+  
+  sups.forEach(cd=>{
+    const items = flt.filter(e=>(e.lieferant||'Unbekannt')===cd);
+    if(!items.length) return;
+    
+    let supTotal = 0;
+    let katHtml = '';
+    const categories = [...new Set(items.map(e=>e.kategorie||'Sonstiges'))].sort();
+    
+    categories.forEach(kat=>{
+        const katItems = items.filter(e=>(e.kategorie||'Sonstiges')===kat).sort((a,b)=>(a.artikel||'').localeCompare(b.artikel||''));
+        if(!katItems.length) return;
+        
+        katHtml += `<div class="ing-group" style="padding: 16px 20px 0;">
+                 <div class="ing-group-title" style="margin-bottom:8px; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">${kat}</div>`;
+                 
+        katItems.forEach(e=>{
+            const s = Number(e.menge||0) * Number(e.preis||0);
+            supTotal += s;
+            gT += s;
+            katHtml += `
+            <div class="ing-row" style="padding:10px 0; border-bottom:1px solid #f1f5f9; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+              <div style="flex:1; min-width:140px;">
+                <div style="font-weight:500;">${e.artikel}</div>
+                ${e.artikelnummer ? `<div style="font-size:11px; color:var(--muted)">Art.-Nr: ${e.artikelnummer}</div>` : ''}
+              </div>
+              <div style="min-width:60px; text-align:right;">
+                <div style="font-weight:500; color:var(--blue)">${e.menge} ${e.einheit}</div>
+                <div style="font-size:11px; color:var(--muted)">${e.preis?fmt(e.preis)+'/'+e.einheit:''}</div>
+              </div>
+              <div style="min-width:70px; text-align:right; font-weight:600; color:var(--text);">
+                ${s>0 ? fmt(s) : '–'}
+              </div>
+              <div style="min-width:60px; display:flex; justify-content:flex-end; gap:6px;">
+                <button class="btn-sm" onclick="openEinkaufModal('${e.id}')">✎</button>
+                <button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button>
+              </div>
+            </div>`;
+        });
+        katHtml += `</div>`;
+    });
+    
+    ht += `<div class="card" style="padding:0; overflow:hidden; margin-bottom:16px;">
+             <div style="background:#f8fafc; padding:14px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+               <div style="font-weight:600; font-size:14px; color:var(--text);">Lieferant: ${cd}</div>
+               <div style="font-weight:700; font-size:15px; color:var(--text);">${fmt(supTotal)}</div>
+             </div>
+             <div class="ing-wrap" style="border:none; border-radius:0; background:var(--card); padding:0;">
+               ${katHtml}
+             </div>
+           </div>`;
+  });
+  ht += `<div class="card" style="display:flex;justify-content:space-between;align-items:center;background:var(--blue-light); border-color:var(--blue);">
+          <span style="font-weight:600;font-size:15px;color:var(--blue);">Gesamtsumme Einkauf</span>
+          <span style="font-weight:800;font-size:20px;color:var(--blue);">${fmt(gT)}</span>
+        </div>`;
+  c.innerHTML=ht;
+}
+
 function copyEinkaufTable(){let tx='EINKAUFSLISTE\n================\n\n';const q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();const flt=state.einkauf.filter(e=>{if(!q)return true;return[e.artikel,e.artikelnummer,e.lieferant,e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q);});const sups=[...new Set(flt.map(e=>e.lieferant||'Unbekannt'))].sort();sups.forEach(cd=>{const is=flt.filter(e=>(e.lieferant||'Unbekannt')===cd);if(!is.length)return;tx+=`\nLIEFERANT: ${cd.toUpperCase()}\n`;is.sort((a,b)=>a.kategorie.localeCompare(b.kategorie)||a.artikel.localeCompare(b.artikel)).forEach(e=>{const s=e.menge*(e.preis||0);tx+=`${e.artikel}${e.artikelnummer?` [Art: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${s>0?' – '+fmt(s):''}\n`;});});copyText(tx,'Kopiert!');}
 
 // ── KONTAKTE ─────────────────────────────────────────────────────────────
 function openKontaktModal(id){state.editKontaktId=id||null;const k=id?state.kontakte.find(x=>x.id===id):null;document.getElementById('kontakt-modal-title').textContent=k?'Bearbeiten':'Neu';['kt-name','kt-firma','kt-tel','kt-email','kt-adresse','kt-notizen'].forEach(f=>document.getElementById(f).value=k?k[f.replace('kt-','')]:'');document.getElementById('kt-typ').value=k?.typ||'Kunde';openModal('kontakt-modal');}
 function saveKontakt(){const k={id:state.editKontaktId||Date.now().toString(),name:document.getElementById('kt-name').value||'Unbekannt',firma:document.getElementById('kt-firma').value,tel:document.getElementById('kt-tel').value,email:document.getElementById('kt-email').value,adresse:document.getElementById('kt-adresse').value,typ:document.getElementById('kt-typ').value,notizen:document.getElementById('kt-notizen').value};pushArrayItemSafe('kontakte',k);db.ref('events').transaction(a=>{if(!a)return[];return a.map(e=>e&&e.contactId===k.id?Object.assign({},e,{kontakt:k.name}):e).filter(x=>x!=null);});closeModal('kontakt-modal');}
 function deleteKontakt(id){removeArrayItemSafe('kontakte',id);db.ref('events').transaction(a=>{if(!a)return[];return a.map(e=>e&&e.contactId===id?Object.assign({},e,{contactId:'',kontakt:''}):e).filter(x=>x!=null);});}
-function renderKontakte(){const el=document.getElementById('kontakt-list'),q=(document.getElementById('kontakte-search')?.value||'').trim().toLowerCase();const fs=state.kontakte.filter(k=>{if(!q)return true;return[k.name,k.firma,k.tel,k.email,k.adresse,k.typ].filter(Boolean).join(' ').toLowerCase().includes(q);});if(!fs.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Nichts da.</div>';return;}el.innerHTML=fs.map(k=>`<div class="contact-item"><div class="avatar">${k.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div><div style="flex:1"><div style="font-weight:500;cursor:pointer;" onclick="openContactInfo('${k.id}')">${k.name}${k.firma?` <span style="color:var(--muted);font-weight:400">· ${k.firma}</span>`:''}</div><div style="font-size:12px;color:var(--muted)">${[k.tel,k.email].filter(Boolean).join(' · ')}</div>${k.adresse?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${k.adresse}</div>`:''}</div><div style="display:flex;gap:6px;align-items:center">${statusBadge(k.typ)}<button class="btn-sm" onclick="openKontaktModal('${k.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteKontakt('${k.id}')">×</button></div></div>`).join('');}
+function renderKontakte(){const el=document.getElementById('kontakt-list'),q=(document.getElementById('kontakte-search')?.value||'').trim().toLowerCase();const fs=state.kontakte.filter(k=>{if(!q)return true;return[k.name,k.firma,k.tel,k.email,k.adresse,k.typ].filter(Boolean).join(' ').toLowerCase().includes(q);});if(!fs.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Nichts da.</div>';return;}el.innerHTML=fs.map(k=>`<div class="contact-item"><div class="avatar">${k.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div><div class="contact-info"><div style="font-weight:500;cursor:pointer;" onclick="openContactInfo('${k.id}')">${k.name}${k.firma?` <span style="color:var(--muted);font-weight:400">· ${k.firma}</span>`:''}</div><div style="font-size:12px;color:var(--muted)">${[k.tel,k.email].filter(Boolean).join(' · ')}</div>${k.adresse?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${k.adresse}</div>`:''}</div><div class="contact-actions">${statusBadge(k.typ)}<button class="btn-sm" onclick="openKontaktModal('${k.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteKontakt('${k.id}')">×</button></div></div>`).join('');}
 
 updateMobileNav('dashboard');
 listenAll();
