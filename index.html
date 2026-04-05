@@ -77,33 +77,12 @@ textarea{resize:vertical}
 .company-chip.hpc{background:#fef3c7;color:#b45309}
 .cal-event-tag{font-size:10px;color:var(--blue);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px; background: rgba(255,255,255,0.6); padding: 1px 3px; border-radius: 4px;}
 
-/* === NEUE MODAL STRUKTUR (FLEXBOX) === */
+/* MODAL - EINFACHES SCROLLING MIT PUFFER */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-
-.modal {
-  background: var(--card); border-radius: 14px;
-  width: 580px; max-width: 96vw; max-height: 90vh;
-  border: 1px solid var(--border);
-  display: flex; flex-direction: column; overflow: hidden; /* Verhindert das Scrollen des gesamten Fensters */
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-}
-.modal-title {
-  font-size: 17px; font-weight: 600; 
-  padding: 20px 24px 16px 24px; 
-  border-bottom: 1px solid var(--border);
-  background: var(--card);
-}
-.modal-body {
-  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 20px 24px;
-  padding-bottom: 60px; /* Puffer damit man am Desktop gut scrollen kann */
-}
-.modal-footer {
-  display: flex; justify-content: flex-end; gap: 8px; 
-  padding: 16px 24px; background: var(--card); 
-  border-top: 1px solid var(--border);
-}
+.modal{background:var(--card);border-radius:14px;padding:24px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto;border:1px solid var(--border); position:relative;}
+.modal-title{font-size:17px;font-weight:600;margin-bottom:18px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
 
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;padding:8px 10px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)}
@@ -111,6 +90,7 @@ td{padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .total-row td{font-weight:600;background:#f8fafc}
+/* PIZZA */
 .pizza-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:10px;margin-bottom:16px}
 .pizza-card{border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--card)}
 .pizza-card-name{font-weight:500;font-size:13px;margin-bottom:8px}
@@ -124,12 +104,14 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .ing-amount{font-weight:500;color:var(--blue);min-width:80px;text-align:right}
 .note-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9}
 .note-row:last-child{border-bottom:none}
+/* CATERING */
 .cat-section{background:#f8fafc;border-radius:10px;padding:16px;border:1px solid var(--border);margin-bottom:12px}
 .cat-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:12px}
 .result-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #f1f5f9}
 .result-row:last-child{border-bottom:none}
 .result-row.bold{font-weight:700;font-size:15px;color:var(--blue)}
 .result-bar{border-radius:8px;padding:10px 16px;text-align:center;font-size:13px;font-weight:500;margin-top:8px}
+
 .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .search-input{max-width:320px}
 .toast-wrap{position:fixed;right:18px;bottom:18px;z-index:500;display:flex;flex-direction:column;gap:8px}
@@ -137,11 +119,13 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .toast.show{opacity:1;transform:translateY(0)}
 .action-row{display:flex;gap:6px;align-items:center}
 .inline-badges{display:flex;flex-wrap:wrap;gap:6px}
+
 .mobile-bottom-nav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:320;background:rgba(255,255,255,.98);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:8px 10px calc(8px + env(safe-area-inset-bottom));overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap}
 .mobile-bottom-nav::-webkit-scrollbar{display:none}
 .mobile-bottom-nav-inner{display:inline-flex;gap:6px;min-width:max-content}
 .mobile-bottom-nav button{padding:8px 12px;min-height:46px;font-size:12px;border-radius:10px;flex:0 0 auto}
 .mobile-bottom-nav button.active{background:var(--blue-light);color:var(--blue);border-color:#bfdbfe;font-weight:600}
+
 .info-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9;}
 .info-row:last-child { border-bottom: none;}
 
@@ -174,16 +158,10 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   .cal-day{min-height:58px;padding:4px 5px;font-size:11px}
   .cal-event-tag{font-size:9px}
   
-  /* NEUES MODAL-BEHAVIOR FÜR HANDY */
-  .modal{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;border:none;}
-  .modal-title{padding: 16px; font-size: 18px;}
-  .modal-body{
-    padding: 16px; 
-    padding-bottom: 180px !important; /* RIESIGER PUFFER, damit du an alles drankommst */
-  }
-  .modal-footer{
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) 16px;
-  }
+  /* LÖSUNG FÜR DEN SPEICHERN BUTTON: Ein großer Puffer unten! */
+  .modal{width:100%;max-width:100%;height:100dvh;max-height:100dvh;border-radius:0;padding:16px; padding-bottom: 120px;}
+  .modal-title{font-size:18px}
+  
   .result-bar{font-size:13px;padding:12px}
   .mobile-bottom-nav{display:block}
 }
@@ -238,6 +216,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 
 <div class="page" id="page-pizza">
   <div class="page-header"><div class="page-title">Pizza & Dips Kalkulation</div><button class="btn-danger" onclick="resetPizzaAndDips()">Zurücksetzen</button></div>
+  
   <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
     <div class="card">
       <div class="card-title">Anzahl Pizzen eingeben</div>
@@ -250,10 +229,12 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
     <div class="card">
       <div class="card-title">Anzahl Dips eingeben</div>
       <div style="display:grid; gap:12px; margin-bottom:16px">
-        <div class="pizza-card"><div class="pizza-card-name">Aioli (50g Schälchen)</div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">Empfehlung: 0,35 pro Pizza</div>
+        <div class="pizza-card"><div class="pizza-card-name">Aioli (50g Schälchen)</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px" id="aioli-rec">Empfehlung: 0</div>
           <div class="pizza-qty"><button onclick="changeDip('aioli',-1)">−</button><input type="number" min="0" value="0" id="dqty-aioli" onchange="setDip('aioli',this.value)"/><button onclick="changeDip('aioli',1)">+</button></div>
         </div>
-        <div class="pizza-card"><div class="pizza-card-name">Hot Honey (50g Schälchen)</div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">Empfehlung: 0,15 pro Pizza</div>
+        <div class="pizza-card"><div class="pizza-card-name">Hot Honey (50g Schälchen)</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px" id="honey-rec">Empfehlung: 0</div>
           <div class="pizza-qty"><button onclick="changeDip('hothoney',-1)">−</button><input type="number" min="0" value="0" id="dqty-hothoney" onchange="setDip('hothoney',this.value)"/><button onclick="changeDip('hothoney',1)">+</button></div>
         </div>
       </div>
@@ -262,6 +243,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
       </div>
     </div>
   </div>
+
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px; flex-wrap:wrap; gap: 10px;">
       <div class="card-title" style="margin-bottom:0">Einkaufsliste aus Kalkulation</div>
@@ -269,6 +251,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
     </div>
     <div id="ingredient-result"></div>
   </div>
+
   <div class="card"><div class="card-title">Notizen zu Pizza & Dips</div><div id="pizza-notes-list"></div>
     <div style="display:flex;gap:8px;margin-top:10px"><input id="pizza-note-input" placeholder="Notiz hinzufügen..."/><button class="btn-primary" onclick="addNote('pizza')">+</button></div>
   </div>
@@ -348,23 +331,21 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 </div><div class="modal-overlay" id="event-modal">
 <div class="modal">
   <div class="modal-title" id="event-modal-title">Neues Event</div>
-  <div class="modal-body">
-    <div class="form-grid">
-      <div class="form-group"><label>Titel</label><input id="ev-title" placeholder="z.B. Hochzeit Meyer"/></div>
-      <div class="form-group"><label>Typ</label><select id="ev-type"><option>Catering</option><option>Event</option><option>Sonstiges</option></select></div>
-      <div class="form-group"><label>Firma</label><select id="ev-company"><option value="HP">HP</option><option value="HPC">HPC</option></select></div>
-      <div class="form-group"><label>Start</label><input type="date" id="ev-date"/></div>
-      <div class="form-group"><label>Ende (optional)</label><input type="date" id="ev-endDate"/></div>
-      <div class="form-group"><label>Uhrzeit</label><input type="time" id="ev-time" value="18:00"/></div>
-      <div class="form-group"><label>Ort</label><input id="ev-ort" placeholder="Adresse"/></div>
-      <div class="form-group"><label>Personen</label><input type="number" id="ev-personen" placeholder="0"/></div>
-      <div class="form-group"><label>Kontakt</label><select id="ev-kontakt-id"></select></div>
-      <div class="form-group"><label>Angebot</label><select id="ev-catering-angebot-id" onchange="handleEventOfferSelection()"></select></div>
-      <div class="form-group"><label>Summe €</label><input type="number" id="ev-angebot" placeholder="0"/></div>
-    </div>
-    <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="ev-notizen" style="min-height:80px"></textarea></div>
-    <div class="form-group" style="margin-top:12px"><label>Status</label><select id="ev-status"><option>Pending...</option><option>Secured</option><option>Possibility</option></select></div>
+  <div class="form-grid">
+    <div class="form-group"><label>Titel</label><input id="ev-title" placeholder="z.B. Hochzeit Meyer"/></div>
+    <div class="form-group"><label>Typ</label><select id="ev-type"><option>Catering</option><option>Event</option><option>Sonstiges</option></select></div>
+    <div class="form-group"><label>Firma</label><select id="ev-company"><option value="HP">HP</option><option value="HPC">HPC</option></select></div>
+    <div class="form-group"><label>Start</label><input type="date" id="ev-date"/></div>
+    <div class="form-group"><label>Ende (optional)</label><input type="date" id="ev-endDate"/></div>
+    <div class="form-group"><label>Uhrzeit</label><input type="time" id="ev-time" value="18:00"/></div>
+    <div class="form-group"><label>Ort</label><input id="ev-ort" placeholder="Adresse"/></div>
+    <div class="form-group"><label>Personen</label><input type="number" id="ev-personen" placeholder="0"/></div>
+    <div class="form-group"><label>Kontakt</label><select id="ev-kontakt-id"></select></div>
+    <div class="form-group"><label>Angebot</label><select id="ev-catering-angebot-id" onchange="handleEventOfferSelection()"></select></div>
+    <div class="form-group"><label>Summe €</label><input type="number" id="ev-angebot" placeholder="0"/></div>
   </div>
+  <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="ev-notizen" style="min-height:80px"></textarea></div>
+  <div class="form-group" style="margin-top:12px"><label>Status</label><select id="ev-status"><option>Pending...</option><option>Secured</option><option>Possibility</option></select></div>
   <div class="modal-footer"><button onclick="closeModal('event-modal')">Abbrechen</button><button class="btn-primary" onclick="saveEvent()">Speichern</button></div>
 </div>
 </div>
@@ -372,30 +353,23 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <div class="modal-overlay" id="kontakt-modal">
 <div class="modal">
   <div class="modal-title" id="kontakt-modal-title">Neuer Kontakt</div>
-  <div class="modal-body">
-    <div class="form-grid">
-      <div class="form-group"><label>Name</label><input id="kt-name"/></div><div class="form-group"><label>Firma</label><input id="kt-firma"/></div>
-      <div class="form-group"><label>Telefon</label><input id="kt-tel"/></div><div class="form-group"><label>E-Mail</label><input id="kt-email"/></div>
-      <div class="form-group"><label>Adresse</label><input id="kt-adresse"/></div><div class="form-group"><label>Typ</label><select id="kt-typ"><option>Kunde</option><option>Lieferant</option><option>Mitarbeiter</option><option>Sonstiges</option></select></div>
-    </div>
-    <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="kt-notizen" style="min-height:70px"></textarea></div>
+  <div class="form-grid">
+    <div class="form-group"><label>Name</label><input id="kt-name"/></div><div class="form-group"><label>Firma</label><input id="kt-firma"/></div>
+    <div class="form-group"><label>Telefon</label><input id="kt-tel"/></div><div class="form-group"><label>E-Mail</label><input id="kt-email"/></div>
+    <div class="form-group"><label>Adresse</label><input id="kt-adresse"/></div><div class="form-group"><label>Typ</label><select id="kt-typ"><option>Kunde</option><option>Lieferant</option><option>Mitarbeiter</option><option>Sonstiges</option></select></div>
   </div>
+  <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="kt-notizen" style="min-height:70px"></textarea></div>
   <div class="modal-footer"><button onclick="closeModal('kontakt-modal')">Abbrechen</button><button class="btn-primary" onclick="saveKontakt()">Speichern</button></div>
 </div>
 </div>
 
 <div class="modal-overlay" id="contact-info-modal">
 <div class="modal">
-  <div class="modal-title" style="padding-bottom: 8px;">
-    <div id="ci-name" style="margin-bottom: 4px;">Name</div>
-    <div id="ci-firma" style="color:var(--muted); font-size:13px; font-weight:400;"></div>
-  </div>
-  <div class="modal-body">
-    <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Telefon</div><div id="ci-tel" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-tel', 'Telefonnummer')">📋</button></div>
-    <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">E-Mail</div><div id="ci-email" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-email', 'E-Mail')">📋</button></div>
-    <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Adresse</div><div id="ci-adresse" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-adresse', 'Adresse')">📋</button></div>
-    <div style="margin-top: 16px;"><div style="font-size:11px; color:var(--muted); margin-bottom: 4px;">Notizen</div><div id="ci-notizen" style="font-size:13px; background:#f8fafc; padding:10px; border-radius:8px; min-height:40px;"></div></div>
-  </div>
+  <div class="modal-title" id="ci-name" style="margin-bottom: 8px;">Name</div><div id="ci-firma" style="color:var(--muted); font-size:13px; margin-bottom: 16px;"></div>
+  <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Telefon</div><div id="ci-tel" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-tel', 'Telefonnummer')">📋</button></div>
+  <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">E-Mail</div><div id="ci-email" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-email', 'E-Mail')">📋</button></div>
+  <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Adresse</div><div id="ci-adresse" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-adresse', 'Adresse')">📋</button></div>
+  <div style="margin-top: 16px;"><div style="font-size:11px; color:var(--muted); margin-bottom: 4px;">Notizen</div><div id="ci-notizen" style="font-size:13px; background:#f8fafc; padding:10px; border-radius:8px; min-height:40px;"></div></div>
   <div class="modal-footer"><button class="btn-primary" onclick="closeModal('contact-info-modal')">Schließen</button></div>
 </div>
 </div>
@@ -403,16 +377,14 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <div class="modal-overlay" id="einkauf-modal">
 <div class="modal">
   <div class="modal-title" id="einkauf-modal-title">Position</div>
-  <div class="modal-body">
-    <div class="form-grid">
-      <div class="form-group"><label>Artikel</label><input id="ek-artikel"/></div>
-      <div class="form-group"><label>Kategorie</label><select id="ek-kat"><option>Teig</option><option>Milchprodukte / Käse</option><option>Sauce / Basis</option><option>Belag</option><option>Gemüse & Kräuter</option><option>Dips</option><option>Getränke</option><option>Sonstiges</option></select></div>
-      <div class="form-group"><label>Art.-Nr.</label><input id="ek-artikelnummer"/></div>
-      <div class="form-group"><label>Lieferant</label><select id="ek-lieferant"><option value="A">A = Andronaco</option><option value="B">B = Bührings</option><option value="M">M = Metro</option><option value="E">E = Edeka</option></select></div>
-      <div class="form-group"><label>Menge</label><input type="number" id="ek-menge" value="1" step="0.01"/></div>
-      <div class="form-group"><label>Einheit</label><select id="ek-einheit"><option>kg</option><option>g</option><option>L</option><option>ml</option><option>Stk</option><option>Pkg</option><option>Kiste</option></select></div>
-      <div class="form-group"><label>Preis/E €</label><input type="number" id="ek-preis" value="0" step="0.01"/></div>
-    </div>
+  <div class="form-grid">
+    <div class="form-group"><label>Artikel</label><input id="ek-artikel"/></div>
+    <div class="form-group"><label>Kategorie</label><select id="ek-kat"><option>Teig</option><option>Milchprodukte / Käse</option><option>Sauce / Basis</option><option>Belag</option><option>Gemüse & Kräuter</option><option>Dips</option><option>Getränke</option><option>Sonstiges</option></select></div>
+    <div class="form-group"><label>Art.-Nr.</label><input id="ek-artikelnummer"/></div>
+    <div class="form-group"><label>Lieferant</label><select id="ek-lieferant"><option value="Andronaco">Andronaco</option><option value="Bührings">Bührings</option><option value="Metro">Metro</option><option value="Edeka">Edeka</option></select></div>
+    <div class="form-group"><label>Menge</label><input type="number" id="ek-menge" value="1" step="0.01"/></div>
+    <div class="form-group"><label>Einheit</label><select id="ek-einheit"><option>kg</option><option>g</option><option>L</option><option>ml</option><option>Stk</option><option>Pkg</option><option>Kiste</option></select></div>
+    <div class="form-group"><label>Preis/E €</label><input type="number" id="ek-preis" value="0" step="0.01"/></div>
   </div>
   <div class="modal-footer"><button onclick="closeModal('einkauf-modal')">Abbrechen</button><button class="btn-primary" onclick="saveEinkauf()">Speichern</button></div>
 </div>
@@ -422,17 +394,96 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
+// ── FIREBASE ─────────────────────────────────────────────────────────────
 const firebaseConfig={apiKey:"AIzaSyDdtoBbNee-dLRjr6YEEhzxM6GCmVE6wTs",authDomain:"heitmannspizza-dashboard.firebaseapp.com",databaseURL:"https://heitmannspizza-dashboard-default-rtdb.europe-west1.firebasedatabase.app",projectId:"heitmannspizza-dashboard"};
 firebase.initializeApp(firebaseConfig); const db=firebase.database();
-const EXCEL_ARTICLES={"Farina Pizzeria Rossa Caputo 5164":{"group":"Mehl","price_inc":25.6693,"pack_size":25,"pack_unit":"kg","supplier":"A","article_no":5164,"unit_price_inc":1.026772},"Semola di Grano Duro Rimancinata":{"group":"Mehl","price_inc":1.7013,"pack_size":1,"pack_unit":"kg","supplier":"A","unit_price_inc":1.7013},"Thunf. Öl":{"group":"Proteine","price_inc":9.2983,"pack_size":2.5,"pack_unit":"kg","supplier":"A","article_no":3140,"unit_price_inc":3.71932},"Salami 55mm Tulip":{"group":"Proteine","price_inc":8.7633,"pack_size":1,"pack_unit":"kg","supplier":"A","article_no":1403,"unit_price_inc":8.7633},"Prosciutto Crudo geschnitten":{"group":"Proteine","price_inc":11.4383,"pack_size":0.5,"pack_unit":"kg","supplier":"M","unit_price_inc":22.8766},"Prosciutto Crudo con Interfoglio":{"group":"Proteine","price_inc":10.4753,"pack_size":0.5,"pack_unit":"kg","supplier":"A","article_no":1438,"unit_price_inc":20.9506},"Salami napoli picante":{"group":"Proteine","price_inc":13.5783,"pack_size":1,"pack_unit":"kg","supplier":"A","article_no":1406,"unit_price_inc":13.5783},"Mortadella":{"group":"Proteine","price_inc":13.8993,"pack_size":1,"pack_unit":"kg","supplier":"A","article_no":15499,"unit_price_inc":13.8993},"Kochschinken":{"group":"Proteine","price_inc":7.4793,"pack_size":7.8,"pack_unit":"kg","supplier":"A","article_no":1413,"unit_price_inc":7.4793},"Sardellen":{"group":"Proteine","price_inc":26.61625,"pack_size":0.08,"pack_unit":"kg","supplier":"A","article_no":3175,"unit_price_inc":26.61625},"Pancetta":{"group":"Proteine","price_inc":7.49,"pack_size":0.3,"pack_unit":"kg","supplier":"E","unit_price_inc":24.966417},"Grana Padano 16M":{"group":"Milchprodukte","price_inc":40.7563,"pack_size":2,"pack_unit":"kg","supplier":"M","unit_price_inc":20.37815},"Fior di Latte Taglio Napoli latteria Sorrentina":{"group":"Milchprodukte","price_inc":17.8583,"pack_size":2,"pack_unit":"kg","supplier":"A","article_no":11498,"unit_price_inc":8.92915},"Fior di Latte Taglio Napoli Zappa":{"group":"Milchprodukte","price_inc":27.2743,"pack_size":3,"pack_unit":"kg","supplier":"A","unit_price_inc":9.0914},"Burrata Nonno Nanni":{"group":"Milchprodukte","price_inc":2.1293,"pack_size":0.125,"pack_unit":"kg","supplier":"A","unit_price_inc":17.0344},"Aro Schmand 24%":{"group":"Milchprodukte","price_inc":27.8093,"pack_size":5,"pack_unit":"kg","supplier":"M","unit_price_inc":5.56186},"Greco Feta 48%":{"group":"Milchprodukte","price_inc":19.2493,"pack_size":2,"pack_unit":"kg","supplier":"M","unit_price_inc":9.6246},"Grana Padano DOP 1/8 Colla":{"group":"Milchprodukte","price_inc":15.8253,"pack_size":4,"pack_unit":"kg","supplier":"A","article_no":13156,"unit_price_inc":15.8253},"Hirtenkäse":{"group":"Milchprodukte","price_inc":14.43,"pack_size":1.8,"pack_unit":"kg","supplier":"M","unit_price_inc":8.0166},"Gorgonzola":{"group":"Milchprodukte","price_inc":11.7593,"pack_size":1.5,"pack_unit":"kg","supplier":"A","article_no":1132,"unit_price_inc":7.8395},"Ricotta di pecora Fresca":{"group":"Milchprodukte","price_inc":8.0143,"pack_size":1.5,"pack_unit":"kg","supplier":"A","article_no":1386,"unit_price_inc":5.3428},"Stracciatella":{"group":"Milchprodukte","price_inc":3.6273,"pack_size":0.25,"pack_unit":"kg","supplier":"A","article_no":11151,"unit_price_inc":14.5092},"Zwiebeln RONL":{"group":"Gemüse","price_inc":3.1993,"pack_size":1.5,"pack_unit":"kg","supplier":"M","unit_price_inc":2.1328},"Zwiebeln rot ":{"group":"Gemüse","price_inc":13.8993,"pack_size":10,"pack_unit":"kg","supplier":"A","article_no":"O445","unit_price_inc":1.3899},"Knoblauch GES":{"group":"Gemüse","price_inc":6.9443,"pack_size":1,"pack_unit":"kg","supplier":"A","article_no":"O475","unit_price_inc":6.9443},"Pelati Andronaco":{"group":"Gemüse","price_inc":3.1993,"pack_size":2.5,"pack_unit":"kg","supplier":"A","article_no":30163,"unit_price_inc":1.2797},"Polpa Andronaco":{"group":"Gemüse","price_inc":13.8993,"pack_size":10,"pack_unit":"kg","supplier":"A","article_no":30164,"unit_price_inc":1.3899},"Polpa cour di pomodoro Cirio":{"group":"Gemüse","price_inc":13.8993,"pack_size":5,"pack_unit":"kg","supplier":"A","unit_price_inc":2.7798},"Basilikum frisch":{"group":"Gemüse","price_inc":16.0393,"pack_size":1,"pack_unit":"kg","supplier":"A","article_no":"O902","unit_price_inc":16.0393},"Rucola frisch":{"group":"Gemüse","price_inc":7.4793,"pack_size":1,"pack_unit":"kg","supplier":"A","article_no":"O106","unit_price_inc":7.4793},"Blattspiat Miniportioniert":{"group":"Gemüse","price_inc":5.6603,"pack_size":2.5,"pack_unit":"kg","supplier":"A","unit_price_inc":2.2641},"Eiswürfel":{"group":"Gemüse","price_inc":5.1051,"pack_size":5,"pack_unit":"kg","supplier":"M","unit_price_inc":1.0210},"Spinat frisch":{"group":"Gemüse","price_inc":19.2493,"pack_size":5.5,"pack_unit":"Kg","supplier":"A","unit_price_inc":3.4998},"Pilze frisch":{"group":"Gemüse","price_inc":4.8,"pack_size":1,"pack_unit":"kg","supplier":"M","unit_price_inc":4.8},"Cherrytomaten":{"group":"Gemüse","price_inc":5.8743,"pack_size":3,"pack_unit":"kg","supplier":"A","article_no":"O312","unit_price_inc":5.8743},"Champignon":{"group":"Gemüse","price_inc":3.9483,"pack_size":3,"pack_unit":"kg","supplier":"A","article_no":"O500","unit_price_inc":1.3161},"Zucchini":{"group":"Gemüse","price_inc":9.6193,"pack_size":5,"pack_unit":"kg","supplier":"A","article_no":"O204","unit_price_inc":1.9238},"Paprika":{"group":"Gemüse","price_inc":15.515,"pack_size":5,"pack_unit":"kg","article_no":"O214","unit_price_inc":3.103},"Aro Rapsöl":{"group":"Sonstiges","price_inc":4.1623,"pack_size":2.5,"pack_unit":"kg","supplier":"M","unit_price_inc":1.6649},"Aro Zucker Raffinade":{"group":"Sonstiges","price_inc":0.8881,"pack_size":1,"pack_unit":"kg","supplier":"M","unit_price_inc":0.8881},"Aro Honig":{"group":"Sonstiges","price_inc":11.2243,"pack_size":1.5,"pack_unit":"kg","supplier":"M","unit_price_inc":7.4828},"Bührings Eier Freiland":{"group":"Sonstiges","price_inc":4,"supplier":"B"},"Hefe Omas Ur-Hefe":{"group":"Sonstiges","price_inc":0.1819,"pack_size":0.042,"pack_unit":"kg","supplier":"M","unit_price_inc":4.3309},"Aro Eiswürfel":{"group":"Sonstiges","price_inc":5.1051,"pack_size":5,"pack_unit":"kg","supplier":"M","unit_price_inc":1.0210},"Olio extra virgin san Giovanni Desantes":{"group":"Sonstiges","price_inc":8.5493,"pack_size":1,"pack_unit":"kg","supplier":"A","unit_price_inc":8.5493},"Wallnusskerne Andronaco":{"group":"Sonstiges","price_inc":19.2493,"pack_size":1,"pack_unit":"kg","supplier":"A","unit_price_inc":19.2493},"Crema di Balsamico":{"group":"Sonstiges","price_inc":5.1253,"pack_size":0.5,"pack_unit":"kg","supplier":"A","unit_price_inc":10.2506},"Apfel essig ":{"group":"Sonstiges","price_inc":1.5515,"pack_size":0.5,"pack_unit":"kg","supplier":"M","unit_price_inc":3.103},"Pesto alla genovese":{"group":"Sonstiges","price_inc":4.8043,"pack_size":0.5,"pack_unit":"kg","supplier":"A","article_no":3456,"unit_price_inc":9.6086},"Salz":{"group":"Sonstiges","price_inc":8.5493,"pack_size":25,"pack_unit":"kg","supplier":"A","article_no":6391,"unit_price_inc":0.3419},"Pomodoro Secchi in olio":{"group":"Sonstiges","price_inc":15.6113,"pack_size":2.9,"pack_unit":"Kg","supplier":"A","article_no":34329,"unit_price_inc":5.3832},"Kuehne Senf ":{"group":"Sonstiges","price_inc":1.5943,"pack_size":0.25,"pack_unit":"Kg","supplier":"M","unit_price_inc":6.3772},"Metro Chef Chiliflocken ":{"group":"Sonstiges","price_inc":8.0143,"pack_size":0.37,"pack_unit":"Kg","supplier":"M","unit_price_inc":21.6602},"Orange":{"group":"Sonstiges","price_inc":6.4093,"pack_size":3,"pack_unit":"Kg","supplier":"M","unit_price_inc":2.1364},"Eier (Bührings)":{"group":"Sonstiges","price_inc":4,"pack_size":10,"pack_unit":"stk","supplier":"B","unit_price_inc":6.6666},"Limette":{"group":"Sonstiges","price_inc":3.1993,"pack_size":1,"pack_unit":"kg","supplier":"M","unit_price_inc":3.1993},"Chilipulver":{"group":"Sonstiges","price_inc":5.8743,"pack_size":0.39,"pack_unit":"kg","supplier":"M","unit_price_inc":15.0623},"Chilischoten":{"group":"Sonstiges","price_inc":8.8703,"pack_size":0.19,"pack_unit":"kg","supplier":"M","unit_price_inc":46.6857},"Peperoncini Piccanti in olio":{"group":"Sonstiges","price_inc":22.4593,"pack_size":3.1,"pack_unit":"kg","supplier":"A","article_no":3431,"unit_price_inc":7.2449},"Oliven schwarz in Scheiben":{"group":"Sonstiges","price_inc":11.0102,"pack_size":4.25,"pack_unit":"kg","supplier":"A","article_no":30108,"unit_price_inc":2.5906},"Pistazien":{"group":"Sonstiges","price_inc":48.1393,"pack_size":1,"pack_unit":"kg","supplier":"A","article_no":6028,"unit_price_inc":48.1393},"Oregano eigenmarke Andronaco":{"group":"Sonstiges","price_inc":10.6893,"pack_size":1,"pack_unit":"kg","supplier":"A","article_no":60196,"unit_price_inc":10.6893},"VioLife":{"group":"Sonstiges","price_inc":2.49,"pack_size":0.18,"pack_unit":"kg","supplier":"E","unit_price_inc":13.8333},"Kapern":{"group":"Sonstiges","price_inc":8.0552,"pack_size":0.53,"pack_unit":"kg","supplier":"A","article_no":34470,"unit_price_inc":8.0552},"G&G Kürbiskerne ":{"group":"Sonstiges","price_inc":2.29,"pack_size":0.25,"pack_unit":"kg","supplier":"E","unit_price_inc":9.16}};
-const EXCEL_BASE_RECIPES={"teig":[["Farina Pizzeria Rossa Caputo 5164",156.789],["Aro Zucker Raffinade",2.349],["Salz",5.184],["Hefe Omas Ur-Hefe",0.621],["Aro Eiswürfel",23.517]],"tomatensauce":[["Polpa Andronaco",83.2],["Pelati Andronaco",44.85],["Salz",0.65],["Aro Zucker Raffinade",0.52],["Basilikum frisch",0.78]],"spinatcreme":[["Blattspiat Miniportioniert",94.9],["Aro Schmand 24%",14.3],["Salz",1.3],["Knoblauch GES",1.3],["Hirtenkäse",15.6],["Aro Zucker Raffinade",2.6]],"schmandcreme":[["Aro Schmand 24%",90.55],["Knoblauch GES",1.55],["Grana Padano DOP 1/8 Colla",6.4],["Salz",1.5]],"chilli_ricotta":[["Ricotta di pecora Fresca",39.08],["Chilipulver",0.44],["Salz",0.48]],"grillgemuese":[["Zucchini",46.08],["Paprika",70.08],["Olio extra virgin san Giovanni Desantes",2.4],["Salz",1.44]],"konfierte_tomaten":[["Cherrytomaten",144.576],["Knoblauch GES",1.92],["Olio extra virgin san Giovanni Desantes",7.232],["Salz",2.416],["Aro Zucker Raffinade",1.92],["Oregano eigenmarke Andronaco",0.24]],"hot_honey":[["Aro Honig",44.5],["Metro Chef Chiliflocken ",1.75],["Apfel essig ",2.9],["Chilipulver",0.85]],"aioli":[["Aro Rapsöl",36.375],["Eier (Bührings)",8.75],["Apfel essig ",0.5],["Aro Zucker Raffinade",0.76],["Salz",0.4],["Kuehne Senf ",1.85],["Knoblauch GES",1.365]],"aioli_auto":[["Aro Rapsöl",36.375],["Eier (Bührings)",8.75],["Aro Zucker Raffinade",0.76],["Salz",0.4],["Kuehne Senf ",1.85],["Knoblauch GES",1.365]],"karam_zwiebeln":[["Zwiebeln rot ",120.0]],"karam_walnuesse":[["Wallnusskerne Andronaco",25.0]],"kuerbiscreme":[["Aro Schmand 24%",135.825],["Knoblauch GES",2.325],["Grana Padano DOP 1/8 Colla",9.6],["Salz",2.25]]};
-const EXCEL_PIZZAS={"Margherita":{"price":0.9955,"parts":[["teig",1],["tomatensauce",1],["Grana Padano DOP 1/8 Colla",6],["Fior di Latte Taglio Napoli latteria Sorrentina",80]]},"Pesto":{"price":0.8339,"parts":[["teig",1],["tomatensauce",1],["Grana Padano DOP 1/8 Colla",6],["Fior di Latte Taglio Napoli latteria Sorrentina",35],["Pesto alla genovese",25]]},"Salami":{"price":1.1195,"parts":[["teig",1],["tomatensauce",1],["Grana Padano DOP 1/8 Colla",6],["Fior di Latte Taglio Napoli latteria Sorrentina",35],["Salami 55mm Tulip",60]]},"Funghi":{"price":0.7911,"parts":[["teig",1],["tomatensauce",1],["Grana Padano DOP 1/8 Colla",6],["Fior di Latte Taglio Napoli latteria Sorrentina",35],["Champignon",50]]},"Parma":{"price":2.1665,"parts":[["teig",1],["tomatensauce",1],["Grana Padano DOP 1/8 Colla",6],["Fior di Latte Taglio Napoli latteria Sorrentina",35],["Prosciutto Crudo con Interfoglio",50],["Rucola frisch",40],["Crema di Balsamico",8],["Pesto alla genovese",15]]},"Tonno":{"price":0.9490,"parts":[["teig",1],["tomatensauce",1],["Grana Padano DOP 1/8 Colla",6],["Fior di Latte Taglio Napoli latteria Sorrentina",35],["Thunf. Öl",75],["Zwiebeln rot ",55]]},"Verde":{"price":1.8508,"parts":[["teig",1],["spinatcreme",1],["Grana Padano DOP 1/8 Colla",6],["Fior di Latte Taglio Napoli latteria Sorrentina",30],["Hirtenkäse",50],["karam_zwiebeln",1.166],["karam_walnuesse",1]]},"Burrata":{"price":3.2637,"parts":[["teig",1],["tomatensauce",1],["Grana Padano DOP 1/8 Colla",6],["Pesto alla genovese",15],["Pomodoro Secchi in olio",20],["Rucola frisch",40],["Fior di Latte Taglio Napoli latteria Sorrentina",35],["Burrata Nonno Nanni",125]]},"Spicy Salami":{"price":2.0784,"parts":[["teig",1],["tomatensauce",0.576],["Grana Padano DOP 1/8 Colla",6],["Fior di Latte Taglio Napoli latteria Sorrentina",55],["Salami napoli picante",75],["chilli_ricotta",1],["hot_honey",0.2],["Peperoncini Piccanti in olio",10]]},"Mortadella e Pistachio":{"price":2.0127,"parts":[["teig",1],["tomatensauce",1],["Grana Padano DOP 1/8 Colla",6],["Fior di Latte Taglio Napoli latteria Sorrentina",35],["Mortadella",50],["Stracciatella",30],["Pistazien",6]]},"Pizza Grillgemüse":{"price":1.2935,"parts":[["teig",1],["tomatensauce",1],["grillgemuese",1],["Oliven schwarz in Scheiben",20],["Pomodoro Secchi in olio",20],["VioLife",35]]},"Special Margherita":{"price":2.0386,"parts":[["teig",1],["schmandcreme",1],["Fior di Latte Taglio Napoli latteria Sorrentina",35],["Grana Padano DOP 1/8 Colla",6],["konfierte_tomaten",1],["Olio extra virgin san Giovanni Desantes",10]]},"Speciale":{"price":1.0137,"parts":[["teig",1],["tomatensauce",1],["Fior di Latte Taglio Napoli latteria Sorrentina",35],["Grana Padano DOP 1/8 Colla",6],["Kochschinken",50],["Champignon",35]]},"Siziliana":{"price":1.2280,"parts":[["teig",1],["tomatensauce",1],["Fior di Latte Taglio Napoli latteria Sorrentina",35],["Grana Padano DOP 1/8 Colla",6],["Zwiebeln rot ",20],["Sardellen",20],["Kapern",6],["Oliven schwarz in Scheiben",10]]},"Gorgonzola e Spinacchi":{"price":1.8255,"parts":[["teig",1],["schmandcreme",1],["Fior di Latte Taglio Napoli latteria Sorrentina",35],["Grana Padano DOP 1/8 Colla",6],["Blattspiat Miniportioniert",60],["Gorgonzola",40],["Cherrytomaten",60]]},"Kürbis":{"price":0.048,"parts":[["teig",1],["kuerbiscreme",1],["Grana Padano DOP 1/8 Colla",9],["Fior di Latte Taglio Napoli latteria Sorrentina",30],["Hirtenkäse",30],["Pancetta",60],["karam_zwiebeln",1],["G&G Kürbiskerne ",5],["Crema di Balsamico",5]]}};
-const SUPPLIER_LABELS={A:'Andronaco',B:'Bührings',E:'Edeka',F:'Famila',H:'Hol Ab',L:'Lütauer',M:'Metro'};
-const ALL_SUPPLIER_CODES=['A','B','E','F','H','L','M']; const SUPPLIER_ORDER={A:1,B:2,E:3,F:4,H:5,L:6,M:7};
+
+// ── KONSTANTEN AUS PIZZA+DIPS KALK.HTML ───────────────────────────────────
+const ART = {
+  'Caputo Mehl':          {ppkg:1.0268,  pkg:25,    artnr:'5164',  sup:'Andronaco', grp:'Teig'},
+  'Fior di Latte':        {ppkg:8.9292,  pkg:2,     artnr:'11498', sup:'Andronaco', grp:'Milchprodukte / Käse'},
+  'Burrata':              {ppkg:17.0344, pkg:0.125, artnr:'11551', sup:'Andronaco', grp:'Milchprodukte / Käse'},
+  'Schmand':              {ppkg:5.5619,  pkg:5,     artnr:'',      sup:'Metro',     grp:'Milchprodukte / Käse'},
+  'Parmesan':             {ppkg:15.8253, pkg:4,     artnr:'13156', sup:'Andronaco', grp:'Milchprodukte / Käse'},
+  'Hirtenkäse':           {ppkg:8.0167,  pkg:1.8,   artnr:'',      sup:'Metro',     grp:'Milchprodukte / Käse'},
+  'Gorgonzola':           {ppkg:7.8395,  pkg:1.5,   artnr:'1132',  sup:'Andronaco', grp:'Milchprodukte / Käse'},
+  'Ricotta':              {ppkg:5.3429,  pkg:1.5,   artnr:'1386',  sup:'Andronaco', grp:'Milchprodukte / Käse'},
+  'Stracciatella':        {ppkg:14.5092, pkg:0.25,  artnr:'11151', sup:'Andronaco', grp:'Milchprodukte / Käse'},
+  'Salami 55mm Tulip':    {ppkg:8.7633,  pkg:1,     artnr:'1403',  sup:'Andronaco', grp:'Belag'},
+  'Prosciutto Crudo':     {ppkg:20.9506, pkg:0.5,   artnr:'1438',  sup:'Andronaco', grp:'Belag'},
+  'Salami Napoli':        {ppkg:13.5783, pkg:1,     artnr:'1406',  sup:'Andronaco', grp:'Belag'},
+  'Mortadella':           {ppkg:13.8993, pkg:1,     artnr:'15499', sup:'Andronaco', grp:'Belag'},
+  'Kochschinken':         {ppkg:7.4793,  pkg:7.8,   artnr:'1413',  sup:'Andronaco', grp:'Belag'},
+  'Sardellen':            {ppkg:26.6163, pkg:0.08,  artnr:'3175',  sup:'Andronaco', grp:'Belag'},
+  'Thunfisch':            {ppkg:3.7193,  pkg:2.5,   artnr:'3140',  sup:'Andronaco', grp:'Belag'},
+  'Pancetta':             {ppkg:24.9664, pkg:0.3,   artnr:'',      sup:'Edeka',     grp:'Belag'},
+  'Pelati':               {ppkg:1.2797,  pkg:2.5,   artnr:'30163', sup:'Andronaco', grp:'Sauce / Basis'},
+  'Polpa':                {ppkg:1.3899,  pkg:10,    artnr:'30164', sup:'Andronaco', grp:'Sauce / Basis'},
+  'Basilikum frisch':     {ppkg:16.0393, pkg:1,     artnr:'O902',  sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Rucola frisch':        {ppkg:7.4793,  pkg:1,     artnr:'O106',  sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Knoblauch':            {ppkg:6.9443,  pkg:1,     artnr:'O475',  sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Zwiebeln rot':         {ppkg:1.3899,  pkg:10,    artnr:'O445',  sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Cherrytomaten':        {ppkg:1.9581,  pkg:3,     artnr:'O312',  sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Champignons':          {ppkg:1.3161,  pkg:3,     artnr:'O500',  sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Zucchini':             {ppkg:1.9239,  pkg:5,     artnr:'O204',  sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Paprika':              {ppkg:3.1030,  pkg:5,     artnr:'O214',  sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Spinat':               {ppkg:2.2641,  pkg:2.5,   artnr:'',      sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Pesto':                {ppkg:9.6086,  pkg:0.5,   artnr:'3456',  sup:'Andronaco', grp:'Sauce / Basis'},
+  'Pomodori Secchi':      {ppkg:5.3832,  pkg:2.9,   artnr:'34329', sup:'Andronaco', grp:'Sauce / Basis'},
+  'Oliven schwarz':       {ppkg:2.5907,  pkg:4.25,  artnr:'30108', sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Peperoncini':          {ppkg:7.2449,  pkg:3.1,   artnr:'3431',  sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Kapern':               {ppkg:8.0553,  pkg:0.53,  artnr:'34470', sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Pistazien':            {ppkg:48.1393, pkg:1,     artnr:'6028',  sup:'Andronaco', grp:'Belag'},
+  'Oregano':              {ppkg:10.6893, pkg:1,     artnr:'60196', sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Salz':                 {ppkg:0.3420,  pkg:25,    artnr:'6391',  sup:'Andronaco', grp:'Teig'},
+  'Crema Balsamico':      {ppkg:9.6086,  pkg:0.5,   artnr:'',      sup:'Andronaco', grp:'Sauce / Basis'},
+  'Wallnusskerne':        {ppkg:19.2493, pkg:1,     artnr:'',      sup:'Andronaco', grp:'Gemüse & Kräuter'},
+  'Olio extra vergine':   {ppkg:8.5493,  pkg:1,     artnr:'',      sup:'Andronaco', grp:'Sonstiges'},
+  'Rapsöl':               {ppkg:1.6649,  pkg:2.5,   artnr:'',      sup:'Metro',     grp:'Dips'},
+  'Zucker':               {ppkg:0.8881,  pkg:1,     artnr:'',      sup:'Metro',     grp:'Teig'},
+  'Honig':                {ppkg:7.4829,  pkg:1.5,   artnr:'',      sup:'Metro',     grp:'Dips'},
+  'Hefe':                 {ppkg:4.3310,  pkg:0.042, artnr:'',      sup:'Metro',     grp:'Teig'},
+  'Eiswürfel':            {ppkg:1.0210,  pkg:5,     artnr:'',      sup:'Metro',     grp:'Teig'},
+  'Chiliflocken':         {ppkg:21.6603, pkg:0.37,  artnr:'',      sup:'Metro',     grp:'Dips'},
+  'Chilipulver':          {ppkg:15.0623, pkg:0.39,  artnr:'',      sup:'Metro',     grp:'Dips'},
+  'Apfelessig':           {ppkg:3.1030,  pkg:0.5,   artnr:'',      sup:'Metro',     grp:'Dips'},
+  'Senf':                 {ppkg:6.3772,  pkg:0.25,  artnr:'',      sup:'Metro',     grp:'Dips'},
+  'Eier':                 {ppkg:0.4000,  pkg:0.6,   artnr:'',      sup:'Bührings',  grp:'Dips'},
+  'VioLife':              {ppkg:13.8333, pkg:0.18,  artnr:'',      sup:'Edeka',     grp:'Milchprodukte / Käse'},
+  'Kürbiskerne':          {ppkg:9.1600,  pkg:0.25,  artnr:'',      sup:'Edeka',     grp:'Gemüse & Kräuter'}
+};
+const TOMATENSAUCE = {'Polpa':64,'Pelati':34.5,'Salz':0.5,'Zucker':0.4,'Basilikum frisch':0.6};
+const SPINATCREME  = {'Spinat':73,'Schmand':11,'Salz':1,'Knoblauch':1,'Hirtenkäse':12,'Zucker':2};
+const SCHMANDCREME = {'Schmand':90.55,'Knoblauch':1.55,'Parmesan':6.4,'Salz':1.5};
+const KONFIERT     = {'Cherrytomaten':90.36,'Knoblauch':1.2,'Rapsöl':4.52,'Salz':1.51,'Zucker':1.2,'Oregano':0.15};
+const GRILLGEMUESE = {'Zucchini':38.4,'Paprika':58.4,'Rapsöl':2,'Salz':1.2};
+const TEIG         = {'Caputo Mehl':156.79,'Zucker':2.349,'Salz':5.184,'Hefe':0.621,'Eiswürfel':23.517};
+const AIOLI        = {'Rapsöl':36.375,'Eier':8.75,'Apfelessig':0.5,'Zucker':0.76,'Salz':0.4,'Senf':1.85,'Knoblauch':1.365};
+const HONEY        = {'Honig':44.5,'Chiliflocken':1.75,'Apfelessig':2.9,'Chilipulver':0.85};
+
+const PIZZAS = [
+  {name:'Margherita',              price:1.18, ing:{__ts:130, 'Parmesan':6, 'Fior di Latte':80}},
+  {name:'Pesto',                   price:1.02, ing:{__ts:130, 'Parmesan':6, 'Fior di Latte':35, 'Pesto':25}},
+  {name:'Salami',                  price:1.31, ing:{__ts:130, 'Parmesan':6, 'Fior di Latte':35, 'Salami 55mm Tulip':60}},
+  {name:'Funghi',                  price:0.98, ing:{__ts:130, 'Parmesan':6, 'Fior di Latte':35, 'Champignons':50}},
+  {name:'Parma',                   price:2.35, ing:{__ts:130, 'Parmesan':6, 'Fior di Latte':35, 'Prosciutto Crudo':50, 'Rucola frisch':40, 'Crema Balsamico':8, 'Pesto':15}},
+  {name:'Tonno',                   price:1.14, ing:{__ts:130, 'Parmesan':6, 'Fior di Latte':35, 'Thunfisch':75, 'Zwiebeln rot':55}},
+  {name:'Verde',                   price:2.31, ing:{__sp:130, 'Parmesan':6, 'Fior di Latte':30, 'Hirtenkäse':50, 'Zwiebeln rot':70, 'Wallnusskerne':25}},
+  {name:'Burrata',                 price:3.45, ing:{__ts:130, 'Parmesan':6, 'Pesto':15, 'Pomodori Secchi':20, 'Rucola frisch':40, 'Fior di Latte':35, 'Burrata':125}},
+  {name:'Spicy Salami',            price:2.27, ing:{__ts_roh:75, 'Parmesan':6, 'Fior di Latte':55, 'Salami Napoli':75, 'Ricotta':40, 'Honig':10, 'Peperoncini':10}},
+  {name:'Mortadella e Pistacchio', price:2.20, ing:{__ts:130, 'Parmesan':6, 'Fior di Latte':35, 'Mortadella':50, 'Stracciatella':30, 'Pistazien':6}},
+  {name:'Pizza Grillgemüse',       price:1.48, ing:{__ts:130, __gg:120, 'Oliven schwarz':20, 'Pomodori Secchi':20, 'VioLife':35}},
+  {name:'Special Margherita',      price:2.66, ing:{__sc:100, 'Fior di Latte':35, 'Parmesan':6, __kt:160, 'Olio extra vergine':10}},
+  {name:'Speciale',                price:1.01, ing:{__ts:130, 'Fior di Latte':35, 'Parmesan':6, 'Kochschinken':50, 'Champignons':35}},
+  {name:'Siziliana',               price:1.41, ing:{__ts:130, 'Fior di Latte':35, 'Parmesan':6, 'Zwiebeln rot':20, 'Sardellen':20, 'Kapern':6, 'Oliven schwarz':10}},
+  {name:'Gorgonzola e Spinacchi',  price:2.44, ing:{__sc:100, 'Fior di Latte':35, 'Parmesan':6, 'Spinat':60, 'Gorgonzola':40, 'Cherrytomaten':60}},
+  {name:'Kürbis',                  price:3.30, ing:{__sc:150, 'Parmesan':9, 'Fior di Latte':30, 'Hirtenkäse':30, 'Pancetta':60, 'Zwiebeln rot':60, 'Kürbiskerne':5, 'Crema Balsamico':5}},
+];
+
 const CAT_DEFAULTS={stundensatz:18,kmsatz:0.8,waren:3.5,gas:10,entsorgung:15,miete:45,ust:1.19};
 const CAT_SCENARIOS=[{min:30,max:49,label:'30 - 49 P.',stunden:35,marge:0.5},{min:50,max:69,label:'50 - 69 P.',stunden:39,marge:0.6},{min:70,max:99,label:'70 - 99 P.',stunden:46,marge:0.7},{min:100,max:149,label:'100 - 149 P.',stunden:52,marge:0.85},{min:150,max:199,label:'150 - 199 P.',stunden:59.5,marge:1.0},{min:200,max:299,label:'200 - 299 P.',stunden:64.5,marge:1.2},{min:300,max:400,label:'300 - 400 P.',stunden:71.5,marge:1.1}];
 let state={events:[],kontakte:[],einkauf:[],cateringAngebote:[],pinnwand:'',notes:{pizza:[],catpizza:[],catmisc:[]},calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),editEventId:null,editKontaktId:null,editEinkaufId:null,editCateringAngebotId:null};
-let pizzaMengen={},dipMengen={aioli:0,hothoney:0}; Object.keys(EXCEL_PIZZAS).forEach(p=>pizzaMengen[p]=0);
+let pizzaMengen={},dipMengen={aioli:0,hothoney:0}; PIZZAS.forEach(p=>pizzaMengen[p.name]=0);
 
 function listenAll(){db.ref('/').on('value',snap=>{const d=snap.val()||{};state.events=(d.events||[]).map(normalizeEvent);state.kontakte=(d.kontakte||[]).map(normalizeKontakt);state.einkauf=(d.einkauf||[]).map(normalizeEinkaufItem);state.cateringAngebote=d.cateringAngebote||[];state.pinnwand=d.pinnwand||'';state.notes=Object.assign({pizza:[],catpizza:[],catmisc:[]},d.notes||{});if(d.pizzaMengen)Object.assign(pizzaMengen,d.pizzaMengen);if(d.dipMengen)Object.assign(dipMengen,d.dipMengen);renderAll();});}
 function pushArrayItemSafe(key,item){db.ref(key).transaction(arr=>{let a=arr||[];let i=a.findIndex(x=>x&&x.id===item.id);if(i>=0)a[i]=item;else a.push(item);return a.filter(x=>x!=null);});}
@@ -441,10 +492,9 @@ function updateStateObj(k,o){db.ref(k).update(o);}
 function normalizeEvent(ev){return Object.assign({},ev,{company:ev.company||'HP',contactId:ev.contactId||ev.kontaktId||'',kontakt:ev.kontakt||ev.contactName||'',cateringAngebotId:ev.cateringAngebotId||'',cateringAngebotName:ev.cateringAngebotName||'',endDate:ev.endDate||''});}
 function normalizeKontakt(k){return Object.assign({firma:'',tel:'',email:'',adresse:'',typ:'Kunde',notizen:''},k);}
 function normalizeEinkaufItem(e){return Object.assign({kategorie:'Sonstiges',menge:0,einheit:'Stk',preis:0,artikelnummer:'',lieferant:'A'},e);}
-function lieferantName(c){return SUPPLIER_LABELS[c]||c||'–';}
 function contactLinkHTML(id,n){return id?`<span class="linkish" onclick="openContactInfo('${id}'); event.stopPropagation();">${n||'Kontakt'}</span>`:'–';}
 function fmt(n){return Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
-function fmtQty(g){return g>=1000?(g/1000).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg':Math.round(g).toLocaleString('de-DE')+' g';}
+function fmtG(g){return g>=1000?(g/1000).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg':Math.round(g).toLocaleString('de-DE')+' g';}
 function statusBadge(s){const m={Catering:'badge-blue',Event:'badge-amber',Sonstiges:'badge-amber','Pending...':'badge-amber',Secured:'badge-green',Possibility:'badge-blue',Kunde:'badge-blue',Lieferant:'badge-green',Mitarbeiter:'badge-amber'};return `<span class="badge ${m[s]||'badge-amber'}">${s}</span>`;}
 function showToast(m){const w=document.getElementById('toast-wrap'),t=document.createElement('div');t.className='toast';t.textContent=m||'Gespeichert';w.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),220);},2200);}
 function copyText(t,m){navigator.clipboard.writeText(t).then(()=>showToast(m||'Kopiert!'));}
@@ -469,34 +519,126 @@ function openEventModal(id){state.editEventId=id||null;const ev=id?normalizeEven
 function handleEventOfferSelection(){const s=document.getElementById('ev-catering-angebot-id');if(!s)return;const a=state.cateringAngebote.find(x=>x.id===s.value);if(!a)return;const aI=document.getElementById('ev-angebot'),pI=document.getElementById('ev-personen');if(aI&&a.bruttoGesamt)aI.value=String(a.bruttoGesamt).replace(/[^0-9.\-]/g,'')||aI.value;if(pI&&(!pI.value||pI.value==='0')&&a.gaeste)pI.value=a.gaeste;}
 function saveEvent(){const cId=document.getElementById('ev-kontakt-id').value||'';const aId=document.getElementById('ev-catering-angebot-id').value||'';const lK=state.kontakte.find(k=>k.id===cId);const lA=state.cateringAngebote.find(a=>a.id===aId);const ev=normalizeEvent({id:state.editEventId||Date.now().toString(),title:document.getElementById('ev-title').value||'Ohne Titel',type:document.getElementById('ev-type').value,company:document.getElementById('ev-company').value||'HP',date:document.getElementById('ev-date').value,endDate:document.getElementById('ev-endDate').value,time:document.getElementById('ev-time').value,ort:document.getElementById('ev-ort').value,personen:document.getElementById('ev-personen').value,contactId:cId,kontakt:lK?lK.name:'',cateringAngebotId:aId,cateringAngebotName:lA?(lA.name||'Angebot'):'',angebot:document.getElementById('ev-angebot').value,notizen:document.getElementById('ev-notizen').value,status:document.getElementById('ev-status').value});pushArrayItemSafe('events',ev);closeModal('event-modal');showToast('Gespeichert');}
 function deleteEvent(id){removeArrayItemSafe('events',id);closeModal('detail-modal');showToast('Gelöscht');}
-function showEventDetail(id){const ev=normalizeEvent(state.events.find(e=>e.id===id)||{});if(!ev.id)return;const kL=contactLinkHTML(ev.contactId,ev.kontakt);let dS=ev.date||'–';if(ev.endDate&&ev.endDate!==ev.date)dS+=` bis ${ev.endDate}`;document.getElementById('detail-content').innerHTML=`<div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;margin:0;padding-bottom:16px;"><div style="margin:0">${ev.title} <span class="company-chip ${(ev.company||'HP').toLowerCase()}">${ev.company||'HP'}</span></div>${statusBadge(ev.status)}</div><div class="modal-body"><table style="font-size:13px"><tr><td style="color:var(--muted);padding:5px 0;width:120px">Typ</td><td>${statusBadge(ev.type)}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${dS} ${ev.time||''}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Ort</td><td>${ev.ort||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td>${kL}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${ev.angebot?fmt(ev.angebot):'–'}</td></tr></table>${ev.notizen?`<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px">${ev.notizen.replace(/\n/g,'<br>')}</div>`:''}</div><div class="modal-footer"><button class="btn-danger" onclick="deleteEvent('${id}')">Löschen</button><button onclick="closeModal('detail-modal');openEventModal('${id}')">Bearbeiten</button><button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button></div>`;openModal('detail-modal');}
+function showEventDetail(id){const ev=normalizeEvent(state.events.find(e=>e.id===id)||{});if(!ev.id)return;const kL=contactLinkHTML(ev.contactId,ev.kontakt);let dS=ev.date||'–';if(ev.endDate&&ev.endDate!==ev.date)dS+=` bis ${ev.endDate}`;document.getElementById('detail-content').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">${ev.title} <span class="company-chip ${(ev.company||'HP').toLowerCase()}">${ev.company||'HP'}</span></div>${statusBadge(ev.status)}</div><table style="font-size:13px"><tr><td style="color:var(--muted);padding:5px 0;width:120px">Typ</td><td>${statusBadge(ev.type)}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${dS} ${ev.time||''}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Ort</td><td>${ev.ort||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td>${kL}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${ev.angebot?fmt(ev.angebot):'–'}</td></tr></table>${ev.notizen?`<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px">${ev.notizen.replace(/\n/g,'<br>')}</div>`:''}<div class="modal-footer"><button class="btn-danger" onclick="deleteEvent('${id}')">Löschen</button><button onclick="closeModal('detail-modal');openEventModal('${id}')">Bearbeiten</button><button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button></div>`;openModal('detail-modal');}
 function renderAllEvents(){const q=(document.getElementById('events-search')?.value||'').trim().toLowerCase();const s=[...state.events].filter(ev=>{if(!q)return true;return [ev.title,ev.type,ev.ort,ev.kontakt,ev.company,ev.status,ev.date].filter(Boolean).join(' ').toLowerCase().includes(q);}).sort((a,b)=>(a.date||'').localeCompare(b.date||''));document.getElementById('all-events-list').innerHTML=s.length?s.map(eventItemHTML).join(''):'<div style="color:var(--muted);font-size:13px">Nichts gefunden.</div>';}
 
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 function renderCalendar(){const y=state.calYear,m=state.calMonth;document.getElementById('cal-title').textContent=MONTHS[m]+' '+y;document.getElementById('cal-headers').innerHTML=['Mo','Di','Mi','Do','Fr','Sa','So'].map(d=>`<div class="cal-header-cell">${d}</div>`).join('');const f=new Date(y,m,1).getDay(),off=(f===0)?6:f-1,dts=new Date(y,m+1,0).getDate(),tdy=new Date();let ht='';for(let i=0;i<off;i++)ht+='<div></div>';for(let d=1;d<=dts;d++){const cD=new Date(y,m,d);cD.setHours(0,0,0,0);const es=state.events.filter(e=>{if(!e.date)return false;const st=new Date(e.date);st.setHours(0,0,0,0);const en=e.endDate?new Date(e.endDate):st;en.setHours(0,0,0,0);return cD>=st&&cD<=en;});const isT=d===tdy.getDate()&&m===tdy.getMonth()&&y===tdy.getFullYear();const cC=es.length?(' '+((es[0].company||'HP').toLowerCase())):'';ht+=`<div class="cal-day${isT?' today':''}${es.length?' has-event':''}${cC}" onclick="${es.length?`showEventDetail('${es[0].id}')`:'openEventModal()'}"><div style="font-weight:600;font-size:12px">${d}</div>${es.map(e=>`<div class="cal-event-tag">${e.title}</div>`).join('')}</div>`;}document.getElementById('cal-body').innerHTML=ht;const cM=new Date(y,m,1),nM=new Date(y,m+2,1);const mE=state.events.filter(e=>{if(!e.date)return false;const st=new Date(e.date);st.setHours(0,0,0,0);const en=e.endDate?new Date(e.endDate):st;en.setHours(0,0,0,0);return en>=cM&&st<nM;});document.getElementById('cal-event-list').innerHTML=mE.length?mE.sort((a,b)=>a.date>b.date?1:-1).map(eventItemHTML).join(''):'<div style="color:var(--muted);font-size:13px">Keine Events.</div>';}
 function changeMonth(d){state.calMonth+=d;if(state.calMonth>11){state.calMonth=0;state.calYear++;}if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar();}
 
-function catFromGroup(g){const m={'Mehl':'Teig','Proteine':'Belag','Milchprodukte':'Milchprodukte / Käse','Gemüse':'Gemüse & Kräuter','Sonstiges':'Sonstiges','Lebensmittel':'Sonstiges'};return m[g]||'Sonstiges';}
-function unitPriceInc(n){const m=EXCEL_ARTICLES[n];return m&&m.unit_price_inc?Number(m.unit_price_inc):0;}
-function expandRecipePart(n,f,t){if(EXCEL_BASE_RECIPES[n]){EXCEL_BASE_RECIPES[n].forEach(([a,g])=>{t[a]=(t[a]||0)+Number(g)*Number(f);});}else{t[n]=(t[n]||0)+Number(f);}}
+// ── PIZZA & DIPS ENGINE AUS ORIGINAL-DATEI ────────────────────────────────
+function addG(acc,k,g){if(!acc[k])acc[k]=0;acc[k]+=g;}
+function expand100(acc,recipe,grams){for(const[k,p100]of Object.entries(recipe))addG(acc,k,grams*p100/100);}
 function totalPizzaCount(){return Object.values(pizzaMengen).reduce((s,v)=>s+(Number(v)||0),0);}
-function renderPizzaGrid(){document.getElementById('pizza-grid').innerHTML=Object.keys(EXCEL_PIZZAS).map(n=>`<div class="pizza-card"><div class="pizza-card-name">${n}</div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">${fmt(EXCEL_PIZZAS[n].price)} / Pizza</div><div class="pizza-qty"><button onclick="changePizza('${n}',-1)">−</button><input type="number" min="0" value="${pizzaMengen[n]||0}" id="pqty-${n.replace(/\s/g,'_').replace(/[()]/g,'')}" onchange="setPizza('${n}',this.value)"/><button onclick="changePizza('${n}',1)">+</button></div></div>`).join('');updatePizzaTotal();}
+
+function renderPizzaGrid(){document.getElementById('pizza-grid').innerHTML=PIZZAS.map(p=>`<div class="pizza-card"><div class="pizza-card-name">${p.name}</div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">${fmt(p.price)} / Pizza</div><div class="pizza-qty"><button onclick="changePizza('${p.name}',-1)">−</button><input type="number" min="0" value="${pizzaMengen[p.name]||0}" id="pqty-${p.name.replace(/\s/g,'_').replace(/[()]/g,'')}" onchange="setPizza('${p.name}',this.value)"/><button onclick="changePizza('${p.name}',1)">+</button></div></div>`).join('');updatePizzaTotal();}
 function changePizza(n,d){pizzaMengen[n]=Math.max(0,(pizzaMengen[n]||0)+d);updateStateObj('pizzaMengen',pizzaMengen);renderPizzaGrid();renderPizzaAndDipsResult();}
 function setPizza(n,v){pizzaMengen[n]=Math.max(0,parseInt(v)||0);updateStateObj('pizzaMengen',pizzaMengen);updatePizzaTotal();renderPizzaAndDipsResult();}
-function updatePizzaTotal(){document.getElementById('pizza-total').textContent=totalPizzaCount();}
+function updatePizzaTotal(){const t=totalPizzaCount();document.getElementById('pizza-total').textContent=t;document.getElementById('aioli-rec').textContent='Empfehlung: '+Math.round(t*0.35);document.getElementById('honey-rec').textContent='Empfehlung: '+Math.round(t*0.15);}
 function changeDip(k,d){dipMengen[k]=Math.max(0,(dipMengen[k]||0)+d);updateStateObj('dipMengen',dipMengen);document.getElementById('dqty-'+k).value=dipMengen[k];renderPizzaAndDipsResult();}
 function setDip(k,v){dipMengen[k]=Math.max(0,parseInt(v)||0);updateStateObj('dipMengen',dipMengen);renderPizzaAndDipsResult();}
-function resetPizzaAndDips(){Object.keys(pizzaMengen).forEach(k=>pizzaMengen[k]=0);dipMengen={aioli:0,hothoney:0};updateStateObj('pizzaMengen',pizzaMengen);updateStateObj('dipMengen',dipMengen);['aioli','hothoney'].forEach(k=>{const e=document.getElementById('dqty-'+k);if(e)e.value=0;});renderPizzaGrid();renderPizzaAndDipsResult();}
-function aggregateAllShopping(){const t={};const tp=totalPizzaCount();Object.entries(pizzaMengen).forEach(([p,q])=>{q=Number(q)||0;if(!q||!EXCEL_PIZZAS[p])return;EXCEL_PIZZAS[p].parts.forEach(([pt,a])=>expandRecipePart(pt,Number(a)*q,t));});if(tp>0){expandRecipePart('aioli_auto',tp*0.35,t);expandRecipePart('hot_honey',tp*0.15,t);}const a=Number(dipMengen.aioli)||0,h=Number(dipMengen.hothoney)||0;if(a>0)expandRecipePart('aioli',a,t);if(h>0)expandRecipePart('hot_honey',h,t);return t;}
-function enrichArticles(t){return Object.entries(t).map(([n,g])=>{const m=EXCEL_ARTICLES[n]||{},kg=Number(g)/1000,uP=unitPriceInc(n),c=uP?uP*kg:0;let pks=null;if(m.pack_size&&m.pack_unit&&String(m.pack_unit).toLowerCase().startsWith('kg'))pks=kg/Number(m.pack_size);return {article:n,grams:Number(g),kg,category:catFromGroup(m.group),supplier:m.supplier||'',supplierLabel:SUPPLIER_LABELS[m.supplier]||m.supplier||'–',articleNo:m.article_no||'',packs:pks,cost:c};}).sort((a,b)=>{const so=(SUPPLIER_ORDER[a.supplier]||99)-(SUPPLIER_ORDER[b.supplier]||99);if(so!==0)return so;return(a.article||'').localeCompare(b.article||'');});}
-function renderPizzaAndDipsResult(){document.getElementById('dip-aioli-total').textContent=dipMengen.aioli||0;document.getElementById('dip-hothoney-total').textContent=dipMengen.hothoney||0;const tP=totalPizzaCount(),tD=(dipMengen.aioli||0)+(dipMengen.hothoney||0);const el=document.getElementById('ingredient-result');if(!tP&&!tD){el.innerHTML='<div style="color:var(--muted);font-size:13px">Mengen eingeben.</div>';return;}const rs=enrichArticles(aggregateAllShopping());let tC=0,ht='<div class="ing-wrap">',cS='';rs.forEach(r=>{tC+=r.cost||0;const hd=r.supplierLabel||'Ohne';if(hd!==cS){if(cS)ht+='</div>';ht+=`<div class="ing-group"><div class="ing-group-title">${hd}</div>`;cS=hd;}const pT=r.packs!=null?` · ${r.packs.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} Pkg`:'';ht+=`<div class="ing-row"><span>${r.article}${r.articleNo?` <span style="color:var(--muted);font-size:11px">[${r.articleNo}]</span>`:''}</span><span class="ing-amount">${fmtQty(r.grams)}</span><span style="font-size:11px;color:var(--muted);min-width:140px;text-align:right">${pT}</span><span style="font-size:11px;color:var(--muted);min-width:70px;text-align:right">${r.cost?fmt(r.cost):''}</span></div>`;});if(cS)ht+='</div>';let iH='';if(tP>0)iH=`Auto (Pizza): Aioli ${(0.35*tP).toLocaleString('de-DE')}x, Hot Honey ${(0.15*tP).toLocaleString('de-DE')}x.`;ht+=`</div><div style="margin-top:10px;font-size:12px;color:var(--muted)">${iH}</div><div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Gesamt:</span><span style="color:var(--blue)">${fmt(tC)}</span></div>`;el.innerHTML=ht;}
-function copyPizzaAndDipList(){const tP=totalPizzaCount(),dA=dipMengen.aioli||0,dH=dipMengen.hothoney||0;if(!tP&&!dA&&!dH)return showToast('Leer.');const rs=enrichArticles(aggregateAllShopping());let tx='EINKAUFSLISTE\n'+'='.repeat(20)+'\n\n';if(tP>0){tx+=`--- PIZZEN (${tP}) ---\n`;Object.entries(pizzaMengen).filter(([,v])=>Number(v)>0).forEach(([n,v])=>tx+=`${n}: ${v}x\n`);tx+=`\nAuto-Dips: Aioli ${0.35*tP} · Hot Honey ${0.15*tP}\n`;}if(dA>0||dH>0){tx+=`\n--- DIPS ---\n`;if(dA>0)tx+=`Aioli: ${dA}x\n`;if(dH>0)tx+=`Hot Honey: ${dH}x\n`;}let cS='';tx+='\n--- ZUTATEN ---\n';rs.forEach(r=>{if(r.supplierLabel!==cS){cS=r.supplierLabel;tx+=`\n${cS.toUpperCase()}\n`;}tx+=`${r.article}${r.articleNo?` [${r.articleNo}]`:''}: ${fmtQty(r.grams)}${r.packs!=null?` · ${r.packs.toLocaleString('de-DE')} Pkg`:''}${r.cost?` · ${fmt(r.cost)}`:''}\n`;});copyText(tx,'Kopiert!');}
-function saveToEinkauf(){const ts=aggregateAllShopping();if(Object.keys(ts).length===0)return showToast('Leer.');Object.entries(ts).forEach(([n,g])=>{const m=EXCEL_ARTICLES[n]||{},kg=Number(g)/1000;const item={id:Date.now().toString()+Math.random(),artikel:n,artikelnummer:m.article_no||'',lieferant:m.supplier||'A',kategorie:catFromGroup(m.group),menge:Number(kg.toFixed(3)),einheit:'kg',preis:unitPriceInc(n)||0};db.ref('einkauf').transaction(data=>{let arr=data||[];const mKey=i=>[i.artikel||'',i.kategorie||'',i.einheit||'',Number(i.preis||0).toFixed(4),i.lieferant||''].join('|').toLowerCase();const eIdx=arr.findIndex(e=>e&&mKey(e)===mKey(item));if(eIdx>=0){arr[eIdx].menge=Number((Number(arr[eIdx].menge||0)+Number(item.menge||0)).toFixed(3));}else{arr.push(item);}return arr.filter(x=>x!=null);});});showToast('Übernommen!');}
+function resetPizzaAndDips(){PIZZAS.forEach(p=>pizzaMengen[p.name]=0);dipMengen={aioli:0,hothoney:0};updateStateObj('pizzaMengen',pizzaMengen);updateStateObj('dipMengen',dipMengen);['aioli','hothoney'].forEach(k=>{const e=document.getElementById('dqty-'+k);if(e)e.value=0;});renderPizzaGrid();renderPizzaAndDipsResult();}
 
+function calcPizzaAndDipsIngredients(){
+  const raw={};
+  PIZZAS.forEach(p=>{
+    const qty=pizzaMengen[p.name]||0; if(!qty)return;
+    for(const[k,g]of Object.entries(TEIG)) addG(raw,k,qty*g);
+    for(const[k,g]of Object.entries(p.ing)){
+      if(k==='__ts') expand100(raw,TOMATENSAUCE,qty*g);
+      else if(k==='__ts_roh') {} // Skip
+      else if(k==='__sp') expand100(raw,SPINATCREME,qty*g);
+      else if(k==='__sc') expand100(raw,SCHMANDCREME,qty*g);
+      else if(k==='__kt') expand100(raw,KONFIERT,qty*g);
+      else if(k==='__gg') expand100(raw,GRILLGEMUESE,qty*g);
+      else addG(raw,k,qty*g);
+    }
+  });
+  const aq=dipMengen.aioli||0, hq=dipMengen.hothoney||0;
+  if(aq>0) for(const[k,g]of Object.entries(AIOLI)) addG(raw,k,aq*g);
+  if(hq>0) for(const[k,g]of Object.entries(HONEY)) addG(raw,k,hq*g);
+
+  const items=[];
+  for(const[artKey,grams]of Object.entries(raw)){
+    if(grams<0.1)continue;
+    const a=ART[artKey];
+    if(!a){items.push({artKey,grams,sup:'Sonstige',grp:'Sonstiges',artnr:'',ppkg:0,pkg:1,cost:0,packs:0});continue;}
+    const kg=grams/1000, cost=kg*a.ppkg, packs=a.pkg?(kg/a.pkg):0;
+    items.push({artKey,grams,sup:a.sup,grp:a.grp,artnr:a.artnr||'',ppkg:a.ppkg,pkg:a.pkg,cost,packs});
+  }
+  return items;
+}
+
+function renderPizzaAndDipsResult(){
+  document.getElementById('dip-aioli-total').textContent=dipMengen.aioli||0;
+  document.getElementById('dip-hothoney-total').textContent=dipMengen.hothoney||0;
+  const tP=totalPizzaCount(),tD=(dipMengen.aioli||0)+(dipMengen.hothoney||0);
+  const el=document.getElementById('ingredient-result');
+  if(!tP&&!tD){el.innerHTML='<div style="color:var(--muted);font-size:13px">Wähle Pizzen oder Dips, um die Liste zu berechnen.</div>';return;}
+  
+  const items=calcPizzaAndDipsIngredients();
+  const bySup={}; items.forEach(i=>{if(!bySup[i.sup])bySup[i.sup]=[]; bySup[i.sup].push(i);});
+  const supOrder=['Andronaco','Metro','Bührings','Edeka','Sonstige'];
+  const sups=Object.keys(bySup).sort((a,b)=>(supOrder.indexOf(a)<0?99:supOrder.indexOf(a))-(supOrder.indexOf(b)<0?99:supOrder.indexOf(b)));
+  
+  let tC=0, ht='<div class="ing-wrap">';
+  sups.forEach(sup=>{
+    const si=bySup[sup].sort((a,b)=>a.grp.localeCompare(b.grp)||a.artKey.localeCompare(b.artKey));
+    ht+=`<div class="ing-group"><div class="ing-group-title">${sup}</div>`;
+    si.forEach(i=>{
+      tC+=i.cost;
+      const pd=i.packs>0?`${i.packs.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} Pkg`:'';
+      ht+=`<div class="ing-row"><span>${i.artKey}${i.artnr?` <span style="color:var(--muted);font-size:11px">[${i.artnr}]</span>`:''}</span><span class="ing-amount">${fmtG(i.grams)}</span><span style="font-size:11px;color:var(--muted);min-width:90px;text-align:right">${pd}</span><span style="font-size:11px;color:var(--muted);min-width:60px;text-align:right">${i.cost>0?fmt(i.cost):''}</span></div>`;
+    });
+    ht+='</div>';
+  });
+  ht+=`</div><div style="margin-top:10px;font-size:12px;color:var(--muted)">Hinweis: Es werden nur manuell eingetragene Dips auf die Liste gesetzt (kein Auto-Zwang).</div><div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Geschätzte Warenkosten:</span><span style="color:var(--blue)">${fmt(tC)}</span></div>`;
+  el.innerHTML=ht;
+}
+
+function copyPizzaAndDipList(){
+  const items=calcPizzaAndDipsIngredients(); if(!items.length)return showToast('Leer.');
+  const tP=totalPizzaCount();
+  let tx='EINKAUFSLISTE PIZZA & DIPS\n'+'='.repeat(26)+'\n\n';
+  if(tP>0){tx+=`--- PIZZEN (${tP}) ---\n`; PIZZAS.filter(p=>pizzaMengen[p.name]>0).forEach(p=>tx+=`${p.name}: ${pizzaMengen[p.name]}x\n`);}
+  if(dipMengen.aioli||dipMengen.hothoney){tx+=`\n--- DIPS ---\n`; if(dipMengen.aioli)tx+=`Aioli: ${dipMengen.aioli}x\n`; if(dipMengen.hothoney)tx+=`Hot Honey: ${dipMengen.hothoney}x\n`;}
+  
+  const bySup={}; items.forEach(i=>{if(!bySup[i.sup])bySup[i.sup]=[]; bySup[i.sup].push(i);});
+  const supOrder=['Andronaco','Metro','Bührings','Edeka','Sonstige'];
+  const sups=Object.keys(bySup).sort((a,b)=>(supOrder.indexOf(a)<0?99:supOrder.indexOf(a))-(supOrder.indexOf(b)<0?99:supOrder.indexOf(b)));
+  
+  tx+='\n--- ZUTATEN ---\n';
+  sups.forEach(sup=>{
+    tx+=`\n${sup.toUpperCase()}\n`;
+    bySup[sup].sort((a,b)=>a.grp.localeCompare(b.grp)||a.artKey.localeCompare(b.artKey)).forEach(i=>{
+      tx+=`${i.artKey}${i.artnr?` [${i.artnr}]`:''}: ${fmtG(i.grams)}${i.packs>0?` · ${i.packs.toLocaleString('de-DE',{maximumFractionDigits:2})} Pkg`:''}${i.cost>0?' · '+fmt(i.cost):''}\n`;
+    });
+  });
+  copyText(tx,'Kopiert!');
+}
+
+function saveToEinkauf(){
+  const items=calcPizzaAndDipsIngredients(); if(!items.length)return showToast('Leer.');
+  items.forEach(i=>{
+    const kg=i.grams/1000;
+    const it={id:Date.now().toString()+Math.random(),artikel:i.artKey,artikelnummer:i.artnr||'',lieferant:i.sup==='Sonstige'?'A':i.sup,kategorie:i.grp||'Sonstiges',menge:Number(kg.toFixed(3)),einheit:'kg',preis:i.ppkg||0};
+    db.ref('einkauf').transaction(data=>{
+      let arr=data||[];
+      const mKey=x=>[x.artikel||'',x.kategorie||'',x.einheit||'',Number(x.preis||0).toFixed(4),x.lieferant||''].join('|').toLowerCase();
+      const eIdx=arr.findIndex(e=>e&&mKey(e)===mKey(it));
+      if(eIdx>=0){arr[eIdx].menge=Number((Number(arr[eIdx].menge||0)+Number(it.menge||0)).toFixed(3));}else{arr.push(it);}
+      return arr.filter(x=>x!=null);
+    });
+  });
+  showToast('In Einkaufsliste übernommen!');
+}
+
+// ── NOTIZEN ───────────────────────────────────────────────────────────────
 function addNote(t){const id={'pizza':'pizza-note-input','catpizza':'cat-pizza-note-input','catmisc':'cat-misc-note-input'};const v=document.getElementById(id[t]).value.trim();if(!v)return;db.ref('notes/'+t).transaction(a=>{let x=a||[];x.push({id:Date.now().toString(),text:v});return x;});document.getElementById(id[t]).value='';}
 function deleteNote(t,i){db.ref('notes/'+t).transaction(a=>{if(!a)return[];a.splice(i,1);return a;});}
 function renderNotes(t){const id={'pizza':'pizza-notes-list','catpizza':'cat-pizza-notes-list','catmisc':'cat-misc-notes-list'};const el=document.getElementById(id[t]);if(!el)return;const arr=state.notes[t]||[];el.innerHTML=arr.length?arr.map((n,i)=>`<div class="note-row"><span style="flex:1">${n.text}</span><button class="btn-danger btn-sm" onclick="deleteNote('${t}',${i})">×</button></div>`).join(''):'';}
 
+// ── CATERING ─────────────────────────────────────────────────────────────
 function getCatScenario(g){return CAT_SCENARIOS.find(s=>g>=s.min&&g<=s.max)||null;}
 function calcCateringBlock({gaeste,km,stunden,stundensatz,waren,kmsatz,gas,entsorgung,miete,marge,ust}){const pK=stunden*stundensatz,wE=gaeste*waren,kK=km*kmsatz,fK=gas+entsorgung+miete;const mW=(pK+wE+kK+fK)*marge,zN=pK+wE+kK+fK+mW;const nG=gaeste?zN/gaeste:0,zB=zN*ust,bG=gaeste?zB/gaeste:0,st=zB-zN;return{personalkosten:pK,wareneinsatz:wE,kmKosten:kK,fixkosten:fK,margeWert:mW,zielpreisNetto:zN,nettoGast:nG,zielpreisBrutto:zB,bruttoGast:bG,steuern:st};}
 function calcCatering(){const gaeste=parseFloat(document.getElementById('cat-gaeste').value)||0,km=parseFloat(document.getElementById('cat-km').value)||0,ak=parseFloat(document.getElementById('cat-ak').value)||2,stundensatz=parseFloat(document.getElementById('cat-stundensatz').value)||CAT_DEFAULTS.stundensatz,waren=parseFloat(document.getElementById('cat-waren').value)||CAT_DEFAULTS.waren,gas=parseFloat(document.getElementById('cat-gas').value)||CAT_DEFAULTS.gas,entsorgung=parseFloat(document.getElementById('cat-entsorgung').value)||CAT_DEFAULTS.entsorgung,miete=parseFloat(document.getElementById('cat-miete').value)||CAT_DEFAULTS.miete,kmsatz=parseFloat(document.getElementById('cat-kmsatz').value)||CAT_DEFAULTS.kmsatz,ust=CAT_DEFAULTS.ust;const sz=getCatScenario(gaeste),mD=document.getElementById('cat-marge-display');if(mD)mD.value=sz?`${sz.label} (${String(sz.marge).replace('.',',')})`:'Außerhalb';const rE=document.getElementById('cat-result-rows');if(!sz){rE.innerHTML='<div style="color:var(--muted);font-size:13px">Gästezahl: 30-400</div>';['cat-netto-gast','cat-brutto-gast','cat-brutto-total'].forEach(id=>document.getElementById(id).textContent='–');return;}const mR=calcCateringBlock({gaeste,km,stunden:sz.stunden,stundensatz,waren,kmsatz,gas,entsorgung,miete,marge:sz.marge,ust});rE.innerHTML=[{l:'Gäste',v:gaeste},{l:'Personal h',v:sz.stunden+' h'},{l:'Personalkosten',v:fmt(mR.personalkosten)},{l:'Wareneinsatz',v:fmt(mR.wareneinsatz)},{l:'km-Kosten',v:fmt(mR.kmKosten)},{l:'Fixkosten',v:fmt(mR.fixkosten)},{l:'Marge',v:fmt(mR.margeWert)},{l:'Ziel netto',v:fmt(mR.zielpreisNetto)},{l:'Steuern',v:fmt(mR.steuern)}].map(r=>`<div class="result-row"><span style="color:var(--muted)">${r.l}</span><span>${r.v}</span></div>`).join('');document.getElementById('cat-netto-gast').textContent=fmt(mR.nettoGast);document.getElementById('cat-brutto-gast').textContent=fmt(mR.bruttoGast);document.getElementById('cat-brutto-total').textContent=fmt(mR.zielpreisBrutto);}
@@ -506,12 +648,14 @@ function editCateringAngebot(id){const a=state.cateringAngebote.find(x=>x.id===i
 function deleteCateringAngebot(id){removeArrayItemSafe('cateringAngebote',id);if(state.editCateringAngebotId===id)resetCateringOfferForm();}
 function renderCateringAngebote(){const el=document.getElementById('cat-saved-list');if(!state.cateringAngebote.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Nichts da.</div>';return;}el.innerHTML=state.cateringAngebote.map(a=>`<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f1f5f9"><div style="flex:1"><div style="font-weight:600">${a.name||'Angebot'} · ${a.gaeste} P · ${a.datum}</div><div style="font-size:12px;color:var(--muted)">Netto ${a.nettoGast} · Brutto ${a.bruttoGesamt}</div>${a.pizzaNotizen&&a.pizzaNotizen.length?`<div style="font-size:11px;color:var(--muted);margin-top:6px">🍕 ${a.pizzaNotizen.map(n=>n.text).join(', ')}</div>`:''}${a.sonstigeNotizen&&a.sonstigeNotizen.length?`<div style="font-size:11px;color:var(--muted);margin-top:4px">📝 ${a.sonstigeNotizen.map(n=>n.text).join(' | ')}</div>`:''}</div><div style="display:flex;gap:6px"><button class="btn-sm" onclick="editCateringAngebot('${a.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteCateringAngebot('${a.id}')">×</button></div></div>`).join('');}
 
-function openEinkaufModal(id){state.editEinkaufId=id||null;const i=id?state.einkauf.find(e=>e.id===id):null;document.getElementById('einkauf-modal-title').textContent=i?'Bearbeiten':'Neu';['ek-artikel','ek-artikelnummer','ek-kat','ek-einheit'].forEach(f=>document.getElementById(f).value=i?i[f.replace('ek-','')]:(f==='ek-kat'?'Teig':(f==='ek-einheit'?'kg':'')));document.getElementById('ek-lieferant').value=i?.lieferant||'A';document.getElementById('ek-menge').value=i?.menge??1;document.getElementById('ek-preis').value=i?.preis??0;openModal('einkauf-modal');}
-function saveEinkauf(){const i={id:state.editEinkaufId||Date.now().toString(),artikel:document.getElementById('ek-artikel').value||'?',artikelnummer:document.getElementById('ek-artikelnummer').value||'',lieferant:document.getElementById('ek-lieferant').value||'A',kategorie:document.getElementById('ek-kat').value,menge:parseFloat(document.getElementById('ek-menge').value)||0,einheit:document.getElementById('ek-einheit').value,preis:parseFloat(document.getElementById('ek-preis').value)||0};pushArrayItemSafe('einkauf',i);closeModal('einkauf-modal');}
+// ── EINKAUFSLISTE ─────────────────────────────────────────────────────────
+function openEinkaufModal(id){state.editEinkaufId=id||null;const i=id?state.einkauf.find(e=>e.id===id):null;document.getElementById('einkauf-modal-title').textContent=i?'Bearbeiten':'Neu';['ek-artikel','ek-artikelnummer','ek-kat','ek-einheit'].forEach(f=>document.getElementById(f).value=i?i[f.replace('ek-','')]:(f==='ek-kat'?'Teig':(f==='ek-einheit'?'kg':'')));document.getElementById('ek-lieferant').value=i?.lieferant||'Andronaco';document.getElementById('ek-menge').value=i?.menge??1;document.getElementById('ek-preis').value=i?.preis??0;openModal('einkauf-modal');}
+function saveEinkauf(){const i={id:state.editEinkaufId||Date.now().toString(),artikel:document.getElementById('ek-artikel').value||'?',artikelnummer:document.getElementById('ek-artikelnummer').value||'',lieferant:document.getElementById('ek-lieferant').value||'Andronaco',kategorie:document.getElementById('ek-kat').value,menge:parseFloat(document.getElementById('ek-menge').value)||0,einheit:document.getElementById('ek-einheit').value,preis:parseFloat(document.getElementById('ek-preis').value)||0};pushArrayItemSafe('einkauf',i);closeModal('einkauf-modal');}
 function deleteEinkauf(id){removeArrayItemSafe('einkauf',id);}
-function renderEinkauf(){const c=document.getElementById('einkauf-kategorien'),q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();const flt=state.einkauf.filter(e=>{if(!q)return true;return[e.artikel,e.artikelnummer,e.lieferant,lieferantName(e.lieferant),e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q);});if(!flt.length){c.innerHTML='<div class="card" style="color:var(--muted);font-size:13px">Nichts gefunden.</div>';return;}let ht='',gT=0;ALL_SUPPLIER_CODES.forEach(cd=>{const is=flt.filter(e=>(e.lieferant||'')===cd).sort((a,b)=>a.kategorie.localeCompare(b.kategorie)||a.artikel.localeCompare(b.artikel));if(!is.length)return;let sT=0;ht+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${cd} – ${lieferantName(cd)}</div><table><thead><tr><th>Artikel</th><th>Art.-Nr.</th><th>Kategorie</th><th>Menge</th><th>EH</th><th>Preis</th><th>Gesamt</th><th></th></tr></thead><tbody>`;is.forEach(e=>{const s=Number(e.menge||0)*Number(e.preis||0);sT+=s;gT+=s;ht+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;});ht+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe:</td><td>${sT>0?fmt(sT):'–'}</td><td></td></tr></tfoot></table></div>`;});ht+=`<div class="card" style="display:flex;justify-content:space-between;background:var(--blue-light)"><span style="font-weight:600">Gesamt</span><span style="font-weight:700;color:var(--blue)">${fmt(gT)}</span></div>`;c.innerHTML=ht;}
-function copyEinkaufTable(){let tx='EINKAUFSLISTE\n================\n\n';const q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();ALL_SUPPLIER_CODES.forEach(cd=>{const is=state.einkauf.filter(e=>(e.lieferant||'')===cd&&(!q||[e.artikel,e.artikelnummer,e.lieferant,lieferantName(e.lieferant),e.kategorie].filter(Boolean).join(' ').toLowerCase().includes(q)));if(!is.length)return;tx+=`\nLIEFERANT ${cd} – ${lieferantName(cd).toUpperCase()}\n`;is.sort((a,b)=>a.kategorie.localeCompare(b.kategorie)||a.artikel.localeCompare(b.artikel)).forEach(e=>{const s=e.menge*(e.preis||0);tx+=`${e.artikel}${e.artikelnummer?` [Art: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${s>0?' – '+fmt(s):''}\n`;});});copyText(tx,'Kopiert!');}
+function renderEinkauf(){const c=document.getElementById('einkauf-kategorien'),q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();const flt=state.einkauf.filter(e=>{if(!q)return true;return[e.artikel,e.artikelnummer,e.lieferant,e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q);});if(!flt.length){c.innerHTML='<div class="card" style="color:var(--muted);font-size:13px">Nichts gefunden.</div>';return;}let ht='',gT=0;const sups=[...new Set(flt.map(e=>e.lieferant||'Unbekannt'))].sort();sups.forEach(cd=>{const is=flt.filter(e=>(e.lieferant||'Unbekannt')===cd).sort((a,b)=>a.kategorie.localeCompare(b.kategorie)||a.artikel.localeCompare(b.artikel));if(!is.length)return;let sT=0;ht+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant: ${cd}</div><table><thead><tr><th>Artikel</th><th>Art.-Nr.</th><th>Kategorie</th><th>Menge</th><th>EH</th><th>Preis</th><th>Gesamt</th><th></th></tr></thead><tbody>`;is.forEach(e=>{const s=Number(e.menge||0)*Number(e.preis||0);sT+=s;gT+=s;ht+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;});ht+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe:</td><td>${sT>0?fmt(sT):'–'}</td><td></td></tr></tfoot></table></div>`;});ht+=`<div class="card" style="display:flex;justify-content:space-between;background:var(--blue-light)"><span style="font-weight:600">Gesamt</span><span style="font-weight:700;color:var(--blue)">${fmt(gT)}</span></div>`;c.innerHTML=ht;}
+function copyEinkaufTable(){let tx='EINKAUFSLISTE\n================\n\n';const q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();const flt=state.einkauf.filter(e=>{if(!q)return true;return[e.artikel,e.artikelnummer,e.lieferant,e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q);});const sups=[...new Set(flt.map(e=>e.lieferant||'Unbekannt'))].sort();sups.forEach(cd=>{const is=flt.filter(e=>(e.lieferant||'Unbekannt')===cd);if(!is.length)return;tx+=`\nLIEFERANT: ${cd.toUpperCase()}\n`;is.sort((a,b)=>a.kategorie.localeCompare(b.kategorie)||a.artikel.localeCompare(b.artikel)).forEach(e=>{const s=e.menge*(e.preis||0);tx+=`${e.artikel}${e.artikelnummer?` [Art: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${s>0?' – '+fmt(s):''}\n`;});});copyText(tx,'Kopiert!');}
 
+// ── KONTAKTE ─────────────────────────────────────────────────────────────
 function openKontaktModal(id){state.editKontaktId=id||null;const k=id?state.kontakte.find(x=>x.id===id):null;document.getElementById('kontakt-modal-title').textContent=k?'Bearbeiten':'Neu';['kt-name','kt-firma','kt-tel','kt-email','kt-adresse','kt-notizen'].forEach(f=>document.getElementById(f).value=k?k[f.replace('kt-','')]:'');document.getElementById('kt-typ').value=k?.typ||'Kunde';openModal('kontakt-modal');}
 function saveKontakt(){const k={id:state.editKontaktId||Date.now().toString(),name:document.getElementById('kt-name').value||'Unbekannt',firma:document.getElementById('kt-firma').value,tel:document.getElementById('kt-tel').value,email:document.getElementById('kt-email').value,adresse:document.getElementById('kt-adresse').value,typ:document.getElementById('kt-typ').value,notizen:document.getElementById('kt-notizen').value};pushArrayItemSafe('kontakte',k);db.ref('events').transaction(a=>{if(!a)return[];return a.map(e=>e&&e.contactId===k.id?Object.assign({},e,{kontakt:k.name}):e).filter(x=>x!=null);});closeModal('kontakt-modal');}
 function deleteKontakt(id){removeArrayItemSafe('kontakte',id);db.ref('events').transaction(a=>{if(!a)return[];return a.map(e=>e&&e.contactId===id?Object.assign({},e,{contactId:'',kontakt:''}):e).filter(x=>x!=null);});}
