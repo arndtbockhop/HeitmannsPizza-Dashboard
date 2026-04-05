@@ -2,14 +2,14 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Heitmanns Pizzav2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Heitmanns Pizza</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#f8fafc;--card:#fff;--text:#111827;--muted:#6b7280;--border:#e5e7eb;--blue:#2563eb;--blue-light:#eff6ff;--green:#16a34a;--green-light:#f0fdf4;--amber:#d97706;--amber-light:#fffbeb;--red:#dc2626;--red-light:#fef2f2}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;overflow-x:hidden;}
 .app{display:flex;min-height:100vh}
 .sidebar{width:200px;min-width:200px;background:var(--card);border-right:1px solid var(--border);padding:16px 0;display:flex;flex-direction:column}
 .sidebar-logo{padding:0 16px 14px;font-size:15px;font-weight:600;color:var(--blue);border-bottom:1px solid var(--border);margin-bottom:8px}
@@ -19,7 +19,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .live-badge{margin-top:auto;padding:12px 16px;font-size:11px;color:var(--green);display:flex;align-items:center;gap:6px}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.main{flex:1;padding:24px;overflow-y:auto}
+.main{flex:1;padding:24px;overflow-y:auto;padding-bottom: 80px;} /* Puffer für mobile nav */
 .page{display:none;flex-direction:column;gap:20px}
 .page.active{display:flex}
 .page-header{display:flex;justify-content:space-between;align-items:center}
@@ -39,6 +39,7 @@ button:hover{background:#f1f5f9}
 .btn-danger:hover{background:var(--red-light)}
 .btn-green{background:var(--green);color:#fff;border-color:var(--green)}
 .btn-green:hover{background:#15803d}
+.btn-icon{padding:4px 8px; font-size: 14px;}
 .btn-sm{padding:4px 10px;font-size:12px}
 input,select,textarea{width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--border);border-radius:7px;background:var(--card);color:var(--text);font-family:inherit}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
@@ -52,13 +53,13 @@ textarea{resize:vertical}
 .badge-amber{background:var(--amber-light);color:var(--amber)}
 .badge-red{background:var(--red-light);color:var(--red)}
 .event-list{display:flex;flex-direction:column;gap:8px}
-.event-item{display:flex;align-items:flex-start;gap:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s}
+.event-item{display:flex;align-items:flex-start;gap:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;transition:all .15s}
 .event-item:hover{background:#f8fafc;border-color:#cbd5e1}
-.event-date{min-width:42px;text-align:center}
+.event-date{min-width:42px;text-align:center; cursor:pointer;}
 .event-day{font-size:22px;font-weight:600;line-height:1}
 .event-month{font-size:11px;color:var(--muted)}
-.event-info{flex:1}
-.event-title-text{font-size:14px;font-weight:500}
+.event-info{flex:1;}
+.event-title-text{font-size:14px;font-weight:500; cursor:pointer;}
 .event-sub{font-size:12px;color:var(--muted);margin-top:2px}
 .linkish{color:var(--blue);cursor:pointer;text-decoration:underline}
 .contact-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px}
@@ -74,7 +75,7 @@ textarea{resize:vertical}
 .company-chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;margin-left:8px}
 .company-chip.hp{background:#dbeafe;color:#1d4ed8}
 .company-chip.hpc{background:#fef3c7;color:#b45309}
-.cal-event-tag{font-size:10px;color:var(--blue);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.cal-event-tag{font-size:10px;color:var(--blue);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px; background: rgba(255,255,255,0.6); padding: 1px 3px; border-radius: 4px;}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal{background:var(--card);border-radius:14px;padding:24px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto;border:1px solid var(--border)}
@@ -107,38 +108,24 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .result-row:last-child{border-bottom:none}
 .result-row.bold{font-weight:700;font-size:15px;color:var(--blue)}
 .result-bar{border-radius:8px;padding:10px 16px;text-align:center;font-size:13px;font-weight:500;margin-top:8px}
-/* GETRAENKE */
-.drink-section{margin-bottom:20px}
-.drink-section-title{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text);padding-bottom:6px;border-bottom:1px solid var(--border)}
-.drink-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9}
-.drink-item:last-child{border-bottom:none}
-.drink-name{flex:1;font-size:13px}
-.drink-controls{display:flex;align-items:center;gap:6px}
-.drink-controls button{padding:3px 9px;font-size:14px;font-weight:600}
-.drink-controls input{width:55px;text-align:center;padding:4px}
-.drink-price{font-size:12px;color:var(--muted);min-width:70px;text-align:right}
-.drink-total{font-weight:500;color:var(--blue);min-width:70px;text-align:right}
 
-.multi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
-.multi-chip{border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .15s;background:var(--card);font-size:13px}
-.multi-chip:hover{background:#f8fafc}
-.multi-chip.active{background:var(--blue-light);border-color:var(--blue);color:var(--blue);font-weight:600}
-.linkish{color:var(--blue);cursor:pointer;text-decoration:underline}
-.inline-badges{display:flex;flex-wrap:wrap;gap:6px}
 .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .search-input{max-width:320px}
 .toast-wrap{position:fixed;right:18px;bottom:18px;z-index:500;display:flex;flex-direction:column;gap:8px}
 .toast{background:var(--text);color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,.16);font-size:13px;opacity:0;transform:translateY(8px);transition:all .2s}
 .toast.show{opacity:1;transform:translateY(0)}
 .action-row{display:flex;gap:6px;align-items:center}
+.inline-badges{display:flex;flex-wrap:wrap;gap:6px}
 
-
-.mobile-bottom-nav{display:none;position:fixed;left:0;right:0;top:0;z-index:320;background:rgba(255,255,255,.98);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:calc(8px + env(safe-area-inset-top)) 10px 8px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap}
+.mobile-bottom-nav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:320;background:rgba(255,255,255,.98);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:8px 10px calc(8px + env(safe-area-inset-bottom));overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap}
 .mobile-bottom-nav::-webkit-scrollbar{display:none}
 .mobile-bottom-nav-inner{display:inline-flex;gap:6px;min-width:max-content}
 .mobile-bottom-nav button{padding:8px 12px;min-height:46px;font-size:12px;border-radius:10px;flex:0 0 auto}
 .mobile-bottom-nav button.active{background:var(--blue-light);color:var(--blue);border-color:#bfdbfe;font-weight:600}
 
+/* Info Row for Details */
+.info-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9;}
+.info-row:last-child { border-bottom: none;}
 
 /* MOBILE OPTIMIZATION */
 .mobile-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -148,7 +135,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   .sidebar{width:100%;min-width:100%;border-right:none;border-bottom:1px solid var(--border);padding:10px 0 8px;display:block;overflow:hidden;white-space:normal}
   .sidebar-logo{padding:0 16px 0;border-bottom:none;margin-bottom:0;display:block;font-size:16px}
   .sidebar .nav-item,.live-badge{display:none}
-  .main{padding:76px 12px 12px}
+  .main{padding:16px 12px calc(80px + env(safe-area-inset-bottom))}
   .page{gap:12px}
   .page-header{flex-direction:column;align-items:stretch;gap:10px}
   .page-title{font-size:18px}
@@ -168,22 +155,16 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   .cal-event-tag{font-size:9px}
   .modal{width:100vw;max-width:100vw;max-height:100dvh;height:100dvh;border-radius:0;padding:16px}
   .modal-title{font-size:16px}
-  .modal-footer{position:sticky;bottom:0;background:var(--card);padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+  .modal-footer{position:sticky;bottom:0;background:var(--card);padding-bottom:calc(8px + env(safe-area-inset-bottom)); margin-top: auto;}
   input,select,textarea,button{font-size:16px}
   .result-bar{font-size:12px;padding:10px 12px}
-  .drink-item{display:grid;grid-template-columns:1fr;gap:6px;align-items:start}
-  .drink-controls{justify-content:flex-start}
   .mobile-bottom-nav{display:block}
 }
 @media (max-width: 520px){
-  .main{padding:76px 10px 10px}
   .card{padding:12px}
-  .card-title{margin-bottom:10px}
-  .pizza-qty input,.drink-controls input{width:64px}
+  .pizza-qty input{width:64px}
   .action-row{flex-wrap:wrap}
-  .inline-badges{gap:4px}
 }
-
 </style>
 </head>
 <body>
@@ -194,17 +175,14 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   <div class="nav-item" onclick="showPage('kalender',this)">Kalender</div>
   <div class="nav-item" onclick="showPage('events',this)">Events</div>
   <div class="nav-item" onclick="showPage('catering',this)">Catering</div>
-  <div class="nav-item" onclick="showPage('pizza',this)">Pizza-Kalk.</div>
-  <div class="nav-item" onclick="showPage('dips',this)">Dips</div>
-  
+  <div class="nav-item" onclick="showPage('pizza',this)">Pizza & Dips</div>
   <div class="nav-item" onclick="showPage('einkauf',this)">Einkaufsliste</div>
   <div class="nav-item" onclick="showPage('kontakte',this)">Kontakte</div>
-  <div class="live-badge"><span class="live-dot"></span>Live für alle</div>
+  <div class="live-badge"><span class="live-dot"></span>Live Sync</div>
 </div>
 
 <div class="main">
 
-<!-- DASHBOARD -->
 <div class="page active" id="page-dashboard">
   <div class="page-header">
     <div class="page-title">Dashboard</div>
@@ -214,7 +192,6 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
     <div class="metric" onclick="navTo('events')"><div class="metric-label">Events diesen Monat</div><div class="metric-value" id="m-events">0</div></div>
     <div class="metric" onclick="navTo('catering')"><div class="metric-label">Catering-Angebote</div><div class="metric-value" id="m-angebote">0</div></div>
     <div class="metric" onclick="navTo('kontakte')"><div class="metric-label">Kontakte</div><div class="metric-value" id="m-kontakte">0</div></div>
-    
   </div>
   <div class="card">
     <div class="card-title">Nächste Events</div>
@@ -229,7 +206,6 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   </div>
 </div>
 
-<!-- KALENDER -->
 <div class="page" id="page-kalender">
   <div class="page-header">
     <div style="display:flex;align-items:center;gap:10px">
@@ -249,42 +225,76 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   </div>
 </div>
 
-<!-- EVENTS -->
 <div class="page" id="page-events">
   <div class="page-header">
     <div class="page-title">Events & Veranstaltungen</div>
     <button class="btn-primary" onclick="openEventModal()">+ Neues Event</button>
   </div>
-  <div class="card"><div class="toolbar" style="margin-bottom:12px"><input class="search-input" id="events-search" placeholder="Events suchen..." oninput="renderAllEvents()"></div><div class="event-list" id="all-events-list"></div></div>
+  <div class="card">
+    <div class="toolbar" style="margin-bottom:12px"><input class="search-input" id="events-search" placeholder="Events suchen..." oninput="renderAllEvents()"></div>
+    <div class="event-list" id="all-events-list"></div>
+  </div>
 </div>
 
-<!-- PIZZA KALKULATOR -->
 <div class="page" id="page-pizza">
   <div class="page-header">
-    <div class="page-title">Pizza-Kalkulation</div>
-    <button class="btn-danger" onclick="resetPizza()">Zurücksetzen</button>
+    <div class="page-title">Pizza & Dips Kalkulation</div>
+    <button class="btn-danger" onclick="resetPizzaAndDips()">Zurücksetzen</button>
   </div>
-  <div class="card">
-    <div class="card-title">Anzahl Pizzen eingeben</div>
-    <div class="pizza-grid" id="pizza-grid"></div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <span style="font-size:13px;color:var(--muted)">Gesamt:</span>
-      <span style="font-size:20px;font-weight:600;color:var(--blue)" id="pizza-total">0</span>
-      <span style="font-size:13px;color:var(--muted)">Pizzen</span>
+  
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <div class="card">
+      <div class="card-title">Anzahl Pizzen eingeben</div>
+      <div class="pizza-grid" id="pizza-grid"></div>
+      <div style="display:flex;align-items:center;gap:12px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);">
+        <span style="font-size:13px;color:var(--muted)">Gesamt:</span>
+        <span style="font-size:20px;font-weight:600;color:var(--blue)" id="pizza-total">0</span>
+        <span style="font-size:13px;color:var(--muted)">Pizzen</span>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">Anzahl Dips eingeben</div>
+      <div style="display:grid; gap:12px; margin-bottom:16px">
+        <div class="pizza-card">
+          <div class="pizza-card-name">Aioli (50g Schälchen)</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Empfehlung: 0,35 pro Pizza</div>
+          <div class="pizza-qty">
+            <button onclick="changeDip('aioli',-1)">−</button>
+            <input type="number" min="0" value="0" id="dqty-aioli" onchange="setDip('aioli',this.value)"/>
+            <button onclick="changeDip('aioli',1)">+</button>
+          </div>
+        </div>
+        <div class="pizza-card">
+          <div class="pizza-card-name">Hot Honey (50g Schälchen)</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Empfehlung: 0,15 pro Pizza</div>
+          <div class="pizza-qty">
+            <button onclick="changeDip('hothoney',-1)">−</button>
+            <input type="number" min="0" value="0" id="dqty-hothoney" onchange="setDip('hothoney',this.value)"/>
+            <button onclick="changeDip('hothoney',1)">+</button>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:20px; border-top: 1px solid var(--border); padding-top: 10px;">
+        <div style="font-size:13px;color:var(--muted)">Aioli: <b id="dip-aioli-total">0</b> Stk.</div>
+        <div style="font-size:13px;color:var(--muted)">Hot Honey: <b id="dip-hothoney-total">0</b> Stk.</div>
+      </div>
     </div>
   </div>
+
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div class="card-title" style="margin-bottom:0">Einkaufsliste aus Kalkulation</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px; flex-wrap:wrap; gap: 10px;">
+      <div class="card-title" style="margin-bottom:0">Einkaufsliste aus Kalkulation (Pizza + Dips)</div>
       <div style="display:flex;gap:8px">
-        <button onclick="copyPizzaList()">📋 Kopieren</button>
-        <button class="btn-primary" onclick="saveToEinkauf()">→ In Einkaufsliste</button>
+        <button onclick="copyPizzaAndDipList()">📋 Kopieren</button>
+        <button class="btn-primary" onclick="saveToEinkauf()">→ In Zentrale Einkaufsliste</button>
       </div>
     </div>
     <div id="ingredient-result"></div>
   </div>
+
   <div class="card">
-    <div class="card-title">Notizen</div>
+    <div class="card-title">Notizen zu Pizza & Dips</div>
     <div id="pizza-notes-list"></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <input id="pizza-note-input" placeholder="Notiz hinzufügen..."/>
@@ -293,57 +303,6 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   </div>
 </div>
 
-<!-- DIPS -->
-<div class="page" id="page-dips">
-  <div class="page-header">
-    <div class="page-title">Dips-Kalkulation</div>
-    <button class="btn-danger" onclick="resetDips()">Zurücksetzen</button>
-  </div>
-  <div class="card">
-    <div class="card-title">Anzahl Dips eingeben</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px">
-      <div class="pizza-card">
-        <div class="pizza-card-name">Aioli (50g Schälchen)</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Empfehlung: 0,35 pro Pizza</div>
-        <div class="pizza-qty">
-          <button onclick="changeDip('aioli',-1)">−</button>
-          <input type="number" min="0" value="0" id="dqty-aioli" onchange="setDip('aioli',this.value)"/>
-          <button onclick="changeDip('aioli',1)">+</button>
-        </div>
-      </div>
-      <div class="pizza-card">
-        <div class="pizza-card-name">Hot Honey (50g Schälchen)</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Empfehlung: 0,15 pro Pizza</div>
-        <div class="pizza-qty">
-          <button onclick="changeDip('hothoney',-1)">−</button>
-          <input type="number" min="0" value="0" id="dqty-hothoney" onchange="setDip('hothoney',this.value)"/>
-          <button onclick="changeDip('hothoney',1)">+</button>
-        </div>
-      </div>
-    </div>
-    <div style="display:flex;gap:20px">
-      <div style="font-size:13px;color:var(--muted)">Aioli: <b id="dip-aioli-total">0</b> Stk.</div>
-      <div style="font-size:13px;color:var(--muted)">Hot Honey: <b id="dip-hothoney-total">0</b> Stk.</div>
-    </div>
-  </div>
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div class="card-title" style="margin-bottom:0">Einkaufsliste Dips</div>
-      <button onclick="copyDipList()">📋 Kopieren</button>
-    </div>
-    <div id="dip-result"></div>
-  </div>
-  <div class="card">
-    <div class="card-title">Notizen</div>
-    <div id="dip-notes-list"></div>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <input id="dip-note-input" placeholder="Notiz hinzufügen..."/>
-      <button class="btn-primary" onclick="addNote('dip')">+</button>
-    </div>
-  </div>
-</div>
-
-<!-- CATERING -->
 <div class="page" id="page-catering">
   <div class="page-header">
     <div class="page-title">Catering-Kalkulation</div>
@@ -361,28 +320,26 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div style="display:grid;grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:16px">
       <div class="card">
-        <div class="cat-section-title" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:14px">EINGABEN</div>
+        <div class="cat-section-title">EINGABEN</div>
         <div style="display:flex;flex-direction:column;gap:12px">
           <div class="form-group"><label>Gästezahl</label><input type="number" id="cat-gaeste" value="30" min="1" oninput="calcCatering()"/></div>
-          <div class="form-group"><label>Strecke km (hin &amp; zurück gesamt)</label><input type="number" id="cat-km" value="48" min="0" oninput="calcCatering()"/></div>
+          <div class="form-group"><label>Strecke km (hin & zurück)</label><input type="number" id="cat-km" value="48" min="0" oninput="calcCatering()"/></div>
           <div class="form-group"><label>Arbeitskräfte</label><input type="number" id="cat-ak" value="2" min="1" oninput="calcCatering()"/></div>
           <div class="form-group"><label>Stundensatz €/h</label><input type="number" id="cat-stundensatz" value="18" min="0" step="0.5" oninput="calcCatering()"/></div>
           <div class="form-group"><label>Wareneinsatz €/Gast</label><input type="number" id="cat-waren" value="3.5" min="0" step="0.1" oninput="calcCatering()"/></div>
-          <div class="form-group"><label>Zielmarge (automatisch aus Gästezahl)</label><input id="cat-marge-display" readonly value="30–49 Pers. (0,5)"/></div>
+          <div class="form-group"><label>Zielmarge (auto)</label><input id="cat-marge-display" readonly /></div>
         </div>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:16px">
-        <div class="card">
-          <div class="cat-section-title" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:14px">FIXKOSTEN</div>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div class="form-group"><label>Gaspauschale €</label><input type="number" id="cat-gas" value="10" oninput="calcCatering()"/></div>
-            <div class="form-group"><label>Entsorgung €</label><input type="number" id="cat-entsorgung" value="15" oninput="calcCatering()"/></div>
-            <div class="form-group"><label>Miete Heitmann €</label><input type="number" id="cat-miete" value="45" oninput="calcCatering()"/></div>
-            <div class="form-group"><label>km-Satz €/km</label><input type="number" id="cat-kmsatz" value="0.8" step="0.05" oninput="calcCatering()"/></div>
-          </div>
+      <div class="card">
+        <div class="cat-section-title">FIXKOSTEN</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="form-group"><label>Gaspauschale €</label><input type="number" id="cat-gas" value="10" oninput="calcCatering()"/></div>
+          <div class="form-group"><label>Entsorgung €</label><input type="number" id="cat-entsorgung" value="15" oninput="calcCatering()"/></div>
+          <div class="form-group"><label>Miete Heitmann €</label><input type="number" id="cat-miete" value="45" oninput="calcCatering()"/></div>
+          <div class="form-group"><label>km-Satz €/km</label><input type="number" id="cat-kmsatz" value="0.8" step="0.05" oninput="calcCatering()"/></div>
         </div>
       </div>
     </div>
@@ -407,7 +364,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   </div>
 
   <div class="card">
-    <div class="cat-section-title" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:14px">ERGEBNIS – WIE IM SHEET „EINGABEN“</div>
+    <div class="cat-section-title">ERGEBNIS – WIE IM SHEET „EINGABEN“</div>
     <div id="cat-result-rows" style="margin-bottom:16px"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
       <div class="result-bar" style="background:var(--blue-light);color:var(--blue)">Netto/Gast: <b id="cat-netto-gast">0,00 €</b></div>
@@ -423,7 +380,6 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   </div>
 </div>
 
-<!-- EINKAUFSLISTE -->
 <div class="page" id="page-einkauf">
   <div class="page-header">
     <div class="page-title">Einkaufsliste</div>
@@ -432,10 +388,12 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
       <button class="btn-primary" onclick="openEinkaufModal()">+ Position</button>
     </div>
   </div>
-  <div class="card" style="margin-bottom:12px"><div class="toolbar"><input class="search-input" id="einkauf-search" placeholder="Artikel, Art.-Nr. oder Lieferant suchen..." oninput="renderEinkauf()"></div></div><div id="einkauf-kategorien"><div class="card" style="color:var(--muted);font-size:13px">Keine Positionen. Füge Positionen hinzu oder übernimm sie aus der Kalkulation.</div></div>
+  <div class="card" style="margin-bottom:12px"><div class="toolbar"><input class="search-input" id="einkauf-search" placeholder="Artikel, Art.-Nr. oder Lieferant suchen..." oninput="renderEinkauf()"></div></div>
+  <div id="einkauf-kategorien">
+    <div class="card" style="color:var(--muted);font-size:13px">Keine Positionen. Füge Positionen hinzu oder übernimm sie aus der Kalkulation.</div>
+  </div>
 </div>
 
-<!-- KONTAKTE -->
 <div class="page" id="page-kontakte">
   <div class="page-header">
     <div class="page-title">Kontakte</div>
@@ -444,38 +402,33 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   <div class="card"><div class="toolbar" style="margin-bottom:12px"><input class="search-input" id="kontakte-search" placeholder="Kontakte suchen..." oninput="renderKontakte()"></div><div style="display:flex;flex-direction:column;gap:8px" id="kontakt-list"><div style="color:var(--muted);font-size:13px">Keine Kontakte vorhanden.</div></div></div>
 </div>
 
-</div><!-- /main -->
-
-<div class="mobile-bottom-nav" id="mobile-bottom-nav">
+</div><div class="mobile-bottom-nav" id="mobile-bottom-nav">
   <div class="mobile-bottom-nav-inner">
     <button onclick="navTo('dashboard')" data-page="dashboard">Home</button>
     <button onclick="navTo('kalender')" data-page="kalender">Kalender</button>
     <button onclick="navTo('events')" data-page="events">Events</button>
     <button onclick="navTo('catering')" data-page="catering">Catering</button>
-    <button onclick="navTo('pizza')" data-page="pizza">Pizza-Kalk.</button>
-    <button onclick="navTo('dips')" data-page="dips">Dips</button>
+    <button onclick="navTo('pizza')" data-page="pizza">Pizza & Dips</button>
     <button onclick="navTo('einkauf')" data-page="einkauf">Einkauf</button>
     <button onclick="navTo('kontakte')" data-page="kontakte">Kontakte</button>
   </div>
 </div>
 
-</div><!-- /app -->
-
-<!-- EVENT MODAL -->
-<div class="modal-overlay" id="event-modal">
+</div><div class="modal-overlay" id="event-modal">
 <div class="modal">
   <div class="modal-title" id="event-modal-title">Neues Event</div>
   <div class="form-grid">
     <div class="form-group"><label>Titel</label><input id="ev-title" placeholder="z.B. Hochzeit Meyer"/></div>
     <div class="form-group"><label>Typ</label><select id="ev-type"><option>Catering</option><option>Event</option><option>Sonstiges</option></select></div>
     <div class="form-group"><label>Firma</label><select id="ev-company"><option value="HP">HP</option><option value="HPC">HPC</option></select></div>
-    <div class="form-group"><label>Datum</label><input type="date" id="ev-date"/></div>
+    <div class="form-group"><label>Start Datum</label><input type="date" id="ev-date"/></div>
+    <div class="form-group"><label>End Datum (optional)</label><input type="date" id="ev-endDate"/></div>
     <div class="form-group"><label>Uhrzeit</label><input type="time" id="ev-time" value="18:00"/></div>
     <div class="form-group"><label>Ort / Adresse</label><input id="ev-ort" placeholder="Ort oder Adresse"/></div>
     <div class="form-group"><label>Personen</label><input type="number" id="ev-personen" placeholder="Gästeanzahl"/></div>
     <div class="form-group"><label>Kontakt zuordnen</label><select id="ev-kontakt-id"></select></div>
-    <div class="form-group"><label>Catering-Angebot zuordnen</label><select id="ev-catering-angebot-id" onchange="handleEventOfferSelection()"></select></div>
-    <div class="form-group"><label>Vorliegendes Angebot €</label><input type="number" id="ev-angebot" placeholder="0"/></div>
+    <div class="form-group"><label>Catering-Angebot</label><select id="ev-catering-angebot-id" onchange="handleEventOfferSelection()"></select></div>
+    <div class="form-group"><label>Angebotssumme €</label><input type="number" id="ev-angebot" placeholder="0"/></div>
   </div>
   <div class="form-group" style="margin-top:12px"><label>Notizen / Wichtige Infos</label><textarea id="ev-notizen" placeholder="Menü, Sonderwünsche, Equipment..." style="min-height:80px"></textarea></div>
   <div class="form-group" style="margin-top:12px"><label>Status</label>
@@ -488,7 +441,6 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 </div>
 </div>
 
-<!-- KONTAKT MODAL -->
 <div class="modal-overlay" id="kontakt-modal">
 <div class="modal">
   <div class="modal-title" id="kontakt-modal-title">Neuer Kontakt</div>
@@ -508,7 +460,43 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 </div>
 </div>
 
-<!-- EINKAUF MODAL -->
+<div class="modal-overlay" id="contact-info-modal">
+<div class="modal">
+  <div class="modal-title" id="ci-name" style="margin-bottom: 8px;">Kontakt Name</div>
+  <div id="ci-firma" style="color:var(--muted); font-size:13px; margin-bottom: 16px;"></div>
+  
+  <div class="info-row">
+    <div style="flex:1">
+      <div style="font-size:11px; color:var(--muted)">Telefon</div>
+      <div id="ci-tel" style="font-size:14px; font-weight:500;"></div>
+    </div>
+    <button class="btn-icon" onclick="copyModalField('ci-tel', 'Telefonnummer')">📋</button>
+  </div>
+  <div class="info-row">
+    <div style="flex:1">
+      <div style="font-size:11px; color:var(--muted)">E-Mail</div>
+      <div id="ci-email" style="font-size:14px; font-weight:500;"></div>
+    </div>
+    <button class="btn-icon" onclick="copyModalField('ci-email', 'E-Mail Adresse')">📋</button>
+  </div>
+  <div class="info-row">
+    <div style="flex:1">
+      <div style="font-size:11px; color:var(--muted)">Adresse</div>
+      <div id="ci-adresse" style="font-size:14px; font-weight:500;"></div>
+    </div>
+    <button class="btn-icon" onclick="copyModalField('ci-adresse', 'Adresse')">📋</button>
+  </div>
+  <div style="margin-top: 16px;">
+    <div style="font-size:11px; color:var(--muted); margin-bottom: 4px;">Notizen</div>
+    <div id="ci-notizen" style="font-size:13px; background:#f8fafc; padding:10px; border-radius:8px; min-height:40px;"></div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn-primary" onclick="closeModal('contact-info-modal')">Schließen</button>
+  </div>
+</div>
+</div>
+
 <div class="modal-overlay" id="einkauf-modal">
 <div class="modal">
   <div class="modal-title" id="einkauf-modal-title">Position hinzufügen</div>
@@ -534,7 +522,6 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 </div>
 </div>
 
-<!-- EVENT DETAIL MODAL -->
 <div class="modal-overlay" id="detail-modal">
 <div class="modal" id="detail-content"></div>
 </div>
@@ -542,118 +529,21 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-// ── FIREBASE ──────────────────────────────────────────────────────────────
+// ── FIREBASE & CONFIG ─────────────────────────────────────────────────────
 const firebaseConfig={apiKey:"AIzaSyDdtoBbNee-dLRjr6YEEhzxM6GCmVE6wTs",authDomain:"heitmannspizza-dashboard.firebaseapp.com",databaseURL:"https://heitmannspizza-dashboard-default-rtdb.europe-west1.firebasedatabase.app",projectId:"heitmannspizza-dashboard"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
-// ── STATE ─────────────────────────────────────────────────────────────────
-let state={events:[],kontakte:[],einkauf:[],cateringAngebote:[],pinnwand:'',notes:{pizza:[],dip:[],drink:[],catpizza:[],catmisc:[]},calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),editEventId:null,editKontaktId:null,editEinkaufId:null,editCateringAngebotId:null};
-let pizzaMengen={};
-let dipMengen={aioli:0,hothoney:0};
-let drinkMengen={};
+// ── EXCEL DATA CONSTANTS ──────────────────────────────────────────────────
+const EXCEL_ARTICLES = {"Farina Pizzeria Rossa Caputo 5164": {"group": "Mehl", "price_inc": 25.6693, "pack_size": 25, "pack_unit": "kg", "supplier": "A", "article_no": 5164, "unit_price_inc": 1.026772}, "Semola di Grano Duro Rimancinata": {"group": "Mehl", "price_inc": 1.7013, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "unit_price_inc": 1.7013}, "Thunf. Öl": {"group": "Proteine", "price_inc": 9.2983, "pack_size": 2.5, "pack_unit": "kg", "supplier": "A", "article_no": 3140, "unit_price_inc": 3.71932}, "Salami 55mm Tulip": {"group": "Proteine", "price_inc": 8.7633, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 1403, "unit_price_inc": 8.7633}, "Prosciutto Crudo geschnitten": {"group": "Proteine", "price_inc": 11.4383, "pack_size": 0.5, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 22.8766}, "Prosciutto Crudo con Interfoglio": {"group": "Proteine", "price_inc": 10.4753, "pack_size": 0.5, "pack_unit": "kg", "supplier": "A", "article_no": 1438, "unit_price_inc": 20.9506}, "Salami napoli picante": {"group": "Proteine", "price_inc": 13.5783, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 1406, "unit_price_inc": 13.5783}, "Mortadella": {"group": "Proteine", "price_inc": 13.8993, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 15499, "unit_price_inc": 13.8993}, "Kochschinken": {"group": "Proteine", "price_inc": 7.4793, "pack_size": 7.8, "pack_unit": "kg", "supplier": "A", "article_no": 1413, "unit_price_inc": 7.4793}, "Sardellen": {"group": "Proteine", "price_inc": 26.61625, "pack_size": 0.08, "pack_unit": "kg", "supplier": "A", "article_no": 3175, "unit_price_inc": 26.61625}, "Pancetta": {"group": "Proteine", "price_inc": 7.49, "pack_size": 0.3, "pack_unit": "kg", "supplier": "E", "unit_price_inc": 24.966417}, "Grana Padano 16M": {"group": "Milchprodukte", "price_inc": 40.7563, "pack_size": 2, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 20.37815}, "Fior di Latte Taglio Napoli latteria Sorrentina": {"group": "Milchprodukte", "price_inc": 17.8583, "pack_size": 2, "pack_unit": "kg", "supplier": "A", "article_no": 11498, "unit_price_inc": 8.92915}, "Fior di Latte Taglio Napoli Zappa": {"group": "Milchprodukte", "price_inc": 27.2743, "pack_size": 3, "pack_unit": "kg", "supplier": "A", "unit_price_inc": 9.0914}, "Burrata Nonno Nanni": {"group": "Milchprodukte", "price_inc": 2.1293, "pack_size": 0.125, "pack_unit": "kg", "supplier": "A", "unit_price_inc": 17.0344}, "Aro Schmand 24%": {"group": "Milchprodukte", "price_inc": 27.8093, "pack_size": 5, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 5.56186}, "Greco Feta 48%": {"group": "Milchprodukte", "price_inc": 19.2493, "pack_size": 2, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 9.6246}, "Grana Padano DOP 1/8 Colla": {"group": "Milchprodukte", "price_inc": 15.8253, "pack_size": 4, "pack_unit": "kg", "supplier": "A", "article_no": 13156, "unit_price_inc": 15.8253}, "Hirtenkäse": {"group": "Milchprodukte", "price_inc": 14.43, "pack_size": 1.8, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 8.0166}, "Gorgonzola": {"group": "Milchprodukte", "price_inc": 11.7593, "pack_size": 1.5, "pack_unit": "kg", "supplier": "A", "article_no": 1132, "unit_price_inc": 7.8395}, "Ricotta di pecora Fresca": {"group": "Milchprodukte", "price_inc": 8.0143, "pack_size": 1.5, "pack_unit": "kg", "supplier": "A", "article_no": 1386, "unit_price_inc": 5.3428}, "Stracciatella": {"group": "Milchprodukte", "price_inc": 3.6273, "pack_size": 0.25, "pack_unit": "kg", "supplier": "A", "article_no": 11151, "unit_price_inc": 14.5092}, "Zwiebeln RONL": {"group": "Gemüse", "price_inc": 3.1993, "pack_size": 1.5, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 2.1328}, "Zwiebeln rot ": {"group": "Gemüse", "price_inc": 13.8993, "pack_size": 10, "pack_unit": "kg", "supplier": "A", "article_no": "O445", "unit_price_inc": 1.3899}, "Knoblauch GES": {"group": "Gemüse", "price_inc": 6.9443, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": "O475", "unit_price_inc": 6.9443}, "Pelati Andronaco": {"group": "Gemüse", "price_inc": 3.1993, "pack_size": 2.5, "pack_unit": "kg", "supplier": "A", "article_no": 30163, "unit_price_inc": 1.2797}, "Polpa Andronaco": {"group": "Gemüse", "price_inc": 13.8993, "pack_size": 10, "pack_unit": "kg", "supplier": "A", "article_no": 30164, "unit_price_inc": 1.3899}, "Polpa cour di pomodoro Cirio": {"group": "Gemüse", "price_inc": 13.8993, "pack_size": 5, "pack_unit": "kg", "supplier": "A", "unit_price_inc": 2.7798}, "Basilikum frisch": {"group": "Gemüse", "price_inc": 16.0393, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": "O902", "unit_price_inc": 16.0393}, "Rucola frisch": {"group": "Gemüse", "price_inc": 7.4793, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": "O106", "unit_price_inc": 7.4793}, "Blattspiat Miniportioniert": {"group": "Gemüse", "price_inc": 5.6603, "pack_size": 2.5, "pack_unit": "kg", "supplier": "A", "unit_price_inc": 2.2641}, "Eiswürfel": {"group": "Gemüse", "price_inc": 5.1051, "pack_size": 5, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 1.0210}, "Spinat frisch": {"group": "Gemüse", "price_inc": 19.2493, "pack_size": 5.5, "pack_unit": "Kg", "supplier": "A", "unit_price_inc": 3.4998}, "Pilze frisch": {"group": "Gemüse", "price_inc": 4.8, "pack_size": 1, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 4.8}, "Cherrytomaten": {"group": "Gemüse", "price_inc": 5.8743, "pack_size": 3, "pack_unit": "kg", "supplier": "A", "article_no": "O312", "unit_price_inc": 5.8743}, "Champignon": {"group": "Gemüse", "price_inc": 3.9483, "pack_size": 3, "pack_unit": "kg", "supplier": "A", "article_no": "O500", "unit_price_inc": 1.3161}, "Zucchini": {"group": "Gemüse", "price_inc": 9.6193, "pack_size": 5, "pack_unit": "kg", "supplier": "A", "article_no": "O204", "unit_price_inc": 1.9238}, "Paprika": {"group": "Gemüse", "price_inc": 15.515, "pack_size": 5, "pack_unit": "kg", "article_no": "O214", "unit_price_inc": 3.103}, "Aro Rapsöl": {"group": "Sonstiges", "price_inc": 4.1623, "pack_size": 2.5, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 1.6649}, "Aro Zucker Raffinade": {"group": "Sonstiges", "price_inc": 0.8881, "pack_size": 1, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 0.8881}, "Aro Honig": {"group": "Sonstiges", "price_inc": 11.2243, "pack_size": 1.5, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 7.4828}, "Bührings Eier Freiland": {"group": "Sonstiges", "price_inc": 4, "supplier": "B"}, "Hefe Omas Ur-Hefe": {"group": "Sonstiges", "price_inc": 0.1819, "pack_size": 0.042, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 4.3309}, "Aro Eiswürfel": {"group": "Sonstiges", "price_inc": 5.1051, "pack_size": 5, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 1.0210}, "Olio extra virgin san Giovanni Desantes": {"group": "Sonstiges", "price_inc": 8.5493, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "unit_price_inc": 8.5493}, "Wallnusskerne Andronaco": {"group": "Sonstiges", "price_inc": 19.2493, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "unit_price_inc": 19.2493}, "Crema di Balsamico": {"group": "Sonstiges", "price_inc": 5.1253, "pack_size": 0.5, "pack_unit": "kg", "supplier": "A", "unit_price_inc": 10.2506}, "Apfel essig ": {"group": "Sonstiges", "price_inc": 1.5515, "pack_size": 0.5, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 3.103}, "Pesto alla genovese": {"group": "Sonstiges", "price_inc": 4.8043, "pack_size": 0.5, "pack_unit": "kg", "supplier": "A", "article_no": 3456, "unit_price_inc": 9.6086}, "Salz": {"group": "Sonstiges", "price_inc": 8.5493, "pack_size": 25, "pack_unit": "kg", "supplier": "A", "article_no": 6391, "unit_price_inc": 0.3419}, "Pomodoro Secchi in olio": {"group": "Sonstiges", "price_inc": 15.6113, "pack_size": 2.9, "pack_unit": "Kg", "supplier": "A", "article_no": 34329, "unit_price_inc": 5.3832}, "Kuehne Senf ": {"group": "Sonstiges", "price_inc": 1.5943, "pack_size": 0.25, "pack_unit": "Kg", "supplier": "M", "unit_price_inc": 6.3772}, "Metro Chef Chiliflocken ": {"group": "Sonstiges", "price_inc": 8.0143, "pack_size": 0.37, "pack_unit": "Kg", "supplier": "M", "unit_price_inc": 21.6602}, "Orange": {"group": "Sonstiges", "price_inc": 6.4093, "pack_size": 3, "pack_unit": "Kg", "supplier": "M", "unit_price_inc": 2.1364}, "Eier (Bührings)": {"group": "Sonstiges", "price_inc": 4, "pack_size": 10, "pack_unit": "stk", "supplier": "B", "unit_price_inc": 6.6666}, "Limette": {"group": "Sonstiges", "price_inc": 3.1993, "pack_size": 1, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 3.1993}, "Chilipulver": {"group": "Sonstiges", "price_inc": 5.8743, "pack_size": 0.39, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 15.0623}, "Chilischoten": {"group": "Sonstiges", "price_inc": 8.8703, "pack_size": 0.19, "pack_unit": "kg", "supplier": "M", "unit_price_inc": 46.6857}, "Peperoncini Piccanti in olio": {"group": "Sonstiges", "price_inc": 22.4593, "pack_size": 3.1, "pack_unit": "kg", "supplier": "A", "article_no": 3431, "unit_price_inc": 7.2449}, "Oliven schwarz in Scheiben": {"group": "Sonstiges", "price_inc": 11.0102, "pack_size": 4.25, "pack_unit": "kg", "supplier": "A", "article_no": 30108, "unit_price_inc": 2.5906}, "Pistazien": {"group": "Sonstiges", "price_inc": 48.1393, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 6028, "unit_price_inc": 48.1393}, "Oregano eigenmarke Andronaco": {"group": "Sonstiges", "price_inc": 10.6893, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 60196, "unit_price_inc": 10.6893}, "VioLife": {"group": "Sonstiges", "price_inc": 2.49, "pack_size": 0.18, "pack_unit": "kg", "supplier": "E", "unit_price_inc": 13.8333}, "Kapern": {"group": "Sonstiges", "price_inc": 8.0552, "pack_size": 0.53, "pack_unit": "kg", "supplier": "A", "article_no": 34470, "unit_price_inc": 8.0552}, "G&G Kürbiskerne ": {"group": "Sonstiges", "price_inc": 2.29, "pack_size": 0.25, "pack_unit": "kg", "supplier": "E", "unit_price_inc": 9.16}};
+const EXCEL_BASE_RECIPES = {"teig": [["Farina Pizzeria Rossa Caputo 5164", 156.789], ["Aro Zucker Raffinade", 2.349], ["Salz", 5.184], ["Hefe Omas Ur-Hefe", 0.621], ["Aro Eiswürfel", 23.517]], "tomatensauce": [["Polpa Andronaco", 83.2], ["Pelati Andronaco", 44.85], ["Salz", 0.65], ["Aro Zucker Raffinade", 0.52], ["Basilikum frisch", 0.78]], "spinatcreme": [["Blattspiat Miniportioniert", 94.9], ["Aro Schmand 24%", 14.3], ["Salz", 1.3], ["Knoblauch GES", 1.3], ["Hirtenkäse", 15.6], ["Aro Zucker Raffinade", 2.6]], "schmandcreme": [["Aro Schmand 24%", 90.55], ["Knoblauch GES", 1.55], ["Grana Padano DOP 1/8 Colla", 6.4], ["Salz", 1.5]], "chilli_ricotta": [["Ricotta di pecora Fresca", 39.08], ["Chilipulver", 0.44], ["Salz", 0.48]], "grillgemuese": [["Zucchini", 46.08], ["Paprika", 70.08], ["Olio extra virgin san Giovanni Desantes", 2.4], ["Salz", 1.44]], "konfierte_tomaten": [["Cherrytomaten", 144.576], ["Knoblauch GES", 1.92], ["Olio extra virgin san Giovanni Desantes", 7.232], ["Salz", 2.416], ["Aro Zucker Raffinade", 1.92], ["Oregano eigenmarke Andronaco", 0.24]], "hot_honey": [["Aro Honig", 44.5], ["Metro Chef Chiliflocken ", 1.75], ["Apfel essig ", 2.9], ["Chilipulver", 0.85]], "aioli": [["Aro Rapsöl", 36.375], ["Eier (Bührings)", 8.75], ["Apfel essig ", 0.5], ["Aro Zucker Raffinade", 0.76], ["Salz", 0.4], ["Kuehne Senf ", 1.85], ["Knoblauch GES", 1.365]], "aioli_auto": [["Aro Rapsöl", 36.375], ["Eier (Bührings)", 8.75], ["Aro Zucker Raffinade", 0.76], ["Salz", 0.4], ["Kuehne Senf ", 1.85], ["Knoblauch GES", 1.365]], "karam_zwiebeln": [["Zwiebeln rot ", 120.0]], "karam_walnuesse": [["Wallnusskerne Andronaco", 25.0]], "kuerbiscreme": [["Aro Schmand 24%", 135.825], ["Knoblauch GES", 2.325], ["Grana Padano DOP 1/8 Colla", 9.6], ["Salz", 2.25]]};
+const EXCEL_PIZZAS = {"Margherita": {"price": 0.9955, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 80]]}, "Pesto": {"price": 0.8339, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Pesto alla genovese", 25]]}, "Salami": {"price": 1.1195, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Salami 55mm Tulip", 60]]}, "Funghi": {"price": 0.7911, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Champignon", 50]]}, "Parma": {"price": 2.1665, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Prosciutto Crudo con Interfoglio", 50], ["Rucola frisch", 40], ["Crema di Balsamico", 8], ["Pesto alla genovese", 15]]}, "Tonno": {"price": 0.9490, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Thunf. Öl", 75], ["Zwiebeln rot ", 55]]}, "Verde": {"price": 1.8508, "parts": [["teig", 1], ["spinatcreme", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 30], ["Hirtenkäse", 50], ["karam_zwiebeln", 1.166], ["karam_walnuesse", 1]]}, "Burrata": {"price": 3.2637, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Pesto alla genovese", 15], ["Pomodoro Secchi in olio", 20], ["Rucola frisch", 40], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Burrata Nonno Nanni", 125]]}, "Spicy Salami": {"price": 2.0784, "parts": [["teig", 1], ["tomatensauce", 0.576], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 55], ["Salami napoli picante", 75], ["chilli_ricotta", 1], ["hot_honey", 0.2], ["Peperoncini Piccanti in olio", 10]]}, "Mortadella e Pistachio": {"price": 2.0127, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Mortadella", 50], ["Stracciatella", 30], ["Pistazien", 6]]}, "Pizza Grillgemüse": {"price": 1.2935, "parts": [["teig", 1], ["tomatensauce", 1], ["grillgemuese", 1], ["Oliven schwarz in Scheiben", 20], ["Pomodoro Secchi in olio", 20], ["VioLife", 35]]}, "Special Margherita": {"price": 2.0386, "parts": [["teig", 1], ["schmandcreme", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["konfierte_tomaten", 1], ["Olio extra virgin san Giovanni Desantes", 10]]}, "Speciale": {"price": 1.0137, "parts": [["teig", 1], ["tomatensauce", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["Kochschinken", 50], ["Champignon", 35]]}, "Siziliana": {"price": 1.2280, "parts": [["teig", 1], ["tomatensauce", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["Zwiebeln rot ", 20], ["Sardellen", 20], ["Kapern", 6], ["Oliven schwarz in Scheiben", 10]]}, "Gorgonzola e Spinacchi": {"price": 1.8255, "parts": [["teig", 1], ["schmandcreme", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["Blattspiat Miniportioniert", 60], ["Gorgonzola", 40], ["Cherrytomaten", 60]]}, "Kürbis": {"price": 0.048, "parts": [["teig", 1], ["kuerbiscreme", 1], ["Grana Padano DOP 1/8 Colla", 9], ["Fior di Latte Taglio Napoli latteria Sorrentina", 30], ["Hirtenkäse", 30], ["Pancetta", 60], ["karam_zwiebeln", 1], ["G&G Kürbiskerne ", 5], ["Crema di Balsamico", 5]]}};
 
-// ── PIZZA DATA ────────────────────────────────────────────────────────────
-const PIZZA_REZEPTE={
-  "Margherita":            [{n:"Tomatensauce",g:130},{n:"Parmesan",g:6},{n:"Mozzarella",g:80}],
-  "Pesto":                 [{n:"Tomatensauce",g:130},{n:"Parmesan",g:6},{n:"Mozzarella",g:35},{n:"Pesto",g:25}],
-  "Salami":                [{n:"Tomatensauce",g:130},{n:"Parmesan",g:6},{n:"Mozzarella",g:35},{n:"Salami",g:60}],
-  "Funghi":                [{n:"Tomatensauce",g:130},{n:"Parmesan",g:6},{n:"Mozzarella",g:35},{n:"Champignon",g:50}],
-  "Parma":                 [{n:"Tomatensauce",g:130},{n:"Parmesan",g:6},{n:"Mozzarella",g:35},{n:"Prosciutto Crudo",g:50},{n:"Rucola",g:40},{n:"Balsamico Crema",g:8},{n:"Pesto",g:15}],
-  "Tonno":                 [{n:"Tomatensauce",g:130},{n:"Parmesan",g:6},{n:"Mozzarella",g:35},{n:"Thunfisch (Öl)",g:75},{n:"Zwiebeln",g:55}],
-  "Verde":                 [{n:"Spinatcreme",g:130},{n:"Parmesan",g:6},{n:"Mozzarella",g:30},{n:"Hirtenkäse",g:50},{n:"Zwiebeln (karam.)",g:70},{n:"Walnüsse (karam.)",g:25}],
-  "Burrata":               [{n:"Tomatensauce",g:130},{n:"Parmesan",g:6},{n:"Mozzarella",g:35},{n:"Pesto",g:15},{n:"Getrocknete Tomaten",g:20},{n:"Rucola",g:40},{n:"Burrata",g:125}],
-  "Spicy Salami":          [{n:"Tomatensauce",g:75},{n:"Parmesan",g:6},{n:"Mozzarella",g:55},{n:"Salami Napoli Picante",g:75},{n:"Ricotta",g:40},{n:"Hot Honey",g:10},{n:"Peperoncini",g:10}],
-  "Mortadella e Pistachio":[{n:"Tomatensauce",g:130},{n:"Parmesan",g:6},{n:"Mozzarella",g:35},{n:"Mortadella",g:50},{n:"Stracciatella",g:30},{n:"Pistazien (gehackt)",g:6}],
-  "Pizza Grillgemüse":     [{n:"Tomatensauce",g:130},{n:"Grillgemüse",g:120},{n:"Oliven",g:20},{n:"Getrocknete Tomaten",g:20},{n:"Veganer Käse",g:35}],
-  "Special Margherita":    [{n:"Schmandcreme",g:100},{n:"Fior di Latte",g:35},{n:"Parmesan",g:6},{n:"Konfierte Tomaten",g:160},{n:"Basilikum-Öl",g:10}],
-  "Speciale":              [{n:"Tomatensauce",g:130},{n:"Fior di Latte",g:35},{n:"Parmesan",g:6},{n:"Kochschinken",g:50},{n:"Champignon",g:35}],
-  "Siziliana":             [{n:"Tomatensauce",g:130},{n:"Fior di Latte",g:35},{n:"Parmesan",g:6},{n:"Zwiebeln",g:20},{n:"Sardellen",g:20},{n:"Kapern",g:6},{n:"Oliven",g:10}],
-  "Gorgonzola e Spinacchi":[{n:"Schmandcreme",g:100},{n:"Fior di Latte",g:35},{n:"Parmesan",g:6},{n:"Spinat",g:60},{n:"Gorgonzola",g:40},{n:"Kirschtomaten",g:60}],
-  "Kürbis":                [{n:"Kürbiscreme",g:150},{n:"Parmesan",g:9},{n:"Fior di Latte",g:30},{n:"Hirtenkäse",g:30},{n:"Pancetta",g:60},{n:"Zwiebeln (karam.)",g:60},{n:"Kürbiskerne",g:5},{n:"Balsamico Crema",g:5}]
-};
-const TEIG_PRO_PIZZA=[{n:"Mehl (Farina Pizzeria Caputo)",g:156.8},{n:"Zucker",g:2.35},{n:"Salz",g:5.18},{n:"Hefe",g:0.62},{n:"Wasser",g:81.5},{n:"Eiswürfel",g:23.5}];
-Object.keys(PIZZA_REZEPTE).forEach(p=>pizzaMengen[p]=0);
+const SUPPLIER_LABELS = {A:'Andronaco',B:'Bührings',E:'Edeka',F:'Famila',H:'Hol Ab',L:'Lütauer',M:'Metro'};
+const ALL_SUPPLIER_CODES = ['A','B','E','F','H','L','M'];
+const SUPPLIER_ORDER = {A:1,B:2,E:3,F:4,H:5,L:6,M:7};
 
-// Prices per kg from Excel
-const PIZZA_PREISE={
-  "Mozzarella":8.345,"Fior di Latte":8.345,"Parmesan":14.79,"Tomatensauce":1.339,
-  "Tomatensoße":1.339,"Spinatcreme":3.283,"Schmandcreme":5.759,"Kürbiscreme":5.759,
-  "Salami":8.19,"Prosciutto Crudo":19.58,"Thunfisch (Öl)":3.476,"Mortadella":12.99,
-  "Kochschinken":6.99,"Sardellen":24.875,"Pancetta":23.23,"Salami Napoli Picante":12.69,
-  "Ricotta":5.037,"Burrata":15.92,"Stracciatella":13.56,"Hirtenkäse":7.494,
-  "Gorgonzola":7.327,"Rucola":6.99,"Champignon":3.69,"Zwiebeln":1.299,
-  "Zwiebeln (karam.)":2.598,"Kirschtomaten":5.49,"Oliven":2.421,"Kapern":7.528,
-  "Spinat":2.116,"Pesto":8.98,"Balsamico Crema":9.58,"Hot Honey":7.854,
-  "Peperoncini":6.771,"Pistazien (gehackt)":44.99,"Getrocknete Tomaten":5.031,
-  "Walnüsse (karam.)":17.99,"Grillgemüse":2.548,"Veganer Käse":11.205,
-  "Konfierte Tomaten":5.430,"Basilikum-Öl":7.99,"Kürbiskerne":8.52,
-  "Mehl (Farina Pizzeria Caputo)":0.9596,"Zucker":0.83,"Salz":0.3197,
-  "Hefe":4.048,"Eiswürfel":0.858,"Wasser":0
-};
-
-// DIP DATA
-const DIP_REZEPTE={
-  aioli:[{n:"Rapsöl",g:36.375},{n:"Eier",g:8.75},{n:"Essig",g:0.5},{n:"Zucker",g:0.76},{n:"Salz",g:0.4},{n:"Senf",g:1.85},{n:"Knoblauch",g:1.365}],
-  hothoney:[{n:"Honig",g:44.5},{n:"Chiliflocken",g:1.75},{n:"Apfelessig",g:2.9},{n:"Chilipulver",g:0.85}]
-};
-const DIP_PREISE={
-  "Rapsöl":1.556,"Eier":6.667,"Essig":2.9,"Zucker":0.83,"Salz":0.3197,"Senf":2.98,"Knoblauch":6.49,
-  "Honig":6.993,"Chiliflocken":20.243,"Apfelessig":2.9,"Chilipulver":14.077
-};
-
-// DRINK DATA from Excel
-const DRINK_DATEN={
-  "Lütauer":[
-    {name:"Apfel-Maracuja",preisProKiste:20.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33},
-    {name:"Apfel",preisProKiste:19.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33},
-    {name:"Apfel-Himbeere",preisProKiste:17.71,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33},
-    {name:"Johannisbeere",preisProKiste:24.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33},
-    {name:"Pink Grapefruit",preisProKiste:18.85,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33},
-    {name:"Rhabarber",preisProKiste:24.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33}
-  ],
-  "Softdrinks":[
-    {name:"Coca Cola",preisProKiste:15.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33},
-    {name:"Coca Cola Zero",preisProKiste:15.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33},
-    {name:"Sprite",preisProKiste:15.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33},
-    {name:"Fanta",preisProKiste:15.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33},
-    {name:"Mezzo-Mix",preisProKiste:15.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33}
-  ],
-  "Bier":[
-    {name:"Krombacher Pils",preisProKiste:16.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33},
-    {name:"Krombacher Radler",preisProKiste:16.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33},
-    {name:"Krombacher Alkoholfrei",preisProKiste:16.99,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33}
-  ],
-  "Mate":[
-    {name:"Original",preisProKiste:9.98,litreProKiste:6,flaschenProKiste:12,flaschenGroesse:0.5},
-    {name:"Ginger",preisProKiste:9.98,litreProKiste:6,flaschenProKiste:12,flaschenGroesse:0.5},
-    {name:"Orange",preisProKiste:9.98,litreProKiste:6,flaschenProKiste:12,flaschenGroesse:0.5}
-  ],
-  "Wasser":[
-    {name:"Für. Bism. Classic",preisProKiste:5.99,litreProKiste:9,flaschenProKiste:12,flaschenGroesse:0.75},
-    {name:"San Pellegrino Aqua Panna",preisProKiste:12.71,litreProKiste:9,flaschenProKiste:12,flaschenGroesse:0.75}
-  ],
-  "Spiritosen":[
-    {name:"Aperol (Flasche 1L)",preisProFlasche:17.84,einheit:"Flasche",flaschenGroesse:1},
-    {name:"Lillet (Flasche 0,75L)",preisProFlasche:15.46,einheit:"Flasche",flaschenGroesse:0.75},
-    {name:"Soda/Kisten",preisProKiste:28.27,litreProKiste:7.92,flaschenProKiste:24,flaschenGroesse:0.33}
-  ]
-};
-// init drink mengen
-Object.entries(DRINK_DATEN).forEach(([grp,items])=>{
-  items.forEach(item=>{ drinkMengen[grp+'_'+item.name]=0; });
-});
-
-// CATERING – exakt aus Excel „Catering - Kalkulation - 5.10.2025“
-const CAT_DEFAULTS={
-  stundensatz:18,
-  kmsatz:0.8,
-  waren:3.5,
-  gas:10,
-  entsorgung:15,
-  miete:45,
-  ust:1.19
-};
+const CAT_DEFAULTS={stundensatz:18,kmsatz:0.8,waren:3.5,gas:10,entsorgung:15,miete:45,ust:1.19};
 const CAT_SCENARIOS=[
   {min:30,max:49,label:'30 - 49 P.', stunden:35, marge:0.5},
   {min:50,max:69,label:'50 - 69 P.', stunden:39, marge:0.6},
@@ -663,42 +553,14 @@ const CAT_SCENARIOS=[
   {min:200,max:299,label:'200 - 299 P.', stunden:64.5, marge:1.2},
   {min:300,max:400,label:'300 - 400 P.', stunden:71.5, marge:1.1}
 ];
-const CAT_STUNDEN_INDIVIDUELL=[
-  {name:'Einkauf',h:2},
-  {name:'Teig',h:0.7},
-  {name:'Dips & Kleinkram',h:0.25},
-  {name:'Beladen / Entladen',h:1},
-  {name:'Prepen',h:1.5},
-  {name:'Aufbau/Abbau',h:1},
-  {name:'Service vor Ort',h:2},
-  {name:'Aufräumen',h:1}
-];
 
-// INGREDIENT CATEGORIES for Einkaufsliste
-const EK_KATEGORIEN=["Teig","Milchprodukte / Käse","Sauce / Basis","Belag","Gemüse & Kräuter","Dips","Getränke","Sonstiges"];
-const LIEFERANTEN={A:'Andronaco',B:'Bührings',M:'Metro',E:'Edeka'};
-const LIEFERANTEN_ORDER={A:1,B:2,M:3,E:4};
-const EK_KAT_MAP={
-  "Mehl (Farina Pizzeria Caputo)":"Teig","Zucker":"Teig","Salz":"Teig","Hefe":"Teig","Wasser":"Teig","Eiswürfel":"Teig",
-  "Mozzarella":"Milchprodukte / Käse","Fior di Latte":"Milchprodukte / Käse","Parmesan":"Milchprodukte / Käse",
-  "Burrata":"Milchprodukte / Käse","Stracciatella":"Milchprodukte / Käse","Hirtenkäse":"Milchprodukte / Käse",
-  "Gorgonzola":"Milchprodukte / Käse","Ricotta":"Milchprodukte / Käse","Schmandcreme":"Milchprodukte / Käse",
-  "Spinatcreme":"Milchprodukte / Käse","Kürbiscreme":"Milchprodukte / Käse",
-  "Tomatensauce":"Sauce / Basis","Tomatensoße":"Sauce / Basis","Konfierte Tomaten":"Sauce / Basis",
-  "Kirschtomaten":"Sauce / Basis","Getrocknete Tomaten":"Sauce / Basis","Basilikum-Öl":"Sauce / Basis",
-  "Salami":"Belag","Prosciutto Crudo":"Belag","Thunfisch (Öl)":"Belag","Mortadella":"Belag",
-  "Kochschinken":"Belag","Sardellen":"Belag","Pancetta":"Belag","Salami Napoli Picante":"Belag",
-  "Champignon":"Gemüse & Kräuter","Rucola":"Gemüse & Kräuter","Zwiebeln":"Gemüse & Kräuter",
-  "Zwiebeln (karam.)":"Gemüse & Kräuter","Kirschtomaten":"Gemüse & Kräuter","Oliven":"Gemüse & Kräuter",
-  "Kapern":"Gemüse & Kräuter","Spinat":"Gemüse & Kräuter","Grillgemüse":"Gemüse & Kräuter",
-  "Veganer Käse":"Gemüse & Kräuter","Walnüsse (karam.)":"Gemüse & Kräuter","Pesto":"Sauce / Basis",
-  "Balsamico Crema":"Sauce / Basis","Hot Honey":"Dips","Peperoncini":"Gemüse & Kräuter",
-  "Pistazien (gehackt)":"Belag","Kürbiskerne":"Gemüse & Kräuter",
-  "Rapsöl":"Dips","Eier":"Dips","Essig":"Dips","Senf":"Dips","Knoblauch":"Gemüse & Kräuter",
-  "Honig":"Dips","Chiliflocken":"Dips","Apfelessig":"Dips","Chilipulver":"Dips"
-};
+// ── STATE ─────────────────────────────────────────────────────────────────
+let state={events:[],kontakte:[],einkauf:[],cateringAngebote:[],pinnwand:'',notes:{pizza:[],catpizza:[],catmisc:[]},calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),editEventId:null,editKontaktId:null,editEinkaufId:null,editCateringAngebotId:null};
+let pizzaMengen={};
+let dipMengen={aioli:0,hothoney:0};
+Object.keys(EXCEL_PIZZAS).forEach(p=>pizzaMengen[p]=0);
 
-// ── FIREBASE SYNC ─────────────────────────────────────────────────────────
+// ── CORE SYNC LOGIC (TRANSACTIONS FOR SAFETY) ─────────────────────────────
 function listenAll(){
   db.ref('/').on('value',snap=>{
     const d=snap.val()||{};
@@ -707,113 +569,71 @@ function listenAll(){
     state.einkauf=(d.einkauf||[]).map(normalizeEinkaufItem);
     state.cateringAngebote=d.cateringAngebote||[];
     state.pinnwand=d.pinnwand||'';
-    state.notes=Object.assign({pizza:[],dip:[],drink:[],catpizza:[],catmisc:[]},d.notes||{});
+    state.notes=Object.assign({pizza:[],catpizza:[],catmisc:[]},d.notes||{});
     if(d.pizzaMengen) Object.assign(pizzaMengen,d.pizzaMengen);
     if(d.dipMengen) Object.assign(dipMengen,d.dipMengen);
-    if(d.drinkMengen) Object.assign(drinkMengen,d.drinkMengen);
     renderAll();
   });
 }
-function push(key,val){db.ref(key).set(val);}
 
+function pushArrayItemSafe(key, item) {
+  db.ref(key).transaction(currentData => {
+    let arr = currentData || [];
+    let idx = arr.findIndex(x => x && x.id === item.id);
+    if (idx >= 0) arr[idx] = item; else arr.push(item);
+    return arr.filter(x => x != null); // remove gaps
+  });
+}
+
+function removeArrayItemSafe(key, id) {
+  db.ref(key).transaction(currentData => {
+    if(!currentData) return [];
+    return currentData.filter(x => x && x.id !== id);
+  });
+}
+
+function updateStateObj(key, obj) {
+  db.ref(key).update(obj);
+}
+
+// ── NORMALIZERS ───────────────────────────────────────────────────────────
 function normalizeEvent(ev){
   return Object.assign({}, ev, {
     company: ev.company || 'HP',
     contactId: ev.contactId || ev.kontaktId || '',
     kontakt: ev.kontakt || ev.contactName || '',
     cateringAngebotId: ev.cateringAngebotId || '',
-    cateringAngebotName: ev.cateringAngebotName || ''
+    cateringAngebotName: ev.cateringAngebotName || '',
+    endDate: ev.endDate || '' // multi-day support
   });
 }
 function normalizeKontakt(k){ return Object.assign({firma:'',tel:'',email:'',adresse:'',typ:'Kunde',notizen:''},k); }
-function normalizeEinkaufItem(e){ return Object.assign({kategorie:'Sonstiges',menge:0,einheit:'Stk',preis:0,artikelnummer:'',lieferant:randomLieferantCode()},e); }
+function normalizeEinkaufItem(e){ return Object.assign({kategorie:'Sonstiges',menge:0,einheit:'Stk',preis:0,artikelnummer:'',lieferant:'A'},e); }
+function lieferantName(code){ return SUPPLIER_LABELS[code]||code||'–'; }
+function contactLinkHTML(id, name){ return id ? `<span class="linkish" onclick="openContactInfo('${id}'); event.stopPropagation();">${name||'Kontakt'}</span>` : '–'; }
 
+// ── HELPERS ───────────────────────────────────────────────────────────────
+function fmt(n){return Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
+function fmtQty(g){return g>=1000?(g/1000).toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2})+' kg':Math.round(g).toLocaleString('de-DE')+' g';}
+function statusBadge(s){
+  const m={Catering:'badge-blue',Event:'badge-amber',Sonstiges:'badge-amber','Pending...':'badge-amber',Secured:'badge-green',Possibility:'badge-blue',Kunde:'badge-blue',Lieferant:'badge-green',Mitarbeiter:'badge-amber'};
+  return `<span class="badge ${m[s]||'badge-amber'}">${s}</span>`;
+}
+function showToast(msg){
+  const wrap=document.getElementById('toast-wrap');
+  const toast=document.createElement('div');
+  toast.className='toast'; toast.textContent=msg||'Gespeichert';
+  wrap.appendChild(toast);
+  requestAnimationFrame(()=>toast.classList.add('show'));
+  setTimeout(()=>{toast.classList.remove('show'); setTimeout(()=>toast.remove(),220);},2200);
+}
+function copyText(t,msg){navigator.clipboard.writeText(t).then(()=>showToast(msg||'Kopiert!'));}
 
-function getKontaktById(id){return state.kontakte.find(k=>k.id===id);}
-function companyChip(company){
-  const c=(company||'HP').toLowerCase();
-  return `<span class="company-chip ${c}">${company||'HP'}</span>`;
-}
-function populateKontaktSelect(selectId, selectedId=''){
-  const el=document.getElementById(selectId); if(!el) return;
-  el.innerHTML='<option value="">— Kein Kontakt —</option>'+state.kontakte.map(k=>`<option value="${k.id}" ${selectedId===k.id?'selected':''}>${k.name}${k.firma?' · '+k.firma:''}</option>`).join('');
-}
-function populateCateringAngebotSelect(selectId, selectedId=''){
-  const el=document.getElementById(selectId); if(!el) return;
-  const angebote=[...state.cateringAngebote].sort((a,b)=>(a.name||'').localeCompare(b.name||''));
-  el.innerHTML='<option value="">— Kein Catering-Angebot —</option>'+
-    angebote.map(a=>`<option value="${a.id}" ${selectedId===a.id?'selected':''}>${a.name||'Angebot'}${a.gaeste?' · '+a.gaeste+' Gäste':''}${a.bruttoGesamt?' · '+a.bruttoGesamt:''}</option>`).join('');
-}
-function handleEventOfferSelection(){
-  const select=document.getElementById('ev-catering-angebot-id');
-  if(!select) return;
-  const angebot=state.cateringAngebote.find(a=>a.id===select.value);
-  if(!angebot) return;
-  const angebotInput=document.getElementById('ev-angebot');
-  const personenInput=document.getElementById('ev-personen');
-  if(angebotInput && angebot.bruttoGesamt){
-    const numeric=String(angebot.bruttoGesamt).replace(/\./g,'').replace(',', '.').replace(/[^0-9.\-]/g,'');
-    angebotInput.value=numeric || angebotInput.value;
-  }
-  if(personenInput && (!personenInput.value || personenInput.value==='0') && angebot.gaeste){
-    personenInput.value=angebot.gaeste;
-  }
-}
-function populateEventSelect(selectId, selectedId='', onlyCatering=false){
-  const el=document.getElementById(selectId); if(!el) return;
-  let events=state.events;
-  if(onlyCatering) events=events.filter(e=>e.type==='Catering');
-  el.innerHTML='<option value="">— Kein Event —</option>'+events.map(ev=>`<option value="${ev.id}" ${selectedId===ev.id?'selected':''}>${ev.title}${ev.date?' · '+ev.date:''}</option>`).join('');
-}
-function populatePizzaMultiSelect(){
-  const el=document.getElementById('cat-pizza-select'); if(!el) return;
-  const prev = new Set(Array.from(el.selectedOptions||[]).map(o=>o.value));
-  el.innerHTML = Object.keys(PIZZA_REZEPTE).map(name=>`<option value="${name}" ${prev.has(name)?'selected':''}>${name}</option>`).join('');
-}
-function openKontaktById(id){
-  if(!id) return;
-  const navItem=document.querySelector(`.nav-item[onclick="showPage('kontakte',this)"]`);
-  showPage('kontakte',navItem);
-  setTimeout(()=>{
-    const row=document.getElementById('kontakt-'+id);
-    if(row){ row.scrollIntoView({behavior:'smooth', block:'center'}); row.style.outline='2px solid var(--blue)'; setTimeout(()=>row.style.outline='',1500); }
-  },50);
-}
-
-// ── RENDER ALL ────────────────────────────────────────────────────────────
-function renderAll(){
-  updateDashboard();
-  renderCalendar();
-  renderAllEvents();
-  renderKontakte();
-  renderEinkauf();
-  renderCateringAngebote();
-  renderPizzaGrid();
-  renderPizzaResult();
-  renderNotes('pizza');
-  renderDipsResult();
-  renderNotes('dip');
-  renderDrinksGrid();
-  renderDrinksResult();
-  renderNotes('drink');
-  renderNotes('catpizza');
-  renderNotes('catmisc');
-  calcCatering();
-  document.getElementById('pinnwand').value=state.pinnwand;
-  document.getElementById('today-date').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
-  // sync qty inputs
-  Object.entries(pizzaMengen).forEach(([k,v])=>{const el=document.getElementById('pqty-'+k.replace(/\s/g,'_').replace(/[()]/g,''));if(el)el.value=v;});
-  Object.entries(dipMengen).forEach(([k,v])=>{const el=document.getElementById('dqty-'+k);if(el)el.value=v;});
-}
-
-// ── NAVIGATION ────────────────────────────────────────────────────────────
+// ── NAVIGATION & MODALS ───────────────────────────────────────────────────
 function updateMobileNav(id){
   document.querySelectorAll('#mobile-bottom-nav button').forEach(b=>b.classList.remove('active'));
   const btn=document.querySelector(`#mobile-bottom-nav button[data-page="${id}"]`);
-  if(btn){
-    btn.classList.add('active');
-    try{ btn.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); }catch(e){}
-  }
+  if(btn){ btn.classList.add('active'); try{btn.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});}catch(e){} }
 }
 function showPage(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -827,75 +647,100 @@ function showPage(id,el){
   if(id==='events') renderAllEvents();
   if(id==='kalender') renderCalendar();
 }
-function navTo(id){
-  const navItem=document.querySelector(`.nav-item[onclick="showPage('${id}',this)"]`);
-  showPage(id,navItem);
-}
+function navTo(id){ const navItem=document.querySelector(`.nav-item[onclick="showPage('${id}',this)"]`); showPage(id,navItem); }
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
-// ── HELPERS ───────────────────────────────────────────────────────────────
-function fmt(n){return Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
-function fmtG(g){return g>=1000?(g/1000).toFixed(2).replace('.',',')+' kg':Math.round(g)+' g';}
-function statusBadge(s){
-  const m={Catering:'badge-blue',Event:'badge-amber',Sonstiges:'badge-amber','Pending...':'badge-amber',Secured:'badge-green',Possibility:'badge-blue',Kunde:'badge-blue',Lieferant:'badge-green',Mitarbeiter:'badge-amber'};
-  return `<span class="badge ${m[s]||'badge-amber'}">${s}</span>`;
+// ── CONTACT MODAL (GLOBAL) ────────────────────────────────────────────────
+function openContactInfo(id){
+  const k = state.kontakte.find(c => c.id === id);
+  if(!k) return;
+  document.getElementById('ci-name').textContent = k.name;
+  document.getElementById('ci-firma').textContent = k.firma ? `Firma: ${k.firma}` : '';
+  document.getElementById('ci-tel').textContent = k.tel || '–';
+  document.getElementById('ci-email').textContent = k.email || '–';
+  document.getElementById('ci-adresse').textContent = k.adresse || '–';
+  document.getElementById('ci-notizen').innerHTML = (k.notizen || 'Keine Notizen').replace(/\n/g,'<br>');
+  openModal('contact-info-modal');
 }
-function showToast(msg){
-  const wrap=document.getElementById('toast-wrap');
-  const toast=document.createElement('div');
-  toast.className='toast';
-  toast.textContent=msg||'Gespeichert';
-  wrap.appendChild(toast);
-  requestAnimationFrame(()=>toast.classList.add('show'));
-  setTimeout(()=>{
-    toast.classList.remove('show');
-    setTimeout(()=>toast.remove(),220);
-  },2200);
+function copyModalField(elementId, label){
+  const text = document.getElementById(elementId).textContent;
+  if(text && text !== '–') copyText(text, `${label} kopiert!`);
 }
-function copyText(t,msg){navigator.clipboard.writeText(t).then(()=>showToast(msg||'Kopiert!'));}
-function randomLieferantCode(){ const arr=['A','B','M','E']; return arr[Math.floor(Math.random()*arr.length)]; }
-function lieferantName(code){ return LIEFERANTEN[code]||code||'–'; }
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────
+function renderAll(){
+  updateDashboard(); renderCalendar(); renderAllEvents(); renderKontakte(); renderEinkauf(); renderCateringAngebote();
+  renderPizzaGrid(); renderPizzaAndDipsResult(); renderNotes('pizza'); renderNotes('catpizza'); renderNotes('catmisc');
+  calcCatering();
+  document.getElementById('pinnwand').value=state.pinnwand;
+  document.getElementById('today-date').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
+  Object.entries(pizzaMengen).forEach(([k,v])=>{const el=document.getElementById('pqty-'+k.replace(/\s/g,'_').replace(/[()]/g,''));if(el)el.value=v;});
+  Object.entries(dipMengen).forEach(([k,v])=>{const el=document.getElementById('dqty-'+k);if(el)el.value=v;});
+}
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────
 function updateDashboard(){
-  const now=new Date();
+  const now=new Date(); now.setHours(0,0,0,0);
   const tm=state.events.filter(e=>e.date&&new Date(e.date).getMonth()===now.getMonth()&&new Date(e.date).getFullYear()===now.getFullYear());
   document.getElementById('m-events').textContent=tm.length;
   document.getElementById('m-angebote').textContent=state.cateringAngebote.length;
   document.getElementById('m-kontakte').textContent=state.kontakte.length;
-  const upcoming=[...state.events].filter(e=>e.date>=now.toISOString().slice(0,10)).sort((a,b)=>a.date>b.date?1:-1).slice(0,3);
+  
+  const upcoming=[...state.events].filter(e=> {
+      if(!e.date) return false;
+      const end = e.endDate ? new Date(e.endDate) : new Date(e.date);
+      end.setHours(23,59,59,999);
+      return end >= now;
+  }).sort((a,b)=>a.date>b.date?1:-1).slice(0,3);
   const el=document.getElementById('dash-events');
   el.innerHTML=upcoming.length?upcoming.map(ev=>eventItemHTML(ev)).join(''):'<div style="color:var(--muted);font-size:13px">Keine bevorstehenden Events.</div>';
 }
-function savePin(){state.pinnwand=document.getElementById('pinnwand').value;push('pinnwand',state.pinnwand);}
+function savePin(){state.pinnwand=document.getElementById('pinnwand').value; db.ref('pinnwand').set(state.pinnwand);}
 
 // ── EVENTS ────────────────────────────────────────────────────────────────
 function eventItemHTML(ev){
   const d=ev.date?new Date(ev.date):null;
+  const ed=ev.endDate?new Date(ev.endDate):null;
+  let dateStr = d?d.getDate():'–';
+  if(ed && d && ed.getTime() !== d.getTime()) dateStr = `${d.getDate()}-${ed.getDate()}`;
+  const kontaktHtml = contactLinkHTML(ev.contactId, ev.kontakt);
   return `<div class="event-item" onclick="showEventDetail('${ev.id}')">
-    <div class="event-date"><div class="event-day">${d?d.getDate():'–'}</div><div class="event-month">${d?d.toLocaleDateString('de-DE',{month:'short'}):''}</div></div>
-    <div class="event-info"><div class="event-title-text">${ev.title}${companyChip(ev.company)}</div><div class="event-sub">${ev.ort||''} ${ev.personen?'· '+ev.personen+' Pers.':''}</div></div>
+    <div class="event-date"><div class="event-day">${dateStr}</div><div class="event-month">${d?d.toLocaleDateString('de-DE',{month:'short'}):''}</div></div>
+    <div class="event-info"><div class="event-title-text">${ev.title} <span class="company-chip ${(ev.company||'HP').toLowerCase()}">${ev.company||'HP'}</span></div><div class="event-sub">${ev.ort||''} ${ev.personen?'· '+ev.personen+' Pers.':''} · Kontakt: ${kontaktHtml}</div></div>
     <div>${statusBadge(ev.status)}</div>
   </div>`;
 }
-
+function populateKontaktSelect(selectId, selectedId=''){
+  const el=document.getElementById(selectId); if(!el) return;
+  el.innerHTML='<option value="">— Kein Kontakt —</option>'+state.kontakte.map(k=>`<option value="${k.id}" ${selectedId===k.id?'selected':''}>${k.name}${k.firma?' · '+k.firma:''}</option>`).join('');
+}
+function populateCateringAngebotSelect(selectId, selectedId=''){
+  const el=document.getElementById(selectId); if(!el) return;
+  const angebote=[...state.cateringAngebote].sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  el.innerHTML='<option value="">— Kein Catering-Angebot —</option>'+
+    angebote.map(a=>`<option value="${a.id}" ${selectedId===a.id?'selected':''}>${a.name||'Angebot'}${a.gaeste?' · '+a.gaeste+' Gäste':''}</option>`).join('');
+}
 function openEventModal(id){
   state.editEventId=id||null;
   const ev=id?normalizeEvent(state.events.find(e=>e.id===id)||{}):null;
   document.getElementById('event-modal-title').textContent=ev?'Event bearbeiten':'Neues Event';
   populateKontaktSelect('ev-kontakt-id', ev?ev.contactId:'');
   populateCateringAngebotSelect('ev-catering-angebot-id', ev?ev.cateringAngebotId:'');
-  const defaults={title:'',type:'Catering',company:'HP',date:'',time:'18:00',ort:'',personen:'',angebot:'',notizen:'',status:'Pending...',cateringAngebotId:''};
+  const defaults={title:'',type:'Catering',company:'HP',date:'',endDate:'',time:'18:00',ort:'',personen:'',angebot:'',notizen:'',status:'Pending...'};
   const source=Object.assign({}, defaults, ev||{});
-  ['title','type','company','date','time','ort','personen','angebot','notizen','status'].forEach(f=>{
-    const el=document.getElementById('ev-'+f);
-    if(el) el.value=source[f] ?? '';
+  ['title','type','company','date','endDate','time','ort','personen','angebot','notizen','status'].forEach(f=>{
+    const el=document.getElementById('ev-'+f); if(el) el.value=source[f] ?? '';
   });
-  document.getElementById('ev-kontakt-id').value=source.contactId||'';
-  document.getElementById('ev-catering-angebot-id').value=source.cateringAngebotId||'';
   openModal('event-modal');
+}
+function handleEventOfferSelection(){
+  const select=document.getElementById('ev-catering-angebot-id'); if(!select) return;
+  const angebot=state.cateringAngebote.find(a=>a.id===select.value); if(!angebot) return;
+  const angebotInput=document.getElementById('ev-angebot'), personenInput=document.getElementById('ev-personen');
+  if(angebotInput && angebot.bruttoGesamt) angebotInput.value=String(angebot.bruttoGesamt).replace(/[^0-9.\-]/g,'') || angebotInput.value;
+  if(personenInput && (!personenInput.value || personenInput.value==='0') && angebot.gaeste) personenInput.value=angebot.gaeste;
 }
 function saveEvent(){
   const contactId=document.getElementById('ev-kontakt-id').value||'';
@@ -908,48 +753,34 @@ function saveEvent(){
     type:document.getElementById('ev-type').value,
     company:document.getElementById('ev-company').value||'HP',
     date:document.getElementById('ev-date').value,
+    endDate:document.getElementById('ev-endDate').value, // NEW
     time:document.getElementById('ev-time').value,
     ort:document.getElementById('ev-ort').value,
     personen:document.getElementById('ev-personen').value,
-    contactId,
-    kontakt:linkedContact?linkedContact.name:'',
-    cateringAngebotId,
-    cateringAngebotName:linkedAngebot?(linkedAngebot.name||'Angebot'):'',
+    contactId, kontakt:linkedContact?linkedContact.name:'',
+    cateringAngebotId, cateringAngebotName:linkedAngebot?(linkedAngebot.name||'Angebot'):'',
     angebot:document.getElementById('ev-angebot').value,
     notizen:document.getElementById('ev-notizen').value,
     status:document.getElementById('ev-status').value
   });
-  if(state.editEventId){
-    const i=state.events.findIndex(e=>e.id===state.editEventId);
-    if(i>=0) state.events[i]=ev;
-  } else {
-    state.events.push(ev);
-  }
-  push('events',state.events);
+  pushArrayItemSafe('events', ev);
   closeModal('event-modal');
   showToast(state.editEventId?'Event aktualisiert':'Event gespeichert');
 }
-function deleteEvent(id){
-  state.events=state.events.filter(e=>e.id!==id);
-  push('events',state.events);
-  closeModal('detail-modal');
-  showToast('Event gelöscht');
-}
+function deleteEvent(id){ removeArrayItemSafe('events', id); closeModal('detail-modal'); showToast('Event gelöscht'); }
 function showEventDetail(id){
-  const ev=normalizeEvent(state.events.find(e=>e.id===id)||{});
-  if(!ev.id) return;
-  const kontaktLink = ev.contactId ? `<span class="linkish" onclick="closeModal('detail-modal');openKontaktById('${ev.contactId}')">${ev.kontakt||'Kontakt öffnen'}</span>` : '–';
-  const angebotLink = ev.cateringAngebotId ? `<span>${ev.cateringAngebotName||'Angebot verknüpft'}</span>` : '–';
+  const ev=normalizeEvent(state.events.find(e=>e.id===id)||{}); if(!ev.id) return;
+  const kontaktLink = contactLinkHTML(ev.contactId, ev.kontakt);
+  let dStr = ev.date||'–';
+  if(ev.endDate && ev.endDate !== ev.date) dStr += ` bis ${ev.endDate}`;
   document.getElementById('detail-content').innerHTML=`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">${ev.title}${companyChip(ev.company)}</div>${statusBadge(ev.status)}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">${ev.title} <span class="company-chip ${(ev.company||'HP').toLowerCase()}">${ev.company||'HP'}</span></div>${statusBadge(ev.status)}</div>
     <table style="font-size:13px">
       <tr><td style="color:var(--muted);padding:5px 0;width:120px">Typ</td><td>${statusBadge(ev.type)}</td></tr>
-      <tr><td style="color:var(--muted);padding:5px 0">Firma</td><td>${companyChip(ev.company)}</td></tr>
-      <tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${ev.date||'–'} ${ev.time||''}</td></tr>
+      <tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${dStr} ${ev.time||''}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Ort</td><td>${ev.ort||'–'}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td>${kontaktLink}</td></tr>
-      <tr><td style="color:var(--muted);padding:5px 0">Catering-Angebot</td><td>${angebotLink}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${ev.angebot?fmt(ev.angebot):'–'}</td></tr>
     </table>
     ${ev.notizen?`<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px">${ev.notizen.replace(/\n/g,'<br>')}</div>`:''}
@@ -963,12 +794,10 @@ function showEventDetail(id){
 function renderAllEvents(){
   const el=document.getElementById('all-events-list');
   const q=(document.getElementById('events-search')?.value||'').trim().toLowerCase();
-  const s=[...state.events]
-    .filter(ev=>{
+  const s=[...state.events].filter(ev=>{
       if(!q) return true;
       return [ev.title,ev.type,ev.ort,ev.kontakt,ev.company,ev.status,ev.date].filter(Boolean).join(' ').toLowerCase().includes(q);
-    })
-    .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    }).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   el.innerHTML=s.length?s.map(ev=>eventItemHTML(ev)).join(''):'<div style="color:var(--muted);font-size:13px">Keine passenden Events.</div>';
 }
 
@@ -981,929 +810,326 @@ function renderCalendar(){
   const first=new Date(y,m,1).getDay(),offset=(first===0)?6:first-1,days=new Date(y,m+1,0).getDate(),today=new Date();
   let html='';for(let i=0;i<offset;i++)html+='<div></div>';
   for(let d=1;d<=days;d++){
-    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const evs=state.events.filter(e=>e.date===ds);
+    const currentDate = new Date(y, m, d); currentDate.setHours(0,0,0,0);
+    const evs=state.events.filter(e=>{
+      if(!e.date) return false;
+      const start = new Date(e.date); start.setHours(0,0,0,0);
+      const end = e.endDate ? new Date(e.endDate) : start; end.setHours(0,0,0,0);
+      return currentDate >= start && currentDate <= end;
+    });
     const isToday=d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear();
     const companyClass = evs.length ? (' '+((evs[0].company||'HP').toLowerCase())) : '';
     html+=`<div class="cal-day${isToday?' today':''}${evs.length?' has-event':''}${companyClass}" onclick="${evs.length?`showEventDetail('${evs[0].id}')`:'openEventModal()'}"><div style="font-weight:600;font-size:12px">${d}</div>${evs.map(e=>`<div class="cal-event-tag">${e.title}</div>`).join('')}</div>`;
   }
   document.getElementById('cal-body').innerHTML=html;
-  const currentMonthStart = new Date(y, m, 1);
-  const nextMonthStart = new Date(y, m + 1, 1);
-  const monthAfterNextStart = new Date(y, m + 2, 1);
+  const currentMonthStart = new Date(y, m, 1), monthAfterNextStart = new Date(y, m + 2, 1);
   const me=state.events.filter(e=>{
     if(!e.date) return false;
-    const eventDate = new Date(e.date);
-    return eventDate >= currentMonthStart && eventDate < monthAfterNextStart;
+    const start = new Date(e.date); start.setHours(0,0,0,0);
+    const end = e.endDate ? new Date(e.endDate) : start; end.setHours(0,0,0,0);
+    return end >= currentMonthStart && start < monthAfterNextStart;
   });
-  document.getElementById('cal-event-list').innerHTML=me.length?me.sort((a,b)=>a.date>b.date?1:-1).map(ev=>eventItemHTML(ev)).join(''):'<div style="color:var(--muted);font-size:13px">Keine Events in diesem oder im nächsten Monat.</div>';
+  document.getElementById('cal-event-list').innerHTML=me.length?me.sort((a,b)=>a.date>b.date?1:-1).map(ev=>eventItemHTML(ev)).join(''):'<div style="color:var(--muted);font-size:13px">Keine Events in diesem Zeitraum.</div>';
 }
 function changeMonth(d){state.calMonth+=d;if(state.calMonth>11){state.calMonth=0;state.calYear++;}if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar();}
 
-// ── PIZZA ─────────────────────────────────────────────────────────────────
-function renderPizzaGrid(){
-  document.getElementById('pizza-grid').innerHTML=Object.keys(PIZZA_REZEPTE).map(name=>`
-    <div class="pizza-card"><div class="pizza-card-name">${name}</div>
-    <div class="pizza-qty">
-      <button onclick="changePizza('${name}',-1)">−</button>
-      <input type="number" min="0" value="${pizzaMengen[name]||0}" id="pqty-${name.replace(/\s/g,'_').replace(/[()]/g,'')}" onchange="setPizza('${name}',this.value)"/>
-      <button onclick="changePizza('${name}',1)">+</button>
-    </div></div>`).join('');
+// ── PIZZA & DIPS KALKULATOR (COMBINED) ────────────────────────────────────
+function catFromGroup(group){ const map={'Mehl':'Teig','Proteine':'Belag','Milchprodukte':'Milchprodukte / Käse','Gemüse':'Gemüse & Kräuter','Sonstiges':'Sonstiges','Lebensmittel':'Sonstiges'}; return map[group] || 'Sonstiges'; }
+function unitPriceInc(name){ const m=EXCEL_ARTICLES[name]; return m && m.unit_price_inc ? Number(m.unit_price_inc) : 0; }
+function expandRecipePart(name, factor, totals){
+  if(EXCEL_BASE_RECIPES[name]){ EXCEL_BASE_RECIPES[name].forEach(([article, grams]) => { totals[article] = (totals[article]||0) + Number(grams) * Number(factor); }); }
+  else { totals[name] = (totals[name]||0) + Number(factor); }
+}
+function totalPizzaCount(){ return Object.values(pizzaMengen).reduce((s,v)=>s+(Number(v)||0),0); }
+
+function renderPizzaGrid() {
+  document.getElementById('pizza-grid').innerHTML = Object.keys(EXCEL_PIZZAS).map(name => `
+    <div class="pizza-card"><div class="pizza-card-name">${name}</div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">${fmt(EXCEL_PIZZAS[name].price)} / Pizza</div>
+    <div class="pizza-qty"><button onclick="changePizza('${name}',-1)">−</button><input type="number" min="0" value="${pizzaMengen[name]||0}" id="pqty-${name.replace(/\s/g,'_').replace(/[()]/g,'')}" onchange="setPizza('${name}',this.value)"/><button onclick="changePizza('${name}',1)">+</button></div></div>`).join('');
   updatePizzaTotal();
 }
-function changePizza(name,d){pizzaMengen[name]=Math.max(0,(pizzaMengen[name]||0)+d);const el=document.getElementById('pqty-'+name.replace(/\s/g,'_').replace(/[()]/g,''));if(el)el.value=pizzaMengen[name];updatePizzaTotal();renderPizzaResult();push('pizzaMengen',pizzaMengen);}
-function setPizza(name,v){pizzaMengen[name]=Math.max(0,parseInt(v)||0);updatePizzaTotal();renderPizzaResult();push('pizzaMengen',pizzaMengen);}
-function updatePizzaTotal(){document.getElementById('pizza-total').textContent=Object.values(pizzaMengen).reduce((s,v)=>s+(v||0),0);}
-function resetPizza(){Object.keys(pizzaMengen).forEach(k=>pizzaMengen[k]=0);push('pizzaMengen',pizzaMengen);renderPizzaGrid();renderPizzaResult();}
+function changePizza(name,d){pizzaMengen[name]=Math.max(0,(pizzaMengen[name]||0)+d); updateStateObj('pizzaMengen', pizzaMengen); renderPizzaGrid(); renderPizzaAndDipsResult(); }
+function setPizza(name,v){pizzaMengen[name]=Math.max(0,parseInt(v)||0); updateStateObj('pizzaMengen', pizzaMengen); updatePizzaTotal(); renderPizzaAndDipsResult(); }
+function updatePizzaTotal(){document.getElementById('pizza-total').textContent=totalPizzaCount();}
 
-function calcPizzaIngredients(){
-  const totals={};
-  const total=Object.values(pizzaMengen).reduce((s,v)=>s+(v||0),0);
-  if(total>0)TEIG_PRO_PIZZA.forEach(i=>{totals[i.n]=(totals[i.n]||0)+i.g*total;});
-  Object.entries(pizzaMengen).forEach(([pizza,qty])=>{
-    if(!qty)return;
-    (PIZZA_REZEPTE[pizza]||[]).forEach(i=>{totals[i.n]=(totals[i.n]||0)+i.g*qty;});
+function changeDip(key,d){dipMengen[key]=Math.max(0,(dipMengen[key]||0)+d); updateStateObj('dipMengen', dipMengen); document.getElementById('dqty-'+key).value=dipMengen[key]; renderPizzaAndDipsResult(); }
+function setDip(key,v){dipMengen[key]=Math.max(0,parseInt(v)||0); updateStateObj('dipMengen', dipMengen); renderPizzaAndDipsResult(); }
+function resetPizzaAndDips(){
+  Object.keys(pizzaMengen).forEach(k=>pizzaMengen[k]=0); dipMengen={aioli:0,hothoney:0};
+  updateStateObj('pizzaMengen', pizzaMengen); updateStateObj('dipMengen', dipMengen);
+  ['aioli','hothoney'].forEach(k=>{const el=document.getElementById('dqty-'+k);if(el)el.value=0;});
+  renderPizzaGrid(); renderPizzaAndDipsResult();
+}
+
+function aggregateAllShopping(){
+  const totals = {};
+  const total = totalPizzaCount();
+  // Pizzen
+  Object.entries(pizzaMengen).forEach(([pizza, qty]) => {
+    qty = Number(qty)||0; if(!qty || !EXCEL_PIZZAS[pizza]) return;
+    EXCEL_PIZZAS[pizza].parts.forEach(([part, amount]) => expandRecipePart(part, Number(amount)*qty, totals));
   });
+  // Auto-Dips from Pizza
+  if(total>0){ expandRecipePart('aioli_auto', total*0.35, totals); expandRecipePart('hot_honey', total*0.15, totals); }
+  // Manual Dips
+  const aioli = Number(dipMengen.aioli)||0, hh = Number(dipMengen.hothoney)||0;
+  if(aioli>0) expandRecipePart('aioli', aioli, totals);
+  if(hh>0) expandRecipePart('hot_honey', hh, totals);
   return totals;
 }
 
-function renderPizzaResult(){
-  const totals=calcPizzaIngredients();
-  const el=document.getElementById('ingredient-result');
-  const total=Object.values(pizzaMengen).reduce((s,v)=>s+(v||0),0);
-  if(!total){el.innerHTML='<div style="color:var(--muted);font-size:13px">Gib oben die Anzahl Pizzen ein.</div>';return;}
-  const groups={'Teig':['Mehl (Farina Pizzeria Caputo)','Hefe','Zucker','Salz','Eiswürfel','Wasser'],
-    'Milchprodukte / Käse':['Mozzarella','Fior di Latte','Parmesan','Burrata','Stracciatella','Hirtenkäse','Gorgonzola','Ricotta','Schmandcreme','Spinatcreme','Kürbiscreme'],
-    'Sauce / Basis':['Tomatensauce','Tomatensoße','Konfierte Tomaten','Getrocknete Tomaten','Basilikum-Öl','Pesto','Balsamico Crema'],
-    'Belag':['Salami','Prosciutto Crudo','Thunfisch (Öl)','Mortadella','Kochschinken','Sardellen','Pancetta','Salami Napoli Picante','Pistazien (gehackt)'],
-    'Gemüse & Kräuter':['Champignon','Rucola','Zwiebeln','Zwiebeln (karam.)','Kirschtomaten','Oliven','Kapern','Spinat','Grillgemüse','Veganer Käse','Walnüsse (karam.)','Kürbiskerne','Peperoncini','Hot Honey']};
-  const assigned=new Set(Object.values(groups).flat());
-  const sonstiges=Object.keys(totals).filter(k=>!assigned.has(k)&&totals[k]>0);
-  if(sonstiges.length)groups['Sonstiges']=sonstiges;
-  let html='<div class="ing-wrap">';
-  let gesamtkosten=0;
-  Object.entries(groups).forEach(([grp,items])=>{
-    const rows=items.filter(i=>totals[i]>0);
-    if(!rows.length)return;
-    html+=`<div class="ing-group"><div class="ing-group-title">${grp}</div>`;
-    rows.forEach(i=>{
-      const preis=(PIZZA_PREISE[i]||0)*(totals[i]/1000);
-      gesamtkosten+=preis;
-      html+=`<div class="ing-row"><span>${i}</span><span class="ing-amount">${fmtG(totals[i])}</span><span style="font-size:11px;color:var(--muted);min-width:60px;text-align:right">${preis>0?fmt(preis):''}</span></div>`;
-    });
-    html+='</div>';
+function enrichArticles(totals){
+  return Object.entries(totals).map(([name, grams]) => {
+    const meta = EXCEL_ARTICLES[name] || {}, kg = Number(grams)/1000, unitPrice = unitPriceInc(name), cost = unitPrice ? unitPrice*kg : 0;
+    let packs = null;
+    if(meta.pack_size && meta.pack_unit && String(meta.pack_unit).toLowerCase().startsWith('kg')) packs = kg / Number(meta.pack_size);
+    return { article:name, grams:Number(grams), kg, category:catFromGroup(meta.group), supplier:meta.supplier||'', supplierLabel: SUPPLIER_LABELS[meta.supplier]||meta.supplier||'–', articleNo: meta.article_no||'', packs, cost };
+  }).sort((a,b) => {
+    const so=(SUPPLIER_ORDER[a.supplier]||99)-(SUPPLIER_ORDER[b.supplier]||99);
+    if(so!==0) return so; return (a.article||'').localeCompare(b.article||'');
   });
-  html+=`</div><div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Geschätzte Warenkosten:</span><span style="color:var(--blue)">${fmt(gesamtkosten)}</span></div>`;
-  el.innerHTML=html;
 }
 
-function copyPizzaList(){
-  const totals=calcPizzaIngredients();
-  const total=Object.values(pizzaMengen).reduce((s,v)=>s+(v||0),0);
-  if(!total){showToast('Keine Pizzen eingegeben.');return;}
-  let text=`PIZZA EINKAUFSLISTE – ${total} Pizzen\n${'='.repeat(35)}\n\n`;
-  Object.entries(pizzaMengen).filter(([,v])=>v>0).forEach(([k,v])=>{text+=`${k}: ${v}x\n`;});
-  text+='\n─── ZUTATEN ───────────────────\n';
-  Object.entries(totals).forEach(([n,g])=>{const p=(PIZZA_PREISE[n]||0)*(g/1000);text+=`${n}: ${fmtG(g)}${p>0?' ('+fmt(p)+')':''}\n`;});
-  if(state.notes.pizza.length){text+='\n─── NOTIZEN ────────────────────\n';state.notes.pizza.forEach(n=>{text+=`• ${n.text}\n`;});}
-  copyText(text,'Einkaufsliste kopiert!');
-}
-
-
-function saveToEinkauf(){
-  const totals=calcPizzaIngredients();
-  const total=Object.values(pizzaMengen).reduce((s,v)=>s+(v||0),0);
-  if(!total){showToast('Keine Pizzen eingegeben.');return;}
-  Object.entries(totals).forEach(([name,g])=>{
-    addOrMergeEinkauf({
-      artikel:name,
-      artikelnummer:'',
-      lieferant:randomLieferantCode(),
-      kategorie:EK_KAT_MAP[name]||'Sonstiges',
-      menge:g>=1000?parseFloat((g/1000).toFixed(3)):Math.round(g),
-      einheit:g>=1000?'kg':'g',
-      preis:(PIZZA_PREISE[name]||0)
-    });
-  });
-  push('einkauf',state.einkauf);
-  showToast('In Einkaufsliste übernommen!');
-}
-
-// ── DIPS ──────────────────────────────────────────────────────────────────
-function changeDip(key,d){dipMengen[key]=Math.max(0,(dipMengen[key]||0)+d);const el=document.getElementById('dqty-'+key);if(el)el.value=dipMengen[key];renderDipsResult();push('dipMengen',dipMengen);}
-function setDip(key,v){dipMengen[key]=Math.max(0,parseInt(v)||0);renderDipsResult();push('dipMengen',dipMengen);}
-function resetDips(){dipMengen={aioli:0,hothoney:0};push('dipMengen',dipMengen);['aioli','hothoney'].forEach(k=>{const el=document.getElementById('dqty-'+k);if(el)el.value=0;});renderDipsResult();}
-
-function renderDipsResult(){
+function renderPizzaAndDipsResult() {
   document.getElementById('dip-aioli-total').textContent=dipMengen.aioli||0;
   document.getElementById('dip-hothoney-total').textContent=dipMengen.hothoney||0;
-  const el=document.getElementById('dip-result');
-  if(!dipMengen.aioli&&!dipMengen.hothoney){el.innerHTML='<div style="color:var(--muted);font-size:13px">Gib oben die Anzahl Dips ein.</div>';return;}
-  const totals={};
-  ['aioli','hothoney'].forEach(key=>{
-    const qty=dipMengen[key]||0;
-    if(!qty)return;
-    (DIP_REZEPTE[key]||[]).forEach(i=>{totals[i.n]=(totals[i.n]||0)+i.g*qty;});
+  const totalPizzas = totalPizzaCount();
+  const totalDips = (dipMengen.aioli||0) + (dipMengen.hothoney||0);
+  const el = document.getElementById('ingredient-result');
+  if(!totalPizzas && !totalDips){ el.innerHTML = '<div style="color:var(--muted);font-size:13px">Gib oben Mengen ein, um die Kalkulation zu starten.</div>'; return; }
+  
+  const rows = enrichArticles(aggregateAllShopping());
+  let totalCost = 0, html = '<div class="ing-wrap">', currentSupplier = '';
+  rows.forEach(row => {
+    totalCost += row.cost || 0;
+    const header = row.supplierLabel || 'Ohne Lieferant';
+    if(header !== currentSupplier){
+      if(currentSupplier) html += '</div>';
+      html += `<div class="ing-group"><div class="ing-group-title">${header}</div>`; currentSupplier = header;
+    }
+    const packTxt = row.packs!=null ? ` · ${row.packs.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} Pkg` : '';
+    html += `<div class="ing-row"><span>${row.article}${row.articleNo ? ` <span style="color:var(--muted);font-size:11px">[${row.articleNo}]</span>` : ''}</span><span class="ing-amount">${fmtQty(row.grams)}</span><span style="font-size:11px;color:var(--muted);min-width:140px;text-align:right">${packTxt}</span><span style="font-size:11px;color:var(--muted);min-width:70px;text-align:right">${row.cost ? fmt(row.cost) : ''}</span></div>`;
   });
-  let html='<div class="ing-wrap"><div class="ing-group-title">Zutaten</div>',gesamtkosten=0;
-  Object.entries(totals).forEach(([n,g])=>{
-    const p=(DIP_PREISE[n]||0)*(g/1000);gesamtkosten+=p;
-    html+=`<div class="ing-row"><span>${n}</span><span class="ing-amount">${fmtG(g)}</span><span style="font-size:11px;color:var(--muted);min-width:60px;text-align:right">${p>0?fmt(p):''}</span></div>`;
-  });
-  html+=`</div><div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Geschätzte Warenkosten:</span><span style="color:var(--blue)">${fmt(gesamtkosten)}</span></div>`;
-  el.innerHTML=html;
+  if(currentSupplier) html += '</div>';
+  
+  let infoHtml = '';
+  if(totalPizzas > 0) infoHtml = `Automatisch durch Pizzen berücksichtigt: Aioli ${(0.35*totalPizzas).toLocaleString('de-DE',{minimumFractionDigits:2})} Schälchen, Hot Honey ${(0.15*totalPizzas).toLocaleString('de-DE',{minimumFractionDigits:2})} Schälchen.`;
+  html += `</div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted)">${infoHtml} Zusätzlich gewählte Dips sind ebenfalls einkalkuliert.</div>
+    <div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Geschätzte Gesamtkosten:</span><span style="color:var(--blue)">${fmt(totalCost)}</span></div>`;
+  el.innerHTML = html;
 }
 
-function copyDipList(){
-  if(!dipMengen.aioli&&!dipMengen.hothoney){showToast('Keine Dips eingegeben.');return;}
-  let text='DIPS EINKAUFSLISTE\n'+'='.repeat(25)+'\n\n';
-  if(dipMengen.aioli)text+=`Aioli: ${dipMengen.aioli} Stk.\n`;
-  if(dipMengen.hothoney)text+=`Hot Honey: ${dipMengen.hothoney} Stk.\n`;
-  text+='\n─── ZUTATEN ─────────────────\n';
-  const totals={};
-  ['aioli','hothoney'].forEach(key=>{const qty=dipMengen[key]||0;if(!qty)return;(DIP_REZEPTE[key]||[]).forEach(i=>{totals[i.n]=(totals[i.n]||0)+i.g*qty;});});
-  Object.entries(totals).forEach(([n,g])=>{const p=(DIP_PREISE[n]||0)*(g/1000);text+=`${n}: ${fmtG(g)}${p>0?' ('+fmt(p)+')':''}\n`;});
-  copyText(text,'Dip-Liste kopiert!');
+function copyPizzaAndDipList() {
+  const total = totalPizzaCount(); const dAioli = dipMengen.aioli||0, dHH = dipMengen.hothoney||0;
+  if(!total && !dAioli && !dHH) return showToast('Keine Mengen eingegeben.');
+  const rows = enrichArticles(aggregateAllShopping());
+  let text = 'EINKAUFSLISTE – PIZZA & DIPS\n' + '='.repeat(42) + '\n\n';
+  if(total>0){
+      text += `--- PIZZEN (${total} gesamt) ---\n`;
+      Object.entries(pizzaMengen).filter(([,v])=>Number(v)>0).forEach(([name,v]) => text += `${name}: ${v}x\n`);
+      text += `\nAuto-Dips (Excel): Aioli ${(0.35*total).toLocaleString('de-DE',{minimumFractionDigits:2})} · Hot Honey ${(0.15*total).toLocaleString('de-DE',{minimumFractionDigits:2})}\n`;
+  }
+  if(dAioli>0 || dHH>0){
+      text += `\n--- ZUSÄTZLICHE DIPS ---\n`;
+      if(dAioli>0) text += `Aioli: ${dAioli}x\n`; if(dHH>0) text += `Hot Honey: ${dHH}x\n`;
+  }
+  let currentSupplier=''; text += '\n--- ZUTATEN ---\n';
+  rows.forEach(r => {
+    if(r.supplierLabel!==currentSupplier){ currentSupplier=r.supplierLabel; text += `\n${currentSupplier.toUpperCase()}\n`; }
+    text += `${r.article}${r.articleNo?` [${r.articleNo}]`:''}: ${fmtQty(r.grams)}${r.packs!=null?` · ${r.packs.toLocaleString('de-DE',{minimumFractionDigits:2})} Pkg`:''}${r.cost?` · ${fmt(r.cost)}`:''}\n`;
+  });
+  copyText(text,'Liste kopiert!');
 }
 
-// ── GETRÄNKE ──────────────────────────────────────────────────────────────
-function renderDrinksGrid(){
-  const el=document.getElementById('drinks-grid');
-  let html='';
-  Object.entries(DRINK_DATEN).forEach(([grp,items])=>{
-    html+=`<div class="drink-section"><div class="drink-section-title">${grp}</div>`;
-    items.forEach(item=>{
-      const key=grp+'_'+item.name;
-      const qty=drinkMengen[key]||0;
-      const einheit=item.einheit||'Kiste';
-      const preis=item.preisProFlasche||item.preisProKiste||0;
-      html+=`<div class="drink-item">
-        <div class="drink-name">${item.name}${item.flaschenGroesse?` (${item.flaschenGroesse}L)`:''}${item.flaschenProKiste?` · ${item.flaschenProKiste} Fl/Kiste`:''}</div>
-        <div class="drink-controls">
-          <button class="btn-sm" onclick="changeDrink('${grp}','${item.name}',-1)">−</button>
-          <input type="number" min="0" value="${qty}" id="dkqty-${key.replace(/\s/g,'_').replace(/[()]/g,'').replace(/,/g,'')}" onchange="setDrink('${grp}','${item.name}',this.value)" style="width:55px;text-align:center;padding:4px"/>
-          <button class="btn-sm" onclick="changeDrink('${grp}','${item.name}',1)">+</button>
-        </div>
-        <div class="drink-price">${fmt(preis)}/${einheit}</div>
-        <div class="drink-total">${qty>0?fmt(qty*preis):''}</div>
-      </div>`;
+function saveToEinkauf() {
+  const totals = aggregateAllShopping();
+  if(Object.keys(totals).length === 0) return showToast('Keine Mengen eingegeben.');
+  Object.entries(totals).forEach(([name, grams]) => {
+    const meta = EXCEL_ARTICLES[name] || {}, kg = Number(grams)/1000;
+    const item = { id: Date.now().toString()+Math.random(), artikel: name, artikelnummer: meta.article_no || '', lieferant: meta.supplier || 'A', kategorie: catFromGroup(meta.group), menge: Number(kg.toFixed(3)), einheit: 'kg', preis: unitPriceInc(name) || 0 };
+    // Custom Merge Logic for safety
+    db.ref('einkauf').transaction(data => {
+        let arr = data || [];
+        const mKey = (i) => [i.artikel||'',i.kategorie||'',i.einheit||'',Number(i.preis||0).toFixed(4),i.lieferant||''].join('|').toLowerCase();
+        const existingIdx = arr.findIndex(e => e && mKey(e) === mKey(item));
+        if(existingIdx >= 0){ arr[existingIdx].menge = Number((Number(arr[existingIdx].menge||0) + Number(item.menge||0)).toFixed(3)); }
+        else { arr.push(item); }
+        return arr.filter(x=>x!=null);
     });
-    html+='</div>';
   });
-  el.innerHTML=html;
-  updateDrinkTotal();
-}
-function changeDrink(grp,name,d){const key=grp+'_'+name;drinkMengen[key]=Math.max(0,(drinkMengen[key]||0)+d);push('drinkMengen',drinkMengen);renderDrinksGrid();renderDrinksResult();}
-function setDrink(grp,name,v){const key=grp+'_'+name;drinkMengen[key]=Math.max(0,parseInt(v)||0);push('drinkMengen',drinkMengen);updateDrinkTotal();renderDrinksResult();}
-function resetDrinks(){Object.keys(drinkMengen).forEach(k=>drinkMengen[k]=0);push('drinkMengen',drinkMengen);renderDrinksGrid();renderDrinksResult();}
-function updateDrinkTotal(){
-  let total=0;
-  Object.entries(DRINK_DATEN).forEach(([grp,items])=>{
-    items.forEach(item=>{const key=grp+'_'+item.name;const qty=drinkMengen[key]||0;if(qty)total+=qty*(item.preisProFlasche||item.preisProKiste||0);});
-  });
-  document.getElementById('drinks-total-cost').textContent=fmt(total);
-}
-function renderDrinksResult(){
-  const el=document.getElementById('drinks-result');
-  const aktiv=[];
-  Object.entries(DRINK_DATEN).forEach(([grp,items])=>{
-    items.forEach(item=>{const key=grp+'_'+item.name;const qty=drinkMengen[key]||0;if(qty>0)aktiv.push({grp,item,qty});});
-  });
-  if(!aktiv.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Gib oben die Mengen ein.</div>';return;}
-  let html='<div class="ing-wrap">';
-  let grpAkt='';
-  aktiv.forEach(({grp,item,qty})=>{
-    if(grp!==grpAkt){if(grpAkt)html+='</div>';html+=`<div class="ing-group"><div class="ing-group-title">${grp}</div>`;grpAkt=grp;}
-    const preis=item.preisProFlasche||item.preisProKiste||0;
-    const total=qty*preis;
-    html+=`<div class="ing-row"><span>${item.name} × ${qty}</span><span class="ing-amount">${fmt(total)}</span></div>`;
-    if(item.flaschenProKiste){const fl=qty*item.flaschenProKiste;html+=`<div style="font-size:11px;color:var(--muted);padding:2px 0 4px 0">${fl} Flaschen · ${(qty*item.litreProKiste).toFixed(1)} L</div>`;}
-  });
-  if(grpAkt)html+='</div>';
-  html+='</div>';
-  el.innerHTML=html;
-  updateDrinkTotal();
-}
-function copyDrinkList(){
-  const aktiv=[];
-  Object.entries(DRINK_DATEN).forEach(([grp,items])=>{items.forEach(item=>{const key=grp+'_'+item.name;const qty=drinkMengen[key]||0;if(qty>0)aktiv.push({grp,item,qty});});});
-  if(!aktiv.length){showToast('Keine Getränke eingegeben.');return;}
-  let text='GETRÄNKE EINKAUFSLISTE\n'+'='.repeat(30)+'\n\n';
-  let grpAkt='';
-  aktiv.forEach(({grp,item,qty})=>{if(grp!==grpAkt){text+=`\n${grp.toUpperCase()}\n`;grpAkt=grp;}const p=item.preisProFlasche||item.preisProKiste||0;text+=`${item.name} × ${qty} ${item.einheit||'Kiste'}: ${fmt(qty*p)}\n`;});
-  copyText(text,'Getränkeliste kopiert!');
-}
-
-
-
-// ── CATERING ─────────────────────────────────────────────────────────────
-function getCatScenario(gaeste){
-  return CAT_SCENARIOS.find(s=>gaeste>=s.min&&gaeste<=s.max)||null;
-}
-function calcCateringBlock({gaeste,km,stunden,stundensatz,waren,kmsatz,gas,entsorgung,miete,marge,ust}){
-  const personalkosten=stunden*stundensatz;
-  const wareneinsatz=gaeste*waren;
-  const kmKosten=km*kmsatz;
-  const fixkosten=gas+entsorgung+miete;
-  const margeWert=(personalkosten+wareneinsatz+kmKosten+fixkosten)*marge;
-  const zielpreisNetto=personalkosten+wareneinsatz+kmKosten+fixkosten+margeWert;
-  const nettoGast=gaeste?zielpreisNetto/gaeste:0;
-  const zielpreisBrutto=zielpreisNetto*ust;
-  const bruttoGast=gaeste?zielpreisBrutto/gaeste:0;
-  const steuern=zielpreisBrutto-zielpreisNetto;
-  return {personalkosten,wareneinsatz,kmKosten,fixkosten,margeWert,zielpreisNetto,nettoGast,zielpreisBrutto,bruttoGast,steuern};
-}
-function calcCatering(){
-  const gaeste=parseFloat(document.getElementById('cat-gaeste').value)||0;
-  const km=parseFloat(document.getElementById('cat-km').value)||0;
-  const ak=parseFloat(document.getElementById('cat-ak').value)||2;
-  const stundensatz=parseFloat(document.getElementById('cat-stundensatz').value)||CAT_DEFAULTS.stundensatz;
-  const waren=parseFloat(document.getElementById('cat-waren').value)||CAT_DEFAULTS.waren;
-  const gas=parseFloat(document.getElementById('cat-gas').value)||CAT_DEFAULTS.gas;
-  const entsorgung=parseFloat(document.getElementById('cat-entsorgung').value)||CAT_DEFAULTS.entsorgung;
-  const miete=parseFloat(document.getElementById('cat-miete').value)||CAT_DEFAULTS.miete;
-  const kmsatz=parseFloat(document.getElementById('cat-kmsatz').value)||CAT_DEFAULTS.kmsatz;
-  const ust=CAT_DEFAULTS.ust;
-
-  const szenario=getCatScenario(gaeste);
-  const margeDisplay=document.getElementById('cat-marge-display');
-  if(margeDisplay){
-    margeDisplay.value=szenario ? `${szenario.label} (${String(szenario.marge).replace('.',',')})` : 'Außerhalb 30–400 Gäste';
-  }
-
-  const resEl=document.getElementById('cat-result-rows');
-  if(!szenario){
-    resEl.innerHTML='<div style="color:var(--muted);font-size:13px">Bitte eine Gästezahl zwischen 30 und 400 eingeben, damit das Haupt-Ergebnis exakt wie im Excel-Sheet „Eingaben“ berechnet werden kann.</div>';
-    document.getElementById('cat-netto-gast').textContent='–';
-    document.getElementById('cat-brutto-gast').textContent='–';
-    document.getElementById('cat-brutto-total').textContent='–';
-    return;
-  }
-
-  const mainResult=calcCateringBlock({
-    gaeste,km,stunden:szenario.stunden,stundensatz,waren,kmsatz,gas,entsorgung,miete,marge:szenario.marge,ust
-  });
-  const rows=[
-    {l:'Gäste',v:gaeste.toString()},
-    {l:'Personalstunden',v:(Math.round(szenario.stunden*100)/100).toLocaleString('de-DE',{minimumFractionDigits:0,maximumFractionDigits:2})+' h'},
-    {l:'Personalkosten',v:fmt(mainResult.personalkosten)},
-    {l:'Wareneinsatz',v:fmt(mainResult.wareneinsatz)},
-    {l:'km-Kosten - 80ct',v:fmt(mainResult.kmKosten)},
-    {l:'Fixkosten',v:fmt(mainResult.fixkosten)},
-    {l:'Marge',v:fmt(mainResult.margeWert)},
-    {l:'Zielpreis netto',v:fmt(mainResult.zielpreisNetto)},
-    {l:'Steuern',v:fmt(mainResult.steuern)}
-  ];
-  resEl.innerHTML=rows.map(r=>`<div class="result-row"><span style="color:var(--muted)">${r.l}</span><span>${r.v}</span></div>`).join('');
-  document.getElementById('cat-netto-gast').textContent=fmt(mainResult.nettoGast);
-  document.getElementById('cat-brutto-gast').textContent=fmt(mainResult.bruttoGast);
-  document.getElementById('cat-brutto-total').textContent=fmt(mainResult.zielpreisBrutto);
-}
-
-function resetCateringOfferForm(){
-  state.editCateringAngebotId=null;
-  document.getElementById('cat-offer-name').value='';
-  document.getElementById('cat-dips-yesno').value='Nein';
-  const saveBtn=document.getElementById('cat-save-btn');
-  if(saveBtn) saveBtn.textContent='Als Angebot speichern';
-}
-function saveCateringAngebot(){
-  const gaeste=document.getElementById('cat-gaeste').value;
-  const brutto=document.getElementById('cat-brutto-total').textContent;
-  const netto=document.getElementById('cat-netto-gast').textContent;
-  const offerName=(document.getElementById('cat-offer-name').value||'Angebot').trim();
-  const dips=document.getElementById('cat-dips-yesno').value;
-  const angebot={
-    id:state.editCateringAngebotId||Date.now().toString(),
-    name:offerName,
-    gaeste,
-    datum:new Date().toLocaleDateString('de-DE'),
-    dips,
-    nettoGast:netto,
-    bruttoGesamt:brutto,
-    inputs:{
-      gaeste:document.getElementById('cat-gaeste').value,
-      km:document.getElementById('cat-km').value,
-      ak:document.getElementById('cat-ak').value,
-      stundensatz:document.getElementById('cat-stundensatz').value,
-      waren:document.getElementById('cat-waren').value,
-      gas:document.getElementById('cat-gas').value,
-      entsorgung:document.getElementById('cat-entsorgung').value,
-      miete:document.getElementById('cat-miete').value,
-      kmsatz:document.getElementById('cat-kmsatz').value
-    },
-    pizzaNotizen:[...(state.notes.catpizza||[])],
-    sonstigeNotizen:[...(state.notes.catmisc||[])]
-  };
-
-  if(state.editCateringAngebotId){
-    const idx=state.cateringAngebote.findIndex(a=>a.id===state.editCateringAngebotId);
-    if(idx>=0) state.cateringAngebote[idx]=angebot;
-    else state.cateringAngebote.push(angebot);
-  }else{
-    state.cateringAngebote.push(angebot);
-  }
-
-  const wasEditing=!!state.editCateringAngebotId;
-  push('cateringAngebote',state.cateringAngebote);
-  resetCateringOfferForm();
-  renderCateringAngebote();
-  showToast(wasEditing?'Angebot aktualisiert!':'Angebot gespeichert!');
-}
-function editCateringAngebot(id){
-  const a=state.cateringAngebote.find(x=>x.id===id);
-  if(!a) return;
-  state.editCateringAngebotId=id;
-  document.getElementById('cat-offer-name').value=a.name||'';
-  document.getElementById('cat-dips-yesno').value=a.dips||'Nein';
-  if(a.inputs){
-    const fields=['gaeste','km','ak','stundensatz','waren','gas','entsorgung','miete','kmsatz'];
-    fields.forEach(field=>{
-      const el=document.getElementById('cat-'+field);
-      if(el && a.inputs[field]!==undefined) el.value=a.inputs[field];
-    });
-  }else if(a.gaeste){
-    document.getElementById('cat-gaeste').value=a.gaeste;
-  }
-  state.notes.catpizza=Array.isArray(a.pizzaNotizen)?JSON.parse(JSON.stringify(a.pizzaNotizen)):[];
-  state.notes.catmisc=Array.isArray(a.sonstigeNotizen)?JSON.parse(JSON.stringify(a.sonstigeNotizen)):[];
-  push('notes',state.notes);
-  calcCatering();
-  const saveBtn=document.getElementById('cat-save-btn');
-  if(saveBtn) saveBtn.textContent='Angebot aktualisieren';
-  document.getElementById('page-catering').scrollIntoView({behavior:'smooth',block:'start'});
-  showToast('Angebot zum Bearbeiten geladen.');
-}
-function deleteCateringAngebot(id){
-  state.cateringAngebote=state.cateringAngebote.filter(a=>a.id!==id);
-  push('cateringAngebote',state.cateringAngebote);
-  if(state.editCateringAngebotId===id) resetCateringOfferForm();
-  renderCateringAngebote();
-  showToast('Angebot gelöscht.');
-}
-function renderCateringAngebote(){
-  const el=document.getElementById('cat-saved-list');
-  if(!state.cateringAngebote.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Noch keine Angebote.</div>';return;}
-  el.innerHTML=state.cateringAngebote.map((a)=>`
-    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f1f5f9">
-      <div style="flex:1">
-        <div style="font-weight:600">${a.name||'Angebot'} · ${a.gaeste} Gäste · ${a.datum}</div>
-        <div style="font-size:12px;color:var(--muted)">Sheet „Eingaben“: Netto/Gast ${a.nettoGast} · Brutto ${a.bruttoGesamt}</div>
-        <div style="font-size:12px;margin-top:4px" class="inline-badges">
-          ${a.dips?`<span class="badge badge-amber">Dips: ${a.dips}</span>`:''}
-        </div>
-        ${a.pizzaNotizen&&a.pizzaNotizen.length?`<div style="font-size:11px;color:var(--muted);margin-top:6px">🍕 ${a.pizzaNotizen.map(n=>n.text).join(', ')}</div>`:''}
-        ${a.sonstigeNotizen&&a.sonstigeNotizen.length?`<div style="font-size:11px;color:var(--muted);margin-top:4px">📝 ${a.sonstigeNotizen.map(n=>n.text).join(' | ')}</div>`:''}
-      </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <button class="btn-sm" onclick="editCateringAngebot('${a.id}')">Bearbeiten</button>
-        <button class="btn-danger btn-sm" onclick="deleteCateringAngebot('${a.id}')">×</button>
-      </div>
-    </div>`).join('');
+  showToast('In Einkaufsliste übernommen!');
 }
 
 // ── NOTIZEN ───────────────────────────────────────────────────────────────
 function addNote(type){
-  const inputId={'pizza':'pizza-note-input','dip':'dip-note-input','drink':'drink-note-input','catpizza':'cat-pizza-note-input','catmisc':'cat-misc-note-input'};
-  const val=document.getElementById(inputId[type]).value.trim();
-  if(!val)return;
-  if(!state.notes[type])state.notes[type]=[];
-  state.notes[type].push({id:Date.now().toString(),text:val});
-  push('notes',state.notes);
+  const inputId={'pizza':'pizza-note-input','catpizza':'cat-pizza-note-input','catmisc':'cat-misc-note-input'};
+  const val=document.getElementById(inputId[type]).value.trim(); if(!val)return;
+  db.ref('notes/' + type).transaction(arr => { let a = arr||[]; a.push({id:Date.now().toString(),text:val}); return a; });
   document.getElementById(inputId[type]).value='';
 }
-function deleteNote(type,i){state.notes[type].splice(i,1);push('notes',state.notes);}
+function deleteNote(type,i){
+  db.ref('notes/' + type).transaction(arr => { if(!arr)return[]; arr.splice(i,1); return arr; });
+}
 function renderNotes(type){
-  const elIds={'pizza':'pizza-notes-list','dip':'dip-notes-list','drink':'drink-notes-list','catpizza':'cat-pizza-notes-list','catmisc':'cat-misc-notes-list'};
+  const elIds={'pizza':'pizza-notes-list','catpizza':'cat-pizza-notes-list','catmisc':'cat-misc-notes-list'};
   const el=document.getElementById(elIds[type]);if(!el)return;
   const arr=state.notes[type]||[];
   el.innerHTML=arr.length?arr.map((n,i)=>`<div class="note-row"><span style="flex:1">${n.text}</span><button class="btn-danger btn-sm" onclick="deleteNote('${type}',${i})">×</button></div>`).join(''):'';
 }
 
-// ── EINKAUFSLISTE ─────────────────────────────────────────────────────────
-function mengenKey(item){
-  return [item.artikel||'',item.kategorie||'',item.einheit||'',Number(item.preis||0).toFixed(4),item.lieferant||''].join('|').toLowerCase();
+// ── CATERING ─────────────────────────────────────────────────────────────
+function getCatScenario(gaeste){ return CAT_SCENARIOS.find(s=>gaeste>=s.min&&gaeste<=s.max)||null; }
+function calcCateringBlock({gaeste,km,stunden,stundensatz,waren,kmsatz,gas,entsorgung,miete,marge,ust}){
+  const personalkosten=stunden*stundensatz, wareneinsatz=gaeste*waren, kmKosten=km*kmsatz, fixkosten=gas+entsorgung+miete;
+  const margeWert=(personalkosten+wareneinsatz+kmKosten+fixkosten)*marge, zielpreisNetto=personalkosten+wareneinsatz+kmKosten+fixkosten+margeWert;
+  const nettoGast=gaeste?zielpreisNetto/gaeste:0, zielpreisBrutto=zielpreisNetto*ust, bruttoGast=gaeste?zielpreisBrutto/gaeste:0, steuern=zielpreisBrutto-zielpreisNetto;
+  return {personalkosten,wareneinsatz,kmKosten,fixkosten,margeWert,zielpreisNetto,nettoGast,zielpreisBrutto,bruttoGast,steuern};
 }
-function addOrMergeEinkauf(item){
-  const normalized=normalizeEinkaufItem(Object.assign({id:Date.now().toString()+Math.random()}, item));
-  const existing=state.einkauf.find(e=>mengenKey(e)===mengenKey(normalized));
-  if(existing){
-    existing.menge=Number((Number(existing.menge||0)+Number(normalized.menge||0)).toFixed(3));
-    if(!existing.artikelnummer && normalized.artikelnummer) existing.artikelnummer=normalized.artikelnummer;
-    if(!existing.lieferant && normalized.lieferant) existing.lieferant=normalized.lieferant;
-  } else {
-    state.einkauf.push(normalized);
+function calcCatering(){
+  const gaeste=parseFloat(document.getElementById('cat-gaeste').value)||0, km=parseFloat(document.getElementById('cat-km').value)||0, ak=parseFloat(document.getElementById('cat-ak').value)||2;
+  const stundensatz=parseFloat(document.getElementById('cat-stundensatz').value)||CAT_DEFAULTS.stundensatz, waren=parseFloat(document.getElementById('cat-waren').value)||CAT_DEFAULTS.waren;
+  const gas=parseFloat(document.getElementById('cat-gas').value)||CAT_DEFAULTS.gas, entsorgung=parseFloat(document.getElementById('cat-entsorgung').value)||CAT_DEFAULTS.entsorgung;
+  const miete=parseFloat(document.getElementById('cat-miete').value)||CAT_DEFAULTS.miete, kmsatz=parseFloat(document.getElementById('cat-kmsatz').value)||CAT_DEFAULTS.kmsatz, ust=CAT_DEFAULTS.ust;
+  const szenario=getCatScenario(gaeste), margeDisplay=document.getElementById('cat-marge-display');
+  if(margeDisplay) margeDisplay.value=szenario ? `${szenario.label} (${String(szenario.marge).replace('.',',')})` : 'Außerhalb 30–400 Gäste';
+  const resEl=document.getElementById('cat-result-rows');
+  if(!szenario){
+    resEl.innerHTML='<div style="color:var(--muted);font-size:13px">Bitte eine Gästezahl zwischen 30 und 400 eingeben.</div>';
+    ['cat-netto-gast','cat-brutto-gast','cat-brutto-total'].forEach(id=>document.getElementById(id).textContent='–'); return;
   }
+  const mainResult=calcCateringBlock({gaeste,km,stunden:szenario.stunden,stundensatz,waren,kmsatz,gas,entsorgung,miete,marge:szenario.marge,ust});
+  resEl.innerHTML=[
+    {l:'Gäste',v:gaeste.toString()},{l:'Personalstunden',v:(Math.round(szenario.stunden*100)/100).toLocaleString('de-DE')+' h'},
+    {l:'Personalkosten',v:fmt(mainResult.personalkosten)},{l:'Wareneinsatz',v:fmt(mainResult.wareneinsatz)},
+    {l:'km-Kosten - 80ct',v:fmt(mainResult.kmKosten)},{l:'Fixkosten',v:fmt(mainResult.fixkosten)},
+    {l:'Marge',v:fmt(mainResult.margeWert)},{l:'Zielpreis netto',v:fmt(mainResult.zielpreisNetto)},{l:'Steuern',v:fmt(mainResult.steuern)}
+  ].map(r=>`<div class="result-row"><span style="color:var(--muted)">${r.l}</span><span>${r.v}</span></div>`).join('');
+  document.getElementById('cat-netto-gast').textContent=fmt(mainResult.nettoGast);
+  document.getElementById('cat-brutto-gast').textContent=fmt(mainResult.bruttoGast);
+  document.getElementById('cat-brutto-total').textContent=fmt(mainResult.zielpreisBrutto);
+}
+function resetCateringOfferForm(){
+  state.editCateringAngebotId=null; document.getElementById('cat-offer-name').value=''; document.getElementById('cat-dips-yesno').value='Nein';
+  const saveBtn=document.getElementById('cat-save-btn'); if(saveBtn) saveBtn.textContent='Als Angebot speichern';
+}
+function saveCateringAngebot(){
+  const angebot={
+    id:state.editCateringAngebotId||Date.now().toString(), name:(document.getElementById('cat-offer-name').value||'Angebot').trim(),
+    gaeste:document.getElementById('cat-gaeste').value, datum:new Date().toLocaleDateString('de-DE'), dips:document.getElementById('cat-dips-yesno').value,
+    nettoGast:document.getElementById('cat-netto-gast').textContent, bruttoGesamt:document.getElementById('cat-brutto-total').textContent,
+    inputs:{gaeste:document.getElementById('cat-gaeste').value, km:document.getElementById('cat-km').value, ak:document.getElementById('cat-ak').value, stundensatz:document.getElementById('cat-stundensatz').value, waren:document.getElementById('cat-waren').value, gas:document.getElementById('cat-gas').value, entsorgung:document.getElementById('cat-entsorgung').value, miete:document.getElementById('cat-miete').value, kmsatz:document.getElementById('cat-kmsatz').value},
+    pizzaNotizen:[...(state.notes.catpizza||[])], sonstigeNotizen:[...(state.notes.catmisc||[])]
+  };
+  pushArrayItemSafe('cateringAngebote', angebot);
+  const wasEditing=!!state.editCateringAngebotId; resetCateringOfferForm();
+  showToast(wasEditing?'Angebot aktualisiert!':'Angebot gespeichert!');
+}
+function editCateringAngebot(id){
+  const a=state.cateringAngebote.find(x=>x.id===id); if(!a) return; state.editCateringAngebotId=id;
+  document.getElementById('cat-offer-name').value=a.name||''; document.getElementById('cat-dips-yesno').value=a.dips||'Nein';
+  if(a.inputs) ['gaeste','km','ak','stundensatz','waren','gas','entsorgung','miete','kmsatz'].forEach(f=>{const el=document.getElementById('cat-'+f); if(el&&a.inputs[f]!==undefined) el.value=a.inputs[f];});
+  else if(a.gaeste) document.getElementById('cat-gaeste').value=a.gaeste;
+  updateStateObj('notes/catpizza', Array.isArray(a.pizzaNotizen)?a.pizzaNotizen:[]); updateStateObj('notes/catmisc', Array.isArray(a.sonstigeNotizen)?a.sonstigeNotizen:[]);
+  calcCatering(); const saveBtn=document.getElementById('cat-save-btn'); if(saveBtn) saveBtn.textContent='Angebot aktualisieren';
+  document.getElementById('page-catering').scrollIntoView({behavior:'smooth',block:'start'}); showToast('Angebot geladen.');
+}
+function deleteCateringAngebot(id){ removeArrayItemSafe('cateringAngebote', id); if(state.editCateringAngebotId===id) resetCateringOfferForm(); showToast('Angebot gelöscht.'); }
+function renderCateringAngebote(){
+  const el=document.getElementById('cat-saved-list'); if(!state.cateringAngebote.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Noch keine Angebote.</div>';return;}
+  el.innerHTML=state.cateringAngebote.map((a)=>`
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f1f5f9">
+      <div style="flex:1"><div style="font-weight:600">${a.name||'Angebot'} · ${a.gaeste} Gäste · ${a.datum}</div>
+        <div style="font-size:12px;color:var(--muted)">Netto/Gast ${a.nettoGast} · Brutto ${a.bruttoGesamt}</div>
+        <div style="font-size:12px;margin-top:4px" class="inline-badges">${a.dips?`<span class="badge badge-amber">Dips: ${a.dips}</span>`:''}</div>
+        ${a.pizzaNotizen&&a.pizzaNotizen.length?`<div style="font-size:11px;color:var(--muted);margin-top:6px">🍕 ${a.pizzaNotizen.map(n=>n.text).join(', ')}</div>`:''}
+        ${a.sonstigeNotizen&&a.sonstigeNotizen.length?`<div style="font-size:11px;color:var(--muted);margin-top:4px">📝 ${a.sonstigeNotizen.map(n=>n.text).join(' | ')}</div>`:''}
+      </div>
+      <div style="display:flex;gap:6px;align-items:center"><button class="btn-sm" onclick="editCateringAngebot('${a.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteCateringAngebot('${a.id}')">×</button></div>
+    </div>`).join('');
 }
 
+// ── EINKAUFSLISTE ─────────────────────────────────────────────────────────
 function openEinkaufModal(id){
-  state.editEinkaufId=id||null;
-  const item=id?state.einkauf.find(e=>e.id===id):null;
+  state.editEinkaufId=id||null; const item=id?state.einkauf.find(e=>e.id===id):null;
   document.getElementById('einkauf-modal-title').textContent=item?'Position bearbeiten':'Position hinzufügen';
-  document.getElementById('ek-artikel').value=item?.artikel||'';
-  document.getElementById('ek-artikelnummer').value=item?.artikelnummer||'';
-  document.getElementById('ek-lieferant').value=item?.lieferant||randomLieferantCode();
-  document.getElementById('ek-kat').value=item?.kategorie||'Teig';
-  document.getElementById('ek-menge').value=item?.menge ?? 1;
-  document.getElementById('ek-einheit').value=item?.einheit||'kg';
-  document.getElementById('ek-preis').value=item?.preis ?? 0;
+  ['ek-artikel','ek-artikelnummer','ek-kat','ek-einheit'].forEach(f=>document.getElementById(f).value=item?item[f.replace('ek-','')]:(f==='ek-kat'?'Teig':(f==='ek-einheit'?'kg':'')));
+  document.getElementById('ek-lieferant').value=item?.lieferant||'A'; document.getElementById('ek-menge').value=item?.menge??1; document.getElementById('ek-preis').value=item?.preis??0;
   openModal('einkauf-modal');
 }
 function saveEinkauf(){
-  const item={
-    id:state.editEinkaufId||Date.now().toString(),
-    artikel:document.getElementById('ek-artikel').value||'Unbekannt',
-    artikelnummer:document.getElementById('ek-artikelnummer').value||'',
-    lieferant:document.getElementById('ek-lieferant').value||randomLieferantCode(),
-    kategorie:document.getElementById('ek-kat').value,
-    menge:parseFloat(document.getElementById('ek-menge').value)||0,
-    einheit:document.getElementById('ek-einheit').value,
-    preis:parseFloat(document.getElementById('ek-preis').value)||0
-  };
-  if(state.editEinkaufId){
-    const i=state.einkauf.findIndex(e=>e.id===state.editEinkaufId);
-    if(i>=0) state.einkauf[i]=item;
-  } else {
-    addOrMergeEinkauf(item);
-  }
-  push('einkauf',state.einkauf);
-  closeModal('einkauf-modal');
-  showToast(state.editEinkaufId?'Position aktualisiert':'Position hinzugefügt');
+  const item={ id:state.editEinkaufId||Date.now().toString(), artikel:document.getElementById('ek-artikel').value||'Unbekannt', artikelnummer:document.getElementById('ek-artikelnummer').value||'', lieferant:document.getElementById('ek-lieferant').value||'A', kategorie:document.getElementById('ek-kat').value, menge:parseFloat(document.getElementById('ek-menge').value)||0, einheit:document.getElementById('ek-einheit').value, preis:parseFloat(document.getElementById('ek-preis').value)||0 };
+  pushArrayItemSafe('einkauf', item); closeModal('einkauf-modal'); showToast(state.editEinkaufId?'Position aktualisiert':'Position hinzugefügt');
 }
-function deleteEinkauf(id){
-  state.einkauf=state.einkauf.filter(e=>e.id!==id);
-  push('einkauf',state.einkauf);
-  showToast('Position gelöscht');
-}
+function deleteEinkauf(id){ removeArrayItemSafe('einkauf', id); showToast('Position gelöscht'); }
 function renderEinkauf(){
-  const container=document.getElementById('einkauf-kategorien');
-  const q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();
-  const supplierCodes=['A','B','M','E'];
-  const filtered=state.einkauf.filter(e=>{
-    if(!q) return true;
-    return [e.artikel,e.artikelnummer,e.lieferant,lieferantName(e.lieferant),e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q);
-  });
+  const container=document.getElementById('einkauf-kategorien'), q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();
+  const filtered=state.einkauf.filter(e=>{ if(!q) return true; return [e.artikel,e.artikelnummer,e.lieferant,lieferantName(e.lieferant),e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q); });
   if(!filtered.length){container.innerHTML='<div class="card" style="color:var(--muted);font-size:13px">Keine passenden Positionen.</div>';return;}
   let html='',gesamtTotal=0;
-  supplierCodes.forEach(code=>{
-    const items=filtered.filter(e=>(e.lieferant||'')===code).sort((a,b)=>{
-      const katCmp=(a.kategorie||'').localeCompare(b.kategorie||'');
-      if(katCmp!==0) return katCmp;
-      return (a.artikel||'').localeCompare(b.artikel||'');
-    });
-    if(!items.length) return;
-    let supplierTotal=0;
-    html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
-    items.forEach(e=>{
-      const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
-      html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
-    });
+  ALL_SUPPLIER_CODES.forEach(code=>{
+    const items=filtered.filter(e=>(e.lieferant||'')===code).sort((a,b)=>a.kategorie.localeCompare(b.kategorie) || a.artikel.localeCompare(b.artikel));
+    if(!items.length) return; let supplierTotal=0;
+    html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><table><thead><tr><th>Artikel</th><th>Art.-Nr.</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
+    items.forEach(e=>{ const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s; html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`; });
     html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe ${lieferantName(code)}:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
   });
-  const unknownItems=filtered.filter(e=>!supplierCodes.includes(e.lieferant||'')).sort((a,b)=>(a.artikel||'').localeCompare(b.artikel||''));
-  if(unknownItems.length){
-    let supplierTotal=0;
-    html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant – Unbekannt</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
-    unknownItems.forEach(e=>{
-      const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
-      html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
-    });
-    html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe Unbekannt:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
-  }
   html+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;background:var(--blue-light)"><span style="font-weight:600;font-size:15px">Gesamtsumme</span><span style="font-weight:700;font-size:18px;color:var(--blue)">${fmt(gesamtTotal)}</span></div>`;
   container.innerHTML=html;
 }
 function copyEinkaufTable(){
-  let text=`EINKAUFSLISTE NACH LIEFERANT
-${'='.repeat(35)}
-
-`;
+  let text='EINKAUFSLISTE NACH LIEFERANT\n'+'='.repeat(35)+'\n\n';
   const q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();
-  const supplierCodes=['A','B','M','E'];
-  supplierCodes.forEach(code=>{
+  ALL_SUPPLIER_CODES.forEach(code=>{
     const items=state.einkauf.filter(e=>(e.lieferant||'')===code && (!q || [e.artikel,e.artikelnummer,e.lieferant,lieferantName(e.lieferant),e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q)));
-    if(!items.length)return;
-    text+=`
-LIEFERANT ${code} – ${lieferantName(code).toUpperCase()}
-`;
-    items.sort((a,b)=>{
-      const katCmp=(a.kategorie||'').localeCompare(b.kategorie||'');
-      if(katCmp!==0) return katCmp;
-      return (a.artikel||'').localeCompare(b.artikel||'');
-    }).forEach(e=>{
-      const s=e.menge*(e.preis||0);
-      text+=`${e.artikel}${e.artikelnummer?` [Art.-Nr.: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${s>0?' – '+fmt(s):''}
-`;
-    });
+    if(!items.length)return; text+=`\nLIEFERANT ${code} – ${lieferantName(code).toUpperCase()}\n`;
+    items.sort((a,b)=>a.kategorie.localeCompare(b.kategorie) || a.artikel.localeCompare(b.artikel)).forEach(e=>{ const s=e.menge*(e.preis||0); text+=`${e.artikel}${e.artikelnummer?` [Art.-Nr.: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${s>0?' – '+fmt(s):''}\n`; });
   });
-  const unknownItems=state.einkauf.filter(e=>!supplierCodes.includes(e.lieferant||'') && (!q || [e.artikel,e.artikelnummer,e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q)));
-  if(unknownItems.length){
-    text+=`
-LIEFERANT UNBEKANNT
-`;
-    unknownItems.sort((a,b)=>(a.artikel||'').localeCompare(b.artikel||'')).forEach(e=>{
-      const s=e.menge*(e.preis||0);
-      text+=`${e.artikel}${e.artikelnummer?` [Art.-Nr.: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${s>0?' – '+fmt(s):''}
-`;
-    });
-  }
   copyText(text,'Einkaufsliste kopiert!');
 }
 
 // ── KONTAKTE ─────────────────────────────────────────────────────────────
-
 function openKontaktModal(id){
-  state.editKontaktId=id||null;
-  const k=id?state.kontakte.find(x=>x.id===id):null;
+  state.editKontaktId=id||null; const k=id?state.kontakte.find(x=>x.id===id):null;
   document.getElementById('kontakt-modal-title').textContent=k?'Kontakt bearbeiten':'Neuer Kontakt';
-  document.getElementById('kt-name').value=k?.name||'';
-  document.getElementById('kt-firma').value=k?.firma||'';
-  document.getElementById('kt-tel').value=k?.tel||'';
-  document.getElementById('kt-email').value=k?.email||'';
-  document.getElementById('kt-adresse').value=k?.adresse||'';
-  document.getElementById('kt-typ').value=k?.typ||'Kunde';
-  document.getElementById('kt-notizen').value=k?.notizen||'';
-  openModal('kontakt-modal');
+  ['kt-name','kt-firma','kt-tel','kt-email','kt-adresse','kt-notizen'].forEach(f=>document.getElementById(f).value=k?k[f.replace('kt-','')]:'');
+  document.getElementById('kt-typ').value=k?.typ||'Kunde'; openModal('kontakt-modal');
 }
 function saveKontakt(){
-  const kontakt={
-    id:state.editKontaktId||Date.now().toString(),
-    name:document.getElementById('kt-name').value||'Unbekannt',
-    firma:document.getElementById('kt-firma').value,
-    tel:document.getElementById('kt-tel').value,
-    email:document.getElementById('kt-email').value,
-    adresse:document.getElementById('kt-adresse').value,
-    typ:document.getElementById('kt-typ').value,
-    notizen:document.getElementById('kt-notizen').value
-  };
-  if(state.editKontaktId){
-    const i=state.kontakte.findIndex(k=>k.id===state.editKontaktId);
-    if(i>=0) state.kontakte[i]=kontakt;
-    state.events=state.events.map(ev=>ev.contactId===kontakt.id?Object.assign({},ev,{kontakt:kontakt.name}):ev);
-    push('events',state.events);
-  } else {
-    state.kontakte.push(kontakt);
-  }
-  push('kontakte',state.kontakte);
-  closeModal('kontakt-modal');
-  showToast(state.editKontaktId?'Kontakt aktualisiert':'Kontakt gespeichert');
+  const kontakt={ id:state.editKontaktId||Date.now().toString(), name:document.getElementById('kt-name').value||'Unbekannt', firma:document.getElementById('kt-firma').value, tel:document.getElementById('kt-tel').value, email:document.getElementById('kt-email').value, adresse:document.getElementById('kt-adresse').value, typ:document.getElementById('kt-typ').value, notizen:document.getElementById('kt-notizen').value };
+  pushArrayItemSafe('kontakte', kontakt);
+  // Update names in events
+  db.ref('events').transaction(arr => {
+      if(!arr) return [];
+      return arr.map(ev => ev && ev.contactId === kontakt.id ? Object.assign({},ev,{kontakt:kontakt.name}) : ev).filter(x=>x!=null);
+  });
+  closeModal('kontakt-modal'); showToast(state.editKontaktId?'Kontakt aktualisiert':'Kontakt gespeichert');
 }
 function deleteKontakt(id){
-  state.kontakte=state.kontakte.filter(k=>k.id!==id);
-  state.events=state.events.map(ev=>ev.contactId===id?Object.assign({},ev,{contactId:'',kontakt:''}):ev);
-  push('kontakte',state.kontakte);
-  push('events',state.events);
+  removeArrayItemSafe('kontakte', id);
+  db.ref('events').transaction(arr => {
+      if(!arr) return []; return arr.map(ev => ev && ev.contactId === id ? Object.assign({},ev,{contactId:'',kontakt:''}) : ev).filter(x=>x!=null);
+  });
   showToast('Kontakt gelöscht');
 }
 function renderKontakte(){
-  const el=document.getElementById('kontakt-list');
-  const q=(document.getElementById('kontakte-search')?.value||'').trim().toLowerCase();
-  const filtered=state.kontakte.filter(k=>{
-    if(!q) return true;
-    return [k.name,k.firma,k.tel,k.email,k.adresse,k.typ].filter(Boolean).join(' ').toLowerCase().includes(q);
-  });
+  const el=document.getElementById('kontakt-list'), q=(document.getElementById('kontakte-search')?.value||'').trim().toLowerCase();
+  const filtered=state.kontakte.filter(k=>{ if(!q) return true; return [k.name,k.firma,k.tel,k.email,k.adresse,k.typ].filter(Boolean).join(' ').toLowerCase().includes(q); });
   if(!filtered.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Keine passenden Kontakte.</div>';return;}
   el.innerHTML=filtered.map(k=>`
     <div class="contact-item" id="kontakt-${k.id}">
       <div class="avatar">${k.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
-      <div style="flex:1">
-        <div style="font-weight:500">${k.name}${k.firma?` <span style="color:var(--muted);font-weight:400">· ${k.firma}</span>`:''}</div>
+      <div style="flex:1"><div style="font-weight:500; cursor:pointer;" onclick="openContactInfo('${k.id}')">${k.name}${k.firma?` <span style="color:var(--muted);font-weight:400">· ${k.firma}</span>`:''}</div>
         <div style="font-size:12px;color:var(--muted)">${[k.tel,k.email].filter(Boolean).join(' · ')}</div>
         ${k.adresse?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${k.adresse}</div>`:''}
-        ${k.notizen?`<div style="font-size:12px;color:var(--muted);margin-top:4px">${k.notizen}</div>`:''}
       </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        ${statusBadge(k.typ)}
-        <button class="btn-sm" onclick="openKontaktModal('${k.id}')">Bearbeiten</button>
-        <button class="btn-danger btn-sm" onclick="deleteKontakt('${k.id}')">×</button>
-      </div>
+      <div style="display:flex;gap:6px;align-items:center">${statusBadge(k.typ)}<button class="btn-sm" onclick="openKontaktModal('${k.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteKontakt('${k.id}')">×</button></div>
     </div>`).join('');
 }
 
-document.getElementById('today-date').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
-calcCatering();
-renderKontakte();
-renderEinkauf();
+// ── INIT ──────────────────────────────────────────────────────────────────
 updateMobileNav('dashboard');
 listenAll();
 </script>
-
-<div style="display:none">
-  <div id="drinks-grid"></div>
-  <div id="drinks-total-cost"></div>
-  <div id="drinks-result"></div>
-  <div id="drink-notes-list"></div>
-</div>
-
-<script>
-(function(){
-const EXCEL_ARTICLES = {"Farina Pizzeria Rossa Caputo 5164": {"group": "Mehl", "price_inc": 25.6693, "pack_size": 25, "pack_unit": "kg", "supplier": "A", "article_no": 5164, "unit_price_inc": 1.026772}, "Semola di Grano Duro Rimancinata": {"group": "Mehl", "price_inc": 1.7013000000000003, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 1.7013000000000003}, "Thunf. Öl": {"group": "Proteine", "price_inc": 9.2983, "pack_size": 2.5, "pack_unit": "kg", "supplier": "A", "article_no": 3140, "unit_price_inc": 3.71932}, "Salami 55mm Tulip": {"group": "Proteine", "price_inc": 8.7633, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 1403, "unit_price_inc": 8.7633}, "Prosciutto Crudo geschnitten": {"group": "Proteine", "price_inc": 11.4383, "pack_size": 0.5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 22.8766}, "Prosciutto Crudo con Interfoglio": {"group": "Proteine", "price_inc": 10.475299999999999, "pack_size": 0.5, "pack_unit": "kg", "supplier": "A", "article_no": 1438, "unit_price_inc": 20.950599999999998}, "Salami napoli picante": {"group": "Proteine", "price_inc": 13.5783, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 1406, "unit_price_inc": 13.5783}, "Mortadella": {"group": "Proteine", "price_inc": 13.8993, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 15499, "unit_price_inc": 13.8993}, "Kochschinken": {"group": "Proteine", "price_inc": 7.4793, "pack_size": 7.8, "pack_unit": "kg", "supplier": "A", "article_no": 1413, "unit_price_inc": 7.4793}, "Sardellen": {"group": "Proteine", "price_inc": 26.61625, "pack_size": 0.08, "pack_unit": "kg", "supplier": "A", "article_no": 3175, "unit_price_inc": 26.61625}, "Pancetta": {"group": "Proteine", "price_inc": 7.49, "pack_size": 0.3, "pack_unit": "kg", "supplier": "E", "article_no": null, "unit_price_inc": 24.966417}, "Grana Padano 16M": {"group": "Milchprodukte", "price_inc": 40.7563, "pack_size": 2, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 20.37815}, "Fior di Latte Taglio Napoli latteria Sorrentina": {"group": "Milchprodukte", "price_inc": 17.858300000000003, "pack_size": 2, "pack_unit": "kg", "supplier": "A", "article_no": 11498, "unit_price_inc": 8.929150000000002}, "Fior di Latte Taglio Napoli Zappa": {"group": "Milchprodukte", "price_inc": 27.2743, "pack_size": 3, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 9.091433333333333}, "Burrata Nonno Nanni": {"group": "Milchprodukte", "price_inc": 2.1293, "pack_size": 0.125, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 17.0344}, "Aro Schmand 24%": {"group": "Milchprodukte", "price_inc": 27.8093, "pack_size": 5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 5.56186}, "Greco Feta 48%": {"group": "Milchprodukte", "price_inc": 19.249299999999998, "pack_size": 2, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 9.624649999999999}, "Grana Padano DOP 1/8 Colla": {"group": "Milchprodukte", "price_inc": 15.8253, "pack_size": 4, "pack_unit": "kg", "supplier": "A", "article_no": 13156, "unit_price_inc": 15.8253}, "Hirtenkäse": {"group": "Milchprodukte", "price_inc": 14.43, "pack_size": 1.8, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 8.016666666666666}, "Gorgonzola": {"group": "Milchprodukte", "price_inc": 11.759300000000001, "pack_size": 1.5, "pack_unit": "kg", "supplier": "A", "article_no": 1132, "unit_price_inc": 7.839533333333334}, "Ricotta di pecora Fresca": {"group": "Milchprodukte", "price_inc": 8.0143, "pack_size": 1.5, "pack_unit": "kg", "supplier": "A", "article_no": 1386, "unit_price_inc": 5.342866666666667}, "Stracciatella": {"group": "Milchprodukte", "price_inc": 3.6273000000000004, "pack_size": 0.25, "pack_unit": "kg", "supplier": "A", "article_no": 11151, "unit_price_inc": 14.5092}, "Zwiebeln RONL": {"group": "Gemüse", "price_inc": 3.1993000000000005, "pack_size": 1.5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 2.132866666666667}, "Zwiebeln rot ": {"group": "Gemüse", "price_inc": 13.8993, "pack_size": 10, "pack_unit": "kg", "supplier": "A", "article_no": "O445", "unit_price_inc": 1.38993}, "Knoblauch GES": {"group": "Gemüse", "price_inc": 6.944300000000001, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": "O475", "unit_price_inc": 6.944300000000001}, "Pelati Andronaco": {"group": "Gemüse", "price_inc": 3.1993000000000005, "pack_size": 2.5, "pack_unit": "kg", "supplier": "A", "article_no": 30163, "unit_price_inc": 1.2797200000000002}, "Polpa Andronaco": {"group": "Gemüse", "price_inc": 13.8993, "pack_size": 10, "pack_unit": "kg", "supplier": "A", "article_no": 30164, "unit_price_inc": 1.38993}, "Polpa cour di pomodoro Cirio": {"group": "Gemüse", "price_inc": 13.8993, "pack_size": 5, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 2.77986}, "Basilikum frisch": {"group": "Gemüse", "price_inc": 16.0393, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": "O902", "unit_price_inc": 16.0393}, "Rucola frisch": {"group": "Gemüse", "price_inc": 7.4793, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": "O106", "unit_price_inc": 7.4793}, "Blattspiat Miniportioniert": {"group": "Gemüse", "price_inc": 5.6603, "pack_size": 2.5, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 2.26412}, "Eiswürfel": {"group": "Gemüse", "price_inc": 5.1051, "pack_size": 5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 1.02102}, "Spinat frisch": {"group": "Gemüse", "price_inc": 19.249299999999998, "pack_size": 5.5, "pack_unit": "Kg", "supplier": "A", "article_no": null, "unit_price_inc": 3.499872727272727}, "Pilze frisch": {"group": "Gemüse", "price_inc": 4.8, "pack_size": 1, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 4.8}, "Cherrytomaten": {"group": "Gemüse", "price_inc": 5.874300000000001, "pack_size": 3, "pack_unit": "kg", "supplier": "A", "article_no": "O312", "unit_price_inc": 5.874300000000001}, "Champignon": {"group": "Gemüse", "price_inc": 3.9483, "pack_size": 3, "pack_unit": "kg", "supplier": "A", "article_no": "O500", "unit_price_inc": 1.3161}, "Zucchini": {"group": "Gemüse", "price_inc": 9.6193, "pack_size": 5, "pack_unit": "kg", "supplier": "A", "article_no": "O204", "unit_price_inc": 1.9238600000000001}, "Paprika": {"group": "Gemüse", "price_inc": 15.515, "pack_size": 5, "pack_unit": "kg", "supplier": null, "article_no": "O214", "unit_price_inc": 3.103}, "Aro Rapsöl": {"group": "Sonstiges", "price_inc": 4.1623, "pack_size": 2.5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 1.66492}, "Aro Zucker Raffinade": {"group": "Sonstiges", "price_inc": 0.8881, "pack_size": 1, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 0.8881}, "Aro Honig": {"group": "Sonstiges", "price_inc": 11.224300000000001, "pack_size": 1.5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 7.482866666666667}, "Bührings Eier Freiland": {"group": "Sonstiges", "price_inc": 4, "pack_size": null, "pack_unit": "kg", "supplier": "B", "article_no": null, "unit_price_inc": null}, "Hefe Omas Ur-Hefe": {"group": "Sonstiges", "price_inc": 0.18190000000000003, "pack_size": 0.042, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 4.3309523809523816}, "Aro Eiswürfel": {"group": "Sonstiges", "price_inc": 5.1051, "pack_size": 5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 1.02102}, "Olio extra virgin san Giovanni Desantes": {"group": "Sonstiges", "price_inc": 8.5493, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 8.5493}, "Wallnusskerne Andronaco": {"group": "Sonstiges", "price_inc": 19.249299999999998, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 19.249299999999998}, "Crema di Balsamico": {"group": "Sonstiges", "price_inc": 5.1253, "pack_size": 0.5, "pack_unit": "kg", "supplier": "A", "article_no": null, "unit_price_inc": 10.2506}, "Apfel essig ": {"group": "Sonstiges", "price_inc": 1.5515, "pack_size": 0.5, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 3.103}, "Pesto alla genovese": {"group": "Sonstiges", "price_inc": 4.8043000000000005, "pack_size": 0.5, "pack_unit": "kg", "supplier": "A", "article_no": 3456, "unit_price_inc": 9.608600000000001}, "Salz": {"group": "Sonstiges", "price_inc": 8.5493, "pack_size": 25, "pack_unit": "kg", "supplier": "A", "article_no": 6391, "unit_price_inc": 0.341972}, "Pomodoro Secchi in olio": {"group": "Sonstiges", "price_inc": 15.6113, "pack_size": 2.9, "pack_unit": "Kg", "supplier": "A", "article_no": 34329, "unit_price_inc": 5.383206896551723}, "Kuehne Senf ": {"group": "Sonstiges", "price_inc": 1.5943, "pack_size": 0.25, "pack_unit": "Kg", "supplier": "M", "article_no": null, "unit_price_inc": 6.3772}, "Metro Chef Chiliflocken ": {"group": "Sonstiges", "price_inc": 8.0143, "pack_size": 0.37, "pack_unit": "Kg", "supplier": "M", "article_no": null, "unit_price_inc": 21.66027027027027}, "Orange": {"group": "Sonstiges", "price_inc": 6.409300000000001, "pack_size": 3, "pack_unit": "Kg", "supplier": "M", "article_no": null, "unit_price_inc": 2.1364333333333336}, "Eier (Bührings)": {"group": "Sonstiges", "price_inc": 4, "pack_size": 10, "pack_unit": "stk", "supplier": "B", "article_no": null, "unit_price_inc": 6.666666666666667}, "Limette": {"group": "Sonstiges", "price_inc": 3.1993000000000005, "pack_size": 1, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 3.1993000000000005}, "Chilipulver": {"group": "Sonstiges", "price_inc": 5.874300000000001, "pack_size": 0.39, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 15.062307692307694}, "Chilischoten": {"group": "Sonstiges", "price_inc": 8.8703, "pack_size": 0.19, "pack_unit": "kg", "supplier": "M", "article_no": null, "unit_price_inc": 46.68578947368421}, "Peperoncini Piccanti in olio": {"group": "Sonstiges", "price_inc": 22.4593, "pack_size": 3.1, "pack_unit": "kg", "supplier": "A", "article_no": 3431, "unit_price_inc": 7.244935483870967}, "Oliven schwarz in Scheiben": {"group": "Sonstiges", "price_inc": 11.010299999999999, "pack_size": 4.25, "pack_unit": "kg", "supplier": "A", "article_no": 30108, "unit_price_inc": 2.5906588235294112}, "Pistazien": {"group": "Sonstiges", "price_inc": 48.139300000000006, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 6028, "unit_price_inc": 48.139300000000006}, "Oregano eigenmarke Andronaco": {"group": "Sonstiges", "price_inc": 10.689300000000001, "pack_size": 1, "pack_unit": "kg", "supplier": "A", "article_no": 60196, "unit_price_inc": 10.689300000000001}, "VioLife": {"group": "Sonstiges", "price_inc": 2.49, "pack_size": 0.18, "pack_unit": "kg", "supplier": "E", "article_no": null, "unit_price_inc": 13.833333333333334}, "Kapern": {"group": "Sonstiges", "price_inc": 8.055283018867925, "pack_size": 0.53, "pack_unit": "kg", "supplier": "A", "article_no": 34470, "unit_price_inc": 8.055283018867925}, "G&G Kürbiskerne ": {"group": "Sonstiges", "price_inc": 2.29, "pack_size": 0.25, "pack_unit": "kg", "supplier": "E", "article_no": null, "unit_price_inc": 9.16}};
-const EXCEL_BASE_RECIPES = {"teig": [["Farina Pizzeria Rossa Caputo 5164", 156.789], ["Aro Zucker Raffinade", 2.349], ["Salz", 5.184], ["Hefe Omas Ur-Hefe", 0.621], ["Aro Eiswürfel", 23.517]], "tomatensauce": [["Polpa Andronaco", 83.2], ["Pelati Andronaco", 44.85], ["Salz", 0.65], ["Aro Zucker Raffinade", 0.52], ["Basilikum frisch", 0.78]], "spinatcreme": [["Blattspiat Miniportioniert", 94.9], ["Aro Schmand 24%", 14.3], ["Salz", 1.3], ["Knoblauch GES", 1.3], ["Hirtenkäse", 15.6], ["Aro Zucker Raffinade", 2.6]], "schmandcreme": [["Aro Schmand 24%", 90.55], ["Knoblauch GES", 1.55], ["Grana Padano DOP 1/8 Colla", 6.4], ["Salz", 1.5]], "chilli_ricotta": [["Ricotta di pecora Fresca", 39.08], ["Chilipulver", 0.44], ["Salz", 0.48]], "grillgemuese": [["Zucchini", 46.08], ["Paprika", 70.08], ["Olio extra virgin san Giovanni Desantes", 2.4], ["Salz", 1.44]], "konfierte_tomaten": [["Cherrytomaten", 144.576], ["Knoblauch GES", 1.92], ["Olio extra virgin san Giovanni Desantes", 7.232], ["Salz", 2.416], ["Aro Zucker Raffinade", 1.92], ["Oregano eigenmarke Andronaco", 0.24]], "hot_honey": [["Aro Honig", 44.5], ["Metro Chef Chiliflocken ", 1.75], ["Apfel essig ", 2.9], ["Chilipulver", 0.85]], "aioli": [["Aro Rapsöl", 36.375], ["Eier (Bührings)", 8.75], ["Apfel essig ", 0.5], ["Aro Zucker Raffinade", 0.76], ["Salz", 0.4], ["Kuehne Senf ", 1.85], ["Knoblauch GES", 1.365]], "aioli_auto": [["Aro Rapsöl", 36.375], ["Eier (Bührings)", 8.75], ["Aro Zucker Raffinade", 0.76], ["Salz", 0.4], ["Kuehne Senf ", 1.85], ["Knoblauch GES", 1.365]], "karam_zwiebeln": [["Zwiebeln rot ", 120.0]], "karam_walnuesse": [["Wallnusskerne Andronaco", 25.0]], "kuerbiscreme": [["Aro Schmand 24%", 135.825], ["Knoblauch GES", 2.325], ["Grana Padano DOP 1/8 Colla", 9.6], ["Salz", 2.25]]};
-const EXCEL_PIZZAS = {"Margherita": {"price": 0.9955161658000002, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 80]]}, "Pesto": {"price": 0.8339194158000003, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Pesto alla genovese", 25]]}, "Salami": {"price": 1.1195024158000002, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Salami 55mm Tulip", 60]]}, "Funghi": {"price": 0.7911194158000002, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Champignon", 50]]}, "Parma": {"price": 2.1665402158, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Prosciutto Crudo con Interfoglio", 50], ["Rucola frisch", 40], ["Crema di Balsamico", 8], ["Pesto alla genovese", 15]]}, "Tonno": {"price": 0.9490995658000001, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Thunf. Öl", 75], ["Zwiebeln rot ", 55]]}, "Verde": {"price": 1.8508145153333335, "parts": [["teig", 1], ["spinatcreme", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 30], ["Hirtenkäse", 50], ["karam_zwiebeln", 1.1666666666666667], ["karam_walnuesse", 1]]}, "Burrata": {"price": 3.2637778037310348, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Pesto alla genovese", 15], ["Pomodoro Secchi in olio", 20], ["Rucola frisch", 40], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Burrata Nonno Nanni", 125]]}, "Spicy Salami": {"price": 2.0784483858522784, "parts": [["teig", 1], ["tomatensauce", 0.5769230769230769], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 55], ["Salami napoli picante", 75], ["chilli_ricotta", 1], ["hot_honey", 0.2], ["Peperoncini Piccanti in olio", 10]]}, "Mortadella e Pistachio": {"price": 2.0127812158000005, "parts": [["teig", 1], ["tomatensauce", 1], ["Grana Padano DOP 1/8 Colla", 6], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Mortadella", 50], ["Stracciatella", 30], ["Pistazien", 6]]}, "Pizza Grillgemüse": {"price": 1.2935672169349561, "parts": [["teig", 1], ["tomatensauce", 1], ["grillgemuese", 1], ["Oliven schwarz in Scheiben", 20], ["Pomodoro Secchi in olio", 20], ["VioLife", 35]]}, "Special Margherita": {"price": 2.0386911947520003, "parts": [["teig", 1], ["schmandcreme", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["konfierte_tomaten", 1], ["Olio extra virgin san Giovanni Desantes", 10]]}, "Speciale": {"price": 1.0137329158000001, "parts": [["teig", 1], ["tomatensauce", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["Kochschinken", 50], ["Champignon", 35]]}, "Siziliana": {"price": 1.2280663021485019, "parts": [["teig", 1], ["tomatensauce", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["Zwiebeln rot ", 20], ["Sardellen", 20], ["Kapern", 6], ["Oliven schwarz in Scheiben", 10]]}, "Gorgonzola e Spinacchi": {"price": 1.8255435493333336, "parts": [["teig", 1], ["schmandcreme", 1], ["Fior di Latte Taglio Napoli latteria Sorrentina", 35], ["Grana Padano DOP 1/8 Colla", 6], ["Blattspiat Miniportioniert", 60], ["Gorgonzola", 40], ["Cherrytomaten", 60]]}, "Kürbis": {"price": 0.048043, "parts": [["teig", 1], ["kuerbiscreme", 1], ["Grana Padano DOP 1/8 Colla", 9], ["Fior di Latte Taglio Napoli latteria Sorrentina", 30], ["Hirtenkäse", 30], ["Pancetta", 60], ["karam_zwiebeln", 1], ["G&G Kürbiskerne ", 5], ["Crema di Balsamico", 5]]}};
-
-const SUPPLIER_LABELS = {A:'Andronaco',B:'Bührings',E:'Edeka',F:'Famila',H:'Hol Ab',L:'Lütauer',M:'Metro'};
-const SUPPLIER_ORDER = {A:1,B:2,E:3,F:4,H:5,L:6,M:7};
-Object.assign(LIEFERANTEN, SUPPLIER_LABELS);
-function fmtQty(g){
-  return g>=1000 ? (g/1000).toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2})+' kg' : Math.round(g).toLocaleString('de-DE')+' g';
-}
-function catFromGroup(group){
-  const map={'Mehl':'Teig','Proteine':'Belag','Milchprodukte':'Milchprodukte / Käse','Gemüse':'Gemüse & Kräuter','Sonstiges':'Sonstiges','Lebensmittel':'Sonstiges'};
-  return map[group] || 'Sonstiges';
-}
-function unitPriceInc(name){
-  const m=EXCEL_ARTICLES[name];
-  return m && m.unit_price_inc ? Number(m.unit_price_inc) : 0;
-}
-function ensureSupplierOptions(){
-  const sel=document.getElementById('ek-lieferant');
-  if(!sel) return;
-  const current=sel.value;
-  sel.innerHTML = Object.keys(SUPPLIER_LABELS).map(code => `<option value="${code}">${code} = ${SUPPLIER_LABELS[code]}</option>`).join('');
-  if(current && SUPPLIER_LABELS[current]) sel.value=current;
-}
-function expandRecipePart(name, factor, totals){
-  if(EXCEL_BASE_RECIPES[name]){
-    EXCEL_BASE_RECIPES[name].forEach(([article, grams]) => {
-      totals[article] = (totals[article]||0) + Number(grams) * Number(factor);
-    });
-  } else {
-    totals[name] = (totals[name]||0) + Number(factor);
-  }
-}
-function totalPizzaCount(){
-  return Object.values(pizzaMengen).reduce((s,v)=>s+(Number(v)||0),0);
-}
-function aggregateExcelShopping(includeAutoDips=true){
-  const totals = {};
-  Object.entries(pizzaMengen).forEach(([pizza, qty]) => {
-    qty = Number(qty)||0;
-    if(!qty || !EXCEL_PIZZAS[pizza]) return;
-    EXCEL_PIZZAS[pizza].parts.forEach(([part, amount]) => {
-      expandRecipePart(part, Number(amount)*qty, totals);
-    });
-  });
-  if(includeAutoDips){
-    const total = totalPizzaCount();
-    if(total>0){
-      expandRecipePart('aioli_auto', total*0.35, totals);
-      expandRecipePart('hot_honey', total*0.15, totals);
-    }
-  }
-  return totals;
-}
-function aggregateManualDips(){
-  const totals={};
-  const aioli = Number(dipMengen.aioli)||0;
-  const hh = Number(dipMengen.hothoney)||0;
-  if(aioli>0) expandRecipePart('aioli', aioli, totals);
-  if(hh>0) expandRecipePart('hot_honey', hh, totals);
-  return totals;
-}
-function enrichArticles(totals){
-  return Object.entries(totals).map(([name, grams]) => {
-    const meta = EXCEL_ARTICLES[name] || {};
-    const kg = Number(grams)/1000;
-    const unitPrice = unitPriceInc(name);
-    const cost = unitPrice ? unitPrice*kg : 0;
-    let packs = null;
-    if(meta.pack_size && meta.pack_unit && String(meta.pack_unit).toLowerCase().startsWith('kg')){
-      packs = kg / Number(meta.pack_size);
-    }
-    return {
-      article:name,
-      grams:Number(grams),
-      kg,
-      category:catFromGroup(meta.group),
-      supplier:meta.supplier || '',
-      supplierLabel: SUPPLIER_LABELS[meta.supplier] || meta.supplier || '–',
-      articleNo: meta.article_no || '',
-      packSize: meta.pack_size || '',
-      packUnit: meta.pack_unit || '',
-      packs,
-      cost
-    };
-  }).sort((a,b) => {
-    const so=(SUPPLIER_ORDER[a.supplier]||99)-(SUPPLIER_ORDER[b.supplier]||99);
-    if(so!==0) return so;
-    const co=(a.category||'').localeCompare(b.category||'');
-    if(co!==0) return co;
-    return (a.article||'').localeCompare(b.article||'');
-  });
-}
-
-renderPizzaGrid = function() {
-  const cards = Object.keys(EXCEL_PIZZAS).map(name => `
-    <div class="pizza-card">
-      <div class="pizza-card-name">${name}</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">${fmt(EXCEL_PIZZAS[name].price)} / Pizza</div>
-      <div class="pizza-qty">
-        <button onclick="changePizza('${name}',-1)">−</button>
-        <input type="number" min="0" value="${pizzaMengen[name]||0}" id="pqty-${name.replace(/\s/g,'_').replace(/[()]/g,'')}" onchange="setPizza('${name}',this.value)"/>
-        <button onclick="changePizza('${name}',1)">+</button>
-      </div>
-    </div>`).join('');
-  document.getElementById('pizza-grid').innerHTML = cards;
-  updatePizzaTotal();
-};
-
-renderPizzaResult = function() {
-  const total = totalPizzaCount();
-  const el = document.getElementById('ingredient-result');
-  if(!el) return;
-  if(!total){
-    el.innerHTML = '<div style="color:var(--muted);font-size:13px">Gib oben die Anzahl Pizzen ein.</div>';
-    return;
-  }
-  const rows = enrichArticles(aggregateExcelShopping(true));
-  let totalCost = 0;
-  let html = '<div class="ing-wrap">';
-  let currentSupplier = '';
-  rows.forEach(row => {
-    totalCost += row.cost || 0;
-    const header = row.supplierLabel || 'Ohne Lieferant';
-    if(header !== currentSupplier){
-      if(currentSupplier) html += '</div>';
-      html += `<div class="ing-group"><div class="ing-group-title">${header}</div>`;
-      currentSupplier = header;
-    }
-    const packTxt = row.packs!=null ? ` · ${row.packs.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} Pkg` : '';
-    html += `<div class="ing-row">
-      <span>${row.article}${row.articleNo ? ` <span style="color:var(--muted);font-size:11px">[${row.articleNo}]</span>` : ''}</span>
-      <span class="ing-amount">${fmtQty(row.grams)}</span>
-      <span style="font-size:11px;color:var(--muted);min-width:140px;text-align:right">${packTxt}</span>
-      <span style="font-size:11px;color:var(--muted);min-width:70px;text-align:right">${row.cost ? fmt(row.cost) : ''}</span>
-    </div>`;
-  });
-  if(currentSupplier) html += '</div>';
-  const autoAioli = (0.35*total).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const autoHot = (0.15*total).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
-  html += `</div>
-    <div style="margin-top:10px;font-size:12px;color:var(--muted)">Automatisch berücksichtigt nach Excel: Aioli ${autoAioli} Schälchen, Hot Honey ${autoHot} Schälchen.</div>
-    <div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Geschätzte Warenkosten nach Excel:</span><span style="color:var(--blue)">${fmt(totalCost)}</span></div>`;
-  el.innerHTML = html;
-};
-
-copyPizzaList = function() {
-  const total = totalPizzaCount();
-  if(!total) return showToast('Keine Pizzen eingegeben.');
-  const rows = enrichArticles(aggregateExcelShopping(true));
-  let text = 'PIZZA EINKAUFSLISTE – ' + total + ' Pizzen (Excel)\n' + '='.repeat(42) + '\n\n';
-  Object.entries(pizzaMengen).filter(([,v])=>Number(v)>0).forEach(([name,v]) => {
-    text += `${name}: ${v}x · ${fmt(EXCEL_PIZZAS[name].price)}\n`;
-  });
-  text += `\nAuto-Dips: Aioli ${(0.35*total).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} · Hot Honey ${(0.15*total).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})}\n`;
-  let currentSupplier='';
-  rows.forEach(r => {
-    if(r.supplierLabel!==currentSupplier){
-      currentSupplier=r.supplierLabel;
-      text += `\n${currentSupplier.toUpperCase()}\n`;
-    }
-    text += `${r.article}${r.articleNo?` [${r.articleNo}]`:''}: ${fmtQty(r.grams)}${r.packs!=null?` · ${r.packs.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} Pkg`:''}${r.cost?` · ${fmt(r.cost)}`:''}\n`;
-  });
-  copyText(text,'Excel-Einkaufsliste kopiert!');
-};
-
-saveToEinkauf = function() {
-  const total = totalPizzaCount();
-  if(!total) return showToast('Keine Pizzen eingegeben.');
-  const totals = aggregateExcelShopping(true);
-  Object.entries(totals).forEach(([name, grams]) => {
-    const meta = EXCEL_ARTICLES[name] || {};
-    const kg = Number(grams)/1000;
-    addOrMergeEinkauf({
-      artikel: name,
-      artikelnummer: meta.article_no || '',
-      lieferant: meta.supplier || randomLieferantCode(),
-      kategorie: catFromGroup(meta.group),
-      menge: Number(kg.toFixed(3)),
-      einheit: 'kg',
-      preis: unitPriceInc(name) || 0
-    });
-  });
-  push('einkauf', state.einkauf);
-  showToast('Pizza-Kalkulation nach Excel in Einkaufsliste übernommen!');
-};
-
-renderDipsResult = function() {
-  document.getElementById('dip-aioli-total').textContent=dipMengen.aioli||0;
-  document.getElementById('dip-hothoney-total').textContent=dipMengen.hothoney||0;
-  const el=document.getElementById('dip-result');
-  if(!el) return;
-  if(!dipMengen.aioli&&!dipMengen.hothoney){
-    el.innerHTML='<div style="color:var(--muted);font-size:13px">Gib oben die Anzahl Dips ein.</div>';
-    return;
-  }
-  const rows = enrichArticles(aggregateManualDips());
-  let totalCost = 0;
-  let html = '<div class="ing-wrap">';
-  let currentSupplier = '';
-  rows.forEach(row => {
-    totalCost += row.cost || 0;
-    const header = row.supplierLabel || 'Ohne Lieferant';
-    if(header !== currentSupplier){
-      if(currentSupplier) html += '</div>';
-      html += `<div class="ing-group"><div class="ing-group-title">${header}</div>`;
-      currentSupplier = header;
-    }
-    html += `<div class="ing-row">
-      <span>${row.article}${row.articleNo ? ` <span style="color:var(--muted);font-size:11px">[${row.articleNo}]</span>` : ''}</span>
-      <span class="ing-amount">${fmtQty(row.grams)}</span>
-      <span style="font-size:11px;color:var(--muted);min-width:70px;text-align:right">${row.cost ? fmt(row.cost) : ''}</span>
-    </div>`;
-  });
-  if(currentSupplier) html += '</div>';
-  html += `</div><div style="display:flex;justify-content:space-between;font-weight:600;margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:8px"><span>Geschätzte Warenkosten nach Excel:</span><span style="color:var(--blue)">${fmt(totalCost)}</span></div>`;
-  el.innerHTML = html;
-};
-
-copyDipList = function() {
-  if(!dipMengen.aioli&&!dipMengen.hothoney) return showToast('Keine Dips eingegeben.');
-  const rows = enrichArticles(aggregateManualDips());
-  let text = 'DIPS EINKAUFSLISTE (Excel)\n' + '='.repeat(28) + '\n\n' + `Aioli: ${dipMengen.aioli||0} Stk.\nHot Honey: ${dipMengen.hothoney||0} Stk.\n`;
-  let currentSupplier='';
-  rows.forEach(r => {
-    if(r.supplierLabel!==currentSupplier){
-      currentSupplier=r.supplierLabel;
-      text += `\n${currentSupplier.toUpperCase()}\n`;
-    }
-    text += `${r.article}${r.articleNo?` [${r.articleNo}]`:''}: ${fmtQty(r.grams)}${r.cost?` · ${fmt(r.cost)}`:''}\n`;
-  });
-  copyText(text,'Dip-Liste kopiert!');
-};
-
-// page removed, keep safe
-renderDrinksGrid = function(){};
-renderDrinksResult = function(){};
-updateDrinkTotal = function(){};
-
-ensureSupplierOptions();
-renderAll();
-})();
-</script>
-
-
-<script>
-(function(){
-  const ALL_SUPPLIER_CODES = ['A','B','E','F','H','L','M'];
-  renderEinkauf = function(){
-    const container=document.getElementById('einkauf-kategorien');
-    const q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();
-    const filtered=state.einkauf.filter(e=>{
-      if(!q) return true;
-      return [e.artikel,e.artikelnummer,e.lieferant,lieferantName(e.lieferant),e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q);
-    });
-    if(!filtered.length){container.innerHTML='<div class="card" style="color:var(--muted);font-size:13px">Keine passenden Positionen.</div>';return;}
-    let html='',gesamtTotal=0;
-    ALL_SUPPLIER_CODES.forEach(code=>{
-      const items=filtered.filter(e=>(e.lieferant||'')===code).sort((a,b)=>{
-        const katCmp=(a.kategorie||'').localeCompare(b.kategorie||'');
-        if(katCmp!==0) return katCmp;
-        return (a.artikel||'').localeCompare(b.artikel||'');
-      });
-      if(!items.length) return;
-      let supplierTotal=0;
-      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
-      items.forEach(e=>{
-        const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
-        html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
-      });
-      html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe ${lieferantName(code)}:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
-    });
-    const unknownItems=filtered.filter(e=>!ALL_SUPPLIER_CODES.includes(e.lieferant||'')).sort((a,b)=>(a.artikel||'').localeCompare(b.artikel||''));
-    if(unknownItems.length){
-      let supplierTotal=0;
-      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant – Unbekannt</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
-      unknownItems.forEach(e=>{
-        const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
-        html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
-      });
-      html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe Unbekannt:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
-    }
-    html+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;background:var(--blue-light)"><span style="font-weight:600;font-size:15px">Gesamtsumme</span><span style="font-weight:700;font-size:18px;color:var(--blue)">${fmt(gesamtTotal)}</span></div>`;
-    container.innerHTML=html;
-  };
-  copyEinkaufTable = function(){
-    let text='EINKAUFSLISTE NACH LIEFERANT\n'+'='.repeat(35)+'\n\n';
-    const q=(document.getElementById('einkauf-search')?.value||'').trim().toLowerCase();
-    ALL_SUPPLIER_CODES.forEach(code=>{
-      const items=state.einkauf.filter(e=>(e.lieferant||'')===code && (!q || [e.artikel,e.artikelnummer,e.lieferant,lieferantName(e.lieferant),e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q)));
-      if(!items.length)return;
-      text+=`\nLIEFERANT ${code} – ${lieferantName(code).toUpperCase()}\n`;
-      items.sort((a,b)=>{
-        const katCmp=(a.kategorie||'').localeCompare(b.kategorie||'');
-        if(katCmp!==0) return katCmp;
-        return (a.artikel||'').localeCompare(b.artikel||'');
-      }).forEach(e=>{
-        const s=e.menge*(e.preis||0);
-        text+=`${e.artikel}${e.artikelnummer?` [Art.-Nr.: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${s>0?' – '+fmt(s):''}\n`;
-      });
-    });
-    copyText(text,'Einkaufsliste kopiert!');
-  };
-  renderEinkauf();
-})();
-</script>
-
 </body>
 </html>
