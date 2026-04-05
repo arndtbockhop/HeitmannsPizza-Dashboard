@@ -133,16 +133,11 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .action-row{display:flex;gap:6px;align-items:center}
 
 
-.mobile-bottom-nav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:320;background:rgba(255,255,255,.98);backdrop-filter:blur(10px);border-top:1px solid var(--border);grid-template-columns:repeat(5,1fr);gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
-.mobile-bottom-nav button{padding:8px 6px;min-height:46px;font-size:12px;border-radius:10px}
+.mobile-bottom-nav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:320;background:rgba(255,255,255,.98);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:8px 10px calc(8px + env(safe-area-inset-bottom));overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap}
+.mobile-bottom-nav::-webkit-scrollbar{display:none}
+.mobile-bottom-nav-inner{display:inline-flex;gap:6px;min-width:max-content}
+.mobile-bottom-nav button{padding:8px 12px;min-height:46px;font-size:12px;border-radius:10px;flex:0 0 auto}
 .mobile-bottom-nav button.active{background:var(--blue-light);color:var(--blue);border-color:#bfdbfe;font-weight:600}
-.more-sheet{display:none;position:fixed;inset:0;z-index:340;background:rgba(0,0,0,.35);align-items:flex-end;justify-content:center}
-.more-sheet.open{display:flex}
-.more-sheet-panel{background:var(--card);width:100%;max-width:560px;border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));border:1px solid var(--border);box-shadow:0 -10px 30px rgba(0,0,0,.12)}
-.more-sheet-handle{width:42px;height:5px;border-radius:999px;background:#cbd5e1;margin:0 auto 12px}
-.more-sheet-title{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:12px;text-align:center;text-transform:uppercase;letter-spacing:.06em}
-.more-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.more-grid button{min-height:48px;border-radius:12px}
 
 
 /* MOBILE OPTIMIZATION */
@@ -178,7 +173,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   .result-bar{font-size:12px;padding:10px 12px}
   .drink-item{display:grid;grid-template-columns:1fr;gap:6px;align-items:start}
   .drink-controls{justify-content:flex-start}
-  .mobile-bottom-nav{display:grid}
+  .mobile-bottom-nav{display:block}
 }
 @media (max-width: 520px){
   .main{padding:10px}
@@ -452,23 +447,15 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 </div><!-- /main -->
 
 <div class="mobile-bottom-nav" id="mobile-bottom-nav">
-  <button onclick="navTo('dashboard')" data-page="dashboard">Home</button>
-  <button onclick="navTo('events')" data-page="events">Events</button>
-  <button onclick="navTo('catering')" data-page="catering">Catering</button>
-  <button onclick="navTo('einkauf')" data-page="einkauf">Einkauf</button>
-  <button onclick="openMoreSheet()" data-page="more">Mehr</button>
-</div>
-
-<div class="more-sheet" id="more-sheet" onclick="if(event.target===this)closeMoreSheet()">
-  <div class="more-sheet-panel">
-    <div class="more-sheet-handle"></div>
-    <div class="more-sheet-title">Weitere Bereiche</div>
-    <div class="more-grid">
-      <button onclick="closeMoreSheet(); navTo('kalender')">Kalender</button>
-      <button onclick="closeMoreSheet(); navTo('pizza')">Pizza-Kalk.</button>
-      <button onclick="closeMoreSheet(); navTo('dips')">Dips</button>
-      <button onclick="closeMoreSheet(); navTo('kontakte')">Kontakte</button>
-    </div>
+  <div class="mobile-bottom-nav-inner">
+    <button onclick="navTo('dashboard')" data-page="dashboard">Home</button>
+    <button onclick="navTo('kalender')" data-page="kalender">Kalender</button>
+    <button onclick="navTo('events')" data-page="events">Events</button>
+    <button onclick="navTo('catering')" data-page="catering">Catering</button>
+    <button onclick="navTo('pizza')" data-page="pizza">Pizza-Kalk.</button>
+    <button onclick="navTo('dips')" data-page="dips">Dips</button>
+    <button onclick="navTo('einkauf')" data-page="einkauf">Einkauf</button>
+    <button onclick="navTo('kontakte')" data-page="kontakte">Kontakte</button>
   </div>
 </div>
 
@@ -823,15 +810,10 @@ function renderAll(){
 function updateMobileNav(id){
   document.querySelectorAll('#mobile-bottom-nav button').forEach(b=>b.classList.remove('active'));
   const btn=document.querySelector(`#mobile-bottom-nav button[data-page="${id}"]`);
-  if(btn) btn.classList.add('active');
-}
-function openMoreSheet(){
-  const s=document.getElementById('more-sheet');
-  if(s) s.classList.add('open');
-}
-function closeMoreSheet(){
-  const s=document.getElementById('more-sheet');
-  if(s) s.classList.remove('open');
+  if(btn){
+    btn.classList.add('active');
+    try{ btn.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); }catch(e){}
+  }
 }
 function showPage(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -840,7 +822,6 @@ function showPage(id,el){
   if(target) target.classList.add('active');
   if(el) el.classList.add('active');
   updateMobileNav(id);
-  closeMoreSheet();
   if(id==='kontakte') renderKontakte();
   if(id==='einkauf') renderEinkauf();
   if(id==='events') renderAllEvents();
