@@ -2,8 +2,8 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Heitmanns Pizza – Heitmanns Pizza</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gastro Manager – Heitmanns Pizza</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
@@ -59,9 +59,9 @@ textarea{resize:vertical}
 .event-month{font-size:11px;color:var(--muted)}
 .event-info{flex:1}
 .event-title-text{font-size:14px;font-weight:500}
-.event-sub{font-size:12px;color:var(--muted);margin-top:2px;word-break:break-word}
+.event-sub{font-size:12px;color:var(--muted);margin-top:2px}
 .linkish{color:var(--blue);cursor:pointer;text-decoration:underline}
-.contact-item{flex-wrap:wrap;}display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px}
+.contact-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px}
 .avatar{width:38px;height:38px;min-width:38px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--blue)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .cal-header-cell{text-align:center;font-size:11px;color:var(--muted);padding:4px}
@@ -112,7 +112,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 .drink-section-title{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text);padding-bottom:6px;border-bottom:1px solid var(--border)}
 .drink-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9}
 .drink-item:last-child{border-bottom:none}
-.drink-name{flex:1;font-size:13px;word-break:break-word}
+.drink-name{flex:1;font-size:13px}
 .drink-controls{display:flex;align-items:center;gap:6px}
 .drink-controls button{padding:3px 9px;font-size:14px;font-weight:600}
 .drink-controls input{width:55px;text-align:center;padding:4px}
@@ -135,214 +135,48 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 
 
 /* MOBILE OPTIMIZATION */
-.mobile-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.mobile-scroll::-webkit-scrollbar{display:none}
-.sidebar{position:relative;z-index:20}
-.main{padding-bottom:max(24px,env(safe-area-inset-bottom))}
-button,input,select,textarea{touch-action:manipulation}
-.card{overflow:hidden}
-table{width:100%}
-.modal{overscroll-behavior:contain}
-.page-header > *{min-width:0}
-.event-title-text,.event-sub,.drink-name,.card-title{word-break:break-word}
-.action-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.einkauf-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -2px}
-.einkauf-table-wrap table{min-width:760px}
-
+.mobile-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 @media (max-width: 900px){
-  html,body{height:100%}
-  body{font-size:14px;-webkit-text-size-adjust:100%}
+  body{font-size:13px}
   .app{flex-direction:column;min-height:100dvh}
-  .sidebar{
-    width:100%;min-width:100%;
-    position:sticky;top:0;
-    border-right:none;border-bottom:1px solid var(--border);
-    padding:0;
-    display:block;
-    overflow-x:auto;white-space:nowrap;
-    background:rgba(255,255,255,.96);
-    backdrop-filter:saturate(180%) blur(10px);
-    box-shadow:0 4px 16px rgba(15,23,42,.06)
-  }
-  .sidebar-logo{
-    position:sticky;left:0;display:inline-flex;align-items:center;
-    padding:12px 14px 10px;
-    border-bottom:none;margin-bottom:0;
-    background:linear-gradient(90deg,#fff 85%,rgba(255,255,255,0));
-    z-index:2
-  }
-  .nav-item{
-    display:inline-flex;align-items:center;justify-content:center;
-    min-height:44px;
-    border-left:none;border-bottom:3px solid transparent;
-    padding:12px 14px;
-    font-size:13px;
-    color:var(--muted)
-  }
-  .nav-item.active{
-    border-left-color:transparent;border-bottom-color:var(--blue);
-    background:transparent;
-    color:var(--blue)
-  }
+  .sidebar{width:100%;min-width:100%;border-right:none;border-bottom:1px solid var(--border);padding:8px 0;display:block;overflow-x:auto;white-space:nowrap}
+  .sidebar-logo{padding:0 12px 8px;border-bottom:none;margin-bottom:0;display:block}
+  .nav-item{display:inline-flex;border-left:none;border-bottom:3px solid transparent;padding:10px 12px;font-size:13px}
+  .nav-item.active{border-left-color:transparent;border-bottom-color:var(--blue)}
   .live-badge{display:none}
-  .main{padding:12px 12px max(18px,env(safe-area-inset-bottom))}
+  .main{padding:12px}
   .page{gap:12px}
   .page-header{flex-direction:column;align-items:stretch;gap:10px}
-  .page-header button,.page-header .btn-primary,.page-header .btn-danger,.page-header .btn-green{width:100%}
-  .page-title{font-size:18px;line-height:1.2}
-  .card{padding:14px;border-radius:14px}
+  .page-title{font-size:18px}
+  .card{padding:14px}
   .metrics{grid-template-columns:1fr}
-  .metric{padding:14px 14px}
-  .metric-value{font-size:22px}
   .form-grid{grid-template-columns:1fr}
   .pizza-grid{grid-template-columns:1fr}
-  .event-item,.contact-item{flex-wrap:wrap;}
-    padding:12px;gap:10px;align-items:flex-start;
-    border-radius:12px
-  }
-  .event-date{min-width:40px}
+  .event-item,.contact-item{padding:10px;gap:10px}
+  .event-date{min-width:38px}
   .event-day{font-size:20px}
   .toolbar{flex-direction:column;align-items:stretch}
-  .toolbar > *{width:100%}
   .search-input{max-width:none;width:100%}
-  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;width:100%}
+  table{display:block;overflow-x:auto;white-space:nowrap;width:100%}
   thead,tbody,tfoot,tr{white-space:nowrap}
   .cal-grid{gap:3px}
-  .cal-day{min-height:62px;padding:5px 4px;font-size:11px}
-  .cal-event-tag{font-size:9px;line-height:1.15}
-  .modal{
-    width:100vw;max-width:100vw;
-    max-height:100dvh;height:100dvh;
-    border-radius:0;padding:16px 14px calc(16px + env(safe-area-inset-bottom));
-    margin:0
-  }
-  .modal-title{font-size:16px;line-height:1.25}
-  .modal-footer{
-    position:sticky;bottom:0;left:0;right:0;
-    background:linear-gradient(180deg,rgba(255,255,255,.92),#fff 30%);
-    margin-left:-14px;margin-right:-14px;
-    padding:12px 14px calc(10px + env(safe-area-inset-bottom));
-    gap:8px;
-    display:grid;
-    grid-template-columns:1fr
-  }
-  .modal-footer button{width:100%;min-height:44px}
+  .cal-day{min-height:58px;padding:4px 5px;font-size:11px}
+  .cal-event-tag{font-size:9px}
+  .modal{width:100vw;max-width:100vw;max-height:100dvh;height:100dvh;border-radius:0;padding:16px}
+  .modal-title{font-size:16px}
+  .modal-footer{position:sticky;bottom:0;background:var(--card);padding-bottom:calc(8px + env(safe-area-inset-bottom))}
   input,select,textarea,button{font-size:16px}
-  input,select,textarea{min-height:44px}
-  textarea{min-height:96px}
   .result-bar{font-size:12px;padding:10px 12px}
-  .drink-item{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:6px;align-items:start;
-    padding:10px 0
-  }
-  .drink-controls{justify-content:flex-start;flex-wrap:wrap}
-  .drink-price,.drink-total{min-width:0;text-align:left}
-  .avatar{width:34px;height:34px;min-width:34px}
-  .toast-wrap{
-    right:12px;left:12px;bottom:max(12px,env(safe-area-inset-bottom))
-  }
-  .toast{width:100%}
+  .drink-item{display:grid;grid-template-columns:1fr;gap:6px;align-items:start}
+  .drink-controls{justify-content:flex-start}
 }
-
-@media (max-width: 640px){
-  .main{padding:10px 10px max(16px,env(safe-area-inset-bottom))}
+@media (max-width: 520px){
+  .main{padding:10px}
   .card{padding:12px}
   .card-title{margin-bottom:10px}
+  .pizza-qty input,.drink-controls input{width:64px}
+  .action-row{flex-wrap:wrap}
   .inline-badges{gap:4px}
-  .pizza-qty input,.drink-controls input{width:68px}
-  .event-item,.contact-item{flex-wrap:wrap;}padding:10px}
-  .result-row{gap:10px;align-items:flex-start}
-  .result-row span:last-child{text-align:right}
-}
-
-@media (max-width: 480px){
-  .sidebar-logo{padding:11px 12px 9px;font-size:14px}
-  .nav-item{padding:11px 12px;font-size:12px}
-  .page-title{font-size:17px}
-  .metric-value{font-size:20px}
-  .cal-day{min-height:56px}
-  .modal{padding:14px 12px calc(14px + env(safe-area-inset-bottom))}
-  .modal-footer{margin-left:-12px;margin-right:-12px;padding:12px 12px calc(10px + env(safe-area-inset-bottom))}
-}
-
-
-@media (max-width:900px){
-  .contact-actions{
-    width:100%;
-    display:flex;
-    gap:8px;
-    margin-top:8px;
-  }
-  .contact-actions button{
-    flex:1;
-    min-height:40px;
-  }
-}
-
-
-html,body{
-  max-width:100%;
-  overflow-x:hidden;
-}
-.app,.main,.page,.card{
-  max-width:100%;
-}
-img,table,input,select,textarea,button{
-  max-width:100%;
-}
-@media (max-width:900px){
-  body,.app,.main{
-    overflow-x:hidden;
-  }
-  .sidebar{
-    overflow-x:auto;
-    overflow-y:hidden;
-  }
-  .mobile-scroll,
-  .einkauf-table-wrap,
-  table{
-    overflow-x:auto;
-  }
-  .page-header,
-  .event-item,
-  .contact-item,
-  .toolbar,
-  .form-grid,
-  .metrics{
-    min-width:0;
-  }
-}
-
-
-.brand-logo{display:flex;align-items:center;justify-content:center;width:100%}
-.brand-svg{width:52px;height:52px;display:block}
-.mobile-bottom-nav{display:none}
-.metric-value{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.assignment-badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;background:#f1f5f9;color:#334155;font-size:11px;font-weight:600}
-.sale-card{border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
-.sale-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.compact-muted{font-size:12px;color:var(--muted)}
-@media (max-width:900px){
-  .brand-svg{width:40px;height:40px}
-  .mobile-bottom-nav{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    position:fixed;left:0;right:0;bottom:0;z-index:40;
-    background:rgba(255,255,255,.97);
-    border-top:1px solid var(--border);
-    padding:8px 8px calc(8px + env(safe-area-inset-bottom));
-    gap:6px;
-    backdrop-filter:saturate(180%) blur(10px)
-  }
-  .mobile-nav-btn{
-    min-height:44px;
-    padding:8px 6px;
-    font-size:12px;
-    border-radius:10px
-  }
-  .main{padding-bottom:calc(82px + env(safe-area-inset-bottom)) !important}
 }
 
 </style>
@@ -350,27 +184,14 @@ img,table,input,select,textarea,button{
 <body>
 <div class="app">
 <div class="sidebar mobile-scroll">
-  <div class="sidebar-logo">
-  <div class="brand-logo" aria-label="Heitmanns Pizza Logo">
-    <svg viewBox="0 0 120 120" class="brand-svg" role="img" aria-hidden="true">
-      <defs>
-        <linearGradient id="hpgrad" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stop-color="#2563eb"/>
-          <stop offset="100%" stop-color="#1d4ed8"/>
-        </linearGradient>
-      </defs>
-      <rect x="8" y="8" width="104" height="104" rx="28" fill="url(#hpgrad)"/>
-      <path d="M34 34h14v20h24V34h14v52H72V67H48v19H34z" fill="#fff"/>
-    </svg>
-  </div>
-</div>
+  <div class="sidebar-logo">Gastro Manager</div>
   <div class="nav-item active" onclick="showPage('dashboard',this)">Dashboard</div>
   <div class="nav-item" onclick="showPage('kalender',this)">Kalender</div>
   <div class="nav-item" onclick="showPage('events',this)">Events</div>
   <div class="nav-item" onclick="showPage('catering',this)">Catering</div>
   <div class="nav-item" onclick="showPage('pizza',this)">Pizza-Kalk.</div>
   <div class="nav-item" onclick="showPage('dips',this)">Dips</div>
-  <div class="nav-item" onclick="showPage('verkaeufe',this)">Verkäufe</div>
+  
   <div class="nav-item" onclick="showPage('einkauf',this)">Einkaufsliste</div>
   <div class="nav-item" onclick="showPage('kontakte',this)">Kontakte</div>
   <div class="live-badge"><span class="live-dot"></span>Live für alle</div>
@@ -388,16 +209,11 @@ img,table,input,select,textarea,button{
     <div class="metric" onclick="navTo('events')"><div class="metric-label">Events diesen Monat</div><div class="metric-value" id="m-events">0</div></div>
     <div class="metric" onclick="navTo('catering')"><div class="metric-label">Catering-Angebote</div><div class="metric-value" id="m-angebote">0</div></div>
     <div class="metric" onclick="navTo('kontakte')"><div class="metric-label">Kontakte</div><div class="metric-value" id="m-kontakte">0</div></div>
-    <div class="metric" onclick="navTo('verkaeufe')"><div class="metric-label">Umsatz gesamt</div><div class="metric-value" id="m-umsatz">0 €</div></div>
-    <div class="metric" onclick="navTo('verkaeufe')"><div class="metric-label">Rohertrag</div><div class="metric-value" id="m-gewinn">0 €</div></div>
+    
   </div>
   <div class="card">
     <div class="card-title">Nächste Events</div>
     <div class="event-list" id="dash-events"></div>
-  </div>
-  <div class="card">
-    <div class="card-title">Performance</div>
-    <div id="dashboard-performance" class="event-list"></div>
   </div>
   <div class="card">
     <div class="card-title">Pinnwand – Notizen für alle</div>
@@ -602,31 +418,12 @@ img,table,input,select,textarea,button{
   </div>
 </div>
 
-
-<!-- VERKÄUFE -->
-<div class="page" id="page-verkaeufe">
-  <div class="page-header">
-    <div class="page-title">Öffentliche Verkäufe</div>
-    <button class="btn-primary" onclick="openSaleModal()">+ Verkauf</button>
-  </div>
-  <div class="card">
-    <div class="toolbar" style="margin-bottom:12px">
-      <input class="search-input" id="sales-search" placeholder="Verkäufe suchen..." oninput="renderSales()">
-    </div>
-    <div id="sales-list"></div>
-  </div>
-</div>
-
 <!-- EINKAUFSLISTE -->
 <div class="page" id="page-einkauf">
   <div class="page-header">
     <div class="page-title">Einkaufsliste</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <div style="display:flex;gap:8px">
       <button onclick="copyEinkaufTable()">📋 Kopieren</button>
-      <button onclick="exportSupplier('A')">A</button>
-      <button onclick="exportSupplier('B')">B</button>
-      <button onclick="exportSupplier('M')">M</button>
-      <button onclick="exportSupplier('E')">E</button>
       <button class="btn-primary" onclick="openEinkaufModal()">+ Position</button>
     </div>
   </div>
@@ -643,13 +440,6 @@ img,table,input,select,textarea,button{
 </div>
 
 </div><!-- /main -->
-<div class="mobile-bottom-nav">
-  <button class="mobile-nav-btn" onclick="navTo('dashboard')">Home</button>
-  <button class="mobile-nav-btn" onclick="navTo('events')">Events</button>
-  <button class="mobile-nav-btn" onclick="navTo('catering')">Catering</button>
-  <button class="mobile-nav-btn" onclick="navTo('verkaeufe')">Verkäufe</button>
-  <button class="mobile-nav-btn" onclick="navTo('einkauf')">Einkauf</button>
-</div>
 </div><!-- /app -->
 
 <!-- EVENT MODAL -->
@@ -717,42 +507,10 @@ img,table,input,select,textarea,button{
     <div class="form-group"><label>Menge</label><input type="number" id="ek-menge" value="1" step="0.01"/></div>
     <div class="form-group"><label>Einheit</label><select id="ek-einheit"><option>kg</option><option>g</option><option>L</option><option>ml</option><option>Stk</option><option>Pkg</option><option>Kiste</option></select></div>
     <div class="form-group"><label>Preis pro Einheit €</label><input type="number" id="ek-preis" value="0" step="0.01"/></div>
-    <div class="form-group"><label>Zuordnung</label>
-      <select id="ek-zuordnung-typ" onchange="updateAssignmentReferenceOptions('einkauf')">
-        <option value="none">Keine</option>
-        <option value="event">Event</option>
-        <option value="catering">Catering-Angebot</option>
-        <option value="sale">Öffentlicher Verkauf</option>
-      </select>
-    </div>
-    <div class="form-group"><label>Referenz</label><select id="ek-zuordnung-ref"></select></div>
-    <div class="form-group"><label>Packungsgröße</label><input id="ek-packung-groesse" readonly placeholder="automatisch"/></div>
-    <div class="form-group"><label>Benötigte Packungen</label><input id="ek-packungen" readonly placeholder="automatisch"/></div>
   </div>
   <div class="modal-footer">
     <button onclick="closeModal('einkauf-modal')">Abbrechen</button>
     <button class="btn-primary" onclick="saveEinkauf()">Hinzufügen</button>
-  </div>
-</div>
-</div>
-
-
-<!-- VERKAUF MODAL -->
-<div class="modal-overlay" id="sale-modal">
-<div class="modal">
-  <div class="modal-title" id="sale-modal-title">Neuer Verkauf</div>
-  <div class="form-grid">
-    <div class="form-group"><label>Name</label><input id="sale-name" placeholder="z. B. Stadtfest / freier Verkauf"/></div>
-    <div class="form-group"><label>Datum</label><input type="date" id="sale-date"/></div>
-    <div class="form-group"><label>Umsatz brutto €</label><input type="number" id="sale-revenue" value="0" step="0.01"/></div>
-    <div class="form-group"><label>Gewinn manuell € (optional)</label><input type="number" id="sale-profit-manual" value="" step="0.01" placeholder="optional"/></div>
-    <div class="form-group"><label>Zugeordnetes Event (optional)</label><select id="sale-event-ref"></select></div>
-    <div class="form-group"><label>Zugeordnetes Catering (optional)</label><select id="sale-catering-ref"></select></div>
-  </div>
-  <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="sale-notes" style="min-height:70px"></textarea></div>
-  <div class="modal-footer">
-    <button onclick="closeModal('sale-modal')">Abbrechen</button>
-    <button class="btn-primary" onclick="saveSale()">Speichern</button>
   </div>
 </div>
 </div>
@@ -771,7 +529,7 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
 // ── STATE ─────────────────────────────────────────────────────────────────
-let state={events:[],kontakte:[],einkauf:[],cateringAngebote:[],sales:[],pinnwand:'',notes:{pizza:[],dip:[],drink:[],catpizza:[],catmisc:[]},calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),editEventId:null,editKontaktId:null,editEinkaufId:null,editCateringAngebotId:null,editSaleId:null};
+let state={events:[],kontakte:[],einkauf:[],cateringAngebote:[],pinnwand:'',notes:{pizza:[],dip:[],drink:[],catpizza:[],catmisc:[]},calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),editEventId:null,editKontaktId:null,editEinkaufId:null,editCateringAngebotId:null};
 let pizzaMengen={};
 let dipMengen={aioli:0,hothoney:0};
 let drinkMengen={};
@@ -929,7 +687,6 @@ function listenAll(){
     state.kontakte=(d.kontakte||[]).map(normalizeKontakt);
     state.einkauf=(d.einkauf||[]).map(normalizeEinkaufItem);
     state.cateringAngebote=d.cateringAngebote||[];
-    state.sales=d.sales||[];
     state.pinnwand=d.pinnwand||'';
     state.notes=Object.assign({pizza:[],dip:[],drink:[],catpizza:[],catmisc:[]},d.notes||{});
     if(d.pizzaMengen) Object.assign(pizzaMengen,d.pizzaMengen);
@@ -950,7 +707,7 @@ function normalizeEvent(ev){
   });
 }
 function normalizeKontakt(k){ return Object.assign({firma:'',tel:'',email:'',adresse:'',typ:'Kunde',notizen:''},k); }
-function normalizeEinkaufItem(e){ return Object.assign({kategorie:'Sonstiges',menge:0,einheit:'Stk',preis:0,artikelnummer:'',lieferant:randomLieferantCode(),zuordnungTyp:'none',zuordnungRef:'',zuordnungName:''},e); }
+function normalizeEinkaufItem(e){ return Object.assign({kategorie:'Sonstiges',menge:0,einheit:'Stk',preis:0,artikelnummer:'',lieferant:randomLieferantCode()},e); }
 
 
 function getKontaktById(id){return state.kontakte.find(k=>k.id===id);}
@@ -1011,7 +768,6 @@ function renderAll(){
   renderAllEvents();
   renderKontakte();
   renderEinkauf();
-  renderSales();
   renderCateringAngebote();
   renderPizzaGrid();
   renderPizzaResult();
@@ -1037,17 +793,11 @@ function showPage(id,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const target=document.getElementById('page-'+id);
   if(target) target.classList.add('active');
-  if(el){
-    el.classList.add('active');
-    try{ el.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); }catch(_){}
-  }
+  if(el) el.classList.add('active');
   if(id==='kontakte') renderKontakte();
   if(id==='einkauf') renderEinkauf();
   if(id==='events') renderAllEvents();
-  if(id==='verkaeufe') renderSales();
   if(id==='kalender') renderCalendar();
-  const main=document.querySelector('.main');
-  if(window.innerWidth<=900 && main){ main.scrollTo({top:0, behavior:'smooth'}); }
 }
 function navTo(id){
   const navItem=document.querySelector(`.nav-item[onclick="showPage('${id}',this)"]`);
@@ -1080,129 +830,16 @@ function copyText(t,msg){navigator.clipboard.writeText(t).then(()=>showToast(msg
 function randomLieferantCode(){ const arr=['A','B','M','E']; return arr[Math.floor(Math.random()*arr.length)]; }
 function lieferantName(code){ return LIEFERANTEN[code]||code||'–'; }
 
-const PACKUNGSGROESSEN={
-  "Mehl (Farina Pizzeria Caputo)":{groesse:10,einheit:"kg"},
-  "Mozzarella":{groesse:2,einheit:"kg"},
-  "Fior di Latte":{groesse:2,einheit:"kg"},
-  "Parmesan":{groesse:1,einheit:"kg"},
-  "Tomatensauce":{groesse:10,einheit:"kg"},
-  "Tomatensoße":{groesse:10,einheit:"kg"},
-  "Polpa":{groesse:3,einheit:"kg"},
-  "Pelati":{groesse:3,einheit:"kg"},
-  "Zucker":{groesse:1,einheit:"kg"},
-  "Salz":{groesse:1,einheit:"kg"},
-  "Hefe":{groesse:0.5,einheit:"kg"},
-  "Rucola":{groesse:0.5,einheit:"kg"},
-  "Burrata":{groesse:1,einheit:"kg"},
-  "Prosciutto Crudo":{groesse:0.5,einheit:"kg"},
-  "Salami":{groesse:1,einheit:"kg"},
-  "Aioli":{groesse:1,einheit:"kg"},
-  "Hot Honey":{groesse:1,einheit:"kg"}
-};
-function parseCurrencyValue(v){
-  if(v===null||v===undefined) return 0;
-  return Number(String(v).replace(/\./g,'').replace(',', '.').replace(/[^0-9.-]/g,''))||0;
-}
-function getPackInfo(item){
-  const key=item.artikel||item.name||'';
-  const p=PACKUNGSGROESSEN[key];
-  if(!p) return null;
-  let qty=Number(item.menge||0);
-  let unit=(item.einheit||'').toLowerCase();
-  if(unit==='g') qty=qty/1000;
-  if(unit==='ml') qty=qty/1000;
-  const packQty = Math.ceil((qty||0)/(p.groesse||1));
-  return {...p, packungen: packQty||0};
-}
-function getAssignmentLabel(item){
-  if(!item.zuordnungTyp || item.zuordnungTyp==='none') return '';
-  const map={event:'Event',catering:'Catering',sale:'Verkauf'};
-  return `${map[item.zuordnungTyp]||item.zuordnungTyp}: ${item.zuordnungName||'–'}`;
-}
-function getEventRevenue(ev){
-  let revenue=parseCurrencyValue(ev.angebot);
-  if(!revenue && ev.cateringAngebotId){
-    const a=state.cateringAngebote.find(x=>x.id===ev.cateringAngebotId);
-    if(a) revenue=parseCurrencyValue(a.bruttoGesamt);
-  }
-  return revenue;
-}
-function getContextCostSum(type, id){
-  return state.einkauf
-    .filter(x=>x.zuordnungTyp===type && x.zuordnungRef===id)
-    .reduce((s,x)=>s + Number(x.menge||0)*Number(x.preis||0), 0);
-}
-function updateAssignmentReferenceOptions(mode='einkauf'){
-  if(mode==='einkauf'){
-    const typ=document.getElementById('ek-zuordnung-typ')?.value || 'none';
-    const ref=document.getElementById('ek-zuordnung-ref');
-    if(!ref) return;
-    let options='<option value="">— Keine Referenz —</option>';
-    if(typ==='event'){
-      options += state.events.map(e=>`<option value="${e.id}">${e.title}${e.date?' · '+e.date:''}</option>`).join('');
-    } else if(typ==='catering'){
-      options += state.cateringAngebote.map(a=>`<option value="${a.id}">${a.name||'Angebot'}${a.datum?' · '+a.datum:''}</option>`).join('');
-    } else if(typ==='sale'){
-      options += state.sales.map(s=>`<option value="${s.id}">${s.name}${s.date?' · '+s.date:''}</option>`).join('');
-    }
-    ref.innerHTML=options;
-  }
-}
-function resolveAssignmentName(typ, ref){
-  if(!typ || typ==='none' || !ref) return '';
-  if(typ==='event') return state.events.find(x=>x.id===ref)?.title || '';
-  if(typ==='catering') return state.cateringAngebote.find(x=>x.id===ref)?.name || '';
-  if(typ==='sale') return state.sales.find(x=>x.id===ref)?.name || '';
-  return '';
-}
-
-
 // ── DASHBOARD ─────────────────────────────────────────────────────────────
 function updateDashboard(){
   const now=new Date();
   const tm=state.events.filter(e=>e.date&&new Date(e.date).getMonth()===now.getMonth()&&new Date(e.date).getFullYear()===now.getFullYear());
-  const eventRevenue = state.events.reduce((s,e)=>s+getEventRevenue(e),0);
-  const salesRevenue = state.sales.reduce((s,x)=>s+parseCurrencyValue(x.revenue),0);
-  const shoppingCost = state.einkauf.reduce((s,x)=>s + Number(x.menge||0)*Number(x.preis||0),0);
-  const totalRevenue = eventRevenue + salesRevenue;
-  const grossProfit = totalRevenue - shoppingCost;
-
   document.getElementById('m-events').textContent=tm.length;
   document.getElementById('m-angebote').textContent=state.cateringAngebote.length;
   document.getElementById('m-kontakte').textContent=state.kontakte.length;
-  document.getElementById('m-umsatz').textContent=fmt(totalRevenue);
-  document.getElementById('m-gewinn').textContent=fmt(grossProfit);
-
   const upcoming=[...state.events].filter(e=>e.date>=now.toISOString().slice(0,10)).sort((a,b)=>a.date>b.date?1:-1).slice(0,3);
   const el=document.getElementById('dash-events');
   el.innerHTML=upcoming.length?upcoming.map(ev=>eventItemHTML(ev)).join(''):'<div style="color:var(--muted);font-size:13px">Keine bevorstehenden Events.</div>';
-
-  const perf=document.getElementById('dashboard-performance');
-  const bestEvents=[...state.events].map(ev=>{
-    const rev=getEventRevenue(ev);
-    const cost=getContextCostSum('event', ev.id);
-    return {...ev, rev, cost, gain: rev-cost};
-  }).sort((a,b)=>b.gain-a.gain).slice(0,3);
-
-  const bestSales=[...state.sales].map(s=>{
-    const rev=parseCurrencyValue(s.revenue);
-    const cost=getContextCostSum('sale', s.id);
-    const gain=(s.profitManual!=='' && s.profitManual!==null && s.profitManual!==undefined) ? Number(s.profitManual||0) : (rev-cost);
-    return {...s, gain};
-  }).sort((a,b)=>b.gain-a.gain).slice(0,2);
-
-  let perfHtml = `
-    <div class="sale-card">
-      <div class="sale-top"><strong>Umsatzstruktur</strong><span class="assignment-badge">Live</span></div>
-      <div class="compact-muted">Events: ${fmt(eventRevenue)} · Öffentliche Verkäufe: ${fmt(salesRevenue)} · Einkauf: ${fmt(shoppingCost)}</div>
-    </div>`;
-  if(bestEvents.length){
-    perfHtml += bestEvents.map(ev=>`<div class="sale-card"><div class="sale-top"><strong>${ev.title}</strong><span class="assignment-badge">${fmt(ev.gain)}</span></div><div class="compact-muted">Umsatz ${fmt(ev.rev)} · Einkauf ${fmt(ev.cost)}</div></div>`).join('');
-  }
-  if(bestSales.length){
-    perfHtml += bestSales.map(s=>`<div class="sale-card"><div class="sale-top"><strong>${s.name}</strong><span class="assignment-badge">${fmt(s.gain)}</span></div><div class="compact-muted">Öffentlicher Verkauf${s.date?' · '+s.date:''}</div></div>`).join('');
-  }
-  if(perf) perf.innerHTML = perfHtml;
 }
 function savePin(){state.pinnwand=document.getElementById('pinnwand').value;push('pinnwand',state.pinnwand);}
 
@@ -1285,7 +922,7 @@ function showEventDetail(id){
       <tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td>${kontaktLink}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0">Catering-Angebot</td><td>${angebotLink}</td></tr>
-      <tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${getEventRevenue(ev)?fmt(getEventRevenue(ev)):'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Einkauf zugeordnet</td><td>${fmt(getContextCostSum('event', ev.id))}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Rohertrag</td><td>${fmt(getEventRevenue(ev)-getContextCostSum('event', ev.id))}</td></tr>
+      <tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${ev.angebot?fmt(ev.angebot):'–'}</td></tr>
     </table>
     ${ev.notizen?`<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px">${ev.notizen.replace(/\n/g,'<br>')}</div>`:''}
     <div class="modal-footer">
@@ -1463,7 +1100,7 @@ function copyDipList(){
 
 // ── GETRÄNKE ──────────────────────────────────────────────────────────────
 function renderDrinksGrid(){
-  const el=document.getElementById('drinks-grid'); if(!el) return;
+  const el=document.getElementById('drinks-grid');
   let html='';
   Object.entries(DRINK_DATEN).forEach(([grp,items])=>{
     html+=`<div class="drink-section"><div class="drink-section-title">${grp}</div>`;
@@ -1496,10 +1133,10 @@ function updateDrinkTotal(){
   Object.entries(DRINK_DATEN).forEach(([grp,items])=>{
     items.forEach(item=>{const key=grp+'_'+item.name;const qty=drinkMengen[key]||0;if(qty)total+=qty*(item.preisProFlasche||item.preisProKiste||0);});
   });
-  const dt=document.getElementById('drinks-total-cost'); if(dt) dt.textContent=fmt(total);
+  document.getElementById('drinks-total-cost').textContent=fmt(total);
 }
 function renderDrinksResult(){
-  const el=document.getElementById('drinks-result'); if(!el) return;
+  const el=document.getElementById('drinks-result');
   const aktiv=[];
   Object.entries(DRINK_DATEN).forEach(([grp,items])=>{
     items.forEach(item=>{const key=grp+'_'+item.name;const qty=drinkMengen[key]||0;if(qty>0)aktiv.push({grp,item,qty});});
@@ -1742,12 +1379,6 @@ function openEinkaufModal(id){
   document.getElementById('ek-menge').value=item?.menge ?? 1;
   document.getElementById('ek-einheit').value=item?.einheit||'kg';
   document.getElementById('ek-preis').value=item?.preis ?? 0;
-  document.getElementById('ek-zuordnung-typ').value=item?.zuordnungTyp||'none';
-  updateAssignmentReferenceOptions('einkauf');
-  document.getElementById('ek-zuordnung-ref').value=item?.zuordnungRef||'';
-  const pack = getPackInfo(item||{artikel:document.getElementById('ek-artikel').value,menge:document.getElementById('ek-menge').value,einheit:document.getElementById('ek-einheit').value});
-  document.getElementById('ek-packung-groesse').value=pack?`${pack.groesse} ${pack.einheit}`:'–';
-  document.getElementById('ek-packungen').value=pack?String(pack.packungen):'–';
   openModal('einkauf-modal');
 }
 function saveEinkauf(){
@@ -1759,12 +1390,8 @@ function saveEinkauf(){
     kategorie:document.getElementById('ek-kat').value,
     menge:parseFloat(document.getElementById('ek-menge').value)||0,
     einheit:document.getElementById('ek-einheit').value,
-    preis:parseFloat(document.getElementById('ek-preis').value)||0,
-    zuordnungTyp:document.getElementById('ek-zuordnung-typ').value||'none',
-    zuordnungRef:document.getElementById('ek-zuordnung-ref').value||'',
-    zuordnungName:''
+    preis:parseFloat(document.getElementById('ek-preis').value)||0
   };
-  item.zuordnungName = resolveAssignmentName(item.zuordnungTyp, item.zuordnungRef);
   if(state.editEinkaufId){
     const i=state.einkauf.findIndex(e=>e.id===state.editEinkaufId);
     if(i>=0) state.einkauf[i]=item;
@@ -1798,24 +1425,22 @@ function renderEinkauf(){
     });
     if(!items.length) return;
     let supplierTotal=0;
-    html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><div class="einkauf-table-wrap"><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Packung</th><th>Zuordnung</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
+    html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
     items.forEach(e=>{
       const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
-      const pack=getPackInfo(e);
-      html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge} ${e.einheit}</td><td>${pack?`${pack.packungen} × ${pack.groesse} ${pack.einheit}`:'–'}</td><td>${getAssignmentLabel(e)||'–'}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
+      html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
     });
-    html+=`</tbody><tfoot><tr class="total-row"><td colspan="7" style="text-align:right">Summe ${lieferantName(code)}:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div></div>`;
+    html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe ${lieferantName(code)}:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
   });
   const unknownItems=filtered.filter(e=>!supplierCodes.includes(e.lieferant||'')).sort((a,b)=>(a.artikel||'').localeCompare(b.artikel||''));
   if(unknownItems.length){
     let supplierTotal=0;
-    html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant – Unbekannt</div><div class="einkauf-table-wrap"><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Packung</th><th>Zuordnung</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
+    html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant – Unbekannt</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
     unknownItems.forEach(e=>{
       const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
-      const pack=getPackInfo(e);
-      html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge} ${e.einheit}</td><td>${pack?`${pack.packungen} × ${pack.groesse} ${pack.einheit}`:'–'}</td><td>${getAssignmentLabel(e)||'–'}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
+      html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
     });
-    html+=`</tbody><tfoot><tr class="total-row"><td colspan="7" style="text-align:right">Summe Unbekannt:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div></div>`;
+    html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe Unbekannt:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
   }
   html+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;background:var(--blue-light)"><span style="font-weight:600;font-size:15px">Gesamtsumme</span><span style="font-weight:700;font-size:18px;color:var(--blue)">${fmt(gesamtTotal)}</span></div>`;
   container.innerHTML=html;
@@ -1839,7 +1464,8 @@ LIEFERANT ${code} – ${lieferantName(code).toUpperCase()}
       return (a.artikel||'').localeCompare(b.artikel||'');
     }).forEach(e=>{
       const s=e.menge*(e.preis||0);
-      const pack=getPackInfo(e); text+=`${e.artikel}${e.artikelnummer?` [Art.-Nr.: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${pack?` (${pack.packungen}x ${pack.groesse} ${pack.einheit})`:''}${getAssignmentLabel(e)?` – ${getAssignmentLabel(e)}`:''}${s>0?' – '+fmt(s):''}\n`;
+      text+=`${e.artikel}${e.artikelnummer?` [Art.-Nr.: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${s>0?' – '+fmt(s):''}
+`;
     });
   });
   const unknownItems=state.einkauf.filter(e=>!supplierCodes.includes(e.lieferant||'') && (!q || [e.artikel,e.artikelnummer,e.kategorie,e.einheit].filter(Boolean).join(' ').toLowerCase().includes(q)));
@@ -1849,94 +1475,11 @@ LIEFERANT UNBEKANNT
 `;
     unknownItems.sort((a,b)=>(a.artikel||'').localeCompare(b.artikel||'')).forEach(e=>{
       const s=e.menge*(e.preis||0);
-      const pack=getPackInfo(e); text+=`${e.artikel}${e.artikelnummer?` [Art.-Nr.: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${pack?` (${pack.packungen}x ${pack.groesse} ${pack.einheit})`:''}${getAssignmentLabel(e)?` – ${getAssignmentLabel(e)}`:''}${s>0?' – '+fmt(s):''}\n`;
+      text+=`${e.artikel}${e.artikelnummer?` [Art.-Nr.: ${e.artikelnummer}]`:''} – ${e.kategorie}: ${e.menge} ${e.einheit}${s>0?' – '+fmt(s):''}
+`;
     });
   }
   copyText(text,'Einkaufsliste kopiert!');
-}
-
-
-function exportSupplier(code){
-  const items=state.einkauf.filter(e=>(e.lieferant||'')===code);
-  if(!items.length){ showToast('Keine Positionen für '+code); return; }
-  let text=`LIEFERANT ${code} – ${lieferantName(code).toUpperCase()}\n${'='.repeat(30)}\n\n`;
-  items.forEach(e=>{
-    const s=Number(e.menge||0)*Number(e.preis||0);
-    const pack=getPackInfo(e);
-    text += `${e.artikel}${e.artikelnummer?` [Art.-Nr.: ${e.artikelnummer}]`:''} – ${e.menge} ${e.einheit}${pack?` (${pack.packungen}x ${pack.groesse} ${pack.einheit})`:''}${getAssignmentLabel(e)?` – ${getAssignmentLabel(e)}`:''}${s?` – ${fmt(s)}`:''}\n`;
-  });
-  copyText(text, `Lieferant ${code} kopiert`);
-}
-
-// ── VERKÄUFE ─────────────────────────────────────────────────────────────
-function openSaleModal(id){
-  state.editSaleId=id||null;
-  const s=id?state.sales.find(x=>x.id===id):null;
-  document.getElementById('sale-modal-title').textContent=s?'Verkauf bearbeiten':'Neuer Verkauf';
-  document.getElementById('sale-name').value=s?.name||'';
-  document.getElementById('sale-date').value=s?.date||new Date().toISOString().slice(0,10);
-  document.getElementById('sale-revenue').value=s?.revenue??0;
-  document.getElementById('sale-profit-manual').value=s?.profitManual??'';
-  populateEventSelect('sale-event-ref', s?.eventRef||'', false);
-  populateCateringAngebotSelect('sale-catering-ref', s?.cateringRef||'');
-  document.getElementById('sale-notes').value=s?.notes||'';
-  openModal('sale-modal');
-}
-function saveSale(){
-  const sale={
-    id:state.editSaleId||Date.now().toString(),
-    name:document.getElementById('sale-name').value||'Öffentlicher Verkauf',
-    date:document.getElementById('sale-date').value,
-    revenue:document.getElementById('sale-revenue').value,
-    profitManual:document.getElementById('sale-profit-manual').value,
-    eventRef:document.getElementById('sale-event-ref').value||'',
-    cateringRef:document.getElementById('sale-catering-ref').value||'',
-    notes:document.getElementById('sale-notes').value||''
-  };
-  if(state.editSaleId){
-    const i=state.sales.findIndex(x=>x.id===state.editSaleId);
-    if(i>=0) state.sales[i]=sale;
-  } else {
-    state.sales.push(sale);
-  }
-  push('sales', state.sales);
-  closeModal('sale-modal');
-  showToast(state.editSaleId?'Verkauf aktualisiert':'Verkauf gespeichert');
-}
-function deleteSale(id){
-  state.sales=state.sales.filter(x=>x.id!==id);
-  state.einkauf=state.einkauf.map(x=>x.zuordnungTyp==='sale' && x.zuordnungRef===id ? Object.assign({},x,{zuordnungTyp:'none',zuordnungRef:'',zuordnungName:''}) : x);
-  push('sales', state.sales);
-  push('einkauf', state.einkauf);
-  showToast('Verkauf gelöscht');
-}
-function renderSales(){
-  const el=document.getElementById('sales-list'); if(!el) return;
-  const q=(document.getElementById('sales-search')?.value||'').trim().toLowerCase();
-  const arr=state.sales.filter(s=>{
-    if(!q) return true;
-    return [s.name,s.date,s.notes].filter(Boolean).join(' ').toLowerCase().includes(q);
-  }).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-}
-
-  if(!arr.length){ el.innerHTML='<div style="color:var(--muted);font-size:13px">Noch keine Verkäufe.</div>'; return; }
-  el.innerHTML=arr.map(s=>{
-    const revenue=parseCurrencyValue(s.revenue);
-    const cost=getContextCostSum('sale', s.id);
-    const gain=(s.profitManual!=='' && s.profitManual!==null && s.profitManual!==undefined) ? Number(s.profitManual||0) : (revenue-cost);
-    const eventName=s.eventRef?state.events.find(x=>x.id===s.eventRef)?.title:'';
-    const cateringName=s.cateringRef?state.cateringAngebote.find(x=>x.id===s.cateringRef)?.name:'';
-    return `<div class="sale-card">
-      <div class="sale-top">
-        <div><strong>${s.name}</strong><div class="compact-muted">${s.date||''}</div></div>
-        <span class="assignment-badge">${fmt(gain)}</span>
-      </div>
-      <div class="compact-muted">Umsatz ${fmt(revenue)} · Einkauf ${fmt(cost)}${s.profitManual!==''&&s.profitManual!==null&&s.profitManual!==undefined?` · Manuell ${fmt(Number(s.profitManual||0))}`:''}</div>
-      <div class="compact-muted">${eventName?`Event: ${eventName}`:''}${eventName&&cateringName?' · ':''}${cateringName?`Catering: ${cateringName}`:''}</div>
-      ${s.notes?`<div class="compact-muted">${s.notes}</div>`:''}
-      <div class="action-row"><button class="btn-sm" onclick="openSaleModal('${s.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteSale('${s.id}')">×</button></div>
-    </div>`;
-  }).join('');
 }
 
 // ── KONTAKTE ─────────────────────────────────────────────────────────────
@@ -2014,17 +1557,6 @@ calcCatering();
 renderKontakte();
 renderEinkauf();
 listenAll();
-['ek-artikel','ek-menge','ek-einheit'].forEach(id=>{
-  const el=document.getElementById(id);
-  if(el) el.addEventListener('input', ()=>{
-    const probe={artikel:document.getElementById('ek-artikel').value,menge:document.getElementById('ek-menge').value,einheit:document.getElementById('ek-einheit').value};
-    const pack=getPackInfo(probe);
-    const pg=document.getElementById('ek-packung-groesse');
-    const pk=document.getElementById('ek-packungen');
-    if(pg) pg.value=pack?`${pack.groesse} ${pack.einheit}`:'–';
-    if(pk) pk.value=pack?String(pack.packungen):'–';
-  });
-});
 </script>
 
 <div style="display:none">
@@ -2302,24 +1834,22 @@ renderAll();
       });
       if(!items.length) return;
       let supplierTotal=0;
-      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><div class="einkauf-table-wrap"><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Packung</th><th>Zuordnung</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
+      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant ${code} – ${lieferantName(code)}</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
       items.forEach(e=>{
         const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
-        const pack=getPackInfo(e);
-      html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge} ${e.einheit}</td><td>${pack?`${pack.packungen} × ${pack.groesse} ${pack.einheit}`:'–'}</td><td>${getAssignmentLabel(e)||'–'}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
+        html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
       });
-      html+=`</tbody><tfoot><tr class="total-row"><td colspan="7" style="text-align:right">Summe ${lieferantName(code)}:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div></div>`;
+      html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe ${lieferantName(code)}:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
     });
     const unknownItems=filtered.filter(e=>!ALL_SUPPLIER_CODES.includes(e.lieferant||'')).sort((a,b)=>(a.artikel||'').localeCompare(b.artikel||''));
     if(unknownItems.length){
       let supplierTotal=0;
-      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant – Unbekannt</div><div class="einkauf-table-wrap"><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Packung</th><th>Zuordnung</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
+      html+=`<div class="card" style="margin-bottom:12px"><div class="card-title">Lieferant – Unbekannt</div><table><thead><tr><th>Artikel</th><th>Artikelnummer</th><th>Kategorie</th><th>Menge</th><th>Einheit</th><th>Preis/E</th><th>Gesamt</th><th></th></tr></thead><tbody>`;
       unknownItems.forEach(e=>{
         const s=Number(e.menge||0)*Number(e.preis||0); supplierTotal+=s; gesamtTotal+=s;
-        const pack=getPackInfo(e);
-      html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge} ${e.einheit}</td><td>${pack?`${pack.packungen} × ${pack.groesse} ${pack.einheit}`:'–'}</td><td>${getAssignmentLabel(e)||'–'}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
+        html+=`<tr><td>${e.artikel}</td><td>${e.artikelnummer||'–'}</td><td>${e.kategorie||'–'}</td><td>${e.menge}</td><td>${e.einheit}</td><td>${e.preis?fmt(e.preis):'–'}</td><td>${s>0?fmt(s):'–'}</td><td><div class="action-row"><button class="btn-sm" onclick="openEinkaufModal('${e.id}')">Bearbeiten</button><button class="btn-danger btn-sm" onclick="deleteEinkauf('${e.id}')">×</button></div></td></tr>`;
       });
-      html+=`</tbody><tfoot><tr class="total-row"><td colspan="7" style="text-align:right">Summe Unbekannt:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div></div>`;
+      html+=`</tbody><tfoot><tr class="total-row"><td colspan="6" style="text-align:right">Summe Unbekannt:</td><td>${supplierTotal>0?fmt(supplierTotal):'–'}</td><td></td></tr></tfoot></table></div>`;
     }
     html+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;background:var(--blue-light)"><span style="font-weight:600;font-size:15px">Gesamtsumme</span><span style="font-weight:700;font-size:18px;color:var(--blue)">${fmt(gesamtTotal)}</span></div>`;
     container.innerHTML=html;
