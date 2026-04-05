@@ -76,17 +76,33 @@ textarea{resize:vertical}
 .company-chip.hp{background:#dbeafe;color:#1d4ed8}
 .company-chip.hpc{background:#fef3c7;color:#b45309}
 .cal-event-tag{font-size:10px;color:var(--blue);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px; background: rgba(255,255,255,0.6); padding: 1px 3px; border-radius: 4px;}
+
+/* === NEUE MODAL STRUKTUR (FLEXBOX) === */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
 
-/* MODAL & STICKY FOOTER OPTIMIZATION */
-.modal{background:var(--card);border-radius:14px;padding:24px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto;border:1px solid var(--border); position:relative;}
-.modal-title{font-size:17px;font-weight:600;margin-bottom:18px}
-.modal-footer{
-  display:flex;justify-content:flex-end;gap:8px;
-  margin-top:18px;padding-top:14px;border-top:1px solid var(--border);
-  position: sticky; bottom: -24px; background: var(--card); padding-bottom: 24px; z-index: 100;
-  box-shadow: 0 -10px 15px -10px rgba(0,0,0,0.05);
+.modal {
+  background: var(--card); border-radius: 14px;
+  width: 580px; max-width: 96vw; max-height: 90vh;
+  border: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden; /* Verhindert das Scrollen des gesamten Fensters */
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+}
+.modal-title {
+  font-size: 17px; font-weight: 600; 
+  padding: 20px 24px 16px 24px; 
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+.modal-body {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 20px 24px;
+  padding-bottom: 60px; /* Puffer damit man am Desktop gut scrollen kann */
+}
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 8px; 
+  padding: 16px 24px; background: var(--card); 
+  border-top: 1px solid var(--border);
 }
 
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -157,9 +173,17 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   .cal-grid{gap:3px}
   .cal-day{min-height:58px;padding:4px 5px;font-size:11px}
   .cal-event-tag{font-size:9px}
-  .modal{width:100%;max-width:100%;height:100dvh;max-height:100dvh;border-radius:0;padding:16px;}
-  .modal-title{font-size:18px}
-  .modal-footer{bottom:-16px; padding-bottom:calc(16px + env(safe-area-inset-bottom));}
+  
+  /* NEUES MODAL-BEHAVIOR FÜR HANDY */
+  .modal{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;border:none;}
+  .modal-title{padding: 16px; font-size: 18px;}
+  .modal-body{
+    padding: 16px; 
+    padding-bottom: 180px !important; /* RIESIGER PUFFER, damit du an alles drankommst */
+  }
+  .modal-footer{
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) 16px;
+  }
   .result-bar{font-size:13px;padding:12px}
   .mobile-bottom-nav{display:block}
 }
@@ -222,6 +246,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
         <span style="font-size:13px;color:var(--muted)">Gesamt:</span><span style="font-size:20px;font-weight:600;color:var(--blue)" id="pizza-total">0</span><span style="font-size:13px;color:var(--muted)">Pizzen</span>
       </div>
     </div>
+    
     <div class="card">
       <div class="card-title">Anzahl Dips eingeben</div>
       <div style="display:grid; gap:12px; margin-bottom:16px">
@@ -323,21 +348,23 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 </div><div class="modal-overlay" id="event-modal">
 <div class="modal">
   <div class="modal-title" id="event-modal-title">Neues Event</div>
-  <div class="form-grid">
-    <div class="form-group"><label>Titel</label><input id="ev-title" placeholder="z.B. Hochzeit Meyer"/></div>
-    <div class="form-group"><label>Typ</label><select id="ev-type"><option>Catering</option><option>Event</option><option>Sonstiges</option></select></div>
-    <div class="form-group"><label>Firma</label><select id="ev-company"><option value="HP">HP</option><option value="HPC">HPC</option></select></div>
-    <div class="form-group"><label>Start</label><input type="date" id="ev-date"/></div>
-    <div class="form-group"><label>Ende (optional)</label><input type="date" id="ev-endDate"/></div>
-    <div class="form-group"><label>Uhrzeit</label><input type="time" id="ev-time" value="18:00"/></div>
-    <div class="form-group"><label>Ort</label><input id="ev-ort" placeholder="Adresse"/></div>
-    <div class="form-group"><label>Personen</label><input type="number" id="ev-personen" placeholder="0"/></div>
-    <div class="form-group"><label>Kontakt</label><select id="ev-kontakt-id"></select></div>
-    <div class="form-group"><label>Angebot</label><select id="ev-catering-angebot-id" onchange="handleEventOfferSelection()"></select></div>
-    <div class="form-group"><label>Summe €</label><input type="number" id="ev-angebot" placeholder="0"/></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="form-group"><label>Titel</label><input id="ev-title" placeholder="z.B. Hochzeit Meyer"/></div>
+      <div class="form-group"><label>Typ</label><select id="ev-type"><option>Catering</option><option>Event</option><option>Sonstiges</option></select></div>
+      <div class="form-group"><label>Firma</label><select id="ev-company"><option value="HP">HP</option><option value="HPC">HPC</option></select></div>
+      <div class="form-group"><label>Start</label><input type="date" id="ev-date"/></div>
+      <div class="form-group"><label>Ende (optional)</label><input type="date" id="ev-endDate"/></div>
+      <div class="form-group"><label>Uhrzeit</label><input type="time" id="ev-time" value="18:00"/></div>
+      <div class="form-group"><label>Ort</label><input id="ev-ort" placeholder="Adresse"/></div>
+      <div class="form-group"><label>Personen</label><input type="number" id="ev-personen" placeholder="0"/></div>
+      <div class="form-group"><label>Kontakt</label><select id="ev-kontakt-id"></select></div>
+      <div class="form-group"><label>Angebot</label><select id="ev-catering-angebot-id" onchange="handleEventOfferSelection()"></select></div>
+      <div class="form-group"><label>Summe €</label><input type="number" id="ev-angebot" placeholder="0"/></div>
+    </div>
+    <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="ev-notizen" style="min-height:80px"></textarea></div>
+    <div class="form-group" style="margin-top:12px"><label>Status</label><select id="ev-status"><option>Pending...</option><option>Secured</option><option>Possibility</option></select></div>
   </div>
-  <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="ev-notizen" style="min-height:80px"></textarea></div>
-  <div class="form-group" style="margin-top:12px"><label>Status</label><select id="ev-status"><option>Pending...</option><option>Secured</option><option>Possibility</option></select></div>
   <div class="modal-footer"><button onclick="closeModal('event-modal')">Abbrechen</button><button class="btn-primary" onclick="saveEvent()">Speichern</button></div>
 </div>
 </div>
@@ -345,23 +372,30 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <div class="modal-overlay" id="kontakt-modal">
 <div class="modal">
   <div class="modal-title" id="kontakt-modal-title">Neuer Kontakt</div>
-  <div class="form-grid">
-    <div class="form-group"><label>Name</label><input id="kt-name"/></div><div class="form-group"><label>Firma</label><input id="kt-firma"/></div>
-    <div class="form-group"><label>Telefon</label><input id="kt-tel"/></div><div class="form-group"><label>E-Mail</label><input id="kt-email"/></div>
-    <div class="form-group"><label>Adresse</label><input id="kt-adresse"/></div><div class="form-group"><label>Typ</label><select id="kt-typ"><option>Kunde</option><option>Lieferant</option><option>Mitarbeiter</option><option>Sonstiges</option></select></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="form-group"><label>Name</label><input id="kt-name"/></div><div class="form-group"><label>Firma</label><input id="kt-firma"/></div>
+      <div class="form-group"><label>Telefon</label><input id="kt-tel"/></div><div class="form-group"><label>E-Mail</label><input id="kt-email"/></div>
+      <div class="form-group"><label>Adresse</label><input id="kt-adresse"/></div><div class="form-group"><label>Typ</label><select id="kt-typ"><option>Kunde</option><option>Lieferant</option><option>Mitarbeiter</option><option>Sonstiges</option></select></div>
+    </div>
+    <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="kt-notizen" style="min-height:70px"></textarea></div>
   </div>
-  <div class="form-group" style="margin-top:12px"><label>Notizen</label><textarea id="kt-notizen" style="min-height:70px"></textarea></div>
   <div class="modal-footer"><button onclick="closeModal('kontakt-modal')">Abbrechen</button><button class="btn-primary" onclick="saveKontakt()">Speichern</button></div>
 </div>
 </div>
 
 <div class="modal-overlay" id="contact-info-modal">
 <div class="modal">
-  <div class="modal-title" id="ci-name" style="margin-bottom: 8px;">Name</div><div id="ci-firma" style="color:var(--muted); font-size:13px; margin-bottom: 16px;"></div>
-  <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Telefon</div><div id="ci-tel" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-tel', 'Telefonnummer')">📋</button></div>
-  <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">E-Mail</div><div id="ci-email" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-email', 'E-Mail')">📋</button></div>
-  <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Adresse</div><div id="ci-adresse" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-adresse', 'Adresse')">📋</button></div>
-  <div style="margin-top: 16px;"><div style="font-size:11px; color:var(--muted); margin-bottom: 4px;">Notizen</div><div id="ci-notizen" style="font-size:13px; background:#f8fafc; padding:10px; border-radius:8px; min-height:40px;"></div></div>
+  <div class="modal-title" style="padding-bottom: 8px;">
+    <div id="ci-name" style="margin-bottom: 4px;">Name</div>
+    <div id="ci-firma" style="color:var(--muted); font-size:13px; font-weight:400;"></div>
+  </div>
+  <div class="modal-body">
+    <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Telefon</div><div id="ci-tel" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-tel', 'Telefonnummer')">📋</button></div>
+    <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">E-Mail</div><div id="ci-email" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-email', 'E-Mail')">📋</button></div>
+    <div class="info-row"><div style="flex:1"><div style="font-size:11px; color:var(--muted)">Adresse</div><div id="ci-adresse" style="font-size:14px; font-weight:500;"></div></div><button class="btn-icon" onclick="copyModalField('ci-adresse', 'Adresse')">📋</button></div>
+    <div style="margin-top: 16px;"><div style="font-size:11px; color:var(--muted); margin-bottom: 4px;">Notizen</div><div id="ci-notizen" style="font-size:13px; background:#f8fafc; padding:10px; border-radius:8px; min-height:40px;"></div></div>
+  </div>
   <div class="modal-footer"><button class="btn-primary" onclick="closeModal('contact-info-modal')">Schließen</button></div>
 </div>
 </div>
@@ -369,14 +403,16 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0}
 <div class="modal-overlay" id="einkauf-modal">
 <div class="modal">
   <div class="modal-title" id="einkauf-modal-title">Position</div>
-  <div class="form-grid">
-    <div class="form-group"><label>Artikel</label><input id="ek-artikel"/></div>
-    <div class="form-group"><label>Kategorie</label><select id="ek-kat"><option>Teig</option><option>Milchprodukte / Käse</option><option>Sauce / Basis</option><option>Belag</option><option>Gemüse & Kräuter</option><option>Dips</option><option>Getränke</option><option>Sonstiges</option></select></div>
-    <div class="form-group"><label>Art.-Nr.</label><input id="ek-artikelnummer"/></div>
-    <div class="form-group"><label>Lieferant</label><select id="ek-lieferant"><option value="A">A = Andronaco</option><option value="B">B = Bührings</option><option value="M">M = Metro</option><option value="E">E = Edeka</option></select></div>
-    <div class="form-group"><label>Menge</label><input type="number" id="ek-menge" value="1" step="0.01"/></div>
-    <div class="form-group"><label>Einheit</label><select id="ek-einheit"><option>kg</option><option>g</option><option>L</option><option>ml</option><option>Stk</option><option>Pkg</option><option>Kiste</option></select></div>
-    <div class="form-group"><label>Preis/E €</label><input type="number" id="ek-preis" value="0" step="0.01"/></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="form-group"><label>Artikel</label><input id="ek-artikel"/></div>
+      <div class="form-group"><label>Kategorie</label><select id="ek-kat"><option>Teig</option><option>Milchprodukte / Käse</option><option>Sauce / Basis</option><option>Belag</option><option>Gemüse & Kräuter</option><option>Dips</option><option>Getränke</option><option>Sonstiges</option></select></div>
+      <div class="form-group"><label>Art.-Nr.</label><input id="ek-artikelnummer"/></div>
+      <div class="form-group"><label>Lieferant</label><select id="ek-lieferant"><option value="A">A = Andronaco</option><option value="B">B = Bührings</option><option value="M">M = Metro</option><option value="E">E = Edeka</option></select></div>
+      <div class="form-group"><label>Menge</label><input type="number" id="ek-menge" value="1" step="0.01"/></div>
+      <div class="form-group"><label>Einheit</label><select id="ek-einheit"><option>kg</option><option>g</option><option>L</option><option>ml</option><option>Stk</option><option>Pkg</option><option>Kiste</option></select></div>
+      <div class="form-group"><label>Preis/E €</label><input type="number" id="ek-preis" value="0" step="0.01"/></div>
+    </div>
   </div>
   <div class="modal-footer"><button onclick="closeModal('einkauf-modal')">Abbrechen</button><button class="btn-primary" onclick="saveEinkauf()">Speichern</button></div>
 </div>
@@ -433,7 +469,7 @@ function openEventModal(id){state.editEventId=id||null;const ev=id?normalizeEven
 function handleEventOfferSelection(){const s=document.getElementById('ev-catering-angebot-id');if(!s)return;const a=state.cateringAngebote.find(x=>x.id===s.value);if(!a)return;const aI=document.getElementById('ev-angebot'),pI=document.getElementById('ev-personen');if(aI&&a.bruttoGesamt)aI.value=String(a.bruttoGesamt).replace(/[^0-9.\-]/g,'')||aI.value;if(pI&&(!pI.value||pI.value==='0')&&a.gaeste)pI.value=a.gaeste;}
 function saveEvent(){const cId=document.getElementById('ev-kontakt-id').value||'';const aId=document.getElementById('ev-catering-angebot-id').value||'';const lK=state.kontakte.find(k=>k.id===cId);const lA=state.cateringAngebote.find(a=>a.id===aId);const ev=normalizeEvent({id:state.editEventId||Date.now().toString(),title:document.getElementById('ev-title').value||'Ohne Titel',type:document.getElementById('ev-type').value,company:document.getElementById('ev-company').value||'HP',date:document.getElementById('ev-date').value,endDate:document.getElementById('ev-endDate').value,time:document.getElementById('ev-time').value,ort:document.getElementById('ev-ort').value,personen:document.getElementById('ev-personen').value,contactId:cId,kontakt:lK?lK.name:'',cateringAngebotId:aId,cateringAngebotName:lA?(lA.name||'Angebot'):'',angebot:document.getElementById('ev-angebot').value,notizen:document.getElementById('ev-notizen').value,status:document.getElementById('ev-status').value});pushArrayItemSafe('events',ev);closeModal('event-modal');showToast('Gespeichert');}
 function deleteEvent(id){removeArrayItemSafe('events',id);closeModal('detail-modal');showToast('Gelöscht');}
-function showEventDetail(id){const ev=normalizeEvent(state.events.find(e=>e.id===id)||{});if(!ev.id)return;const kL=contactLinkHTML(ev.contactId,ev.kontakt);let dS=ev.date||'–';if(ev.endDate&&ev.endDate!==ev.date)dS+=` bis ${ev.endDate}`;document.getElementById('detail-content').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" style="margin-bottom:0">${ev.title} <span class="company-chip ${(ev.company||'HP').toLowerCase()}">${ev.company||'HP'}</span></div>${statusBadge(ev.status)}</div><table style="font-size:13px"><tr><td style="color:var(--muted);padding:5px 0;width:120px">Typ</td><td>${statusBadge(ev.type)}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${dS} ${ev.time||''}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Ort</td><td>${ev.ort||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td>${kL}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${ev.angebot?fmt(ev.angebot):'–'}</td></tr></table>${ev.notizen?`<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px">${ev.notizen.replace(/\n/g,'<br>')}</div>`:''}<div class="modal-footer"><button class="btn-danger" onclick="deleteEvent('${id}')">Löschen</button><button onclick="closeModal('detail-modal');openEventModal('${id}')">Bearbeiten</button><button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button></div>`;openModal('detail-modal');}
+function showEventDetail(id){const ev=normalizeEvent(state.events.find(e=>e.id===id)||{});if(!ev.id)return;const kL=contactLinkHTML(ev.contactId,ev.kontakt);let dS=ev.date||'–';if(ev.endDate&&ev.endDate!==ev.date)dS+=` bis ${ev.endDate}`;document.getElementById('detail-content').innerHTML=`<div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;margin:0;padding-bottom:16px;"><div style="margin:0">${ev.title} <span class="company-chip ${(ev.company||'HP').toLowerCase()}">${ev.company||'HP'}</span></div>${statusBadge(ev.status)}</div><div class="modal-body"><table style="font-size:13px"><tr><td style="color:var(--muted);padding:5px 0;width:120px">Typ</td><td>${statusBadge(ev.type)}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${dS} ${ev.time||''}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Ort</td><td>${ev.ort||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Kontakt</td><td>${kL}</td></tr><tr><td style="color:var(--muted);padding:5px 0">Angebot</td><td>${ev.angebot?fmt(ev.angebot):'–'}</td></tr></table>${ev.notizen?`<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px">${ev.notizen.replace(/\n/g,'<br>')}</div>`:''}</div><div class="modal-footer"><button class="btn-danger" onclick="deleteEvent('${id}')">Löschen</button><button onclick="closeModal('detail-modal');openEventModal('${id}')">Bearbeiten</button><button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button></div>`;openModal('detail-modal');}
 function renderAllEvents(){const q=(document.getElementById('events-search')?.value||'').trim().toLowerCase();const s=[...state.events].filter(ev=>{if(!q)return true;return [ev.title,ev.type,ev.ort,ev.kontakt,ev.company,ev.status,ev.date].filter(Boolean).join(' ').toLowerCase().includes(q);}).sort((a,b)=>(a.date||'').localeCompare(b.date||''));document.getElementById('all-events-list').innerHTML=s.length?s.map(eventItemHTML).join(''):'<div style="color:var(--muted);font-size:13px">Nichts gefunden.</div>';}
 
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
