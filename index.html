@@ -12,22 +12,36 @@
 :root{--bg:#f8fafc;--card:#fff;--text:#111827;--muted:#6b7280;--border:#e5e7eb;--blue:#2563eb;--blue-light:#eff6ff;--green:#16a34a;--green-light:#f0fdf4;--amber:#d97706;--amber-light:#fffbeb;--red:#dc2626;--red-light:#fef2f2}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;overflow-x:hidden;}
 .app{display:flex;min-height:100vh}
+
+/* =========================================
+   SIDEBAR (DESKTOP)
+   ========================================= */
 .sidebar{width:200px;min-width:200px;background:var(--card);border-right:1px solid var(--border);padding:16px 0;display:flex;flex-direction:column; z-index:50;}
 .sidebar-logo{padding:0 16px 14px;font-size:15px;font-weight:600;color:var(--blue);border-bottom:1px solid var(--border);margin-bottom:8px}
 .nav-item{padding:9px 16px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:8px;transition:all .15s;border-left:3px solid transparent;font-size:13px}
 .nav-item:hover{background:#f1f5f9;color:var(--text)}
 .nav-item.active{background:var(--blue-light);color:var(--blue);border-left-color:var(--blue);font-weight:500}
-.main{flex:1;padding:24px;overflow-y:auto;padding-bottom: 80px;} 
+
+/* =========================================
+   MAIN CONTENT
+   ========================================= */
+.main{flex:1;padding:24px;overflow-y:auto;padding-bottom: 100px;} 
 .page{display:none;flex-direction:column;gap:20px}
 .page.active{display:flex}
-.page-header{display:flex;justify-content:space-between;align-items:center}
+.page-header{display:flex;justify-content:space-between;align-items:center; flex-wrap: wrap; gap: 10px;}
 .page-title{font-size:20px;font-weight:600}
+
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px; box-shadow:0 1px 3px rgba(0,0,0,0.02); position: relative;}
-.card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:14px; display: flex; justify-content: space-between;}
+.card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:14px; display: flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:8px;}
+
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
 .metric{background:var(--blue-light);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s}
 .metric-label{font-size:11px;color:var(--muted);margin-bottom:4px}
 .metric-value{font-size:24px;font-weight:600;color:var(--blue)}
+
+/* =========================================
+   FORMS & BUTTONS
+   ========================================= */
 button{cursor:pointer;font-family:inherit;font-size:13px;border-radius:7px;padding:7px 14px;border:1px solid var(--border);background:var(--card);color:var(--text);transition:all .15s; display:inline-flex; align-items:center; justify-content:center; gap: 6px;}
 button:hover{background:#f1f5f9}
 .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
@@ -37,53 +51,130 @@ button:hover{background:#f1f5f9}
 .btn-green{background:var(--green);color:#fff;border-color:var(--green)}
 .btn-green:hover{background:#15803d}
 .btn-sm{padding:4px 10px;font-size:12px}
+
 input,select,textarea{width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--border);border-radius:7px;background:var(--card);color:var(--text);font-family:inherit;}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form-group{display:flex;flex-direction:column;gap:5px}
 .form-group label{font-size:12px;color:var(--muted);font-weight:500}
+
 .badge{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:500}
 .badge-blue{background:var(--blue-light);color:var(--blue)}
 .badge-green{background:var(--green-light);color:var(--green)}
 .badge-amber{background:var(--amber-light);color:var(--amber)}
 
-.event-item{display:flex;align-items:flex-start;gap:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px; cursor: pointer;}
+/* =========================================
+   LISTS (EVENTS, KONTAKTE, etc.)
+   ========================================= */
+.event-item{display:flex;align-items:flex-start;gap:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px; cursor: pointer; transition: background 0.2s;}
+.event-item:hover{background:#f8fafc;}
 .event-info{flex:1;}
 .event-actions { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap;}
 
-.contact-item { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--border); border-radius:10px; }
-.contact-tools { display: flex; gap: 10px; margin-left: auto; }
-.contact-tools a { text-decoration: none; font-size: 18px; }
+.contact-item { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--border); border-radius:10px; margin-bottom:8px; flex-wrap:wrap;}
+.contact-tools { display: flex; gap: 12px; margin-left: auto; }
+.contact-tools a { text-decoration: none; font-size: 18px; display:flex; align-items:center; justify-content:center; width:36px; height:36px; background:#f1f5f9; border-radius:50%; transition:all 0.2s;}
+.contact-tools a:hover { background:var(--blue-light); transform:scale(1.05);}
 
+.cleaning-rank-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+.cleaning-rank-item.next { color: var(--red); font-weight: 700; }
+
+.mailbox-item { padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; line-height:1.4;}
+.mailbox-item.unread { background: var(--blue-light); border-left: 3px solid var(--blue); }
+
+/* =========================================
+   CALENDAR & TABLES
+   ========================================= */
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .cal-day{min-height:70px;border:1px solid var(--border);border-radius:8px;padding:5px;font-size:11px;cursor:pointer;}
 .cal-day.today{border-color:var(--blue);background:var(--blue-light)}
-.cal-event-tag{font-size:9px; padding:1px 3px; border-radius:4px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.cal-header-cell{text-align:center;font-size:11px;color:var(--muted);padding:4px}
+.cal-event-tag{font-size:10px; padding:2px 4px; border-radius:4px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
-.settings-tabs { display:flex; gap:12px; border-bottom:1px solid var(--border); margin-bottom:16px; overflow-x:auto; }
+.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; margin-bottom: 16px; }
+table{width:100%;border-collapse:collapse;font-size:13px; min-width: 400px;}
+th{text-align:left;padding:8px 10px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)}
+td{padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+
+/* =========================================
+   PIZZA & CATERING
+   ========================================= */
+.pizza-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:10px;margin-bottom:16px}
+.pizza-qty { display: flex; align-items: center; gap: 10px; }
+.pizza-qty button { width: 40px; height: 40px; font-size: 18px; }
+.result-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #f1f5f9}
+.result-row:last-child{border-bottom:none}
+.result-bar{border-radius:8px;padding:10px 16px;text-align:center;font-size:13px;font-weight:500;margin-top:8px}
+.ing-group{margin-bottom:14px}
+.ing-group-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+
+/* =========================================
+   SETTINGS TABS
+   ========================================= */
+.settings-tabs { display:flex; gap:12px; border-bottom:1px solid var(--border); margin-bottom:16px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:5px;}
 .settings-tab { padding:10px 4px; cursor:pointer; color:var(--muted); border-bottom:2px solid transparent; white-space:nowrap; }
 .settings-tab.active { color:var(--blue); border-bottom-color:var(--blue); font-weight:600; }
 .settings-panel { display:none; }
 .settings-panel.active { display:block; }
 
-.mailbox-item { padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
-.mailbox-item.unread { background: var(--blue-light); border-left: 3px solid var(--blue); }
+/* =========================================
+   MODALS & TOASTS
+   ========================================= */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999; align-items:center; justify-content:center; padding: 16px; backdrop-filter: blur(3px);}
+.modal-overlay.open { display:flex; }
+.modal { background: var(--card); width: 100%; max-width: 580px; max-height: 90vh; display: flex; flex-direction: column; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.modal-title { padding: 16px 20px; font-size: 18px; font-weight: 600; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.modal-body { padding: 16px 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; }
+.modal-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
 
-.pizza-qty { display: flex; align-items: center; gap: 10px; }
-.pizza-qty button { width: 40px; height: 40px; font-size: 18px; }
+.toast-wrap{position:fixed;right:18px;bottom:18px;z-index:15000;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--text);color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,.16);font-size:13px;opacity:0;transform:translateY(8px);transition:all .2s}
+.toast.show{opacity:1;transform:translateY(0)}
 
-.cleaning-rank-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
-.cleaning-rank-item.next { color: var(--red); font-weight: 700; }
-
+/* =========================================
+   ROLE-BASED VISIBILITY
+   ========================================= */
 body:not([data-role="superadmin"]):not([data-role="admin"]) .admin-only,
 body:not([data-role="superadmin"]) .superadmin-only { display: none !important; }
 
 #login-screen { position:fixed; inset:0; background:var(--bg); z-index:20000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
 
+/* =========================================
+   MOBILE OPTIMIZATION (THE MAGIC)
+   ========================================= */
+.mobile-bottom-nav{display:none;}
 @media (max-width: 900px){
   .sidebar{display:none}
   .main{padding:16px 12px 100px}
-  .mobile-bottom-nav{display:flex; position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--border); overflow-x:auto; padding:10px; z-index:1000;}
-  .mobile-bottom-nav button { flex:0 0 auto; margin-right: 8px; font-size: 18px; min-height: 46px; }
+  .page-header{flex-direction:column; align-items:stretch;}
+  .form-grid{grid-template-columns:1fr}
+  .cal-day{min-height:58px; font-size:11px;}
+  .modal{max-width:95%; max-height:85vh; margin:auto;}
+  
+  /* Perfekte Aufteilung der unteren Navigationsleiste */
+  .mobile-bottom-nav{
+      display:flex; 
+      position:fixed; 
+      bottom:0; 
+      left:0; 
+      right:0; 
+      background:rgba(255,255,255,0.95); 
+      backdrop-filter: blur(10px);
+      border-top:1px solid var(--border); 
+      padding:10px 5px calc(10px + env(safe-area-inset-bottom)); 
+      z-index:1000;
+      justify-content: space-around; /* Verteilt Buttons gleichmäßig */
+  }
+  .mobile-bottom-nav button { 
+      flex: 1; /* Jeder Button nimmt gleich viel Platz ein */
+      margin: 0 4px; /* Kleiner Abstand dazwischen */
+      font-size: 20px; /* Größere Emojis */
+      min-height: 48px; 
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+  }
+  .mobile-bottom-nav button:active { background: #f1f5f9; }
 }
 </style>
 </head>
@@ -134,7 +225,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
   </div>
 
   <div class="card admin-only">
-    <div class="card-title">Pinnwand</div>
+    <div class="card-title">Pinnwand (Für alle sichtbar)</div>
     <textarea id="pinnwand" style="min-height:100px;" oninput="savePin()"></textarea>
   </div>
 </div>
@@ -146,7 +237,10 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
     </div>
     <button class="btn-primary admin-only" onclick="openEventModal()">+ Neuer Termin</button>
   </div>
-  <div class="card"><div class="cal-grid" id="cal-headers"></div><div class="cal-grid" id="cal-body"></div></div>
+  <div class="card">
+    <div class="cal-grid" id="cal-headers"></div>
+    <div class="cal-grid" id="cal-body"></div>
+  </div>
 </div>
 
 <div class="page" id="page-events">
@@ -169,12 +263,12 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
         <div class="card"><div class="card-title">Eingaben</div>
             <div class="form-group"><label>Gäste</label><input type="number" id="cat-gaeste" value="30" oninput="calcCatering()"></div>
             <div class="form-group"><label>KM (hin/rück)</label><input type="number" id="cat-km" value="50" oninput="calcCatering()"></div>
-            <div class="form-group"><label>Zielmarge</label><input id="cat-marge-display" readonly></div>
+            <div class="form-group"><label>Zielmarge</label><input id="cat-marge-display" readonly style="background:#f1f5f9;"></div>
         </div>
         <div class="card"><div class="card-title">Ergebnis</div>
             <div id="cat-result-rows"></div>
-            <div class="result-bar" style="background:var(--green-light); padding:10px; border-radius:8px; margin-top:10px;">
-                Brutto Gesamt: <b id="cat-brutto-total">0 €</b>
+            <div class="result-bar" style="background:var(--green-light); padding:10px; border-radius:8px; margin-top:10px; font-size: 16px;">
+                Brutto Gesamt: <b id="cat-brutto-total">0,00 €</b>
             </div>
         </div>
     </div>
@@ -203,7 +297,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
     <div id="panel-zutaten" class="settings-panel active">
         <div class="card">
             <div class="card-title">Zutaten verwalten <button class="btn-sm" onclick="openIngredientModal()">+ Neue Zutat</button></div>
-            <div id="settings-art-list"></div>
+            <div class="table-responsive" id="settings-art-list"></div>
         </div>
     </div>
     <div id="panel-rezepte" class="settings-panel"><div class="card" id="settings-recipes-list"></div></div>
@@ -213,10 +307,15 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
             <div class="card-title">Lohn & Steuern</div>
             <div class="form-group"><label>Standard-Stundenlohn (€)</label><input type="number" id="set-cat-stundensatz" step="0.5"></div>
             <div class="form-group" style="margin-top:10px;"><label>Umsatzsteuer (z.B. 1.19)</label><input type="number" id="set-cat-ust" step="0.01"></div>
-            <button class="btn-primary" style="margin-top:15px; width:100%;" onclick="saveCateringSettings()">Speichern</button>
+            <button class="btn-primary" style="margin-top:15px; width:100%; padding:10px;" onclick="saveCateringSettings()">Speichern</button>
         </div>
     </div>
-    <div id="panel-team" class="settings-panel"><div class="card" id="team-list-container"></div></div>
+    <div id="panel-team" class="settings-panel">
+        <div class="card">
+            <div class="card-title">Team-Verwaltung</div>
+            <div class="table-responsive" id="team-list-container"></div>
+        </div>
+    </div>
 </div>
 
 </div>
@@ -227,7 +326,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
     <button onclick="navTo('events')">🍕</button>
     <button class="admin-only" onclick="navTo('einkauf')">🛒</button>
     <button class="superadmin-only" onclick="navTo('settings')">⚙️</button>
-    <button onclick="auth.signOut()" style="color:var(--red)">🚪</button>
+    <button onclick="auth.signOut()">🚪</button>
 </div>
 </div>
 
@@ -245,7 +344,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
             </div>
             <div class="form-group"><label>Start Datum</label><input type="date" id="ev-date"></div>
             <div class="form-group"><label>Uhrzeit</label><input type="time" id="ev-time"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Ort</label><input id="ev-ort"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Ort / Adresse</label><input id="ev-ort"></div>
             <div class="form-group"><label>Gästezahl</label><input type="number" id="ev-personen"></div>
             <div class="form-group"><label>Status</label>
                 <select id="ev-status">
@@ -253,11 +352,11 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
                 </select>
             </div>
         </div>
-        <div class="form-group admin-only" style="margin-top:10px;">
+        <div class="form-group admin-only" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
             <label>Crew Zuweisung</label>
-            <div id="ev-crew-select" style="display:flex; flex-wrap:wrap; gap:5px;"></div>
+            <div id="ev-crew-select" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:5px;"></div>
         </div>
-        <textarea id="ev-notizen" placeholder="Notizen..." style="margin-top:10px; min-height:60px;"></textarea>
+        <textarea id="ev-notizen" placeholder="Interne Notizen..." style="margin-top:12px; min-height:80px;"></textarea>
     </div>
     <div class="modal-footer"><button onclick="closeModal('event-modal')">Abbrechen</button><button class="btn-primary" onclick="saveEvent()">Speichern</button></div>
 </div>
@@ -265,15 +364,31 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
 
 <div class="modal-overlay" id="ingredient-modal">
 <div class="modal">
-    <div class="modal-title">Zutat anlegen</div>
+    <div class="modal-title">Neue Zutat anlegen</div>
     <div class="modal-body">
-        <div class="form-group"><label>Name</label><input id="ing-new-name"></div>
-        <div class="form-grid" style="margin-top:10px;">
-            <div class="form-group"><label>Netto € / kg</label><input type="number" id="ing-new-netto" step="0.01"></div>
-            <div class="form-group"><label>Brutto € / kg</label><input type="number" id="ing-new-brutto" step="0.01"></div>
+        <div class="form-group"><label>Bezeichnung</label><input id="ing-new-name"></div>
+        <div class="form-grid" style="margin-top:12px;">
+            <div class="form-group"><label>Netto € / kg (oder Stück)</label><input type="number" id="ing-new-netto" step="0.01"></div>
+            <div class="form-group"><label>Brutto € / kg (oder Stück)</label><input type="number" id="ing-new-brutto" step="0.01"></div>
         </div>
     </div>
     <div class="modal-footer"><button onclick="closeModal('ingredient-modal')">Abbrechen</button><button class="btn-primary" onclick="saveNewIngredient()">Speichern</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="kontakt-modal">
+<div class="modal">
+    <div class="modal-title">Kontakt bearbeiten</div>
+    <div class="modal-body">
+        <div class="form-grid">
+            <div class="form-group"><label>Name</label><input id="kt-name"></div>
+            <div class="form-group"><label>Firma / Info</label><input id="kt-firma"></div>
+            <div class="form-group"><label>Telefon</label><input type="tel" id="kt-tel"></div>
+            <div class="form-group"><label>E-Mail</label><input type="email" id="kt-email"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Adresse</label><input id="kt-adresse"></div>
+        </div>
+    </div>
+    <div class="modal-footer"><button onclick="closeModal('kontakt-modal')">Abbrechen</button><button class="btn-primary" onclick="saveKontakt()">Speichern</button></div>
 </div>
 </div>
 
@@ -286,9 +401,8 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 const auth=firebase.auth();
 
-let state={role:'staff', events:[], kontakte:[], einkauf:[], recipes:[], pizzas:[], ingredients:[], cateringDefaults:{}, cateringScenarios:[], calYear:new Date().getFullYear(), calMonth:new Date().getMonth(), editEventId:null};
+let state={role:'staff', events:[], kontakte:[], einkauf:[], recipes:[], pizzas:[], ingredients:[], cateringDefaults:{}, cateringScenarios:[], calYear:new Date().getFullYear(), calMonth:new Date().getMonth(), editEventId:null, editKontaktId:null};
 let pizzaMengen={}, dipMengen={aioli:0, hothoney:0};
-let allUsers = [];
 
 const $ = id => document.getElementById(id);
 function showToast(m){const w=$('toast-wrap'),t=document.createElement('div');t.className='toast show';t.textContent=m||'Gespeichert';w.appendChild(t);setTimeout(()=>{t.remove()},2200);}
@@ -318,11 +432,22 @@ function removeArrayItemSafe(key,id){
         return arr.filter(x => x && x.id !== id);
     });
 }
+function pushArrayItemSafe(key,item){
+    db.ref(key).transaction(current=>{
+        let arr = [];
+        if(Array.isArray(current)) arr = current;
+        else if(current) arr = Object.values(current);
+        let i = arr.findIndex(x => x && x.id === item.id);
+        if(i >= 0) arr[i] = item;
+        else arr.push(item);
+        return arr.filter(x=>x!=null);
+    });
+}
 
 function normalizeEvent(ev){
     return Object.assign({}, ev, {
         endDate: ev.endDate||'', 
-        crew: ev.crew||[],
+        assignedCrew: ev.assignedCrew||[],
         availUIDs: ev.availUIDs||[],
         unavailUIDs: ev.unavailUIDs||[]
     });
@@ -375,7 +500,12 @@ function listenAll(){
         state.kontakte = Object.values(d.kontakte||{});
         state.einkauf = Object.values(d.einkauf||{});
         state.cateringDefaults = d.cateringDefaults || {stundensatz:14, ust:1.19, gas:10, entsorgung:15, miete:45, kmsatz:0.8};
-        state.cateringScenarios = d.cateringScenarios || [{min:30,max:49,label:'Klein',stunden:35,marge:0.5}];
+        state.pinnwand = d.pinnwand || '';
+        
+        if($('pinnwand') && document.activeElement !== $('pinnwand')) {
+            $('pinnwand').value = state.pinnwand;
+        }
+
         renderAll();
     });
 }
@@ -405,12 +535,14 @@ function updateDashboard(){
         db.ref('users').once('value', snap=>{
             const users = Object.values(snap.val()||{});
             const admins = users.filter(x=>x.role!=='staff').sort((a,b)=>(a.cleaningPoints||0)-(b.cleaningPoints||0));
-            $('cleaning-ranking').innerHTML = admins.map((a,i)=>`
+            $('cleaning-ranking').innerHTML = admins.map((a,i)=>{
+                const emailStr = a.email || 'Unbekannt';
+                return `
                 <div class="cleaning-rank-item ${i===0?'next':''}">
-                    <span>${a.email.split('@')[0]} ${i===0?'👉':''}</span>
+                    <span>${emailStr.split('@')[0]} ${i===0?'👉':''}</span>
                     <b>${a.cleaningPoints||0} Pkt.</b>
                 </div>
-            `).join('');
+            `}).join('');
         });
     }
 
@@ -435,8 +567,7 @@ function clearNotifications(){
 }
 
 function savePin(){
-    state.pinnwand = $('pinnwand').value;
-    db.ref('pinnwand').set(state.pinnwand);
+    db.ref('pinnwand').set($('pinnwand').value);
 }
 
 // CALENDAR
@@ -457,7 +588,7 @@ function renderCalendar(){
         html += `
             <div class="cal-day ${isToday ? 'today' : ''}" onclick="state.role!=='staff'?openEventModal(null,'${curDate}'):''">
                 <b>${d}</b>
-                ${visibleEvs.map(e => `<div class="cal-event-tag" style="background:var(--blue-light); border:1px solid var(--blue);">${e.title}</div>`).join('')}
+                ${visibleEvs.map(e => `<div class="cal-event-tag" style="background:var(--blue-light); border:1px solid var(--blue); color:var(--blue); font-weight:600;">${e.title}</div>`).join('')}
             </div>
         `;
     }
@@ -474,19 +605,19 @@ function renderEventList(){
         const uid = auth.currentUser.uid;
         const isAvailable = (e.availUIDs || []).includes(uid);
         const isUnavailable = (e.unavailUIDs || []).includes(uid);
-        const loggedHours = (e.loggedHours || {})[uid] || 0;
+        const loggedHours = (e.loggedHours || {})[uid] || '';
         
         return `
             <div class="card" style="margin-bottom:12px;">
-                <div class="event-item" onclick="showEventDetail('${e.id}')">
+                <div class="event-item" style="border:none; padding:0;" onclick="showEventDetail('${e.id}')">
                     <div class="event-info">
-                        <div class="card-title">${e.type} <span>${e.date}</span></div>
+                        <div class="card-title" style="margin-bottom:6px;">${e.type} <span>${e.date}</span></div>
                         <b style="font-size:16px">${e.title}</b><br>
-                        <small>${e.ort || 'Kein Ort'}</small>
+                        <small style="color:var(--muted)">${e.ort || 'Kein Ort eingetragen'}</small>
                     </div>
                     ${statusBadge(e.status)}
                 </div>
-                <div class="event-actions">
+                <div class="event-actions" style="margin-top:12px; padding-top:12px; border-top:1px solid #f1f5f9;">
                     <button class="btn-sm ${isAvailable ? 'btn-green' : ''}" onclick="toggleAvailability('${e.id}', true)">
                         ${isAvailable ? '✅ Bin dabei' : '🙋‍♂️ Habe Zeit'}
                     </button>
@@ -496,8 +627,8 @@ function renderEventList(){
 
                     ${e.status==='Secured' ? `
                         <div style="margin-left:auto; display:flex; align-items:center; gap:5px;">
-                            <input type="number" id="hours-${e.id}" placeholder="Std" style="width:60px" value="${loggedHours}">
-                            <button class="btn-sm btn-primary" onclick="logHours('${e.id}')">Stunden OK</button>
+                            <input type="number" id="hours-${e.id}" placeholder="Std." style="width:60px; padding:4px;" value="${loggedHours}">
+                            <button class="btn-sm btn-primary" onclick="logHours('${e.id}')">OK</button>
                         </div>
                     ` : ''}
                 </div>
@@ -529,7 +660,7 @@ function toggleAvailability(eid, available) {
 
 function logHours(eid){
     const h = parseFloat($('hours-'+eid).value);
-    if(isNaN(h)) return;
+    if(isNaN(h)) return showToast("Bitte Zahl eingeben");
     db.ref(`events/${eid}/loggedHours/${auth.currentUser.uid}`).set(h);
     showToast("Stunden gespeichert");
 }
@@ -547,9 +678,10 @@ function openEventModal(id, dateString){
 
     if(state.role !== 'staff'){
         db.ref('users').once('value', snap=>{
-            const users = Object.values(snap.val()||{});
+            const usersObj = snap.val()||{};
+            const users = Object.values(usersObj);
             $('ev-crew-select').innerHTML = users.map(u => {
-                const uid = Object.keys(snap.val()||{}).find(key => snap.val()[key].email === u.email);
+                const uid = Object.keys(usersObj).find(key => usersObj[key].email === u.email);
                 const isAssigned = (ev && ev.assignedCrew && ev.assignedCrew.includes(uid));
                 
                 const hasTime = ev && (ev.availUIDs || []).includes(uid);
@@ -559,9 +691,11 @@ function openEventModal(id, dateString){
                 if(hasTime) statusIcon = '✅';
                 else if(noTime) statusIcon = '❌';
                 
+                const emailStr = u.email || 'Unbekannt';
+                
                 return `
                     <div class="badge ${isAssigned?'badge-green':'badge-blue'} crew-chip ${isAssigned?'active':''}" style="cursor:pointer; padding:6px 10px;" data-uid="${uid}" onclick="this.classList.toggle('active'); this.classList.toggle('badge-green'); this.classList.toggle('badge-blue');">
-                        ${u.email.split('@')[0]} ${statusIcon}
+                        ${emailStr.split('@')[0]} ${statusIcon}
                     </div>
                 `;
             }).join('');
@@ -590,7 +724,6 @@ function saveEvent(){
         notizen: $('ev-notizen').value
     };
 
-    // Keep existing availability arrays
     const existingEv = state.events.find(x => x.id === id);
     if(existingEv) {
         evUpdates.availUIDs = existingEv.availUIDs || [];
@@ -611,6 +744,7 @@ function saveEvent(){
 
     db.ref('events/'+id).update(evUpdates);
     closeModal('event-modal');
+    showToast('Event gespeichert');
 }
 
 function showEventDetail(id){
@@ -625,19 +759,19 @@ function showEventDetail(id){
             ${statusBadge(ev.status)}
         </div>
         <div class="modal-body">
-            <table style="font-size:13px">
-                <tr><td style="color:var(--muted);padding:5px 0;width:120px">Typ</td><td>${ev.type}</td></tr>
+            <table style="font-size:13px; margin-bottom:12px;">
+                <tr><td style="color:var(--muted);padding:5px 0;width:90px">Typ</td><td>${ev.type}</td></tr>
                 <tr><td style="color:var(--muted);padding:5px 0">Datum</td><td>${dS} ${ev.time||''}</td></tr>
                 <tr><td style="color:var(--muted);padding:5px 0">Ort</td><td>${ev.ort||'–'}</td></tr>
                 <tr><td style="color:var(--muted);padding:5px 0">Personen</td><td>${ev.personen||'–'}</td></tr>
             </table>
-            ${ev.notizen ? `<div style="margin-top:12px;padding:10px;background:#f8fafc;border-radius:8px;font-size:13px">${ev.notizen.replace(/\n/g,'<br>')}</div>` : ''}
+            ${ev.notizen ? `<div style="padding:10px;background:#f8fafc;border-radius:8px;font-size:13px">${ev.notizen.replace(/\n/g,'<br>')}</div>` : ''}
             
             ${state.role !== 'staff' && ev.status === 'Secured' && !ev.cleaningDoneBy ? `
                 <div style="margin-top:16px; border-top:1px solid var(--border); padding-top:12px;">
-                    <button class="btn-primary" onclick="markCleaningDone('${ev.id}', '${auth.currentUser.uid}')">🧽 Putzdienst erledigt</button>
+                    <button class="btn-primary" style="width:100%; padding:10px;" onclick="markCleaningDone('${ev.id}', '${auth.currentUser.uid}')">🧽 Putzdienst erledigt</button>
                 </div>
-            ` : (ev.cleaningDoneBy ? `<div style="margin-top:16px; font-size:12px; color:var(--green);">🧽 Putzdienst wurde bereits eingetragen.</div>` : '')}
+            ` : (ev.cleaningDoneBy ? `<div style="margin-top:16px; font-size:12px; color:var(--green); font-weight:600;">✅ Putzdienst wurde bereits eingetragen.</div>` : '')}
         </div>
         <div class="modal-footer">
             <button class="btn-danger admin-only" onclick="deleteEvent('${id}')">Löschen</button>
@@ -667,7 +801,12 @@ function markCleaningDone(eid, adminUID){
 }
 
 // ZUTATEN ANLEGEN
-function openIngredientModal(){ openModal('ingredient-modal'); }
+function openIngredientModal(){ 
+    $('ing-new-name').value = '';
+    $('ing-new-netto').value = '';
+    $('ing-new-brutto').value = '';
+    openModal('ingredient-modal'); 
+}
 function saveNewIngredient(){
     const name = $('ing-new-name').value;
     if(!name) return;
@@ -682,8 +821,9 @@ function saveNewIngredient(){
     showToast('Zutat gespeichert');
 }
 
-// PIZZA-LABOR, EINKAUF, KONTAKTE, CATERING etc. 
-// ... (Die Logik bleibt identisch zu vorher, nur die Buttons wurden angepasst) ...
+// PIZZA-LABOR
+function getIngredient(id){ return (state.ingredients||[]).find(i=>i.id===id); }
+
 function renderPizzaGrid(){
     const c = $('pizza-grid');
     if(!c) return;
@@ -697,13 +837,162 @@ function renderPizzaGrid(){
             </div>
         </div>
     `).join('');
+    
+    renderPizzaResult();
 }
 
+function changePizzaMenge(name, delta){
+    pizzaMengen[name] = Math.max(0, (pizzaMengen[name]||0) + delta);
+    renderAll();
+}
 function resetPizza(){ pizzaMengen = {}; renderAll(); }
+
+function addG(acc,k,g){if(!acc[k])acc[k]=0;acc[k]+=g;}
+function expandRecipe(recipeId, gramsOrQty, accumulator) {
+   const recipe = (state.recipes||[]).find(r => r.id === recipeId);
+   if (!recipe) return;
+   const ratio = recipe.yieldGrams ? (gramsOrQty / recipe.yieldGrams) : gramsOrQty;
+   (recipe.items||[]).forEach(item => {
+      if (item.recipeId) expandRecipe(item.recipeId, item.grams * ratio, accumulator);
+      else if (item.ingredientId) addG(accumulator, item.ingredientId, item.grams * ratio);
+   });
+}
+function calcPizzaIngredients(){
+  const raw={};
+  (state.pizzas||[]).forEach(p=>{
+    const qty=Number(pizzaMengen[p.name])||0; if(!qty)return;
+    (p.items||[]).forEach(item=>{
+       if(item.recipeId) expandRecipe(item.recipeId, item.grams * qty, raw);
+       else if(item.ingredientId) addG(raw, item.ingredientId, item.grams * qty);
+    });
+  });
+  return raw;
+}
+
+function renderPizzaResult() {
+    const target = $('ingredient-result');
+    if(target) target.innerHTML = buildIngredientCards(calcPizzaIngredients(), 'Keine Pizzen ausgewählt.');
+}
+
+function buildIngredientCards(rawDict, emptyMsg){
+  if(Object.keys(rawDict).length===0) return `<div style="color:var(--muted);font-size:13px">${emptyMsg}</div>`;
+  const items = []; let gesamtBrutto = 0;
+  for(const[artKey,grams] of Object.entries(rawDict)){
+    if(grams<0.1) continue;
+    const a = getIngredient(artKey);
+    if(!a){items.push({artKey,grams,sup:'Sonstige',grp:'Sonstiges',artnr:'',cost_inc:0,cost_ex:0});continue;}
+    const kg = grams/1000; const cost_inc = kg * a.priceGross; const cost_ex = kg * a.priceNet;
+    gesamtBrutto += cost_inc;
+    items.push({artKey,grams,sup:a.supplier||'Sonstige',grp:a.category,artnr:a.articleNumber||'',cost_inc,cost_ex});
+  }
+
+  let ht = '';
+  // Einfache Gruppierung nur nach Lieferant (platzsparend für Mobile)
+  const bySup = {}; items.forEach(i=>{if(!bySup[i.sup]) bySup[i.sup]=[]; bySup[i.sup].push(i);});
+  
+  Object.keys(bySup).sort().forEach(sup=>{
+    const si = bySup[sup].sort((a,b)=>a.artKey.localeCompare(b.artKey));
+    let supTotalBrutto = 0; let katHtml = '';
+    si.forEach(i=>{
+        supTotalBrutto += i.cost_inc;
+        katHtml += `
+            <div style="padding:10px 0; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+                <div style="flex:1;">
+                    <div style="font-weight:500; font-size:13px;">${i.artKey}</div>
+                    <div style="font-size:11px; color:var(--muted)">${fmtKG(i.grams)}</div>
+                </div>
+                <div style="font-size:13px; font-weight:600;">${i.cost_inc>0?fmt(i.cost_inc):'–'}</div>
+            </div>
+        `;
+    });
+    ht += `
+        <div class="card" style="padding:0; overflow:hidden; margin-bottom:16px;">
+            <div style="background:#f8fafc; padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:600; font-size:13px; color:var(--text);">${sup}</div>
+                <div style="font-weight:700; font-size:14px; color:var(--text);">${fmt(supTotalBrutto)}</div>
+            </div>
+            <div style="padding:0 16px;">${katHtml}</div>
+        </div>
+    `;
+  });
+  ht+=`<div class="result-bar" style="background:var(--blue-light); color:var(--blue); font-size:16px;">Gesamt: <b>${fmt(gesamtBrutto)}</b></div>`;
+  return ht;
+}
+
 function saveToEinkauf(){ showToast('Pizza-Zutaten in Einkaufsliste übernommen!'); } // Placeholder für den Build-Code
-function calcCatering(){} // Placeholder für den Live-Berechner
-function clearEinkauf(){}
-function renderEinkauf(){}
+
+// CATERING
+function calcCateringBlock(params){
+    const { gaeste, km, stunden, stundensatz, waren, kmsatz, gas, entsorgung, miete, marge, ust } = params;
+    const pK = stunden * stundensatz;
+    const wE = gaeste * waren;
+    const kK = km * kmsatz;
+    const fK = gas + entsorgung + miete;
+    const mW = (pK + wE + kK + fK) * marge;
+    const zN = pK + wE + kK + fK + mW;
+    return {
+        personalkosten: pK, wareneinsatz: wE, kmKosten: kK, fixkosten: fK,
+        margeWert: mW, zielpreisNetto: zN, nettoGast: gaeste?zN/gaeste:0,
+        zielpreisBrutto: zN*ust, bruttoGast: gaeste?(zN*ust)/gaeste:0, steuern: (zN*ust)-zN
+    };
+}
+function calcCatering(){
+    const gaeste = parseFloat($('cat-gaeste').value) || 0;
+    const km = parseFloat($('cat-km').value) || 0;
+    
+    const defs = state.cateringDefaults || {};
+    const mR = calcCateringBlock({ 
+        gaeste, km, stunden: 35, // dummy stunden
+        stundensatz: defs.stundensatz||14, waren: 3.5, kmsatz: 0.8, 
+        gas: 10, entsorgung: 15, miete: 45, marge: 0.5, ust: defs.ust||1.19 
+    });
+
+    const rE = $('cat-result-rows');
+    if(rE) {
+        rE.innerHTML = [
+            { l: 'Gäste', v: gaeste },
+            { l: 'Personalkosten', v: fmt(mR.personalkosten) },
+            { l: 'Wareneinsatz', v: fmt(mR.wareneinsatz) },
+            { l: 'Fixkosten', v: fmt(mR.fixkosten) },
+            { l: 'Ziel netto', v: fmt(mR.zielpreisNetto) },
+            { l: 'Steuern', v: fmt(mR.steuern) }
+        ].map(r => `<div class="result-row"><span style="color:var(--muted)">${r.l}</span><span>${r.v}</span></div>`).join('');
+    }
+    if($('cat-brutto-total')) $('cat-brutto-total').textContent = fmt(mR.zielpreisBrutto);
+}
+
+// EINKAUF
+function clearEinkauf(){ if(confirm('Einkaufsliste leeren?')) { db.ref('einkauf').set([]); showToast('Geleert'); } }
+function renderEinkauf(){
+    const c = $('einkauf-kategorien');
+    if(!c) return;
+    c.innerHTML = state.einkauf.length ? `<div class="card">Einkaufsliste mit ${state.einkauf.length} Einträgen...</div>` : '<div class="card" style="color:var(--muted);font-size:13px">Keine Positionen.</div>';
+}
+
+// KONTAKTE
+function openKontaktModal(){
+    state.editKontaktId = null;
+    $('kt-name').value = '';
+    $('kt-firma').value = '';
+    $('kt-tel').value = '';
+    $('kt-email').value = '';
+    $('kt-adresse').value = '';
+    openModal('kontakt-modal');
+}
+function saveKontakt(){
+    const k = {
+        id: state.editKontaktId || Date.now().toString(),
+        name: $('kt-name').value || 'Unbekannt',
+        firma: $('kt-firma').value,
+        tel: $('kt-tel').value,
+        email: $('kt-email').value,
+        adresse: $('kt-adresse').value
+    };
+    pushArrayItemSafe('kontakte', k);
+    closeModal('kontakt-modal');
+    showToast('Kontakt gespeichert');
+}
+function deleteKontakt(id){ removeArrayItemSafe('kontakte', id); showToast('Kontakt gelöscht');}
 function renderKontakte(){
     const c = $('kontakt-list');
     if(!c) return;
@@ -711,32 +1000,51 @@ function renderKontakte(){
         <div class="contact-item card">
             <div class="event-info">
                 <b style="font-size:15px;">${k.name}</b><br>
-                <small style="color:var(--muted)">${k.firma || k.typ}</small>
+                <small style="color:var(--muted)">${k.firma || 'Kontakt'}</small>
             </div>
             <div class="contact-tools">
                 ${k.tel ? `<a href="tel:${k.tel}">📞</a>` : ''}
-                ${k.adresse ? `<a href="http://maps.google.com/?q=${encodeURIComponent(k.adresse)}" target="_blank">📍</a>` : ''}
+                ${k.adresse ? `<a href="http://googleusercontent.com/maps.google.com/3{encodeURIComponent(k.adresse)}" target="_blank">📍</a>` : ''}
                 ${k.email ? `<a href="mailto:${k.email}">✉️</a>` : ''}
             </div>
-            <button class="btn-sm admin-only" onclick="deleteKontakt('${k.id}')">🗑️</button>
+            <button class="btn-sm admin-only" onclick="deleteKontakt('${k.id}')" style="margin-left:10px;">🗑️</button>
         </div>
     `).join('');
 }
-function openKontaktModal(){ openModal('kontakt-modal'); }
-function deleteKontakt(id){ removeArrayItemSafe('kontakte', id); }
 
+// SETTINGS
 function renderSettings(){
-    let h = '<table style="width:100%; font-size:13px; text-align:left;"><tr><th>Artikel</th><th>Netto / Einheit</th><th>Brutto / Einheit</th></tr>';
+    renderSettingsART();
+    
+    // Team-Tabelle Update mit Email Check
+    db.ref('users').once('value', snap=>{
+        const users = Object.values(snap.val()||{});
+        let h = '<table style="width:100%;font-size:13px; text-align:left;"><tr><th>E-Mail</th><th>Rolle</th></tr>';
+        users.forEach(u => {
+            const emailStr = u.email || 'Unbekannt';
+            h += `<tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:8px 4px;">${emailStr}</td>
+                <td style="padding:8px 4px;">${u.role}</td>
+            </tr>`;
+        });
+        h += '</table>';
+        if($('team-list-container')) $('team-list-container').innerHTML = h;
+    });
+}
+
+function renderSettingsART(){
+    let h = '<table style="width:100%; font-size:13px; text-align:left;"><tr><th>Artikel</th><th>Netto</th><th>Brutto</th></tr>';
     (state.ingredients || []).sort((a,b)=>a.name.localeCompare(b.name)).forEach(ing => {
         h += `
             <tr style="border-bottom:1px solid #f1f5f9;">
-                <td style="padding:8px 4px;">${ing.name}</td>
-                <td style="padding:8px 4px;"><input type="number" step="0.01" value="${ing.priceNet}" style="width:80px; padding:6px;"></td>
-                <td style="padding:8px 4px;"><input type="number" step="0.01" value="${ing.priceGross}" style="width:80px; padding:6px;"></td>
+                <td style="padding:8px 4px; max-width: 120px; word-wrap: break-word;">${ing.name}</td>
+                <td style="padding:8px 4px;"><input type="number" step="0.01" id="set-ex-${ing.id.replace(/\s/g, '_')}" value="${ing.priceNet}" style="width:70px; padding:6px;"></td>
+                <td style="padding:8px 4px;"><input type="number" step="0.01" id="set-inc-${ing.id.replace(/\s/g, '_')}" value="${ing.priceGross}" style="width:70px; padding:6px;"></td>
             </tr>
         `;
     });
     h += '</table>';
+    
     const listEl = $('settings-art-list');
     if(listEl) listEl.innerHTML = h;
 
