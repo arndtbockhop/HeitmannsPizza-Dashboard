@@ -139,7 +139,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
 #login-screen { position:fixed; inset:0; background:var(--bg); z-index:20000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
 
 /* =========================================
-   MOBILE OPTIMIZATION (THE MAGIC)
+   MOBILE OPTIMIZATION
    ========================================= */
 .mobile-bottom-nav{display:none;}
 @media (max-width: 900px){
@@ -150,7 +150,6 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
   .cal-day{min-height:58px; font-size:11px;}
   .modal{max-width:95%; max-height:85vh; margin:auto;}
   
-  /* Perfekte Aufteilung der unteren Navigationsleiste */
   .mobile-bottom-nav{
       display:flex; 
       position:fixed; 
@@ -162,12 +161,12 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
       border-top:1px solid var(--border); 
       padding:10px 5px calc(10px + env(safe-area-inset-bottom)); 
       z-index:1000;
-      justify-content: space-around; /* Verteilt Buttons gleichmäßig */
+      justify-content: space-around;
   }
   .mobile-bottom-nav button { 
-      flex: 1; /* Jeder Button nimmt gleich viel Platz ein */
-      margin: 0 4px; /* Kleiner Abstand dazwischen */
-      font-size: 20px; /* Größere Emojis */
+      flex: 1; 
+      margin: 0 4px; 
+      font-size: 20px; 
       min-height: 48px; 
       padding: 0;
       background: transparent;
@@ -403,6 +402,7 @@ const auth=firebase.auth();
 
 let state={role:'staff', events:[], kontakte:[], einkauf:[], recipes:[], pizzas:[], ingredients:[], cateringDefaults:{}, cateringScenarios:[], calYear:new Date().getFullYear(), calMonth:new Date().getMonth(), editEventId:null, editKontaktId:null};
 let pizzaMengen={}, dipMengen={aioli:0, hothoney:0};
+let allUsers = [];
 
 const $ = id => document.getElementById(id);
 function showToast(m){const w=$('toast-wrap'),t=document.createElement('div');t.className='toast show';t.textContent=m||'Gespeichert';w.appendChild(t);setTimeout(()=>{t.remove()},2200);}
@@ -645,16 +645,27 @@ function toggleAvailability(eid, available) {
         let unavail = ev.unavailUIDs || [];
 
         if (available) {
-            if (!avail.includes(uid)) avail.push(uid);
-            unavail = unavail.filter(x => x !== uid);
+            if (avail.includes(uid)) {
+                avail = avail.filter(x => x !== uid);
+            } else {
+                avail.push(uid);
+                unavail = unavail.filter(x => x !== uid);
+            }
         } else {
-            if (!unavail.includes(uid)) unavail.push(uid);
-            avail = avail.filter(x => x !== uid);
+            if (unavail.includes(uid)) {
+                unavail = unavail.filter(x => x !== uid);
+            } else {
+                unavail.push(uid);
+                avail = avail.filter(x => x !== uid);
+            }
         }
 
         ev.availUIDs = avail;
         ev.unavailUIDs = unavail;
         return ev;
+    }, (error, committed) => {
+        if(error) showToast("Fehler aufgetreten!");
+        else if(committed) showToast("Verfügbarkeit gespeichert!");
     });
 }
 
@@ -1000,7 +1011,7 @@ function renderKontakte(){
         <div class="contact-item card">
             <div class="event-info">
                 <b style="font-size:15px;">${k.name}</b><br>
-                <small style="color:var(--muted)">${k.firma || 'Kontakt'}</small>
+                <small style="color:var(--muted)">${k.firma || k.typ || 'Kontakt'}</small>
             </div>
             <div class="contact-tools">
                 ${k.tel ? `<a href="tel:${k.tel}">📞</a>` : ''}
