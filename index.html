@@ -17,9 +17,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .nav-item{padding:9px 16px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:8px;transition:all .15s;border-left:3px solid transparent;font-size:13px}
 .nav-item:hover{background:#f1f5f9;color:var(--text)}
 .nav-item.active{background:var(--blue-light);color:var(--blue);border-left-color:var(--blue);font-weight:500}
-.live-badge{margin-top:auto;padding:12px 16px;font-size:11px;color:var(--green);display:flex;align-items:center;gap:6px}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .main{flex:1;padding:24px;overflow-y:auto;padding-bottom: 80px;} 
 .page{display:none;flex-direction:column;gap:20px}
 .page.active{display:flex}
@@ -129,6 +126,14 @@ td{padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
 
 #login-screen { position:fixed; inset:0; background:var(--bg); z-index:20000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
 
+/* TABS FÜR EINSTELLUNGEN */
+.settings-tabs { display:flex; gap:12px; border-bottom:1px solid var(--border); margin-bottom:16px; overflow-x:auto; }
+.settings-tab { padding:10px 4px; cursor:pointer; color:var(--muted); font-weight:500; font-size:14px; border-bottom:2px solid transparent; transition:all .15s; white-space:nowrap; }
+.settings-tab:hover { color:var(--text); }
+.settings-tab.active { color:var(--blue); border-bottom-color:var(--blue); }
+.settings-panel { display:none; }
+.settings-panel.active { display:block; }
+
 /* ROLE-BASED VISIBILITY */
 body:not([data-role="superadmin"]):not([data-role="admin"]) .admin-only,
 body:not([data-role="superadmin"]) .superadmin-only {
@@ -144,7 +149,7 @@ body:not([data-role="superadmin"]) .superadmin-only {
   .app{flex-direction:column;min-height:100dvh}
   .sidebar{width:100%;min-width:100%;border-right:none;border-bottom:1px solid var(--border);padding:10px 0 8px;display:block;overflow:hidden;white-space:normal}
   .sidebar-logo{padding:0 16px 0;border-bottom:none;margin-bottom:0;display:block;font-size:16px}
-  .sidebar .nav-item,.live-badge{display:none}
+  .sidebar .nav-item{display:none} /* Sidebar items verstecken, ABER Mobile Nav hat einen Logout */
   .main{padding:16px 12px calc(80px + env(safe-area-inset-bottom))}
   .page{gap:12px}
   .page-header{flex-direction:column;align-items:stretch;gap:10px}
@@ -184,7 +189,7 @@ body:not([data-role="superadmin"]) .superadmin-only {
   <div class="nav-item admin-only" onclick="showPage('einkauf',this)">Einkaufsliste</div>
   <div class="nav-item admin-only" onclick="showPage('kontakte',this)">Kontakte</div>
   <div class="nav-item superadmin-only" onclick="showPage('settings',this)" style="margin-top:10px; border-top:1px solid var(--border); padding-top:16px;">⚙️ Einstellungen</div>
-  <div class="live-badge" style="cursor:pointer" onclick="auth.signOut()"><span class="live-dot"></span>Logout</div>
+  <div class="nav-item" style="margin-top:auto; color:var(--red); font-weight:600;" onclick="auth.signOut()">🚪 Logout</div>
 </div>
 
 <div class="main">
@@ -281,17 +286,17 @@ body:not([data-role="superadmin"]) .superadmin-only {
           <div class="form-group"><label>Gästezahl</label><input type="number" id="cat-gaeste" value="30" min="1" oninput="calcCatering()"/></div>
           <div class="form-group"><label>Strecke km (hin & zurück)</label><input type="number" id="cat-km" value="48" min="0" oninput="calcCatering()"/></div>
           <div class="form-group"><label>Arbeitskräfte</label><input type="number" id="cat-ak" value="2" min="1" oninput="calcCatering()"/></div>
-          <div class="form-group"><label>Stundensatz €/h</label><input type="number" id="cat-stundensatz" value="18" min="0" step="0.5" oninput="calcCatering()"/></div>
-          <div class="form-group"><label>Wareneinsatz €/Gast</label><input type="number" id="cat-waren" value="3.5" min="0" step="0.1" oninput="calcCatering()"/></div>
+          <div class="form-group"><label id="label-cat-stundensatz">Stundensatz €/h</label><input type="number" id="cat-stundensatz" min="0" step="0.5" oninput="calcCatering()"/></div>
+          <div class="form-group"><label id="label-cat-waren">Wareneinsatz €/Gast</label><input type="number" id="cat-waren" min="0" step="0.1" oninput="calcCatering()"/></div>
           <div class="form-group"><label>Zielmarge (auto)</label><input id="cat-marge-display" readonly /></div>
         </div>
       </div>
       <div class="card"><div class="cat-section-title">FIXKOSTEN</div>
         <div style="display:flex;flex-direction:column;gap:10px">
-          <div class="form-group"><label>Gaspauschale €</label><input type="number" id="cat-gas" value="10" oninput="calcCatering()"/></div>
-          <div class="form-group"><label>Entsorgung €</label><input type="number" id="cat-entsorgung" value="15" oninput="calcCatering()"/></div>
-          <div class="form-group"><label>Miete Heitmann €</label><input type="number" id="cat-miete" value="45" oninput="calcCatering()"/></div>
-          <div class="form-group"><label>km-Satz €/km</label><input type="number" id="cat-kmsatz" value="0.8" step="0.05" oninput="calcCatering()"/></div>
+          <div class="form-group"><label id="label-cat-gas">Gaspauschale €</label><input type="number" id="cat-gas" oninput="calcCatering()"/></div>
+          <div class="form-group"><label id="label-cat-entsorgung">Entsorgung €</label><input type="number" id="cat-entsorgung" oninput="calcCatering()"/></div>
+          <div class="form-group"><label id="label-cat-miete">Miete Heitmann €</label><input type="number" id="cat-miete" oninput="calcCatering()"/></div>
+          <div class="form-group"><label id="label-cat-kmsatz">km-Satz €/km</label><input type="number" id="cat-kmsatz" step="0.05" oninput="calcCatering()"/></div>
         </div>
       </div>
     </div>
@@ -328,19 +333,68 @@ body:not([data-role="superadmin"]) .superadmin-only {
 <div class="page superadmin-only" id="page-settings">
   <div class="page-header"><div class="page-title">Stammdaten & Systemeinstellungen</div></div>
   
-  <div class="card">
-    <div class="card-title">Zutaten-Preise anpassen</div>
-    <div style="overflow-x:auto; margin-bottom:16px;">
-      <div id="settings-art-list"></div>
-    </div>
-    <button class="btn-primary" style="width:100%; padding:12px; font-size:15px;" onclick="saveSettingsART()">💾 Preise in Datenbank speichern</button>
+  <div class="settings-tabs">
+      <div class="settings-tab active" onclick="switchSettingsTab('zutaten', this)">Zutatenpreise</div>
+      <div class="settings-tab" onclick="switchSettingsTab('rezepte', this)">Sub-Rezepte</div>
+      <div class="settings-tab" onclick="switchSettingsTab('pizzas', this)">Pizzen</div>
+      <div class="settings-tab" onclick="switchSettingsTab('catering', this)">Catering-Einstellungen</div>
+      <div class="settings-tab" onclick="switchSettingsTab('team', this)">Team & Rechte</div>
   </div>
 
-  <div class="card" style="margin-top: 20px;">
-    <div class="card-title">Team & Rechte (Nur Ober-Admin)</div>
-    <div style="overflow-x:auto;">
-      <div id="team-list-container"></div>
-    </div>
+  <div id="panel-zutaten" class="settings-panel active">
+      <div class="card">
+        <div class="card-title">Zutaten-Preise anpassen (Live in alle Kalkulationen)</div>
+        <div style="overflow-x:auto; margin-bottom:16px;"><div id="settings-art-list"></div></div>
+        <button class="btn-primary" style="width:100%; padding:12px; font-size:15px;" onclick="saveSettingsART()">💾 Preise in Datenbank speichern</button>
+      </div>
+  </div>
+
+  <div id="panel-rezepte" class="settings-panel">
+      <div class="card">
+         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div class="card-title" style="margin-bottom:0">Gespeicherte Sub-Rezepte</div>
+            <button class="btn-primary" onclick="openRecipeModal()">+ Neues Rezept</button>
+         </div>
+         <div id="settings-recipes-list"></div>
+      </div>
+  </div>
+
+  <div id="panel-pizzas" class="settings-panel">
+      <div class="card">
+         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div class="card-title" style="margin-bottom:0">Gespeicherte Pizzen</div>
+            <button class="btn-primary" onclick="openPizzaModal()">+ Neue Pizza</button>
+         </div>
+         <div id="settings-pizzas-list"></div>
+      </div>
+  </div>
+
+  <div id="panel-catering" class="settings-panel">
+      <div class="card" style="margin-bottom:16px">
+         <div class="card-title">Globale Fixkosten & Vorgaben</div>
+         <div class="form-grid">
+             <div class="form-group"><label>Stundensatz €/h</label><input type="number" id="set-cat-stundensatz" step="0.5"></div>
+             <div class="form-group"><label>km-Satz €/km</label><input type="number" id="set-cat-kmsatz" step="0.05"></div>
+             <div class="form-group"><label>Wareneinsatz €/Gast</label><input type="number" id="set-cat-waren" step="0.1"></div>
+             <div class="form-group"><label>Umsatzsteuer (z.B. 1.19)</label><input type="number" id="set-cat-ust" step="0.01"></div>
+             <div class="form-group"><label>Gaspauschale €</label><input type="number" id="set-cat-gas" step="1"></div>
+             <div class="form-group"><label>Entsorgung €</label><input type="number" id="set-cat-entsorgung" step="1"></div>
+             <div class="form-group"><label>Miete Heitmann €</label><input type="number" id="set-cat-miete" step="1"></div>
+         </div>
+      </div>
+      <div class="card">
+         <div class="card-title">Catering Staffelungen (Gäste & Margen)</div>
+         <div id="scenario-list"></div>
+         <button class="btn-sm" style="margin-top:12px; margin-bottom:16px" onclick="addScenarioRow()">+ Neue Staffel-Zeile</button>
+         <button class="btn-primary" style="width:100%; padding:12px; font-size:15px;" onclick="saveCateringSettings()">💾 Catering-Einstellungen speichern</button>
+      </div>
+  </div>
+
+  <div id="panel-team" class="settings-panel">
+      <div class="card">
+        <div class="card-title">Team & Rechteverwaltung</div>
+        <div style="overflow-x:auto;"><div id="team-list-container"></div></div>
+      </div>
   </div>
 </div>
 
@@ -356,6 +410,7 @@ body:not([data-role="superadmin"]) .superadmin-only {
     <button class="admin-only" onclick="navTo('einkauf')" data-page="einkauf">Einkauf</button>
     <button class="admin-only" onclick="navTo('kontakte')" data-page="kontakte">Kontakte</button>
     <button class="superadmin-only" onclick="navTo('settings')" data-page="settings">⚙️ Settings</button>
+    <button onclick="auth.signOut()" style="color:var(--red); font-weight:600;">🚪 Logout</button>
   </div>
 </div>
 </div>
@@ -440,6 +495,44 @@ body:not([data-role="superadmin"]) .superadmin-only {
 </div>
 </div>
 
+<div class="modal-overlay" id="recipe-modal">
+  <div class="modal">
+    <div class="modal-title" id="recipe-modal-title">Rezept bearbeiten</div>
+    <div class="modal-body">
+       <div class="form-grid">
+          <div class="form-group"><label>Rezept-Name</label><input id="rm-name" placeholder="z.B. Tomatensauce"></div>
+          <div class="form-group"><label>Ertrag (Yield in g)</label><input type="number" id="rm-yield" value="100"></div>
+       </div>
+       <div style="margin-top:20px; margin-bottom:8px; font-weight:600; font-size:12px; color:var(--blue); border-bottom:1px solid var(--border); padding-bottom:4px;">ZUTATEN & SUB-REZEPTE</div>
+       <div id="recipe-items-container"></div>
+       <button class="btn-sm" style="margin-top:8px" onclick="addEditItemRow('recipe')">+ Zutat hinzufügen</button>
+    </div>
+    <div class="modal-footer">
+        <button onclick="closeModal('recipe-modal')">Abbrechen</button>
+        <button class="btn-primary" onclick="saveRecipe()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pizza-modal">
+  <div class="modal">
+    <div class="modal-title" id="pizza-modal-title">Pizza bearbeiten</div>
+    <div class="modal-body">
+       <div class="form-grid">
+          <div class="form-group"><label>Pizza-Name</label><input id="pm-name" placeholder="z.B. Margherita"></div>
+          <div class="form-group"><label>Verkaufspreis €</label><input type="number" id="pm-price" step="0.01" value="0"></div>
+       </div>
+       <div style="margin-top:20px; margin-bottom:8px; font-weight:600; font-size:12px; color:var(--blue); border-bottom:1px solid var(--border); padding-bottom:4px;">ZUTATEN & SUB-REZEPTE (Pro Pizza)</div>
+       <div id="pizza-items-container"></div>
+       <button class="btn-sm" style="margin-top:8px" onclick="addEditItemRow('pizza')">+ Zutat hinzufügen</button>
+    </div>
+    <div class="modal-footer">
+        <button onclick="closeModal('pizza-modal')">Abbrechen</button>
+        <button class="btn-primary" onclick="savePizza()">Speichern</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="detail-modal"><div class="modal" id="detail-content"></div></div>
 <div class="toast-wrap" id="toast-wrap"></div>
 
@@ -449,9 +542,13 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 const auth=firebase.auth();
 
-let state={role:'staff', events:[],kontakte:[],einkauf:[],cateringAngebote:[],pinnwand:'',notes:{pizza:[],dip:[],drink:[],catpizza:[],catmisc:[]},calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),editEventId:null,editKontaktId:null,editEinkaufId:null,editCateringAngebotId:null, ingredients:[], recipes:[], pizzas:[]};
+let state={role:'staff', events:[],kontakte:[],einkauf:[],cateringAngebote:[],pinnwand:'',notes:{pizza:[],dip:[],drink:[],catpizza:[],catmisc:[]},calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),editEventId:null,editKontaktId:null,editEinkaufId:null,editCateringAngebotId:null, editRecipeId:null, editPizzaId:null, ingredients:[], recipes:[], pizzas:[], cateringDefaults:{}, cateringScenarios:[]};
 let pizzaMengen={},dipMengen={aioli:0,hothoney:0}; 
 let allUsers = [];
+let editItemRows = [];
+let editScenarios = [];
+
+const SUPPLIER_LABELS = {A:'Andronaco',B:'Bührings',E:'Edeka',M:'Metro',Sonstige:'Sonstige'};
 
 function pushArrayItemSafe(key,item){
     db.ref(key).transaction(current=>{
@@ -492,121 +589,6 @@ document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click
 function openContactInfo(id){const k=state.kontakte.find(c=>c.id===id);if(!k)return;document.getElementById('ci-name').textContent=k.name;document.getElementById('ci-firma').textContent=k.firma?`Firma: ${k.firma}`:'';document.getElementById('ci-tel').textContent=k.tel||'–';document.getElementById('ci-email').textContent=k.email||'–';document.getElementById('ci-adresse').textContent=k.adresse||'–';document.getElementById('ci-notizen').innerHTML=(k.notizen||'Keine Notizen').replace(/\n/g,'<br>');openModal('contact-info-modal');}
 function copyModalField(id,l){const t=document.getElementById(id).textContent;if(t&&t!=='–')copyText(t,`${l} kopiert!`);}
 
-function migrateIngredients() {
-  const DEFAULT_ART = {
-    "Farina Pizzeria Rossa Caputo 5164": { p_ex: 0.9596, p_inc: 1.0268, sup: "Andronaco", grp: "Teig", artnr: "5164" },
-    "Semola di Grano Duro Rimancinata": { p_ex: 1.5899, p_inc: 1.7013, sup: "Andronaco", grp: "Teig", artnr: "" },
-    "Thunfisch Öl": { p_ex: 3.4759, p_inc: 3.7193, sup: "Andronaco", grp: "Belag", artnr: "3140" },
-    "Salami 55mm Tulip": { p_ex: 8.1900, p_inc: 8.7633, sup: "Andronaco", grp: "Belag", artnr: "1403" },
-    "Prosciutto Crudo con Interfoglio": { p_ex: 19.5800, p_inc: 20.9506, sup: "Andronaco", grp: "Belag", artnr: "1438" },
-    "Salami napoli picante": { p_ex: 12.6900, p_inc: 13.5783, sup: "Andronaco", grp: "Belag", artnr: "1406" },
-    "Mortadella": { p_ex: 12.9900, p_inc: 13.8993, sup: "Andronaco", grp: "Belag", artnr: "15499" },
-    "Kochschinken": { p_ex: 6.9900, p_inc: 7.4793, sup: "Andronaco", grp: "Belag", artnr: "1413" },
-    "Sardellen": { p_ex: 24.8750, p_inc: 26.6163, sup: "Andronaco", grp: "Belag", artnr: "3175" },
-    "Pancetta": { p_ex: 23.3330, p_inc: 24.9664, sup: "Edeka", grp: "Belag", artnr: "" },
-    "Fior di Latte Taglio Napoli latteria Sorrentina": { p_ex: 8.3450, p_inc: 8.9292, sup: "Andronaco", grp: "Milchprodukte / Käse", artnr: "11498" },
-    "Burrata Nonno Nanni": { p_ex: 15.9200, p_inc: 17.0344, sup: "Andronaco", grp: "Milchprodukte / Käse", artnr: "11551" },
-    "Aro Schmand 24%": { p_ex: 5.1980, p_inc: 5.5619, sup: "Metro", grp: "Milchprodukte / Käse", artnr: "" },
-    "Grana Padano DOP 1-8 Colla": { p_ex: 14.7900, p_inc: 15.8253, sup: "Andronaco", grp: "Milchprodukte / Käse", artnr: "13156" },
-    "Hirtenkäse": { p_ex: 7.4922, p_inc: 8.0167, sup: "Metro", grp: "Milchprodukte / Käse", artnr: "" },
-    "Gorgonzola": { p_ex: 7.3266, p_inc: 7.8395, sup: "Andronaco", grp: "Milchprodukte / Käse", artnr: "1132" },
-    "Ricotta di pecora Fresca": { p_ex: 4.9933, p_inc: 5.3429, sup: "Andronaco", grp: "Milchprodukte / Käse", artnr: "1386" },
-    "Stracciatella": { p_ex: 13.5600, p_inc: 14.5092, sup: "Andronaco", grp: "Milchprodukte / Käse", artnr: "11151" },
-    "Zwiebeln rot ": { p_ex: 1.2990, p_inc: 1.3899, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "O445" },
-    "Knoblauch GES": { p_ex: 6.4900, p_inc: 6.9443, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "O475" },
-    "Pelati Andronaco": { p_ex: 1.1960, p_inc: 1.2797, sup: "Andronaco", grp: "Sauce / Basis", artnr: "30163" },
-    "Polpa Andronaco": { p_ex: 1.2990, p_inc: 1.3899, sup: "Andronaco", grp: "Sauce / Basis", artnr: "30164" },
-    "Basilikum frisch": { p_ex: 14.9900, p_inc: 16.0393, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "O902" },
-    "Rucola frisch": { p_ex: 6.9900, p_inc: 7.4793, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "O106" },
-    "Blattspiat Miniportioniert": { p_ex: 2.1160, p_inc: 2.2641, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "" },
-    "Aro Eiswürfel": { p_ex: 0.9542, p_inc: 1.0210, sup: "Metro", grp: "Teig", artnr: "" },
-    "Champignon": { p_ex: 1.2300, p_inc: 1.3161, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "O500" },
-    "Cherrytomaten": { p_ex: 5.4900, p_inc: 5.8743, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "O312" },
-    "Zucchini": { p_ex: 1.7980, p_inc: 1.9239, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "O204" },
-    "Paprika": { p_ex: 2.9000, p_inc: 3.1030, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "O214" },
-    "Pesto alla genovese": { p_ex: 8.9800, p_inc: 9.6086, sup: "Andronaco", grp: "Sauce / Basis", artnr: "3456" },
-    "Pomodoro Secchi in olio": { p_ex: 5.0310, p_inc: 5.3832, sup: "Andronaco", grp: "Sauce / Basis", artnr: "34329" },
-    "Oliven schwarz in Scheiben": { p_ex: 2.4211, p_inc: 2.5907, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "30108" },
-    "Peperoncini Piccanti in olio": { p_ex: 6.7709, p_inc: 7.2449, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "3431" },
-    "Kapern": { p_ex: 7.5283, p_inc: 8.0553, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "34470" },
-    "Pistazien": { p_ex: 44.9900, p_inc: 48.1393, sup: "Andronaco", grp: "Belag", artnr: "6028" },
-    "Oregano eigenmarke Andronaco": { p_ex: 9.9900, p_inc: 10.6893, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "60196" },
-    "Salz": { p_ex: 0.3196, p_inc: 0.3420, sup: "Andronaco", grp: "Teig", artnr: "6391" },
-    "Crema di Balsamico": { p_ex: 9.5800, p_inc: 10.2506, sup: "Andronaco", grp: "Sauce / Basis", artnr: "" },
-    "Wallnusskerne Andronaco": { p_ex: 17.9900, p_inc: 19.2493, sup: "Andronaco", grp: "Gemüse & Kräuter", artnr: "" },
-    "Olio extra virgin san Giovanni Desantes": { p_ex: 7.9900, p_inc: 8.5493, sup: "Andronaco", grp: "Sonstiges", artnr: "" },
-    "Aro Rapsöl": { p_ex: 1.5560, p_inc: 1.6649, sup: "Metro", grp: "Dips", artnr: "" },
-    "Aro Zucker Raffinade": { p_ex: 0.8300, p_inc: 0.8881, sup: "Metro", grp: "Teig", artnr: "" },
-    "Aro Honig": { p_ex: 6.9933, p_inc: 7.4829, sup: "Metro", grp: "Dips", artnr: "" },
-    "Hefe Omas Ur-Hefe": { p_ex: 4.0476, p_inc: 4.3310, sup: "Metro", grp: "Teig", artnr: "" },
-    "Metro Chef Chiliflocken ": { p_ex: 20.2432, p_inc: 21.6603, sup: "Metro", grp: "Dips", artnr: "" },
-    "Chilipulver": { p_ex: 14.0769, p_inc: 15.0623, sup: "Metro", grp: "Dips", artnr: "" },
-    "Apfel essig ": { p_ex: 2.9000, p_inc: 3.1030, sup: "Metro", grp: "Dips", artnr: "" },
-    "Kuehne Senf ": { p_ex: 5.9600, p_inc: 6.3772, sup: "Metro", grp: "Dips", artnr: "" },
-    "Eier (Bührings)": { p_ex: 6.6667, p_inc: 6.6667, sup: "Bührings", grp: "Dips", artnr: "" },
-    "VioLife": { p_ex: 12.9283, p_inc: 13.8333, sup: "Edeka", grp: "Milchprodukte / Käse", artnr: "" },
-    "G&G Kürbiskerne ": { p_ex: 8.5607, p_inc: 9.1600, sup: "Edeka", grp: "Gemüse & Kräuter", artnr: "" },
-    "Wasser": { p_ex: 0, p_inc: 0, sup: "", grp: "Teig", artnr: "" }
-  };
-  const ingredients = {};
-  for (const [name, data] of Object.entries(DEFAULT_ART)) {
-    ingredients[name] = { id: name, name: name, supplier: data.sup || 'Andronaco', category: data.grp || 'Sonstiges', articleNumber: data.artnr || '', unit: 'kg', priceNet: data.p_ex || 0, priceGross: data.p_inc || 0, active: true };
-  }
-  db.ref('ingredients').set(ingredients);
-}
-
-function migrateRecipes() {
-  const TOMATENSAUCE = {'Polpa Andronaco':64, 'Pelati Andronaco':34.5, 'Salz':0.5, 'Aro Zucker Raffinade':0.4, 'Basilikum frisch':0.6};
-  const SPINATCREME = {'Blattspiat Miniportioniert':73, 'Aro Schmand 24%':11, 'Salz':1, 'Knoblauch GES':1, 'Hirtenkäse':12, 'Aro Zucker Raffinade':2};
-  const SCHMANDCREME = {'Aro Schmand 24%':90.55, 'Knoblauch GES':1.55, 'Grana Padano DOP 1-8 Colla':6.4, 'Salz':1.5};
-  const KONFIERT = {'Cherrytomaten':90.36, 'Knoblauch GES':1.2, 'Aro Rapsöl':4.52, 'Salz':1.51, 'Aro Zucker Raffinade':1.2, 'Oregano eigenmarke Andronaco':0.15};
-  const GRILLGEMUESE = {'Zucchini':38.4, 'Paprika':58.4, 'Aro Rapsöl':2, 'Salz':1.2};
-  const TEIG = {'Farina Pizzeria Rossa Caputo 5164':156.79, 'Aro Zucker Raffinade':2.35, 'Salz':5.18, 'Hefe Omas Ur-Hefe':0.62, 'Aro Eiswürfel':23.52, 'Wasser':81.54};
-  const AIOLI = {'Aro Rapsöl':36.375, 'Eier (Bührings)':8.75, 'Apfel essig ':0.5, 'Aro Zucker Raffinade':0.76, 'Salz':0.4, 'Kuehne Senf ':1.85, 'Knoblauch GES':1.365};
-  const HONEY = {'Aro Honig':44.5, 'Metro Chef Chiliflocken ':1.75, 'Apfel essig ':2.9, 'Chilipulver':0.85};
-
-  const recipes = {};
-  const addRec = (id, name, yieldGrams, sourceObj) => {
-    recipes[id] = { id, name, type: "component", yieldGrams, items: Object.entries(sourceObj).map(([ingName, grams]) => ({ ingredientId: ingName, grams })), active: true };
-  };
-  addRec('rec_teig', 'Teig', 1, TEIG);
-  addRec('rec_ts', 'Tomatensauce', 100, TOMATENSAUCE);
-  addRec('rec_sp', 'Spinatcreme', 100, SPINATCREME);
-  addRec('rec_sc', 'Schmandcreme', 100, SCHMANDCREME);
-  addRec('rec_kt', 'Konfierte Tomaten', 100, KONFIERT);
-  addRec('rec_gg', 'Grillgemuese', 100, GRILLGEMUESE);
-  addRec('rec_aioli', 'Aioli', 1, AIOLI);
-  addRec('rec_honey', 'Hot Honey', 1, HONEY);
-  db.ref('recipes').set(recipes);
-}
-
-function migratePizzas() {
-  const DEFAULT_PIZZAS = [
-    { id: "p_margherita", name: 'Margherita', price: 1.18, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 130 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 80 } ] },
-    { id: "p_pesto", name: 'Pesto', price: 1.02, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 130 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 35 }, { ingredientId: 'Pesto alla genovese', grams: 25 } ] },
-    { id: "p_salami", name: 'Salami', price: 1.31, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 130 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 35 }, { ingredientId: 'Salami 55mm Tulip', grams: 60 } ] },
-    { id: "p_funghi", name: 'Funghi', price: 0.98, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 130 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 35 }, { ingredientId: 'Champignon', grams: 50 } ] },
-    { id: "p_parma", name: 'Parma', price: 2.35, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 130 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 35 }, { ingredientId: 'Prosciutto Crudo con Interfoglio', grams: 50 }, { ingredientId: 'Rucola frisch', grams: 40 }, { ingredientId: 'Crema di Balsamico', grams: 8 }, { ingredientId: 'Pesto alla genovese', grams: 15 } ] },
-    { id: "p_tonno", name: 'Tonno', price: 1.14, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 130 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 35 }, { ingredientId: 'Thunfisch Öl', grams: 75 }, { ingredientId: 'Zwiebeln rot ', grams: 55 } ] },
-    { id: "p_verde", name: 'Verde', price: 2.31, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_sp', grams: 130 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 30 }, { ingredientId: 'Hirtenkäse', grams: 50 }, { ingredientId: 'Zwiebeln rot ', grams: 70 }, { ingredientId: 'Wallnusskerne Andronaco', grams: 25 } ] },
-    { id: "p_burrata", name: 'Burrata', price: 3.45, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 130 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Pesto alla genovese', grams: 15 }, { ingredientId: 'Pomodoro Secchi in olio', grams: 20 }, { ingredientId: 'Rucola frisch', grams: 40 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 35 }, { ingredientId: 'Burrata Nonno Nanni', grams: 125 } ] },
-    { id: "p_spicy_salami", name: 'Spicy Salami', price: 2.27, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 75 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 55 }, { ingredientId: 'Salami napoli picante', grams: 75 }, { ingredientId: 'Ricotta di pecora Fresca', grams: 40 }, { ingredientId: 'Aro Honig', grams: 10 }, { ingredientId: 'Peperoncini Piccanti in olio', grams: 10 } ] },
-    { id: "p_mortadella", name: 'Mortadella e Pistacchio', price: 2.20, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 130 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 35 }, { ingredientId: 'Mortadella', grams: 50 }, { ingredientId: 'Stracciatella', grams: 30 }, { ingredientId: 'Pistazien', grams: 6 } ] },
-    { id: "p_grillgemuese", name: 'Pizza Grillgemuese', price: 1.48, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 130 }, { recipeId: 'rec_gg', grams: 120 }, { ingredientId: 'Oliven schwarz in Scheiben', grams: 20 }, { ingredientId: 'Pomodoro Secchi in olio', grams: 20 }, { ingredientId: 'VioLife', grams: 35 } ] },
-    { id: "p_special_margherita", name: 'Special Margherita', price: 2.66, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_sc', grams: 100 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 35 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { recipeId: 'rec_kt', grams: 160 }, { ingredientId: 'Olio extra virgin san Giovanni Desantes', grams: 10 } ] },
-    { id: "p_speciale", name: 'Speciale', price: 1.01, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 130 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 35 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Kochschinken', grams: 50 }, { ingredientId: 'Champignon', grams: 35 } ] },
-    { id: "p_siziliana", name: 'Siziliana', price: 1.41, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_ts', grams: 130 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 35 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Zwiebeln rot ', grams: 20 }, { ingredientId: 'Sardellen', grams: 20 }, { ingredientId: 'Kapern', grams: 6 }, { ingredientId: 'Oliven schwarz in Scheiben', grams: 10 } ] },
-    { id: "p_gorgonzola", name: 'Gorgonzola e Spinacchi', price: 2.44, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_sc', grams: 100 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 35 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 6 }, { ingredientId: 'Blattspiat Miniportioniert', grams: 60 }, { ingredientId: 'Gorgonzola', grams: 40 }, { ingredientId: 'Cherrytomaten', grams: 60 } ] },
-    { id: "p_kuerbis", name: 'Kürbis', price: 3.30, items: [ { recipeId: 'rec_teig', grams: 1 }, { recipeId: 'rec_sc', grams: 150 }, { ingredientId: 'Grana Padano DOP 1-8 Colla', grams: 9 }, { ingredientId: 'Fior di Latte Taglio Napoli latteria Sorrentina', grams: 30 }, { ingredientId: 'Hirtenkäse', grams: 30 }, { ingredientId: 'Pancetta', grams: 60 }, { ingredientId: 'Zwiebeln rot ', grams: 60 }, { ingredientId: 'G&G Kürbiskerne ', grams: 5 }, { ingredientId: 'Crema di Balsamico', grams: 5 } ] }
-  ];
-  const pizzas = {};
-  DEFAULT_PIZZAS.forEach(p => { pizzas[p.id] = { ...p, active: true }; });
-  db.ref('pizzas').set(pizzas);
-}
-
-function loadIngredients(d){ state.ingredients = Object.values(d.ingredients||{}).filter(i=>i.active!==false); }
-function loadRecipes(d){ state.recipes = Object.values(d.recipes||{}).filter(r=>r.active!==false); }
-function loadPizzas(d){ state.pizzas = Object.values(d.pizzas||{}).filter(p=>p.active!==false); }
 function getIngredient(id){ return (state.ingredients||[]).find(i=>i.id===id); }
 
 auth.onAuthStateChanged(u=>{
@@ -717,14 +699,18 @@ function listenAll(){
   db.ref('/').on('value',snap=>{
     const d=snap.val()||{};
     
-    if(!d.ingredients) migrateIngredients();
-    else loadIngredients(d);
-
-    if(!d.recipes) migrateRecipes();
-    else loadRecipes(d);
-
-    if(!d.pizzas) migratePizzas();
-    else loadPizzas(d);
+    state.ingredients = Object.values(d.ingredients||{}).filter(i=>i.active!==false);
+    state.recipes = Object.values(d.recipes||{}).filter(r=>r.active!==false);
+    state.pizzas = Object.values(d.pizzas||{}).filter(p=>p.active!==false);
+    
+    // Catering Fallback defaults if empty
+    state.cateringDefaults = d.cateringDefaults || {stundensatz:18, kmsatz:0.8, waren:3.5, gas:10, entsorgung:15, miete:45, ust:1.19};
+    state.cateringScenarios = d.cateringScenarios || [
+        {min:30,max:49,label:'30 - 49 P.',stunden:35,marge:0.5},{min:50,max:69,label:'50 - 69 P.',stunden:39,marge:0.6},
+        {min:70,max:99,label:'70 - 99 P.',stunden:46,marge:0.7},{min:100,max:149,label:'100 - 149 P.',stunden:52,marge:0.85},
+        {min:150,max:199,label:'150 - 199 P.',stunden:59.5,marge:1.0},{min:200,max:299,label:'200 - 299 P.',stunden:64.5,marge:1.2},
+        {min:300,max:400,label:'300 - 400 P.',stunden:71.5,marge:1.1}
+    ];
 
     state.events=(Array.isArray(d.events)?d.events:Object.values(d.events||{})).map(normalizeEvent);
     state.kontakte=(Array.isArray(d.kontakte)?d.kontakte:Object.values(d.kontakte||{})).map(normalizeKontakt);
@@ -782,12 +768,6 @@ function renderAllEvents(){const q=(document.getElementById('events-search')?.va
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 function renderCalendar(){const y=state.calYear,m=state.calMonth;document.getElementById('cal-title').textContent=MONTHS[m]+' '+y;document.getElementById('cal-headers').innerHTML=['Mo','Di','Mi','Do','Fr','Sa','So'].map(d=>`<div class="cal-header-cell">${d}</div>`).join('');const f=new Date(y,m,1).getDay(),off=(f===0)?6:f-1,dts=new Date(y,m+1,0).getDate(),tdy=new Date();let ht='';for(let i=0;i<off;i++)ht+='<div></div>';for(let d=1;d<=dts;d++){const cD=new Date(y,m,d);cD.setHours(0,0,0,0);const es=state.events.filter(e=>{if(!e.date)return false;const st=new Date(e.date);st.setHours(0,0,0,0);const en=e.endDate?new Date(e.endDate):st;en.setHours(0,0,0,0);return cD>=st&&cD<=en;});const isT=d===tdy.getDate()&&m===tdy.getMonth()&&y===tdy.getFullYear();const cC=es.length?(' '+((es[0].company||'HP').toLowerCase())):'';ht+=`<div class="cal-day${isT?' today':''}${es.length?' has-event':''}${cC}" onclick="${es.length?`showEventDetail('${es[0].id}')`:'openEventModal()'}"><div style="font-weight:600;font-size:12px">${d}</div>${es.map(e=>`<div class="cal-event-tag">${e.title}</div>`).join('')}</div>`;}document.getElementById('cal-body').innerHTML=ht;const cM=new Date(y,m,1),nM=new Date(y,m+2,1);const mE=state.events.filter(e=>{if(!e.date)return false;const st=new Date(e.date);st.setHours(0,0,0,0);const en=e.endDate?new Date(e.endDate):st;en.setHours(0,0,0,0);return en>=cM&&st<nM;});document.getElementById('cal-event-list').innerHTML=mE.length?mE.sort((a,b)=>a.date>b.date?1:-1).map(eventItemHTML).join(''):'<div style="color:var(--muted);font-size:13px">Keine Events.</div>';}
 function changeMonth(d){state.calMonth+=d;if(state.calMonth>11){state.calMonth=0;state.calYear++;}if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar();}
-
-const SUPPLIER_LABELS = {A:'Andronaco',B:'Bührings',E:'Edeka',M:'Metro',Sonstige:'Sonstige'};
-const CAT_DEFAULTS={stundensatz:18,kmsatz:0.8,waren:3.5,gas:10,entsorgung:15,miete:45,ust:1.19};
-const CAT_SCENARIOS=[{min:30,max:49,label:'30 - 49 P.',stunden:35,marge:0.5},{min:50,max:69,label:'50 - 69 P.',stunden:39,marge:0.6},{min:70,max:99,label:'70 - 99 P.',stunden:46,marge:0.7},{min:100,max:149,label:'100 - 149 P.',stunden:52,marge:0.85},{min:150,max:199,label:'150 - 199 P.',stunden:59.5,marge:1.0},{min:200,max:299,label:'200 - 299 P.',stunden:64.5,marge:1.2},{min:300,max:400,label:'300 - 400 P.',stunden:71.5,marge:1.1}];
-
-function getCatScenario(g){return CAT_SCENARIOS.find(s=>g>=s.min&&g<=s.max)||null;}
 
 function addG(acc,k,g){if(!acc[k])acc[k]=0;acc[k]+=g;}
 
@@ -934,7 +914,22 @@ function saveDipsToEinkauf(){
   }, (err, comm) => { if(!err && comm) showToast('Dips in Einkaufsliste übernommen!'); });
 }
 
+// === NEUE STAMMDATEN LOGIK ===
+function switchSettingsTab(tabId, btn) {
+    document.querySelectorAll('.settings-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + tabId).classList.add('active');
+}
+
 function renderSettings(){
+  renderSettingsART();
+  renderSettingsRecipes();
+  renderSettingsPizzas();
+  renderSettingsCatering();
+}
+
+function renderSettingsART(){
   let h = '<table style="width:100%;font-size:13px; text-align:left;"><tr><th>Artikel</th><th>Netto / Einheit</th><th>Brutto / Einheit</th></tr>';
   (state.ingredients||[]).sort((a,b)=>a.name.localeCompare(b.name)).forEach(ing => {
      h += `<tr style="border-bottom:1px solid #f1f5f9;">
@@ -946,18 +941,190 @@ function renderSettings(){
   h += '</table>';
   document.getElementById('settings-art-list').innerHTML = h;
 }
+
 function saveSettingsART(){
   (state.ingredients||[]).forEach(ing => {
      let ex = document.getElementById('set-ex-'+ing.id.replace(/\s/g,'_'));
      let inc = document.getElementById('set-inc-'+ing.id.replace(/\s/g,'_'));
      if(ex) ing.priceNet = parseFloat(ex.value)||0;
      if(inc) ing.priceGross = parseFloat(inc.value)||0;
-     db.ref(`ingredients/${ing.id}`).update({
-         priceNet: ing.priceNet,
-         priceGross: ing.priceGross
-     });
+     db.ref(`ingredients/${ing.id}`).update({priceNet: ing.priceNet, priceGross: ing.priceGross});
   });
   showToast('Preise erfolgreich in der Datenbank aktualisiert!');
+}
+
+function renderSettingsRecipes() {
+    const c = document.getElementById('settings-recipes-list');
+    c.innerHTML = state.recipes.map(r => `
+        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f1f5f9; align-items:center;">
+            <div><b style="font-size:14px">${r.name}</b> <span style="color:var(--muted);font-size:12px;margin-left:6px;">(${r.yieldGrams}g Ertrag)</span></div>
+            <div style="display:flex; gap:6px;">
+                <button class="btn-sm" onclick="openRecipeModal('${r.id}')">Bearbeiten</button>
+                <button class="btn-danger btn-sm" onclick="deleteRecipe('${r.id}')">×</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderSettingsPizzas() {
+    const c = document.getElementById('settings-pizzas-list');
+    c.innerHTML = state.pizzas.map(p => `
+        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f1f5f9; align-items:center;">
+            <div><b style="font-size:14px">${p.name}</b> <span style="color:var(--muted);font-size:12px;margin-left:6px;">(${fmt(p.price)})</span></div>
+            <div style="display:flex; gap:6px;">
+                <button class="btn-sm" onclick="openPizzaModal('${p.id}')">Bearbeiten</button>
+                <button class="btn-danger btn-sm" onclick="deletePizza('${p.id}')">×</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderSettingsCatering() {
+    const defs = state.cateringDefaults || {};
+    ['stundensatz','kmsatz','waren','gas','entsorgung','miete','ust'].forEach(k => {
+        const el = document.getElementById(`set-cat-${k}`);
+        if(el) el.value = defs[k] || 0;
+    });
+    editScenarios = JSON.parse(JSON.stringify(state.cateringScenarios || []));
+    renderScenariosTable();
+}
+
+function renderScenariosTable() {
+    const c = document.getElementById('scenario-list');
+    c.innerHTML = editScenarios.map((s, i) => `
+        <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center; flex-wrap:wrap; background:#f8fafc; padding:8px; border-radius:8px; border:1px solid var(--border);">
+            <div style="display:flex; gap:4px; align-items:center;"><span style="font-size:11px;color:var(--muted)">Min:</span><input type="number" value="${s.min}" onchange="editScenarios[${i}].min=Number(this.value)" style="width:60px;padding:4px"></div>
+            <div style="display:flex; gap:4px; align-items:center;"><span style="font-size:11px;color:var(--muted)">Max:</span><input type="number" value="${s.max}" onchange="editScenarios[${i}].max=Number(this.value)" style="width:60px;padding:4px"></div>
+            <div style="display:flex; gap:4px; align-items:center; flex:1; min-width:120px;"><input type="text" placeholder="Bezeichnung" value="${s.label}" onchange="editScenarios[${i}].label=this.value" style="width:100%;padding:4px"></div>
+            <div style="display:flex; gap:4px; align-items:center;"><span style="font-size:11px;color:var(--muted)">Std:</span><input type="number" value="${s.stunden}" step="0.5" onchange="editScenarios[${i}].stunden=Number(this.value)" style="width:60px;padding:4px"></div>
+            <div style="display:flex; gap:4px; align-items:center;"><span style="font-size:11px;color:var(--muted)">Marge:</span><input type="number" value="${s.marge}" step="0.05" onchange="editScenarios[${i}].marge=Number(this.value)" style="width:60px;padding:4px"></div>
+            <button class="btn-danger btn-sm" onclick="editScenarios.splice(${i},1);renderScenariosTable()">×</button>
+        </div>
+    `).join('');
+}
+
+function addScenarioRow() {
+    editScenarios.push({min: 0, max: 0, label: 'Neue Staffel', stunden: 0, marge: 1.0});
+    renderScenariosTable();
+}
+
+function saveCateringSettings() {
+    const defs = {};
+    ['stundensatz','kmsatz','waren','gas','entsorgung','miete','ust'].forEach(k => {
+        defs[k] = parseFloat(document.getElementById('set-cat-'+k).value) || 0;
+    });
+    db.ref('cateringDefaults').set(defs);
+    db.ref('cateringScenarios').set(editScenarios);
+    showToast('Catering-Einstellungen erfolgreich gespeichert!');
+}
+
+function populateEditItemRows(items) {
+    editItemRows = (items || []).map(i => ({
+        grams: i.grams || 0,
+        ref: i.ingredientId ? 'ing_' + i.ingredientId : (i.recipeId ? 'rec_' + i.recipeId : '')
+    }));
+}
+
+function getParsedEditItems() {
+    return editItemRows.map(row => {
+        const ref = row.ref || '';
+        const realId = ref.replace(/^(ing_|rec_)/, '');
+        if(!realId) return null;
+        return ref.startsWith('rec_') ? { recipeId: realId, grams: row.grams } : { ingredientId: realId, grams: row.grams };
+    }).filter(Boolean);
+}
+
+function renderEditItemRows(containerId, excludeRecipeId = null) {
+    const container = document.getElementById(containerId);
+    let ingOptions = state.ingredients.map(i => `<option value="ing_${i.id}">${i.name}</option>`).join('');
+    let recOptions = state.recipes.filter(r => r.id !== excludeRecipeId).map(r => `<option value="rec_${r.id}">${r.name} (Sub-Rezept)</option>`).join('');
+    
+    container.innerHTML = editItemRows.map((item, idx) => `
+        <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;background:#f8fafc;padding:6px 8px;border-radius:6px;border:1px solid var(--border);">
+            <select style="flex:1" onchange="editItemRows[${idx}].ref=this.value">
+                <option value="">-- Zutat/Rezept wählen --</option>
+                <optgroup label="Basis-Zutaten">${ingOptions}</optgroup>
+                <optgroup label="Sub-Rezepte">${recOptions}</optgroup>
+            </select>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <input type="number" style="width:70px" placeholder="Menge" value="${item.grams}" onchange="editItemRows[${idx}].grams=Number(this.value)">
+              <span style="font-size:12px;color:var(--muted)">g / Stk</span>
+            </div>
+            <button class="btn-danger btn-sm" onclick="editItemRows.splice(${idx},1);renderEditItemRows('${containerId}','${excludeRecipeId}')">×</button>
+        </div>
+    `).join('');
+
+    const selects = container.querySelectorAll('select');
+    editItemRows.forEach((item, idx) => { if (selects[idx]) selects[idx].value = item.ref; });
+}
+
+function addEditItemRow(type) {
+    editItemRows.push({ grams: 0, ref: '' });
+    if(type === 'recipe') renderEditItemRows('recipe-items-container', state.editRecipeId);
+    else renderEditItemRows('pizza-items-container');
+}
+
+function openRecipeModal(id) {
+    state.editRecipeId = id || null;
+    const r = id ? state.recipes.find(x => x.id === id) : null;
+    document.getElementById('rm-name').value = r ? r.name : '';
+    document.getElementById('rm-yield').value = r ? r.yieldGrams : 100;
+    populateEditItemRows(r ? r.items : []);
+    renderEditItemRows('recipe-items-container', state.editRecipeId);
+    openModal('recipe-modal');
+}
+
+function saveRecipe() {
+    const id = state.editRecipeId || 'rec_' + Date.now();
+    const r = {
+        id: id,
+        name: document.getElementById('rm-name').value || 'Unbenanntes Rezept',
+        type: 'component',
+        yieldGrams: Number(document.getElementById('rm-yield').value) || 100,
+        items: getParsedEditItems(),
+        active: true
+    };
+    db.ref(`recipes/${id}`).set(r);
+    closeModal('recipe-modal');
+    showToast('Rezept gespeichert');
+}
+
+function deleteRecipe(id) {
+    if(confirm('Möchtest du dieses Sub-Rezept wirklich unwiderruflich löschen?')) {
+        db.ref(`recipes/${id}`).remove();
+        showToast('Rezept gelöscht');
+    }
+}
+
+function openPizzaModal(id) {
+    state.editPizzaId = id || null;
+    const p = id ? state.pizzas.find(x => x.id === id) : null;
+    document.getElementById('pm-name').value = p ? p.name : '';
+    document.getElementById('pm-price').value = p ? p.price : 0;
+    populateEditItemRows(p ? p.items : []);
+    renderEditItemRows('pizza-items-container');
+    openModal('pizza-modal');
+}
+
+function savePizza() {
+    const id = state.editPizzaId || 'p_' + Date.now();
+    const p = {
+        id: id,
+        name: document.getElementById('pm-name').value || 'Neue Pizza',
+        price: parseFloat(document.getElementById('pm-price').value) || 0,
+        items: getParsedEditItems(),
+        active: true
+    };
+    db.ref(`pizzas/${id}`).set(p);
+    closeModal('pizza-modal');
+    showToast('Pizza gespeichert');
+}
+
+function deletePizza(id) {
+    if(confirm('Möchtest du diese Pizza wirklich unwiderruflich löschen?')) {
+        db.ref(`pizzas/${id}`).remove();
+        showToast('Pizza gelöscht');
+    }
 }
 
 function addNote(t){const id={'pizza':'pizza-note-input','dip':'dip-note-input','catpizza':'cat-pizza-note-input','catmisc':'cat-misc-note-input'};const v=document.getElementById(id[t]).value.trim();if(!v)return;db.ref('notes/'+t).transaction(a=>{let x=a||[];x.push({id:Date.now().toString(),text:v});return x;});document.getElementById(id[t]).value='';}
@@ -965,7 +1132,52 @@ function deleteNote(t,i){db.ref('notes/'+t).transaction(a=>{if(!a)return[];a.spl
 function renderNotes(t){const id={'pizza':'pizza-notes-list','dip':'dip-notes-list','catpizza':'cat-pizza-notes-list','catmisc':'cat-misc-notes-list'};const el=document.getElementById(id[t]);if(!el)return;const arr=state.notes[t]||[];el.innerHTML=arr.length?arr.map((n,i)=>`<div class="note-row"><span style="flex:1">${n.text}</span><button class="btn-danger btn-sm admin-only" onclick="deleteNote('${t}',${i})">×</button></div>`).join(''):'';}
 
 function calcCateringBlock({gaeste,km,stunden,stundensatz,waren,kmsatz,gas,entsorgung,miete,marge,ust}){const pK=stunden*stundensatz,wE=gaeste*waren,kK=km*kmsatz,fK=gas+entsorgung+miete;const mW=(pK+wE+kK+fK)*marge,zN=pK+wE+kK+fK+mW;const nG=gaeste?zN/gaeste:0,zB=zN*ust,bG=gaeste?zB/gaeste:0,st=zB-zN;return{personalkosten:pK,wareneinsatz:wE,kmKosten:kK,fixkosten:fK,margeWert:mW,zielpreisNetto:zN,nettoGast:nG,zielpreisBrutto:zB,bruttoGast:bG,steuern:st};}
-function calcCatering(){const gaeste=parseFloat(document.getElementById('cat-gaeste').value)||0,km=parseFloat(document.getElementById('cat-km').value)||0,ak=parseFloat(document.getElementById('cat-ak').value)||2,stundensatz=parseFloat(document.getElementById('cat-stundensatz').value)||CAT_DEFAULTS.stundensatz,waren=parseFloat(document.getElementById('cat-waren').value)||CAT_DEFAULTS.waren,gas=parseFloat(document.getElementById('cat-gas').value)||CAT_DEFAULTS.gas,entsorgung=parseFloat(document.getElementById('cat-entsorgung').value)||CAT_DEFAULTS.entsorgung,miete=parseFloat(document.getElementById('cat-miete').value)||CAT_DEFAULTS.miete,kmsatz=parseFloat(document.getElementById('cat-kmsatz').value)||CAT_DEFAULTS.kmsatz,ust=CAT_DEFAULTS.ust;const sz=getCatScenario(gaeste),mD=document.getElementById('cat-marge-display');if(mD)mD.value=sz?`${sz.label} (${String(sz.marge).replace('.',',')})`:'Außerhalb';const rE=document.getElementById('cat-result-rows');if(!sz){rE.innerHTML='<div style="color:var(--muted);font-size:13px">Gästezahl: 30-400</div>';['cat-netto-gast','cat-brutto-gast','cat-brutto-total'].forEach(id=>document.getElementById(id).textContent='–');return;}const mR=calcCateringBlock({gaeste,km,stunden:sz.stunden,stundensatz,waren,kmsatz,gas,entsorgung,miete,marge:sz.marge,ust});rE.innerHTML=[{l:'Gäste',v:gaeste},{l:'Personal h',v:sz.stunden+' h'},{l:'Personalkosten',v:fmt(mR.personalkosten)},{l:'Wareneinsatz',v:fmt(mR.wareneinsatz)},{l:'km-Kosten',v:fmt(mR.kmKosten)},{l:'Fixkosten',v:fmt(mR.fixkosten)},{l:'Marge',v:fmt(mR.margeWert)},{l:'Ziel netto',v:fmt(mR.zielpreisNetto)},{l:'Steuern',v:fmt(mR.steuern)}].map(r=>`<div class="result-row"><span style="color:var(--muted)">${r.l}</span><span>${r.v}</span></div>`).join('');document.getElementById('cat-netto-gast').textContent=fmt(mR.nettoGast);document.getElementById('cat-brutto-gast').textContent=fmt(mR.bruttoGast);document.getElementById('cat-brutto-total').textContent=fmt(mR.zielpreisBrutto);}
+function getCatScenario(g){return (state.cateringScenarios||[]).find(s=>g>=s.min&&g<=s.max)||null;}
+
+function calcCatering(){
+  const gaeste=parseFloat(document.getElementById('cat-gaeste').value)||0,
+        km=parseFloat(document.getElementById('cat-km').value)||0,
+        ak=parseFloat(document.getElementById('cat-ak').value)||2;
+        
+  const defs = state.cateringDefaults || {};
+  const stundensatz=parseFloat(document.getElementById('cat-stundensatz').value)||defs.stundensatz||18,
+        waren=parseFloat(document.getElementById('cat-waren').value)||defs.waren||3.5,
+        gas=parseFloat(document.getElementById('cat-gas').value)||defs.gas||10,
+        entsorgung=parseFloat(document.getElementById('cat-entsorgung').value)||defs.entsorgung||15,
+        miete=parseFloat(document.getElementById('cat-miete').value)||defs.miete||45,
+        kmsatz=parseFloat(document.getElementById('cat-kmsatz').value)||defs.kmsatz||0.8,
+        ust=defs.ust||1.19;
+
+  document.getElementById('cat-stundensatz').placeholder = defs.stundensatz||18;
+  document.getElementById('cat-waren').placeholder = defs.waren||3.5;
+  document.getElementById('cat-gas').placeholder = defs.gas||10;
+  document.getElementById('cat-entsorgung').placeholder = defs.entsorgung||15;
+  document.getElementById('cat-miete').placeholder = defs.miete||45;
+  document.getElementById('cat-kmsatz').placeholder = defs.kmsatz||0.8;
+
+  const sz=getCatScenario(gaeste),mD=document.getElementById('cat-marge-display');
+  if(mD)mD.value=sz?`${sz.label} (${String(sz.marge).replace('.',',')})`:'Außerhalb';
+  
+  const rE=document.getElementById('cat-result-rows');
+  if(!sz){
+      rE.innerHTML='<div style="color:var(--muted);font-size:13px">Gästezahl außerhalb der festgelegten Staffelung.</div>';
+      ['cat-netto-gast','cat-brutto-gast','cat-brutto-total'].forEach(id=>document.getElementById(id).textContent='–');
+      return;
+  }
+  
+  const mR=calcCateringBlock({gaeste,km,stunden:sz.stunden,stundensatz,waren,kmsatz,gas,entsorgung,miete,marge:sz.marge,ust});
+  
+  rE.innerHTML=[
+      {l:'Gäste',v:gaeste},{l:'Personal h',v:sz.stunden+' h'},{l:'Personalkosten',v:fmt(mR.personalkosten)},
+      {l:'Wareneinsatz',v:fmt(mR.wareneinsatz)},{l:'km-Kosten',v:fmt(mR.kmKosten)},{l:'Fixkosten',v:fmt(mR.fixkosten)},
+      {l:'Marge',v:fmt(mR.margeWert)},{l:'Ziel netto',v:fmt(mR.zielpreisNetto)},{l:'Steuern',v:fmt(mR.steuern)}
+  ].map(r=>`<div class="result-row"><span style="color:var(--muted)">${r.l}</span><span>${r.v}</span></div>`).join('');
+  
+  document.getElementById('cat-netto-gast').textContent=fmt(mR.nettoGast);
+  document.getElementById('cat-brutto-gast').textContent=fmt(mR.bruttoGast);
+  document.getElementById('cat-brutto-total').textContent=fmt(mR.zielpreisBrutto);
+}
+
 function resetCateringOfferForm(){state.editCateringAngebotId=null;document.getElementById('cat-offer-name').value='';document.getElementById('cat-dips-yesno').value='Nein';const sB=document.getElementById('cat-save-btn');if(sB)sB.textContent='Als Angebot speichern';}
 function saveCateringAngebot(){const a={id:state.editCateringAngebotId||Date.now().toString(),name:(document.getElementById('cat-offer-name').value||'Angebot').trim(),gaeste:document.getElementById('cat-gaeste').value,datum:new Date().toLocaleDateString('de-DE'),dips:document.getElementById('cat-dips-yesno').value,nettoGast:document.getElementById('cat-netto-gast').textContent,bruttoGesamt:document.getElementById('cat-brutto-total').textContent,inputs:{gaeste:document.getElementById('cat-gaeste').value,km:document.getElementById('cat-km').value,ak:document.getElementById('cat-ak').value,stundensatz:document.getElementById('cat-stundensatz').value,waren:document.getElementById('cat-waren').value,gas:document.getElementById('cat-gas').value,entsorgung:document.getElementById('cat-entsorgung').value,miete:document.getElementById('cat-miete').value,kmsatz:document.getElementById('cat-kmsatz').value},pizzaNotizen:[...(state.notes.catpizza||[])],sonstigeNotizen:[...(state.notes.catmisc||[])]};pushArrayItemSafe('cateringAngebote',a);const wE=!!state.editCateringAngebotId;resetCateringOfferForm();showToast(wE?'Aktualisiert':'Gespeichert');}
 function editCateringAngebot(id){const a=state.cateringAngebote.find(x=>x.id===id);if(!a)return;state.editCateringAngebotId=id;document.getElementById('cat-offer-name').value=a.name||'';document.getElementById('cat-dips-yesno').value=a.dips||'Nein';if(a.inputs)['gaeste','km','ak','stundensatz','waren','gas','entsorgung','miete','kmsatz'].forEach(f=>{const e=document.getElementById('cat-'+f);if(e&&a.inputs[f]!==undefined)e.value=a.inputs[f];});else if(a.gaeste)document.getElementById('cat-gaeste').value=a.gaeste;updateStateObj('notes/catpizza',Array.isArray(a.pizzaNotizen)?a.pizzaNotizen:[]);updateStateObj('notes/catmisc',Array.isArray(a.sonstigeNotizen)?a.sonstigeNotizen:[]);calcCatering();const sB=document.getElementById('cat-save-btn');if(sB)sB.textContent='Aktualisieren';document.getElementById('page-catering').scrollIntoView({behavior:'smooth',block:'start'});}
