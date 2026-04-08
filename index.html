@@ -623,11 +623,22 @@ function doLogin(){
   if(!e||!p) return showToast('Bitte E-Mail und 4-stellige PIN eingeben.');
   if(p.length !== 4 || isNaN(p)) return showToast('Die PIN muss exakt 4 Zahlen lang sein!');
   const fbPass = p + "-hp26";
-  auth.signInWithEmailAndPassword(e,fbPass).catch(err=>{
-     if(err.code === 'auth/user-not-found') {
-         auth.createUserWithEmailAndPassword(e,fbPass).catch(e2=>alert(e2.message));
+
+  // Zuerst normalen Login versuchen
+  auth.signInWithEmailAndPassword(e, fbPass).catch(err => {
+     // Wenn das fehlschlägt, versuchen wir den User direkt neu zu registrieren
+     if(err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+         auth.createUserWithEmailAndPassword(e, fbPass).catch(e2 => {
+             // Wenn das auch fehlschlägt, weil die E-Mail schon existiert, war die PIN falsch
+             if(e2.code === 'auth/email-already-in-use') {
+                 alert('Falsche PIN! Diese E-Mail ist bereits mit einer anderen PIN registriert.');
+             } else {
+                 alert(e2.message);
+             }
+         });
+     } else {
+         alert(err.message);
      }
-     else alert(err.message);
   });
 }
 
