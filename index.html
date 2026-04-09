@@ -441,7 +441,7 @@
         .tag-SocialMedia { background: var(--cyan); }
 
         /* =========================================
-           PIZZA & DIPS LABOR
+           PIZZA LABOR
            ========================================= */
         .pizza-grid {
             display: grid;
@@ -929,7 +929,7 @@
                 </div>
                 <button class="btn-primary" onclick="openKontaktModal()">Neuen Kontakt anlegen</button>
             </div>
-            <div id="kontakt-list" class="form-grid"></div>
+            <div id="kontakt-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;"></div>
         </div>
 
         <div class="page superadmin-only" id="page-settings">
@@ -1226,7 +1226,8 @@
 
             <div id="builder-calc-preview" style="margin-top: 16px; padding: 12px; background: var(--blue-light); border-radius: 8px; display: none;">
                 <div style="font-size: 11px; color: var(--blue); font-weight: 600; text-transform: uppercase;">Berechneter Wareneinsatz</div>
-                <div style="font-size: 18px; font-weight: 700; color: var(--blue);" id="builder-calc-total">0,00 €</div>
+                <div style="font-size: 18px; font-weight: 700; color: var(--blue);" id="builder-calc-total-gross">0,00 € (Brutto)</div>
+                <div style="font-size: 13px; color: var(--blue);" id="builder-calc-total-net">0,00 € (Netto)</div>
             </div>
 
         </div>
@@ -1658,7 +1659,7 @@ function openDayEventsModal(dateStr) {
         html = '<div style="color:var(--muted); font-size:14px; padding:16px 0;">Keine Termine an diesem Tag.</div>';
     } else {
         html = visibleEvs.map(e => `
-            <div class="list-item" style="cursor:pointer;" onclick="closeModal('day-events-modal'); showEventDetail('${e.id}')">
+            <div class="list-item" style="cursor:pointer; margin-bottom:8px; padding:12px;" onclick="closeModal('day-events-modal'); showEventDetail('${e.id}')">
                 <div style="flex:1;">
                     <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">${e.type}</div>
                     <div style="font-size:16px; font-weight:700;">${e.title}</div>
@@ -1830,38 +1831,6 @@ function toggleEventCrewVisibility() {
     } else {
         customerContainer.style.display = 'none';
     }
-}
-
-function updateEventCrewDisplay(ev) {
-    const crewDiv = $('ev-crew-select');
-    const selectedIds = Array.from(crewDiv.querySelectorAll('.crew-chip')).map(el => el.dataset.uid);
-    
-    crewDiv.innerHTML = selectedIds.map(uid => {
-        const u = state.users.find(user => user.uid === uid);
-        if (!u) return '';
-        
-        let dateStr = '';
-        if (ev && ev.availDetails && ev.availDetails[u.uid]) {
-            const dates = ev.availDetails[u.uid];
-            if (dates.length > 0 && ev.date !== ev.endDate) {
-                const shortDates = dates.map(d => { let p = d.split('-'); return p[2] + '.' + p[1] + '.'; }).join(', ');
-                dateStr = ` (${shortDates})`;
-            }
-        }
-        
-        let hasTime = ev && ev.availUIDs && ev.availUIDs.includes(u.uid);
-        let noTime = ev && ev.unavailUIDs && ev.unavailUIDs.includes(u.uid);
-        let icon = hasTime ? `✅${dateStr}` : (noTime ? '❌' : '');
-
-        return `
-            <div class="badge badge-green crew-chip active" 
-                 style="cursor:pointer; padding:6px 12px; font-size:12px; display:flex; align-items:center; gap:6px;" 
-                 data-uid="${u.uid}" 
-                 onclick="this.remove();">
-                ${u.name} ${icon} <span style="font-weight:bold; margin-left:4px;">×</span>
-            </div>
-        `;
-    }).join('');
 }
 
 function handleCrewDropdownSelect() {
@@ -2562,39 +2531,52 @@ function addBuilderItemRow() {
 }
 
 function calculateBuilderTotal() {
-    let totalCost = 0;
+    let totalCostGross = 0;
+    let totalCostNet = 0;
     
     const expandCost = (rId, qty) => {
         const r = state.recipes.find(x => x.id === rId);
-        if (!r) return 0;
+        if (!r) return { gross: 0, net: 0 };
         const ratio = r.yieldGrams ? (qty / r.yieldGrams) : qty;
-        let c = 0;
+        let cGross = 0, cNet = 0;
+        
         (r.items || []).forEach(i => {
             if (i.recipeId) {
-                c += expandCost(i.recipeId, i.grams * ratio);
+                const sub = expandCost(i.recipeId, i.grams * ratio);
+                cGross += sub.gross;
+                cNet += sub.net;
             } else if (i.ingredientId) {
                 const ing = getIngredient(i.ingredientId);
-                if (ing) c += (i.grams * ratio / 1000) * (ing.priceGross || 0);
+                if (ing) {
+                    cGross += (i.grams * ratio / 1000) * (ing.priceGross || 0);
+                    cNet += (i.grams * ratio / 1000) * (ing.priceNet || 0);
+                }
             }
         });
-        return c;
+        return { gross: cGross, net: cNet };
     };
 
     builderItems.forEach(b => {
         if (!b.ref || b.grams <= 0) return;
         const realId = b.ref.replace(/^(ing_|rec_)/, '');
         if (b.ref.startsWith('rec_')) {
-            totalCost += expandCost(realId, b.grams);
+            const sub = expandCost(realId, b.grams);
+            totalCostGross += sub.gross;
+            totalCostNet += sub.net;
         } else {
             const ing = getIngredient(realId);
-            if (ing) totalCost += (b.grams / 1000) * (ing.priceGross || 0);
+            if (ing) {
+                totalCostGross += (b.grams / 1000) * (ing.priceGross || 0);
+                totalCostNet += (b.grams / 1000) * (ing.priceNet || 0);
+            }
         }
     });
 
     const preview = $('builder-calc-preview');
-    if (builderType === 'pizza' && totalCost > 0) {
+    if (totalCostGross > 0) {
         preview.style.display = 'block';
-        $('builder-calc-total').textContent = fmt(totalCost);
+        $('builder-calc-total-gross').textContent = fmt(totalCostGross) + ' (Brutto)';
+        $('builder-calc-total-net').textContent = fmt(totalCostNet) + ' (Netto)';
     } else {
         preview.style.display = 'none';
     }
@@ -2615,8 +2597,8 @@ function openRecipeModal(id) {
         ref: i.ingredientId ? 'ing_' + i.ingredientId : (i.recipeId ? 'rec_' + i.recipeId : '') 
     }));
     
-    $('builder-calc-preview').style.display = 'none';
     renderBuilderItems(); 
+    calculateBuilderTotal();
     openModal('builder-modal');
 }
 
@@ -2702,17 +2684,21 @@ function renderKontakte() {
     if (!c) return;
     
     c.innerHTML = state.kontakte.map(k => `
-        <div class="list-item" style="flex-wrap:wrap; align-items:center;">
-            <div style="flex:1; min-width:200px;">
-                <b style="font-size:15px;">${k.name}</b><br>
-                <small style="color:var(--muted)">${k.firma || 'Kontakt'}</small>
+        <div class="card" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <div style="font-size: 18px; font-weight: 700; color: var(--text);">${k.name}</div>
+                    ${k.firma ? `<div style="font-size: 13px; color: var(--muted); margin-top: 4px;">🏢 ${k.firma}</div>` : ''}
+                    <div style="display:flex; flex-direction:column; gap:4px; margin-top: 12px; font-size:13px;">
+                        ${k.tel ? `<div>📞 <a href="javascript:void(0)" onclick="confirmAction('tel', 'tel:${k.tel}')" style="color:var(--text); text-decoration:none;">${k.tel}</a></div>` : ''}
+                        ${k.email ? `<div>✉️ <a href="javascript:void(0)" onclick="confirmAction('mail', 'mailto:${k.email}')" style="color:var(--text); text-decoration:none;">${k.email}</a></div>` : ''}
+                        ${k.adresse ? `<div>📍 <a href="javascript:void(0)" onclick="confirmAction('map', 'http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(k.adresse)}')" style="color:var(--text); text-decoration:none;">${k.adresse}</a></div>` : ''}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn-danger btn-sm admin-only" onclick="deleteKontakt('${k.id}')">Löschen</button>
+                </div>
             </div>
-            <div style="display:flex; gap:12px;">
-                ${k.tel ? `<button class="btn-sm" onclick="confirmAction('tel', 'tel:${k.tel}')">📞</button>` : ''}
-                ${k.adresse ? `<button class="btn-sm" onclick="confirmAction('map', 'http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(k.adresse)}')">📍</button>` : ''}
-                ${k.email ? `<button class="btn-sm" onclick="confirmAction('mail', 'mailto:${k.email}')">✉️</button>` : ''}
-            </div>
-            <button class="btn-sm btn-danger admin-only" onclick="deleteKontakt('${k.id}')" style="margin-left:auto;">Löschen</button>
         </div>
     `).join('');
 }
@@ -2809,18 +2795,21 @@ function saveCateringSettings() {
 }
 
 function updateUser(uid) {
-    const newRole = $(`role-${uid}`).value;
-    const newWage = parseFloat($(`wage-${uid}`).value) || 14;
+    const roleEl = document.getElementById(`role-${uid}`);
+    const wageEl = document.getElementById(`wage-${uid}`);
+    
+    if (!roleEl || !wageEl) return;
+
+    const newRole = roleEl.value;
+    const newWage = parseFloat(wageEl.value) || 14;
 
     db.ref(`users/${uid}`).update({
         role: newRole,
         wage: newWage
-    }, (error) => {
-        if (error) {
-            alert("Fehler beim Speichern!");
-        } else {
-            showToast('Mitarbeiterdaten erfolgreich aktualisiert!');
-        }
+    }).then(() => {
+        showToast('Mitarbeiterdaten erfolgreich aktualisiert!');
+    }).catch(error => {
+        alert("Fehler beim Speichern!");
     });
 }
 
