@@ -27,7 +27,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
    ========================================= */
 .sidebar{width:220px;min-width:220px;background:var(--card);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column; z-index:50;}
 .sidebar-logo{padding:0 24px 20px;font-size:18px;font-weight:700;color:var(--text);border-bottom:1px solid var(--border);margin-bottom:12px; letter-spacing:-0.5px;}
-.nav-item{padding:10px 24px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:10px;transition:all .2s;border-left:3px solid transparent;font-size:14px; font-weight:500;}
+.nav-item{padding:12px 24px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:10px;transition:all .2s;border-left:3px solid transparent;font-size:14px; font-weight:500;}
 .nav-item:hover{background:#f1f5f9;color:var(--text)}
 .nav-item.active{background:var(--blue-light);color:var(--blue);border-left-color:var(--blue);}
 
@@ -37,7 +37,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .main{flex:1;padding:32px;overflow-y:auto;padding-bottom:100px;} 
 .page{display:none;flex-direction:column;gap:24px}
 .page.active{display:flex}
-.page-header{display:flex;justify-content:space-between;align-items:flex-end; border-bottom:1px solid var(--border); padding-bottom:16px;}
+.page-header{display:flex;justify-content:space-between;align-items:flex-end; border-bottom:1px solid var(--border); padding-bottom:16px; flex-wrap:wrap; gap:16px;}
 .page-title{font-size:24px;font-weight:700; color:var(--text); letter-spacing:-0.5px;}
 .page-subtitle{font-size:13px; color:var(--muted); margin-top:4px;}
 
@@ -61,23 +61,27 @@ button:hover{background:#f1f5f9}
 .btn-sm{padding:6px 12px;font-size:12px}
 
 /* =========================================
-   LISTS & BADGES
+   LISTS, GRIDS & BADGES
    ========================================= */
 .badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;}
 .badge-blue{background:var(--blue-light);color:var(--blue)}
 .badge-green{background:var(--green-light);color:var(--green)}
 .badge-amber{background:var(--amber-light);color:var(--amber)}
 
-.list-item{display:flex;align-items:flex-start;gap:16px;padding:16px;border:1px solid var(--border);border-radius:10px;margin-bottom:12px; background:var(--card); transition:all .2s;}
-.list-item:hover{border-color:#cbd5e1; box-shadow:0 4px 6px rgba(0,0,0,0.02);}
+.event-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px; }
+.event-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; transition:all .2s; box-shadow:0 2px 4px rgba(0,0,0,0.02);}
+.event-card:hover { border-color:#cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.05); transform:translateY(-2px);}
+.event-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; cursor:pointer; }
+.event-card-body { cursor:pointer; flex:1; }
+.event-card-footer { margin-top:16px; padding-top:16px; border-top:1px solid #f1f5f9; display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
 
-.mailbox-item { padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; line-height:1.4;}
+.mailbox-item { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; line-height:1.4;}
 .mailbox-item.unread { background: var(--blue-light); border-left: 3px solid var(--blue); }
 
-.table-wrap { overflow-x:auto; }
+.table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%; margin-bottom:16px; border-radius:8px;}
 table { width:100%; min-width:600px; border-collapse:collapse; text-align:left; font-size:13px; }
 th { padding:12px; border-bottom:2px solid var(--border); color:var(--muted); font-weight:600; text-transform:uppercase; font-size:11px;}
-td { padding:12px; border-bottom:1px solid var(--border); }
+td { padding:12px; border-bottom:1px solid var(--border); vertical-align:middle;}
 
 /* =========================================
    CALENDAR
@@ -85,7 +89,7 @@ td { padding:12px; border-bottom:1px solid var(--border); }
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
 .cal-day{min-height:90px;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12px;font-weight:500; cursor:pointer; background:var(--card); display:flex; flex-direction:column; gap:4px; transition:background 0.2s;}
 .cal-day:hover{background:#f8fafc;}
-.cal-day.today{border-color:var(--blue); border-width:2px;}
+.cal-day.today{border-color:var(--blue); border-width:2px; background:var(--blue-light);}
 .cal-header-cell{text-align:center;font-size:12px;font-weight:600;color:var(--muted);padding:8px 0;}
 
 .cal-tag{font-size:10px; font-weight:600; padding:4px 6px; border-radius:4px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
@@ -101,13 +105,13 @@ td { padding:12px; border-bottom:1px solid var(--border); }
    ========================================= */
 .pizza-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;}
 .pizza-qty { display:flex; align-items:center; justify-content:space-between; background:var(--bg); border-radius:8px; padding:4px; margin-top:10px;}
-.pizza-qty button { width:36px; height:36px; border:none; background:var(--card); box-shadow:0 1px 2px rgba(0,0,0,0.05); font-size:18px; font-weight:bold;}
+.pizza-qty button { width:40px; height:40px; border:none; background:var(--card); box-shadow:0 1px 2px rgba(0,0,0,0.05); font-size:18px; font-weight:bold; border-radius:6px;}
 .pizza-qty input { width:60px; text-align:center; border:none; background:transparent; font-weight:700; font-size:16px; padding:0;}
 
 /* =========================================
    SETTINGS TABS
    ========================================= */
-.settings-tabs { display:flex; gap:8px; border-bottom:1px solid var(--border); margin-bottom:24px; overflow-x:auto; padding-bottom:1px;}
+.settings-tabs { display:flex; gap:8px; border-bottom:1px solid var(--border); margin-bottom:24px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:1px;}
 .settings-tab { padding:12px 16px; cursor:pointer; color:var(--muted); font-weight:600; border-bottom:2px solid transparent; white-space:nowrap;}
 .settings-tab.active { color:var(--blue); border-bottom-color:var(--blue);}
 .settings-panel { display:none; }
@@ -120,7 +124,7 @@ td { padding:12px; border-bottom:1px solid var(--border); }
 .modal-overlay.open { display:flex; }
 .modal { background: var(--card); width: 100%; max-width: 650px; max-height: 90vh; display: flex; flex-direction: column; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow:hidden;}
 .modal-title { padding: 20px 24px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border); background:#f8fafc;}
-.modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+.modal-body { padding: 24px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling:touch;}
 .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; background:#f8fafc;}
 
 #toast-wrap { position:fixed; bottom:20px; right:20px; z-index:99999; display:flex; flex-direction:column; gap:10px; }
@@ -136,7 +140,7 @@ body:not([data-role="superadmin"]):not([data-role="admin"]) .admin-only,
 body:not([data-role="superadmin"]) .superadmin-only { display: none !important; }
 
 /* =========================================
-   MOBILE OPTIMIZATION
+   MOBILE OPTIMIZATION (STRICT PARITY)
    ========================================= */
 .mobile-bottom-nav{display:none;}
 @media (max-width: 900px){
@@ -144,14 +148,18 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
   .main{padding:16px 12px 100px}
   .page-header{flex-direction:column; align-items:flex-start; gap:12px;}
   .form-grid{grid-template-columns:1fr}
+  .event-grid{grid-template-columns:1fr}
+  
+  input,select,textarea { font-size: 16px; min-height:44px; } /* Prevents iOS Zoom & improves touch */
+  button { min-height:44px; }
   
   .mobile-bottom-nav{
       display:flex; position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,0.98); 
       backdrop-filter: blur(10px); border-top:1px solid var(--border); 
-      padding:10px 8px calc(10px + env(safe-area-inset-bottom)); z-index:1000;
-      justify-content: space-between; overflow-x:auto;
+      padding:8px 4px calc(8px + env(safe-area-inset-bottom)); z-index:1000;
+      justify-content: space-between; overflow-x:auto; -webkit-overflow-scrolling:touch;
   }
-  .mobile-bottom-nav button { flex:1; min-width:60px; font-size:11px; flex-direction:column; gap:4px; padding:10px 4px; border:none; background:transparent;}
+  .mobile-bottom-nav button { flex:1; min-width:65px; font-size:11px; flex-direction:column; gap:4px; padding:8px 2px; border:none; background:transparent; white-space:nowrap;}
   .mobile-bottom-nav button.active { color:var(--blue); font-weight:700;}
   
   .cal-day{min-height:60px; padding:4px;}
@@ -202,7 +210,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
     </div>
     <div class="card">
         <div class="card-title">Anstehende Events</div>
-        <div id="dash-events"></div>
+        <div id="dash-events" style="display:flex; flex-direction:column; gap:12px;"></div>
     </div>
   </div>
 
@@ -243,7 +251,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
         </div>
         <button class="btn-primary admin-only" onclick="openEventModal()">Neues Event anlegen</button>
     </div>
-    <div id="all-events-list"></div>
+    <div id="all-events-list" class="event-grid"></div>
 </div>
 
 <div class="page admin-only" id="page-timesheet">
@@ -353,14 +361,22 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
 
 <div class="page admin-only" id="page-kontakte">
     <div class="page-header">
-        <div class="page-title">Kontakte & Adressbuch</div>
+        <div>
+            <div class="page-title">Kontakte & Adressbuch</div>
+            <div class="page-subtitle">Kunden, Lieferanten und Partner</div>
+        </div>
         <button class="btn-primary" onclick="openKontaktModal()">Neuen Kontakt anlegen</button>
     </div>
     <div id="kontakt-list" class="form-grid"></div>
 </div>
 
 <div class="page superadmin-only" id="page-settings">
-    <div class="page-header"><div class="page-title">System-Einstellungen</div></div>
+    <div class="page-header">
+        <div>
+            <div class="page-title">System-Einstellungen</div>
+            <div class="page-subtitle">Konfiguration, Rezepte und Stammdaten</div>
+        </div>
+    </div>
     <div class="settings-tabs">
         <div class="settings-tab active" onclick="switchSettingsTab('zutaten', this)">Zutaten</div>
         <div class="settings-tab" onclick="switchSettingsTab('rezepte', this)">Sub-Rezepte</div>
@@ -378,14 +394,14 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
     </div>
     <div id="panel-rezepte" class="settings-panel">
         <div class="card">
-            <div class="card-title">Gespeicherte Sub-Rezepte</div>
-            <div id="settings-recipes-list"></div>
+            <div class="card-title">Gespeicherte Sub-Rezepte <button class="btn-sm" onclick="openRecipeModal()">Neues Sub-Rezept</button></div>
+            <div class="table-wrap" id="settings-recipes-list"></div>
         </div>
     </div>
     <div id="panel-pizzas" class="settings-panel">
         <div class="card">
-            <div class="card-title">Gespeicherte Pizzen</div>
-            <div id="settings-pizzas-list"></div>
+            <div class="card-title">Gespeicherte Pizzen <button class="btn-sm" onclick="openPizzaModal()">Neue Pizza</button></div>
+            <div class="table-wrap" id="settings-pizzas-list"></div>
         </div>
     </div>
     
@@ -416,7 +432,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
 
 <div class="mobile-bottom-nav">
     <button onclick="navTo('dashboard', this)" class="active">Dash</button>
-    <button onclick="navTo('kalender', this)">Kal</button>
+    <button onclick="navTo('kalender', this)">Kalender</button>
     <button onclick="navTo('events', this)">Events</button>
     <button class="admin-only" onclick="navTo('timesheet', this)">Zeiten</button>
     <button class="admin-only" onclick="navTo('pizza', this)">Labor</button>
@@ -441,11 +457,11 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
                     <option>Pending...</option><option>Secured</option><option>Cancelled</option>
                 </select>
             </div>
-            <div class="form-group"><label>Datum</label><input type="date" id="ev-date"></div>
-            <div class="form-group"><label>Gästezahl</label><input type="number" id="ev-personen"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Datum</label><input type="date" id="ev-date"></div>
             <div class="form-group"><label>Start Uhrzeit</label><input type="time" id="ev-time"></div>
             <div class="form-group"><label>End Uhrzeit</label><input type="time" id="ev-time-end"></div>
             <div class="form-group" style="grid-column: span 2;"><label>Ort / Adresse</label><input id="ev-ort"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Gästezahl</label><input type="number" id="ev-personen"></div>
         </div>
         
         <div class="form-group admin-only" style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
@@ -510,6 +526,27 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
 </div>
 </div>
 
+<div class="modal-overlay" id="builder-modal">
+<div class="modal">
+    <div class="modal-title" id="builder-title">Bearbeiten</div>
+    <div class="modal-body">
+        <div class="form-grid" style="margin-bottom: 16px;">
+            <div class="form-group"><label>Name</label><input id="builder-name"></div>
+            <div class="form-group" id="builder-param-group">
+                <label id="builder-param-label">Wert</label>
+                <input type="number" id="builder-param" step="0.01">
+            </div>
+        </div>
+        <div class="form-group">
+            <label style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:8px;">Zutaten & Bestandteile</label>
+            <div id="builder-items-container"></div>
+            <button class="btn-sm" style="margin-top:8px; align-self:flex-start;" onclick="addBuilderItemRow()">+ Bestandteil hinzufügen</button>
+        </div>
+    </div>
+    <div class="modal-footer"><button onclick="closeModal('builder-modal')">Abbrechen</button><button class="btn-primary" onclick="saveBuilder()">Speichern</button></div>
+</div>
+</div>
+
 <div class="modal-overlay" id="kontakt-modal">
 <div class="modal">
     <div class="modal-title">Kontakt bearbeiten</div>
@@ -566,7 +603,13 @@ let state = {
     editTimesheetId:null,
     pinnwand:''
 };
+
 let pizzaMengen = {}, dipMengen = {aioli:0, hothoney:0};
+
+// Builder State
+let builderType = ''; // 'recipe' or 'pizza'
+let builderEditId = null;
+let builderItems = []; 
 
 const colorMap = {'Catering':'tag-Catering', 'Event':'tag-Event', 'Meeting':'tag-Meeting', 'Preppen':'tag-Preppen', 'Einkaufen':'tag-Einkaufen', 'SocialMedia':'tag-SocialMedia'};
 
@@ -610,7 +653,6 @@ function confirmAction(type, url) {
     if(confirm(msgs[type])) window.open(url, type==='map'?'_blank':'_self');
 }
 
-// Calculate hours between two time strings (HH:MM)
 function calculateHours(startStr, endStr) {
     if (!startStr || !endStr) return 0;
     const [startH, startM] = startStr.split(':').map(Number);
@@ -618,8 +660,6 @@ function calculateHours(startStr, endStr) {
     
     let startDate = new Date(); startDate.setHours(startH, startM, 0);
     let endDate = new Date(); endDate.setHours(endH, endM, 0);
-    
-    // Handle overnight shifts
     if(endDate < startDate) endDate.setDate(endDate.getDate() + 1);
     
     return (endDate - startDate) / (1000 * 60 * 60);
@@ -640,7 +680,6 @@ auth.onAuthStateChanged(u => {
             return; 
         }
         
-        // Name Enforcement
         if(!user.name || user.name.trim() === '') {
             let n = prompt("Zwingend erforderlich: Bitte gib deinen Vor- und Nachnamen ein:");
             while(!n || n.trim() === '') {
@@ -678,11 +717,10 @@ function doLogin(){
 function listenAll(){
     db.ref('/').on('value', snap => {
         const d = snap.val() || {};
-        state.ingredients = Object.values(d.ingredients||{});
-        state.recipes = Object.values(d.recipes||{});
-        state.pizzas = Object.values(d.pizzas||{});
+        state.ingredients = Object.values(d.ingredients||{}).filter(i=>i && i.id);
+        state.recipes = Object.values(d.recipes||{}).filter(r=>r && r.id);
+        state.pizzas = Object.values(d.pizzas||{}).filter(p=>p && p.id);
         
-        // Filter undefined events and normalize
         state.events = Object.values(d.events||{})
             .filter(ev => ev && ev.id)
             .sort((a,b)=>a.date > b.date ? 1 : -1)
@@ -747,10 +785,10 @@ function updateDashboard(){
 
     const next = state.events.filter(e => new Date(e.date) >= new Date().setHours(0,0,0,0)).slice(0,4);
     $('dash-events').innerHTML = next.map(e => `
-        <div class="list-item" style="cursor:pointer;" onclick="showEventDetail('${e.id}')">
-            <div style="flex:1;">
-                <b style="font-size:15px;">${e.title}</b><br>
-                <div style="color:var(--muted); font-size:12px; margin-top:4px;">${e.date} · ${e.type}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer;" onclick="showEventDetail('${e.id}')">
+            <div>
+                <b style="font-size:14px;">${e.title}</b><br>
+                <div style="color:var(--muted); font-size:12px; margin-top:2px;">${e.date} · ${e.type}</div>
             </div>
             ${statusBadge(e.status)}
         </div>
@@ -785,7 +823,6 @@ function renderCalendar(){
         const curDate = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         const evs = state.events.filter(e => e.date === curDate);
         
-        // Rule: Staff only sees Event & Catering
         const visibleEvs = state.role === 'staff' ? evs.filter(e => ['Catering','Event'].includes(e.type)) : evs;
         const isToday = new Date().toISOString().split('T')[0] === curDate;
         
@@ -809,11 +846,10 @@ function changeMonth(d){
 }
 
 // ============================================================================
-// EVENTS & STAFFING
+// EVENTS & STAFFING (GRID)
 // ============================================================================
 function renderEventList(){
     const c = $('all-events-list');
-    // Rule: Staff only sees Event & Catering
     const filtered = state.role === 'staff' ? state.events.filter(e => ['Catering','Event'].includes(e.type)) : state.events;
     
     c.innerHTML = filtered.map(e => {
@@ -822,17 +858,16 @@ function renderEventList(){
         const isUnavail = e.unavailUIDs.includes(uid);
         
         return `
-            <div class="card" style="margin-bottom:16px;">
-                <div class="list-item" style="border:none; padding:0; box-shadow:none; cursor:pointer;" onclick="showEventDetail('${e.id}')">
-                    <div style="flex:1;">
-                        <div style="font-size:11px; font-weight:700; color:var(--muted); margin-bottom:4px; text-transform:uppercase;">${e.type} · ${e.date}</div>
-                        <div style="font-size:18px; font-weight:700;">${e.title}</div>
-                        <div style="color:var(--muted); font-size:13px; margin-top:4px;">📍 ${e.ort || 'Kein Ort angegeben'}</div>
-                    </div>
+            <div class="event-card">
+                <div class="event-card-header" onclick="showEventDetail('${e.id}')">
+                    <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">${e.type} · ${e.date}</div>
                     ${statusBadge(e.status)}
                 </div>
-                
-                <div style="margin-top:16px; padding-top:16px; border-top:1px solid #f1f5f9; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                <div class="event-card-body" onclick="showEventDetail('${e.id}')">
+                    <div style="font-size:18px; font-weight:700;">${e.title}</div>
+                    <div style="color:var(--muted); font-size:13px; margin-top:4px;">📍 ${e.ort || 'Kein Ort angegeben'}</div>
+                </div>
+                <div class="event-card-footer">
                     <button class="btn-sm ${isAvail ? 'btn-green' : ''}" onclick="toggleAvail('${e.id}', true)">${isAvail ? '✅ Zugesagt' : '🙋‍♂️ Habe Zeit'}</button>
                     <button class="btn-sm ${isUnavail ? 'btn-danger' : ''}" onclick="toggleAvail('${e.id}', false)">${isUnavail ? '❌ Abgesagt' : '🚫 Keine Zeit'}</button>
                 </div>
@@ -900,14 +935,12 @@ function saveEvent(){
         status: newStatus, assignedCrew: crew, notizen: $('ev-notizen').value
     };
 
-    // Preserve arrays
     if(oldEv) {
         updates.availUIDs = oldEv.availUIDs || []; 
         updates.unavailUIDs = oldEv.unavailUIDs || [];
         if(oldEv.cleaningDoneBy) updates.cleaningDoneBy = oldEv.cleaningDoneBy;
     }
 
-    // Auto Inbox Messaging
     if(newStatus === 'Secured' && oldStatus !== 'Secured'){
         crew.forEach(uid => {
             db.ref(`users/${uid}/notifications`).transaction(cur => {
@@ -936,7 +969,7 @@ function showEventDetail(id){
             <div style="background:#f1f5f9; padding:16px; border-radius:10px; margin-bottom:16px;">
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:14px;">
                     <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Typ</span><br><b>${ev.type}</b></div>
-                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Zeitraum</span><br><b>${ev.date} ${ev.time||''} ${ev.timeEnd?'- '+ev.timeEnd:''}</b></div>
+                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Zeitraum</span><br><b>${ev.date} <br>${ev.time||''} ${ev.timeEnd?'- '+ev.timeEnd:''}</b></div>
                     <div style="grid-column:span 2;"><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Ort</span><br><b>${ev.ort||'–'}</b></div>
                     <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Gäste</span><br><b>${ev.personen||'–'}</b></div>
                 </div>
@@ -955,7 +988,7 @@ function showEventDetail(id){
 
     html += `</div>
         <div class="modal-footer">
-            <button class="btn-danger admin-only" onclick="deleteEvent('${id}')">Event löschen</button>
+            <button class="btn-danger admin-only" onclick="deleteEvent('${id}')">Löschen</button>
             <button class="admin-only" onclick="closeModal('detail-modal'); openEventModal('${id}')">Bearbeiten</button>
             <button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button>
         </div>
@@ -986,10 +1019,9 @@ function markCleaningDone(eid){
 // PERSONAL & ZEITEN (TIMESHEETS)
 // ============================================================================
 function renderTimesheets() {
-    if(state.role === 'staff') return; // Not visible for staff
+    if(state.role === 'staff') return;
 
-    // 1. Populate Lists
-    let tsListHtml = '<table style="width:100%; min-width:800px; font-size:13px;"><tr><th>Event</th><th>Mitarbeiter</th><th>Datum</th><th>Zeit</th><th>Std</th><th>Lohn</th><th>Aktionen</th></tr>';
+    let tsListHtml = '<table style="width:100%; min-width:800px; font-size:13px;"><tr><th>Event</th><th>Mitarbeiter</th><th>Datum</th><th>Zeit</th><th>Std</th><th>Lohn</th><th>Aktion</th></tr>';
     
     let eventStats = {};
     let userStats = {};
@@ -998,12 +1030,10 @@ function renderTimesheets() {
         const user = state.users.find(u=>u.uid === ts.userId) || {name:'Unbekannt', wage:0};
         const ev = state.events.find(e=>e.id === ts.eventId) || {title:'Unbekanntes Event'};
         
-        // Accumulate Event Stats
         if(!eventStats[ts.eventId]) eventStats[ts.eventId] = {title: ev.title, totalHours: 0, totalCost: 0};
         eventStats[ts.eventId].totalHours += ts.totalHours;
         eventStats[ts.eventId].totalCost += ts.totalCost;
 
-        // Accumulate User Stats
         if(!userStats[ts.userId]) userStats[ts.userId] = {name: user.name, totalHours: 0, totalCost: 0, events: new Set()};
         userStats[ts.userId].totalHours += ts.totalHours;
         userStats[ts.userId].totalCost += ts.totalCost;
@@ -1019,13 +1049,13 @@ function renderTimesheets() {
             <td>
                 <button class="btn-sm" onclick="openTimesheetModal('${ts.id}')">✏️</button>
                 <button class="btn-sm btn-danger" onclick="deleteTimesheet('${ts.id}')">🗑️</button>
+                <button class="btn-sm btn-primary" onclick="printReceipt('${ts.id}')">PDF</button>
             </td>
         </tr>`;
     });
     tsListHtml += '</table>';
     if($('timesheet-list-container')) $('timesheet-list-container').innerHTML = tsListHtml;
 
-    // 2. Populate Event Stats
     let evHtml = '<table style="width:100%; min-width:500px;"><tr><th>Event</th><th>Gesamtstunden</th><th>Gesamtkosten</th></tr>';
     Object.values(eventStats).forEach(es => {
         evHtml += `<tr><td><b>${es.title}</b></td><td>${es.totalHours.toFixed(2)}h</td><td><b style="color:var(--red)">${fmt(es.totalCost)}</b></td></tr>`;
@@ -1033,7 +1063,6 @@ function renderTimesheets() {
     evHtml += '</table>';
     if($('timesheet-events-container')) $('timesheet-events-container').innerHTML = evHtml;
 
-    // 3. Populate User Stats
     let usrHtml = '<table style="width:100%; min-width:600px;"><tr><th>Mitarbeiter</th><th>Gesamtstunden</th><th>Gesamtlohn</th><th>Eingesetzt bei</th></tr>';
     Object.values(userStats).forEach(us => {
         usrHtml += `<tr><td><b>${us.name}</b></td><td>${us.totalHours.toFixed(2)}h</td><td><b style="color:var(--green)">${fmt(us.totalCost)}</b></td><td>${Array.from(us.events).join(', ')}</td></tr>`;
@@ -1046,7 +1075,6 @@ function openTimesheetModal(id) {
     state.editTimesheetId = id || null;
     const ts = id ? state.timesheets.find(t => t.id === id) : null;
     
-    // Populate Dropdowns
     $('ts-event-id').innerHTML = '<option value="">-- Event wählen --</option>' + state.events.map(e=>`<option value="${e.id}">${e.date} - ${e.title}</option>`).join('');
     $('ts-user-id').innerHTML = '<option value="">-- Mitarbeiter wählen --</option>' + state.users.map(u=>`<option value="${u.uid}">${u.name}</option>`).join('');
 
@@ -1063,7 +1091,6 @@ function openTimesheetModal(id) {
         $('ts-end').value = '';
         $('ts-bonus').value = 0;
     }
-    
     openModal('timesheet-modal');
 }
 
@@ -1085,10 +1112,7 @@ function saveTimesheet() {
     const totalHours = workHours + bonus;
     const totalCost = totalHours * wage;
 
-    const ts = {
-        id, eventId, userId, date, start, end, bonus, workHours, totalHours, wage, totalCost
-    };
-
+    const ts = { id, eventId, userId, date, start, end, bonus, workHours, totalHours, wage, totalCost };
     db.ref('timesheets/'+id).set(ts);
     closeModal('timesheet-modal');
     showToast("Zeiterfassung gespeichert!");
@@ -1101,15 +1125,42 @@ function deleteTimesheet(id) {
     }
 }
 
+function printReceipt(tsId) {
+    const ts = state.timesheets.find(t=>t.id===tsId);
+    if(!ts) return;
+    const ev = state.events.find(e=>e.id===ts.eventId) || {title:'Unbekannt', type:'-', date:ts.date};
+    const user = state.users.find(u=>u.uid===ts.userId) || {name:'Unbekannt'};
+    
+    const html = `
+        <html><head><title>Abrechnung - ${user.name}</title>
+        <style>body{font-family:sans-serif; padding:40px; color:#111827;} .box{border:1px solid #e5e7eb; padding:30px; border-radius:10px; max-width:600px; margin:0 auto;} h1{color:#2563eb; margin-bottom:5px;} .row{display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #f1f5f9; padding-bottom:5px;}</style>
+        </head><body>
+        <div class="box">
+            <h1>Heitmanns Pizza</h1>
+            <p style="color:#6b7280; margin-bottom:30px;">Abrechnung Event-Personal</p>
+            <div class="row"><b>Mitarbeiter:</b> <span>${user.name}</span></div>
+            <div class="row"><b>Event:</b> <span>${ev.title} (${ev.type})</span></div>
+            <div class="row"><b>Datum:</b> <span>${ts.date}</span></div>
+            <div class="row"><b>Arbeitszeit:</b> <span>${ts.start} - ${ts.end} (${ts.workHours.toFixed(2)}h)</span></div>
+            ${ts.bonus > 0 ? `<div class="row"><b>Zuschlag / Sonstiges:</b> <span>+${ts.bonus}h</span></div>` : ''}
+            <div class="row" style="margin-top:30px;"><b>Gesamtstunden:</b> <span>${ts.totalHours.toFixed(2)} Stunden</span></div>
+            <div class="row"><b>Stundenlohn:</b> <span>${fmt(ts.wage)}</span></div>
+            <div class="row" style="margin-top:20px; font-size:20px; border-bottom:none;"><b>Auszahlungsbetrag:</b> <b style="color:#2563eb;">${fmt(ts.totalCost)}</b></div>
+        </div>
+        <script>window.print();<\/script>
+        </body></html>
+    `;
+    const w = window.open('','_blank');
+    w.document.write(html);
+    w.document.close();
+}
+
 // ============================================================================
 // PIZZA LABOR, DIPS & KALKULATOR
 // ============================================================================
-function getIngredient(id){ return (state.ingredients||[]).find(i=>i.id===id); }
-
 function renderPizzaGrid(){
     const c = $('pizza-grid');
     if(!c) return;
-    // Visually show + / - but jump in 5s
     c.innerHTML = state.pizzas.map(p => `
         <div class="card">
             <div class="card-title">${p.name} <span>${fmt(p.price)}</span></div>
@@ -1140,7 +1191,6 @@ function calcIngredients(){
         });
     };
 
-    // Calculate Pizzas
     state.pizzas.forEach(p => {
         const qty = pizzaMengen[p.name]||0;
         if(qty>0) {
@@ -1151,7 +1201,6 @@ function calcIngredients(){
         }
     });
     
-    // Calculate Dips
     if(dipMengen.aioli>0) expand('rec_aioli', dipMengen.aioli);
     if(dipMengen.hothoney>0) expand('rec_honey', dipMengen.hothoney);
 
@@ -1165,13 +1214,15 @@ function renderPizzaResult() {
     
     if(Object.keys(raw).length===0) { target.innerHTML = `<div style="color:var(--muted)">Keine Werte kalkuliert.</div>`; return; }
     
-    const items = []; let gB = 0;
+    const items = []; let gB = 0; let gN = 0;
     for(const[art, g] of Object.entries(raw)){
         if(g<0.1) continue;
-        const a = getIngredient(art) || {supplier:'Sonstige', category:'Sonstiges', priceGross:0};
-        const kg = g/1000; const cost = kg * a.priceGross;
-        gB += cost;
-        items.push({art, g, sup:a.supplier, cat:a.category, cost});
+        const a = getIngredient(art) || {supplier:'Sonstige', category:'Sonstiges', priceGross:0, priceNet:0};
+        const kg = g/1000; 
+        const costBrutto = kg * (a.priceGross || 0);
+        const costNetto = kg * (a.priceNet || 0);
+        gB += costBrutto; gN += costNetto;
+        items.push({art, g, sup:a.supplier, cat:a.category, costBrutto, costNetto});
     }
 
     const bySup = {}; items.forEach(i=>{if(!bySup[i.sup]) bySup[i.sup]=[]; bySup[i.sup].push(i);});
@@ -1180,10 +1231,10 @@ function renderPizzaResult() {
     Object.keys(bySup).sort().forEach(sup => {
         let sT = 0;
         let rows = bySup[sup].sort((a,b)=>a.art.localeCompare(b.art)).map(i => {
-            sT += i.cost;
+            sT += i.costBrutto;
             return `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9;">
                 <div><b>${i.art}</b><br><span style="font-size:12px;color:var(--muted)">${fmtKG(i.g)}</span></div>
-                <div style="font-weight:600">${i.cost>0?fmt(i.cost):'–'}</div>
+                <div style="font-weight:600">${i.costBrutto>0?fmt(i.costBrutto):'–'}</div>
             </div>`;
         }).join('');
         
@@ -1196,7 +1247,7 @@ function renderPizzaResult() {
             </div>
         `;
     });
-    ht += `<div style="background:var(--blue-light); color:var(--blue); padding:16px; border-radius:8px; font-size:18px; font-weight:700; text-align:center;">Gesamt: ${fmt(gB)}</div>`;
+    ht += `<div style="background:var(--blue-light); color:var(--blue); padding:16px; border-radius:8px; font-size:18px; font-weight:700; text-align:center;">Gesamt Brutto: ${fmt(gB)} <br><span style="font-size:12px; font-weight:normal; color:var(--text);">Netto: ${fmt(gN)}</span></div>`;
     target.innerHTML = ht;
 }
 
@@ -1233,7 +1284,7 @@ function calcCatering(){
     }
 
     const defs = state.cateringDefaults || {gas:10, entsorgung:15, miete:45, kmsatz:0.8, waren:3.5, ust:1.19};
-    const stundensatz = 14; // Base dummy
+    const stundensatz = 14; 
     const sz = state.cateringScenarios.find(s => gaeste >= s.min && gaeste <= s.max);
     
     if(!sz){
@@ -1279,7 +1330,7 @@ function renderEinkauf(){
         let supT = 0;
         const rows = state.einkauf.filter(e=>e.lieferant===sup).map(e => {
             const pNetto = e.preis || 0;
-            const pBrutto = e.preisBrutto || (pNetto * 1.07); // Fallback
+            const pBrutto = e.preisBrutto || (pNetto * 1.07); 
             const sumNetto = e.menge * pNetto;
             const sumBrutto = e.menge * pBrutto;
             
@@ -1305,42 +1356,6 @@ function renderEinkauf(){
     c.innerHTML = ht;
 }
 function clearEinkauf(){ if(confirm('Möchtest du die Liste wirklich komplett leeren?')) { db.ref('einkauf').set([]); showToast("Liste geleert!"); } }
-
-// ============================================================================
-// ZUTATEN ANLEGEN
-// ============================================================================
-function openIngredientModal(){
-    $('ing-new-name').value = ''; $('ing-new-artnr').value = '';
-    $('ing-new-netto').value = ''; $('ing-new-brutto').value = '';
-    openModal('ingredient-modal');
-}
-function saveNewIngredient(){
-    const name = $('ing-new-name').value;
-    const artNr = $('ing-new-artnr').value;
-    const sup = $('ing-new-sup').value;
-    const cat = $('ing-new-cat').value;
-    const unit = $('ing-new-unit').value;
-    const netto = parseFloat($('ing-new-netto').value);
-    const brutto = parseFloat($('ing-new-brutto').value);
-
-    if(!name || !artNr || isNaN(netto) || isNaN(brutto)) {
-        return alert("Bitte fülle alle Felder inkl. Preise und Artikelnummer aus!");
-    }
-
-    const ing = {
-        id: name, name: name,
-        articleNumber: artNr,
-        supplier: sup,
-        category: cat,
-        unit: unit,
-        priceNet: netto,
-        priceGross: brutto,
-        active: true
-    };
-    db.ref('ingredients/'+name).set(ing);
-    closeModal('ingredient-modal');
-    showToast('Zutat gespeichert!');
-}
 
 // ============================================================================
 // KONTAKTE
@@ -1385,7 +1400,7 @@ function renderKontakte(){
 }
 
 // ============================================================================
-// EINSTELLUNGEN
+// EINSTELLUNGEN & REZEPT/PIZZA BUILDER
 // ============================================================================
 function renderSettings(){
     // Zutaten-Tabelle
@@ -1401,15 +1416,31 @@ function renderSettings(){
     h += '</table>';
     if($('settings-art-list')) $('settings-art-list').innerHTML = h;
 
-    // Sub-Rezepte
-    let rh = '<table style="width:100%; font-size:13px;"><tr><th>Rezept</th><th>Ertrag</th></tr>';
-    (state.recipes||[]).forEach(r => { rh += `<tr><td><b>${r.name}</b></td><td>${r.yieldGrams}g</td></tr>`; });
+    // Sub-Rezepte Liste
+    let rh = '<table style="width:100%; font-size:13px;"><tr><th>Rezept</th><th>Ertrag (g)</th><th>Aktion</th></tr>';
+    (state.recipes||[]).forEach(r => { 
+        rh += `<tr>
+            <td><b>${r.name}</b></td><td>${r.yieldGrams}g</td>
+            <td>
+                <button class="btn-sm" onclick="openRecipeModal('${r.id}')">✏️</button>
+                <button class="btn-sm btn-danger" onclick="deleteRecipe('${r.id}')">🗑️</button>
+            </td>
+        </tr>`; 
+    });
     rh += '</table>';
     if($('settings-recipes-list')) $('settings-recipes-list').innerHTML = rh;
 
-    // Pizzen
-    let ph = '<table style="width:100%; font-size:13px;"><tr><th>Pizza</th><th>Preis</th></tr>';
-    (state.pizzas||[]).forEach(p => { ph += `<tr><td><b>${p.name}</b></td><td>${fmt(p.price)}</td></tr>`; });
+    // Pizzen Liste
+    let ph = '<table style="width:100%; font-size:13px;"><tr><th>Pizza</th><th>Preis</th><th>Aktion</th></tr>';
+    (state.pizzas||[]).forEach(p => { 
+        ph += `<tr>
+            <td><b>${p.name}</b></td><td>${fmt(p.price)}</td>
+            <td>
+                <button class="btn-sm" onclick="openPizzaModal('${p.id}')">✏️</button>
+                <button class="btn-sm btn-danger" onclick="deletePizza('${p.id}')">🗑️</button>
+            </td>
+        </tr>`; 
+    });
     ph += '</table>';
     if($('settings-pizzas-list')) $('settings-pizzas-list').innerHTML = ph;
 
@@ -1437,6 +1468,7 @@ function renderSettings(){
     if($('team-list-container')) $('team-list-container').innerHTML = th;
 }
 
+// Zutat Speichern
 function saveSettingsART(){
   (state.ingredients||[]).forEach(ing => {
      let ex = $('set-ex-'+ing.id.replace(/\s/g,'_'));
@@ -1462,6 +1494,127 @@ function updateUser(uid) {
     });
     showToast('Mitarbeiterdaten aktualisiert!');
 }
+
+function openIngredientModal(){
+    $('ing-new-name').value = ''; $('ing-new-artnr').value = '';
+    $('ing-new-netto').value = ''; $('ing-new-brutto').value = '';
+    openModal('ingredient-modal');
+}
+function saveNewIngredient(){
+    const name = $('ing-new-name').value;
+    const artNr = $('ing-new-artnr').value;
+    const sup = $('ing-new-sup').value;
+    const cat = $('ing-new-cat').value;
+    const unit = $('ing-new-unit').value;
+    const netto = parseFloat($('ing-new-netto').value);
+    const brutto = parseFloat($('ing-new-brutto').value);
+
+    if(!name || !artNr || isNaN(netto) || isNaN(brutto)) {
+        return alert("Bitte fülle alle Felder inkl. Preise und Artikelnummer aus!");
+    }
+
+    const ing = {
+        id: name, name: name, articleNumber: artNr, supplier: sup,
+        category: cat, unit: unit, priceNet: netto, priceGross: brutto, active: true
+    };
+    db.ref('ingredients/'+name).set(ing);
+    closeModal('ingredient-modal');
+    showToast('Zutat gespeichert!');
+}
+
+// ============================================================================
+// BUILDER: REZEPTE & PIZZEN
+// ============================================================================
+function renderBuilderItems() {
+    let ingOpts = state.ingredients.map(i=>`<option value="ing_${i.id}">${i.name}</option>`).join('');
+    let recOpts = state.recipes.filter(r=>r.id !== builderEditId).map(r=>`<option value="rec_${r.id}">${r.name} (Rezept)</option>`).join('');
+    
+    let html = builderItems.map((item, idx) => `
+        <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center; background:#f8fafc; padding:8px; border-radius:8px;">
+            <select style="flex:1" onchange="builderItems[${idx}].ref=this.value">
+                <option value="">-- Zutat / Rezept wählen --</option>
+                <optgroup label="Zutaten">${ingOpts}</optgroup>
+                <optgroup label="Rezepte">${recOpts}</optgroup>
+            </select>
+            <input type="number" style="width:80px;" placeholder="g/Stk" value="${item.grams}" onchange="builderItems[${idx}].grams=Number(this.value)">
+            <button class="btn-danger btn-sm" onclick="builderItems.splice(${idx},1); renderBuilderItems()">X</button>
+        </div>
+    `).join('');
+    
+    $('builder-items-container').innerHTML = html;
+    
+    const selects = $('builder-items-container').querySelectorAll('select');
+    builderItems.forEach((item, idx) => { if(selects[idx]) selects[idx].value = item.ref; });
+}
+
+function addBuilderItemRow() {
+    builderItems.push({ref:'', grams:0});
+    renderBuilderItems();
+}
+
+function openRecipeModal(id) {
+    builderType = 'recipe';
+    builderEditId = id || null;
+    const r = id ? state.recipes.find(x=>x.id===id) : null;
+    
+    $('builder-title').textContent = r ? 'Rezept bearbeiten' : 'Neues Rezept';
+    $('builder-name').value = r ? r.name : '';
+    $('builder-param-label').textContent = 'Ertrag (Yield in Gramm)';
+    $('builder-param').value = r ? r.yieldGrams : 100;
+    
+    builderItems = (r?.items || []).map(i => ({
+        grams: i.grams, 
+        ref: i.ingredientId ? 'ing_'+i.ingredientId : (i.recipeId ? 'rec_'+i.recipeId : '')
+    }));
+    
+    renderBuilderItems();
+    openModal('builder-modal');
+}
+
+function openPizzaModal(id) {
+    builderType = 'pizza';
+    builderEditId = id || null;
+    const p = id ? state.pizzas.find(x=>x.id===id) : null;
+    
+    $('builder-title').textContent = p ? 'Pizza bearbeiten' : 'Neue Pizza';
+    $('builder-name').value = p ? p.name : '';
+    $('builder-param-label').textContent = 'Verkaufspreis (€)';
+    $('builder-param').value = p ? p.price : 0;
+    
+    builderItems = (p?.items || []).map(i => ({
+        grams: i.grams, 
+        ref: i.ingredientId ? 'ing_'+i.ingredientId : (i.recipeId ? 'rec_'+i.recipeId : '')
+    }));
+    
+    renderBuilderItems();
+    openModal('builder-modal');
+}
+
+function saveBuilder() {
+    const name = $('builder-name').value;
+    const param = parseFloat($('builder-param').value) || 0;
+    if(!name) return alert("Bitte Namen eingeben");
+
+    const items = builderItems.map(b => {
+        if(!b.ref) return null;
+        const realId = b.ref.replace(/^(ing_|rec_)/, '');
+        return b.ref.startsWith('rec_') ? {recipeId: realId, grams: b.grams} : {ingredientId: realId, grams: b.grams};
+    }).filter(Boolean);
+
+    if(builderType === 'recipe') {
+        const id = builderEditId || 'rec_' + Date.now();
+        db.ref('recipes/'+id).set({id, name, yieldGrams: param, items, active:true});
+    } else {
+        const id = builderEditId || 'p_' + Date.now();
+        db.ref('pizzas/'+id).set({id, name, price: param, items, active:true});
+    }
+    
+    closeModal('builder-modal');
+    showToast("Gespeichert!");
+}
+
+function deleteRecipe(id) { if(confirm("Rezept wirklich löschen?")) db.ref('recipes/'+id).remove(); }
+function deletePizza(id) { if(confirm("Pizza wirklich löschen?")) db.ref('pizzas/'+id).remove(); }
 
 </script>
 </body>
