@@ -110,7 +110,7 @@
             flex: 1;
             padding: 32px;
             overflow-y: auto;
-            padding-bottom: 100px;
+            padding-bottom: 120px; /* Sicherstellen, dass mobile Nav nichts verdeckt */
         }
 
         .page {
@@ -620,7 +620,7 @@
         }
 
         /* =========================================
-           MOBILE OPTIMIZATION (STRICT PARITY)
+           MOBILE OPTIMIZATION
            ========================================= */
         .mobile-bottom-nav {
             display: none;
@@ -651,7 +651,7 @@
 
             input, select, textarea {
                 font-size: 16px;
-                min-height: 44px; /* Prevents iOS Zoom & improves touch */
+                min-height: 44px; /* Prevents iOS Zoom */
             }
 
             button {
@@ -804,7 +804,6 @@
                     <div class="page-title">Personal & Zeiten</div>
                     <div class="page-subtitle">Erfassung und Auswertung von Arbeitszeiten</div>
                 </div>
-                <button class="btn-primary" onclick="openTimesheetModal()">Neue Zeit erfassen</button>
             </div>
 
             <div class="settings-tabs">
@@ -1007,8 +1006,7 @@
 <div class="modal-overlay" id="day-events-modal">
     <div class="modal">
         <div class="modal-title" id="day-events-title">Events am Tag</div>
-        <div class="modal-body" id="day-events-list">
-            </div>
+        <div class="modal-body" id="day-events-list"></div>
         <div class="modal-footer">
             <button class="btn-primary admin-only" id="day-events-add-btn">Neuer Termin hier</button>
             <button onclick="closeModal('day-events-modal')">Schließen</button>
@@ -1053,8 +1051,12 @@
                     <input type="date" id="ev-endDate">
                 </div>
                 <div class="form-group">
-                    <label>Uhrzeit</label>
+                    <label>Start Uhrzeit</label>
                     <input type="time" id="ev-time">
+                </div>
+                <div class="form-group">
+                    <label>End Uhrzeit</label>
+                    <input type="time" id="ev-time-end">
                 </div>
                 <div class="form-group">
                     <label>Gästezahl</label>
@@ -1073,7 +1075,7 @@
             </div>
 
             <div class="form-group admin-only" id="ev-crew-container" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
-                <label style="color: var(--blue)">Personal Zuteilung</label>
+                <label style="color: var(--blue)">Personal Zuteilung (Zusagen: ✅ / Absagen: ❌)</label>
                 <select id="ev-crew-select-dropdown" style="margin-bottom: 8px;">
                     <option value="">-- Mitarbeiter hinzufügen --</option>
                 </select>
@@ -1102,44 +1104,6 @@
         <div class="modal-footer">
             <button onclick="closeModal('avail-modal')">Abbrechen</button>
             <button class="btn-primary" onclick="saveAvailDays()">Tage speichern</button>
-        </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="timesheet-modal">
-    <div class="modal">
-        <div class="modal-title">Zeiterfassung eintragen</div>
-        <div class="modal-body">
-            <div class="form-grid">
-                <div class="form-group" style="grid-column: span 2;">
-                    <label>Event</label>
-                    <select id="ts-event-id"></select>
-                </div>
-                <div class="form-group" style="grid-column: span 2;">
-                    <label>Mitarbeiter</label>
-                    <select id="ts-user-id"></select>
-                </div>
-                <div class="form-group">
-                    <label>Datum</label>
-                    <input type="date" id="ts-date">
-                </div>
-                <div class="form-group">
-                    <label>Trinkgeld-Zuschlag (Std., z.B. 0.25)</label>
-                    <input type="number" step="0.01" id="ts-bonus" value="0">
-                </div>
-                <div class="form-group">
-                    <label>Beginn (Uhrzeit)</label>
-                    <input type="time" id="ts-start">
-                </div>
-                <div class="form-group">
-                    <label>Ende (Uhrzeit)</label>
-                    <input type="time" id="ts-end">
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button onclick="closeModal('timesheet-modal')">Abbrechen</button>
-            <button class="btn-primary" onclick="saveTimesheet()">Speichern</button>
         </div>
     </div>
 </div>
@@ -1325,12 +1289,10 @@ let state = {
 let pizzaMengen = {};
 let dipMengen = { aioli: 0, hothoney: 0 };
 
-// Builder State
 let builderType = ''; 
 let builderEditId = null;
 let builderItems = []; 
 
-// Avail Modal State
 let currentAvailEventId = null;
 
 const colorMap = {
@@ -1695,9 +1657,17 @@ function renderEventList() {
         const isUnavail = e.unavailUIDs.includes(uid);
         
         const isPastEvent = new Date().toISOString().split('T')[0] >= e.date;
-        const loggedHours = (e.loggedHours || {})[uid] || '';
+        
+        // Find existing logged hours for this user/event (direct loggedHours fallback)
+        let loggedHours = (e.loggedHours || {})[uid] || '';
+        // If not in loggedHours, check timesheets
+        if(loggedHours === '') {
+            const userTs = state.timesheets.find(ts => ts.eventId === e.id && ts.userId === uid);
+            if(userTs) loggedHours = userTs.totalHours;
+        }
         
         let timeEntryHtml = '';
+        // Only show hour input if event is in the past
         if (e.status === 'Secured' && isPastEvent) {
             timeEntryHtml = `
                 <div style="margin-left:auto; display:flex; align-items:center; gap:8px; background:#f8fafc; padding:4px 8px; border-radius:8px;">
@@ -1881,6 +1851,7 @@ function openEventModal(id, dateStr) {
         date: dateStr || '', 
         endDate: dateStr || '', 
         time: '', 
+        timeEnd: '',
         ort: '', 
         personen: '', 
         status: 'Pending...', 
@@ -1888,9 +1859,10 @@ function openEventModal(id, dateStr) {
         customerContactId: ''
     }, ev || {});
     
-    ['title', 'type', 'date', 'endDate', 'time', 'ort', 'personen', 'status', 'notizen'].forEach(f => {
-        if ($(f === 'notizen' ? 'ev-notizen' : 'ev-' + f)) {
-            $(f === 'notizen' ? 'ev-notizen' : 'ev-' + f).value = src[f] ?? '';
+    ['title', 'type', 'date', 'endDate', 'time', 'timeEnd', 'ort', 'personen', 'status', 'notizen'].forEach(f => {
+        const inputId = f === 'notizen' ? 'ev-notizen' : (f === 'timeEnd' ? 'ev-time-end' : 'ev-' + f);
+        if ($(inputId)) {
+            $(inputId).value = src[f] ?? '';
         }
     });
 
@@ -1946,6 +1918,7 @@ function saveEvent() {
         date: $('ev-date').value,
         endDate: $('ev-endDate').value || $('ev-date').value,
         time: $('ev-time').value, 
+        timeEnd: $('ev-time-end').value,
         ort: $('ev-ort').value, 
         personen: parseInt($('ev-personen').value) || 0,
         status: newStatus, 
@@ -2000,7 +1973,7 @@ function showEventDetail(id) {
             <div style="background:#f1f5f9; padding:16px; border-radius:10px; margin-bottom:16px;">
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:14px;">
                     <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Typ</span><br><b>${ev.type}</b></div>
-                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Zeitraum</span><br><b>${ev.date}${ev.endDate && ev.endDate !== ev.date ? ' bis ' + ev.endDate : ''} <br>${ev.time || ''}</b></div>
+                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Zeitraum</span><br><b>${ev.date}${ev.endDate && ev.endDate !== ev.date ? ' bis ' + ev.endDate : ''} <br>${ev.time || ''}${ev.timeEnd ? ' - ' + ev.timeEnd : ''}</b></div>
                     <div style="grid-column:span 2;"><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Ort</span><br><b>${mapLink}</b></div>
                     <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Gäste</span><br><b>${ev.personen || '–'}</b></div>
                     ${customerStr}
@@ -2034,9 +2007,17 @@ function showEventDetail(id) {
 }
 
 function deleteEvent(id) { 
-    db.ref('events/' + id).remove(); 
-    closeModal('detail-modal'); 
-    showToast('Event gelöscht'); 
+    if (confirm("Möchtest du dieses Event und alle zugehörigen Daten wirklich löschen?")) {
+        db.ref('events/' + id).remove().then(() => {
+            // Cascading delete for timesheets
+            const relatedTimesheets = state.timesheets.filter(ts => ts.eventId === id);
+            relatedTimesheets.forEach(ts => {
+                db.ref('timesheets/' + ts.id).remove();
+            });
+            closeModal('detail-modal'); 
+            showToast('Event und Zeiten gelöscht'); 
+        }).catch(err => alert("Fehler beim Löschen."));
+    }
 }
 
 function markCleaningDone(eid) {
@@ -2052,7 +2033,34 @@ function markCleaningDone(eid) {
 function logHours(eid) {
     const h = parseFloat($('hours-' + eid).value);
     if (isNaN(h)) return showToast("Bitte gültige Zahl eingeben!");
-    db.ref(`events/${eid}/loggedHours/${auth.currentUser.uid}`).set(h);
+    
+    const uid = auth.currentUser.uid;
+    const ev = state.events.find(e => e.id === eid);
+    const user = state.users.find(u => u.uid === uid);
+    const wage = user ? (Number(user.wage) || 14) : 14;
+
+    // Save to event node for backwards compatibility and UI speed
+    db.ref(`events/${eid}/loggedHours/${uid}`).set(h);
+
+    // Auto-generate or update a Timesheet object bridging the data
+    const existingTs = state.timesheets.find(t => t.eventId === eid && t.userId === uid);
+    const tsId = existingTs ? existingTs.id : 'ts_' + Date.now() + '_' + uid;
+
+    const ts = {
+        id: tsId,
+        eventId: eid,
+        userId: uid,
+        date: ev.date,
+        start: ev.time || "00:00",
+        end: ev.timeEnd || "00:00", 
+        bonus: 0,
+        workHours: Number(h.toFixed(2)),
+        totalHours: Number(h.toFixed(2)),
+        wage: Number(wage),
+        totalCost: Number((h * wage).toFixed(2))
+    };
+    db.ref('timesheets/' + tsId).set(ts);
+
     showToast("Stunden erfolgreich erfasst!");
 }
 
@@ -2067,26 +2075,32 @@ function renderTimesheets() {
     let eventStats = {};
     let userStats = {};
 
-    state.timesheets.sort((a, b) => b.date.localeCompare(a.date)).forEach(ts => {
-        const user = state.users.find(u => u.uid === ts.userId) || { name: 'Unbekannt', wage: 0 };
-        const ev = state.events.find(e => e.id === ts.eventId) || { title: 'Unbekanntes Event' };
+    // Safely filter valid timesheets
+    const validTimesheets = state.timesheets.filter(ts => ts && ts.userId && ts.eventId);
+
+    validTimesheets.sort((a, b) => (b.date || "").localeCompare(a.date || "")).forEach(ts => {
+        const user = state.users.find(u => u.uid === ts.userId) || { name: 'Gelöschter User', wage: 0 };
+        const ev = state.events.find(e => e.id === ts.eventId) || { title: 'Gelöschtes Event' };
         
+        const tHours = Number(ts.totalHours) || 0;
+        const tCost = Number(ts.totalCost) || 0;
+
         if (!eventStats[ts.eventId]) eventStats[ts.eventId] = { title: ev.title, totalHours: 0, totalCost: 0 };
-        eventStats[ts.eventId].totalHours += ts.totalHours;
-        eventStats[ts.eventId].totalCost += ts.totalCost;
+        eventStats[ts.eventId].totalHours += tHours;
+        eventStats[ts.eventId].totalCost += tCost;
 
         if (!userStats[ts.userId]) userStats[ts.userId] = { name: user.name, totalHours: 0, totalCost: 0, events: new Set() };
-        userStats[ts.userId].totalHours += ts.totalHours;
-        userStats[ts.userId].totalCost += ts.totalCost;
+        userStats[ts.userId].totalHours += tHours;
+        userStats[ts.userId].totalCost += tCost;
         userStats[ts.userId].events.add(ev.title);
 
         tsListHtml += `<tr>
             <td><b>${ev.title}</b></td>
             <td>${user.name}</td>
-            <td>${ts.date}</td>
-            <td>${ts.start} - ${ts.end}</td>
-            <td>${ts.totalHours.toFixed(2)}h ${ts.bonus > 0 ? `(+${ts.bonus}h)` : ''}</td>
-            <td>${fmt(ts.totalCost)}</td>
+            <td>${ts.date || '-'}</td>
+            <td>${ts.start || '-'} - ${ts.end || '-'}</td>
+            <td>${tHours.toFixed(2)}h ${Number(ts.bonus) > 0 ? `(+${ts.bonus}h)` : ''}</td>
+            <td>${fmt(tCost)}</td>
             <td>
                 <button class="btn-sm" onclick="openTimesheetModal('${ts.id}')">✏️</button>
                 <button class="btn-sm btn-danger" onclick="deleteTimesheet('${ts.id}')">🗑️</button>
@@ -2095,21 +2109,36 @@ function renderTimesheets() {
         </tr>`;
     });
     tsListHtml += '</table>';
-    if ($('timesheet-list-container')) $('timesheet-list-container').innerHTML = tsListHtml;
+    
+    const listContainer = $('timesheet-list-container');
+    if (listContainer) {
+        if(validTimesheets.length === 0) listContainer.innerHTML = '<div style="color:var(--muted);">Keine erfassten Zeiten.</div>';
+        else listContainer.innerHTML = tsListHtml;
+    }
 
     let evHtml = '<table style="width:100%; min-width:500px;"><tr><th>Event</th><th>Gesamtstunden</th><th>Gesamtkosten</th></tr>';
     Object.values(eventStats).forEach(es => {
         evHtml += `<tr><td><b>${es.title}</b></td><td>${es.totalHours.toFixed(2)}h</td><td><b style="color:var(--red)">${fmt(es.totalCost)}</b></td></tr>`;
     });
     evHtml += '</table>';
-    if ($('timesheet-events-container')) $('timesheet-events-container').innerHTML = evHtml;
+    
+    const evContainer = $('timesheet-events-container');
+    if (evContainer) {
+        if(Object.keys(eventStats).length === 0) evContainer.innerHTML = '<div style="color:var(--muted);">Keine Event-Daten.</div>';
+        else evContainer.innerHTML = evHtml;
+    }
 
     let usrHtml = '<table style="width:100%; min-width:600px;"><tr><th>Mitarbeiter</th><th>Gesamtstunden</th><th>Gesamtlohn</th><th>Eingesetzt bei</th></tr>';
     Object.values(userStats).forEach(us => {
         usrHtml += `<tr><td><b>${us.name}</b></td><td>${us.totalHours.toFixed(2)}h</td><td><b style="color:var(--green)">${fmt(us.totalCost)}</b></td><td>${Array.from(us.events).join(', ')}</td></tr>`;
     });
     usrHtml += '</table>';
-    if ($('timesheet-users-container')) $('timesheet-users-container').innerHTML = usrHtml;
+    
+    const usrContainer = $('timesheet-users-container');
+    if (usrContainer) {
+        if(Object.keys(userStats).length === 0) usrContainer.innerHTML = '<div style="color:var(--muted);">Keine Mitarbeiter-Daten.</div>';
+        else usrContainer.innerHTML = usrHtml;
+    }
 }
 
 function openTimesheetModal(id) {
@@ -2149,13 +2178,25 @@ function saveTimesheet() {
     }
 
     const user = state.users.find(u => u.uid === userId);
-    const wage = user ? (user.wage || 14) : 14;
+    const wage = user ? (Number(user.wage) || 14) : 14;
     
     const workHours = calculateHours(start, end);
     const totalHours = workHours + bonus;
     const totalCost = totalHours * wage;
 
-    const ts = { id, eventId, userId, date, start, end, bonus, workHours, totalHours, wage, totalCost };
+    const ts = { 
+        id, 
+        eventId, 
+        userId, 
+        date, 
+        start, 
+        end, 
+        bonus, 
+        workHours: Number(workHours.toFixed(2)), 
+        totalHours: Number(totalHours.toFixed(2)), 
+        wage: Number(wage), 
+        totalCost: Number(totalCost.toFixed(2)) 
+    };
     db.ref('timesheets/' + id).set(ts);
     closeModal('timesheet-modal');
     showToast("Zeiterfassung gespeichert!");
@@ -2184,9 +2225,9 @@ function printReceipt(tsId) {
             <div class="row"><b>Mitarbeiter:</b> <span>${user.name}</span></div>
             <div class="row"><b>Event:</b> <span>${ev.title} (${ev.type})</span></div>
             <div class="row"><b>Datum:</b> <span>${ts.date}</span></div>
-            <div class="row"><b>Arbeitszeit:</b> <span>${ts.start} - ${ts.end} (${ts.workHours.toFixed(2)}h)</span></div>
-            ${ts.bonus > 0 ? `<div class="row"><b>Zuschlag / Sonstiges:</b> <span>+${ts.bonus}h</span></div>` : ''}
-            <div class="row" style="margin-top:30px;"><b>Gesamtstunden:</b> <span>${ts.totalHours.toFixed(2)} Stunden</span></div>
+            <div class="row"><b>Arbeitszeit:</b> <span>${ts.start} - ${ts.end} (${Number(ts.workHours).toFixed(2)}h)</span></div>
+            ${Number(ts.bonus) > 0 ? `<div class="row"><b>Zuschlag / Sonstiges:</b> <span>+${ts.bonus}h</span></div>` : ''}
+            <div class="row" style="margin-top:30px;"><b>Gesamtstunden:</b> <span>${Number(ts.totalHours).toFixed(2)} Stunden</span></div>
             <div class="row"><b>Stundenlohn:</b> <span>${fmt(ts.wage)}</span></div>
             <div class="row" style="margin-top:20px; font-size:20px; border-bottom:none;"><b>Auszahlungsbetrag:</b> <b style="color:#2563eb;">${fmt(ts.totalCost)}</b></div>
         </div>
@@ -2281,8 +2322,8 @@ function renderPizzaResult() {
         if (grams < 0.1) continue;
         const ingredient = getIngredient(article) || { supplier: 'Sonstige', category: 'Sonstiges', priceGross: 0, priceNet: 0 };
         const kg = grams / 1000; 
-        const costBrutto = kg * (ingredient.priceGross || 0);
-        const costNetto = kg * (ingredient.priceNet || 0);
+        const costBrutto = kg * (Number(ingredient.priceGross) || 0);
+        const costNetto = kg * (Number(ingredient.priceNet) || 0);
         grossTotal += costBrutto; 
         netTotal += costNetto;
         items.push({ art: article, g: grams, sup: ingredient.supplier, cat: ingredient.category, costBrutto, costNetto });
@@ -2341,8 +2382,8 @@ function saveToEinkauf() {
                 kategorie: ingredient.category || 'Sonstiges', 
                 menge: parseFloat(kg.toFixed(3)), 
                 einheit: 'kg', 
-                preis: ingredient.priceNet || 0, 
-                preisBrutto: ingredient.priceGross || 0,
+                preis: Number(ingredient.priceNet) || 0, 
+                preisBrutto: Number(ingredient.priceGross) || 0,
                 autoGenerated: true
             });
         }
@@ -2394,13 +2435,13 @@ function calcCatering() {
 
     $('cat-marge-display').value = `${sz.label} (${sz.marge})`;
 
-    const pK = sz.stunden * stundensatz;
-    const wE = gaeste * defs.waren;
-    const kK = km * defs.kmsatz;
-    const fK = defs.gas + defs.entsorgung + defs.miete;
-    const mW = (pK + wE + kK + fK) * sz.marge;
+    const pK = Number(sz.stunden) * stundensatz;
+    const wE = gaeste * Number(defs.waren);
+    const kK = km * Number(defs.kmsatz);
+    const fK = Number(defs.gas) + Number(defs.entsorgung) + Number(defs.miete);
+    const mW = (pK + wE + kK + fK) * Number(sz.marge);
     const zN = pK + wE + kK + fK + mW;
-    const zB = zN * defs.ust;
+    const zB = zN * Number(defs.ust);
 
     rE.innerHTML = [
         { l: 'Gäste', v: gaeste },
@@ -2433,10 +2474,10 @@ function renderEinkauf() {
     sups.forEach(sup => {
         let supTotal = 0;
         const rows = state.einkauf.filter(e => e.lieferant === sup).map(e => {
-            const pNetto = e.preis || 0;
-            const pBrutto = e.preisBrutto || (pNetto * 1.07); 
-            const sumNetto = e.menge * pNetto;
-            const sumBrutto = e.menge * pBrutto;
+            const pNetto = Number(e.preis) || 0;
+            const pBrutto = Number(e.preisBrutto) || (pNetto * 1.07); 
+            const sumNetto = Number(e.menge) * pNetto;
+            const sumBrutto = Number(e.menge) * pBrutto;
             
             supTotal += sumBrutto; 
             grandTotal += sumBrutto;
@@ -2447,7 +2488,7 @@ function renderEinkauf() {
                     <span style="font-size:11px;color:var(--muted)">Art: ${e.artikelnummer || '-'} | ${e.kategorie}</span>
                 </div>
                 <div style="text-align:right;">
-                    <b style="color:var(--blue)">${e.einheit === 'kg' ? fmtKG(e.menge * 1000) : e.menge + ' ' + e.einheit}</b><br>
+                    <b style="color:var(--blue)">${e.einheit === 'kg' ? fmtKG(Number(e.menge) * 1000) : e.menge + ' ' + e.einheit}</b><br>
                     <span style="font-size:11px;">Brutto: ${fmt(sumBrutto)} <span style="color:var(--muted)">(Netto: ${fmt(sumNetto)})</span></span>
                 </div>
             </div>`;
@@ -2548,8 +2589,8 @@ function calculateBuilderTotal() {
             } else if (i.ingredientId) {
                 const ing = getIngredient(i.ingredientId);
                 if (ing) {
-                    cGross += (i.grams * ratio / 1000) * (ing.priceGross || 0);
-                    cNet += (i.grams * ratio / 1000) * (ing.priceNet || 0);
+                    cGross += (i.grams * ratio / 1000) * (Number(ing.priceGross) || 0);
+                    cNet += (i.grams * ratio / 1000) * (Number(ing.priceNet) || 0);
                 }
             }
         });
@@ -2566,8 +2607,8 @@ function calculateBuilderTotal() {
         } else {
             const ing = getIngredient(realId);
             if (ing) {
-                totalCostGross += (b.grams / 1000) * (ing.priceGross || 0);
-                totalCostNet += (b.grams / 1000) * (ing.priceNet || 0);
+                totalCostGross += (b.grams / 1000) * (Number(ing.priceGross) || 0);
+                totalCostNet += (b.grams / 1000) * (Number(ing.priceNet) || 0);
             }
         }
     });
@@ -2597,8 +2638,8 @@ function openRecipeModal(id) {
         ref: i.ingredientId ? 'ing_' + i.ingredientId : (i.recipeId ? 'rec_' + i.recipeId : '') 
     }));
     
+    $('builder-calc-preview').style.display = 'none';
     renderBuilderItems(); 
-    calculateBuilderTotal();
     openModal('builder-modal');
 }
 
@@ -2684,7 +2725,7 @@ function renderKontakte() {
     if (!c) return;
     
     c.innerHTML = state.kontakte.map(k => `
-        <div class="card" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px; padding: 20px;">
+        <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; gap: 12px; padding: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
                 <div>
                     <div style="font-size: 18px; font-weight: 700; color: var(--text);">${k.name}</div>
