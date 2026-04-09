@@ -176,6 +176,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
   <div class="nav-item active" onclick="navTo('dashboard',this)">Dashboard</div>
   <div class="nav-item" onclick="navTo('kalender',this)">Kalender</div>
   <div class="nav-item" onclick="navTo('events',this)">Events & Staffing</div>
+  <div class="nav-item admin-only" onclick="navTo('timesheet',this)">Personal & Zeiten</div>
   <div class="nav-item admin-only" onclick="navTo('catering',this)">Catering-Kalkulator</div>
   <div class="nav-item admin-only" onclick="navTo('pizza',this)">Pizza Labor</div>
   <div class="nav-item admin-only" onclick="navTo('einkauf',this)">Einkaufsliste</div>
@@ -238,11 +239,48 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
     <div class="page-header">
         <div>
             <div class="page-title">Events & Personalplanung</div>
-            <div class="page-subtitle">Verfügbarkeiten prüfen und Stunden erfassen</div>
+            <div class="page-subtitle">Verfügbarkeiten prüfen und Zuteilungen vornehmen</div>
         </div>
         <button class="btn-primary admin-only" onclick="openEventModal()">Neues Event anlegen</button>
     </div>
     <div id="all-events-list"></div>
+</div>
+
+<div class="page admin-only" id="page-timesheet">
+    <div class="page-header">
+        <div>
+            <div class="page-title">Personal & Zeiten</div>
+            <div class="page-subtitle">Erfassung und Auswertung von Arbeitszeiten</div>
+        </div>
+        <button class="btn-primary" onclick="openTimesheetModal()">Neue Zeit erfassen</button>
+    </div>
+
+    <div class="settings-tabs">
+        <div class="settings-tab active" onclick="switchSettingsTab('ts-list', this)">Erfasste Zeiten</div>
+        <div class="settings-tab" onclick="switchSettingsTab('ts-events', this)">Event-Auswertung</div>
+        <div class="settings-tab" onclick="switchSettingsTab('ts-users', this)">Mitarbeiter-Auswertung</div>
+    </div>
+
+    <div id="panel-ts-list" class="settings-panel active">
+        <div class="card">
+            <div class="card-title">Alle erfassten Schichten</div>
+            <div class="table-wrap" id="timesheet-list-container"></div>
+        </div>
+    </div>
+
+    <div id="panel-ts-events" class="settings-panel">
+        <div class="card">
+            <div class="card-title">Kosten pro Event</div>
+            <div class="table-wrap" id="timesheet-events-container"></div>
+        </div>
+    </div>
+
+    <div id="panel-ts-users" class="settings-panel">
+        <div class="card">
+            <div class="card-title">Stunden pro Mitarbeiter</div>
+            <div class="table-wrap" id="timesheet-users-container"></div>
+        </div>
+    </div>
 </div>
 
 <div class="page admin-only" id="page-pizza">
@@ -338,8 +376,18 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
             <button class="btn-primary" style="margin-top:16px; width:100%;" onclick="saveSettingsART()">Preisänderungen speichern</button>
         </div>
     </div>
-    <div id="panel-rezepte" class="settings-panel"><div class="card" id="settings-recipes-list">Platzhalter Sub-Rezepte</div></div>
-    <div id="panel-pizzas" class="settings-panel"><div class="card" id="settings-pizzas-list">Platzhalter Pizzen Konfiguration</div></div>
+    <div id="panel-rezepte" class="settings-panel">
+        <div class="card">
+            <div class="card-title">Gespeicherte Sub-Rezepte</div>
+            <div id="settings-recipes-list"></div>
+        </div>
+    </div>
+    <div id="panel-pizzas" class="settings-panel">
+        <div class="card">
+            <div class="card-title">Gespeicherte Pizzen</div>
+            <div id="settings-pizzas-list"></div>
+        </div>
+    </div>
     
     <div id="panel-catering" class="settings-panel">
         <div class="card">
@@ -370,8 +418,8 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
     <button onclick="navTo('dashboard', this)" class="active">Dash</button>
     <button onclick="navTo('kalender', this)">Kal</button>
     <button onclick="navTo('events', this)">Events</button>
+    <button class="admin-only" onclick="navTo('timesheet', this)">Zeiten</button>
     <button class="admin-only" onclick="navTo('pizza', this)">Labor</button>
-    <button class="admin-only" onclick="navTo('einkauf', this)">Kauf</button>
     <button class="superadmin-only" onclick="navTo('settings', this)">Settings</button>
 </div>
 </div>
@@ -394,9 +442,10 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
                 </select>
             </div>
             <div class="form-group"><label>Datum</label><input type="date" id="ev-date"></div>
-            <div class="form-group"><label>Uhrzeit</label><input type="time" id="ev-time"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Ort / Adresse</label><input id="ev-ort"></div>
             <div class="form-group"><label>Gästezahl</label><input type="number" id="ev-personen"></div>
+            <div class="form-group"><label>Start Uhrzeit</label><input type="time" id="ev-time"></div>
+            <div class="form-group"><label>End Uhrzeit</label><input type="time" id="ev-time-end"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Ort / Adresse</label><input id="ev-ort"></div>
         </div>
         
         <div class="form-group admin-only" style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
@@ -409,6 +458,27 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
         </div>
     </div>
     <div class="modal-footer"><button onclick="closeModal('event-modal')">Abbrechen</button><button class="btn-primary" onclick="saveEvent()">Speichern</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="timesheet-modal">
+<div class="modal">
+    <div class="modal-title">Zeiterfassung eintragen</div>
+    <div class="modal-body">
+        <div class="form-grid">
+            <div class="form-group" style="grid-column: span 2;"><label>Event</label>
+                <select id="ts-event-id"></select>
+            </div>
+            <div class="form-group" style="grid-column: span 2;"><label>Mitarbeiter</label>
+                <select id="ts-user-id"></select>
+            </div>
+            <div class="form-group"><label>Datum</label><input type="date" id="ts-date"></div>
+            <div class="form-group"><label>Trinkgeld-Zuschlag (Std., z.B. 0.25)</label><input type="number" step="0.01" id="ts-bonus" value="0"></div>
+            <div class="form-group"><label>Beginn (Uhrzeit)</label><input type="time" id="ts-start"></div>
+            <div class="form-group"><label>Ende (Uhrzeit)</label><input type="time" id="ts-end"></div>
+        </div>
+    </div>
+    <div class="modal-footer"><button onclick="closeModal('timesheet-modal')">Abbrechen</button><button class="btn-primary" onclick="saveTimesheet()">Speichern</button></div>
 </div>
 </div>
 
@@ -477,7 +547,25 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-let state = {role:'staff', events:[], kontakte:[], einkauf:[], recipes:[], pizzas:[], ingredients:[], users:[], cateringDefaults:{}, cateringScenarios:[], calYear:new Date().getFullYear(), calMonth:new Date().getMonth(), editEventId:null, editKontaktId:null, pinnwand:''};
+let state = {
+    role:'staff', 
+    events:[], 
+    kontakte:[], 
+    einkauf:[], 
+    recipes:[], 
+    pizzas:[], 
+    ingredients:[], 
+    users:[], 
+    timesheets:[],
+    cateringDefaults:{}, 
+    cateringScenarios:[], 
+    calYear:new Date().getFullYear(), 
+    calMonth:new Date().getMonth(), 
+    editEventId:null, 
+    editKontaktId:null, 
+    editTimesheetId:null,
+    pinnwand:''
+};
 let pizzaMengen = {}, dipMengen = {aioli:0, hothoney:0};
 
 const colorMap = {'Catering':'tag-Catering', 'Event':'tag-Event', 'Meeting':'tag-Meeting', 'Preppen':'tag-Preppen', 'Einkaufen':'tag-Einkaufen', 'SocialMedia':'tag-SocialMedia'};
@@ -520,6 +608,21 @@ function statusBadge(s){
 function confirmAction(type, url) {
     const msgs = { tel: "Möchtest du diese Nummer wirklich anrufen?", mail: "Möchtest du eine E-Mail verfassen?", map: "Möchtest du die Adresse in Google Maps öffnen?" };
     if(confirm(msgs[type])) window.open(url, type==='map'?'_blank':'_self');
+}
+
+// Calculate hours between two time strings (HH:MM)
+function calculateHours(startStr, endStr) {
+    if (!startStr || !endStr) return 0;
+    const [startH, startM] = startStr.split(':').map(Number);
+    const [endH, endM] = endStr.split(':').map(Number);
+    
+    let startDate = new Date(); startDate.setHours(startH, startM, 0);
+    let endDate = new Date(); endDate.setHours(endH, endM, 0);
+    
+    // Handle overnight shifts
+    if(endDate < startDate) endDate.setDate(endDate.getDate() + 1);
+    
+    return (endDate - startDate) / (1000 * 60 * 60);
 }
 
 // ============================================================================
@@ -579,12 +682,17 @@ function listenAll(){
         state.recipes = Object.values(d.recipes||{});
         state.pizzas = Object.values(d.pizzas||{});
         
-        state.events = Object.values(d.events||{}).sort((a,b)=>a.date > b.date ? 1 : -1).map(ev => Object.assign({}, ev, {
-            assignedCrew: ev.assignedCrew||[], availUIDs: ev.availUIDs||[], unavailUIDs: ev.unavailUIDs||[]
-        }));
+        // Filter undefined events and normalize
+        state.events = Object.values(d.events||{})
+            .filter(ev => ev && ev.id)
+            .sort((a,b)=>a.date > b.date ? 1 : -1)
+            .map(ev => Object.assign({}, ev, {
+                assignedCrew: ev.assignedCrew||[], availUIDs: ev.availUIDs||[], unavailUIDs: ev.unavailUIDs||[]
+            }));
         
-        state.kontakte = Object.values(d.kontakte||{});
-        state.einkauf = Object.values(d.einkauf||{});
+        state.kontakte = Object.values(d.kontakte||{}).filter(k => k && k.id);
+        state.einkauf = Object.values(d.einkauf||{}).filter(e => e && e.id);
+        state.timesheets = Object.values(d.timesheets||{}).filter(t => t && t.id);
         
         const usersObj = d.users||{};
         state.users = Object.keys(usersObj).map(uid => ({uid, ...usersObj[uid]}));
@@ -603,6 +711,7 @@ function renderAll(){
     updateDashboard();
     renderCalendar();
     renderEventList();
+    renderTimesheets();
     renderPizzaGrid();
     renderEinkauf();
     renderKontakte();
@@ -711,7 +820,6 @@ function renderEventList(){
         const uid = auth.currentUser.uid;
         const isAvail = e.availUIDs.includes(uid);
         const isUnavail = e.unavailUIDs.includes(uid);
-        const loggedHours = (e.loggedHours || {})[uid] || '';
         
         return `
             <div class="card" style="margin-bottom:16px;">
@@ -727,13 +835,6 @@ function renderEventList(){
                 <div style="margin-top:16px; padding-top:16px; border-top:1px solid #f1f5f9; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
                     <button class="btn-sm ${isAvail ? 'btn-green' : ''}" onclick="toggleAvail('${e.id}', true)">${isAvail ? '✅ Zugesagt' : '🙋‍♂️ Habe Zeit'}</button>
                     <button class="btn-sm ${isUnavail ? 'btn-danger' : ''}" onclick="toggleAvail('${e.id}', false)">${isUnavail ? '❌ Abgesagt' : '🚫 Keine Zeit'}</button>
-
-                    ${e.status === 'Secured' ? `
-                        <div style="margin-left:auto; display:flex; align-items:center; gap:8px; background:#f8fafc; padding:4px 8px; border-radius:8px;">
-                            <input type="number" id="hours-${e.id}" placeholder="Std." style="width:60px; padding:6px; border:none; background:#fff;" value="${loggedHours}">
-                            <button class="btn-sm btn-primary" onclick="logHours('${e.id}')">Speichern</button>
-                        </div>
-                    ` : ''}
                 </div>
             </div>
         `;
@@ -755,21 +856,16 @@ function toggleAvail(eid, isAvailable) {
     }, (error, comm) => { if(comm) showToast("Verfügbarkeit gespeichert!"); });
 }
 
-function logHours(eid){
-    const h = parseFloat($('hours-'+eid).value);
-    if(isNaN(h)) return showToast("Bitte gültige Zahl eingeben!");
-    db.ref(`events/${eid}/loggedHours/${auth.currentUser.uid}`).set(h);
-    showToast("Stunden erfolgreich erfasst!");
-}
-
 function openEventModal(id, dateStr){
     state.editEventId = id || null;
     const ev = id ? state.events.find(e => e.id === id) : null;
     
-    const src = Object.assign({title:'', type:'Catering', date:dateStr||'', time:'', ort:'', personen:'', status:'Pending...', notizen:''}, ev || {});
+    const src = Object.assign({title:'', type:'Catering', date:dateStr||'', time:'', timeEnd:'', ort:'', personen:'', status:'Pending...', notizen:''}, ev || {});
+    
     ['title','type','date','time','ort','personen','status','notizen'].forEach(f => {
         if($(f==='notizen'?'ev-notizen':'ev-'+f)) $(f==='notizen'?'ev-notizen':'ev-'+f).value = src[f] ?? '';
     });
+    if($('ev-time-end')) $('ev-time-end').value = src.timeEnd || '';
 
     if(state.role !== 'staff'){
         $('ev-crew-select').innerHTML = state.users.map(u => {
@@ -800,7 +896,7 @@ function saveEvent(){
     
     const updates = {
         id, title: $('ev-title').value, type: $('ev-type').value, date: $('ev-date').value,
-        time: $('ev-time').value, ort: $('ev-ort').value, personen: parseInt($('ev-personen').value)||0,
+        time: $('ev-time').value, timeEnd: $('ev-time-end').value, ort: $('ev-ort').value, personen: parseInt($('ev-personen').value)||0,
         status: newStatus, assignedCrew: crew, notizen: $('ev-notizen').value
     };
 
@@ -808,7 +904,6 @@ function saveEvent(){
     if(oldEv) {
         updates.availUIDs = oldEv.availUIDs || []; 
         updates.unavailUIDs = oldEv.unavailUIDs || [];
-        if(oldEv.loggedHours) updates.loggedHours = oldEv.loggedHours;
         if(oldEv.cleaningDoneBy) updates.cleaningDoneBy = oldEv.cleaningDoneBy;
     }
 
@@ -841,7 +936,7 @@ function showEventDetail(id){
             <div style="background:#f1f5f9; padding:16px; border-radius:10px; margin-bottom:16px;">
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:14px;">
                     <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Typ</span><br><b>${ev.type}</b></div>
-                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Datum</span><br><b>${ev.date} ${ev.time||''}</b></div>
+                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Zeitraum</span><br><b>${ev.date} ${ev.time||''} ${ev.timeEnd?'- '+ev.timeEnd:''}</b></div>
                     <div style="grid-column:span 2;"><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Ort</span><br><b>${ev.ort||'–'}</b></div>
                     <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Gäste</span><br><b>${ev.personen||'–'}</b></div>
                 </div>
@@ -855,18 +950,6 @@ function showEventDetail(id){
         } else {
             const cleaner = state.users.find(u=>u.uid === ev.cleaningDoneBy)?.name || 'Ein Admin';
             html += `<div style="text-align:center; padding:10px; background:var(--green-light); color:var(--green); border-radius:8px; font-weight:600;">Putzdienst wurde erledigt von: ${cleaner}.</div>`;
-        }
-        
-        // Quittungen PDF
-        if(ev.loggedHours) {
-            html += `<div style="margin-top:20px; font-weight:700; margin-bottom:8px;">Abrechnungen (PDF):</div><div style="display:flex; flex-direction:column; gap:8px;">`;
-            Object.entries(ev.loggedHours).forEach(([uid, hrs]) => {
-                const u = state.users.find(x=>x.uid === uid);
-                if(u) {
-                    html += `<button onclick="printReceipt('${ev.id}', '${uid}')">Quittung generieren für ${u.name} (${hrs} Std)</button>`;
-                }
-            });
-            html += `</div>`;
         }
     }
 
@@ -899,35 +982,123 @@ function markCleaningDone(eid){
     closeModal('detail-modal');
 }
 
-function printReceipt(eventId, uid) {
-    const ev = state.events.find(e=>e.id===eventId);
-    const user = state.users.find(u=>u.uid===uid);
-    if(!ev || !user) return;
+// ============================================================================
+// PERSONAL & ZEITEN (TIMESHEETS)
+// ============================================================================
+function renderTimesheets() {
+    if(state.role === 'staff') return; // Not visible for staff
+
+    // 1. Populate Lists
+    let tsListHtml = '<table style="width:100%; min-width:800px; font-size:13px;"><tr><th>Event</th><th>Mitarbeiter</th><th>Datum</th><th>Zeit</th><th>Std</th><th>Lohn</th><th>Aktionen</th></tr>';
     
-    const hours = ev.loggedHours[uid] || 0;
-    const wage = user.wage || 14;
-    const total = hours * wage;
+    let eventStats = {};
+    let userStats = {};
+
+    state.timesheets.sort((a,b)=>b.date.localeCompare(a.date)).forEach(ts => {
+        const user = state.users.find(u=>u.uid === ts.userId) || {name:'Unbekannt', wage:0};
+        const ev = state.events.find(e=>e.id === ts.eventId) || {title:'Unbekanntes Event'};
+        
+        // Accumulate Event Stats
+        if(!eventStats[ts.eventId]) eventStats[ts.eventId] = {title: ev.title, totalHours: 0, totalCost: 0};
+        eventStats[ts.eventId].totalHours += ts.totalHours;
+        eventStats[ts.eventId].totalCost += ts.totalCost;
+
+        // Accumulate User Stats
+        if(!userStats[ts.userId]) userStats[ts.userId] = {name: user.name, totalHours: 0, totalCost: 0, events: new Set()};
+        userStats[ts.userId].totalHours += ts.totalHours;
+        userStats[ts.userId].totalCost += ts.totalCost;
+        userStats[ts.userId].events.add(ev.title);
+
+        tsListHtml += `<tr>
+            <td><b>${ev.title}</b></td>
+            <td>${user.name}</td>
+            <td>${ts.date}</td>
+            <td>${ts.start} - ${ts.end}</td>
+            <td>${ts.totalHours.toFixed(2)}h ${ts.bonus > 0 ? `(+${ts.bonus}h)`:''}</td>
+            <td>${fmt(ts.totalCost)}</td>
+            <td>
+                <button class="btn-sm" onclick="openTimesheetModal('${ts.id}')">✏️</button>
+                <button class="btn-sm btn-danger" onclick="deleteTimesheet('${ts.id}')">🗑️</button>
+            </td>
+        </tr>`;
+    });
+    tsListHtml += '</table>';
+    if($('timesheet-list-container')) $('timesheet-list-container').innerHTML = tsListHtml;
+
+    // 2. Populate Event Stats
+    let evHtml = '<table style="width:100%; min-width:500px;"><tr><th>Event</th><th>Gesamtstunden</th><th>Gesamtkosten</th></tr>';
+    Object.values(eventStats).forEach(es => {
+        evHtml += `<tr><td><b>${es.title}</b></td><td>${es.totalHours.toFixed(2)}h</td><td><b style="color:var(--red)">${fmt(es.totalCost)}</b></td></tr>`;
+    });
+    evHtml += '</table>';
+    if($('timesheet-events-container')) $('timesheet-events-container').innerHTML = evHtml;
+
+    // 3. Populate User Stats
+    let usrHtml = '<table style="width:100%; min-width:600px;"><tr><th>Mitarbeiter</th><th>Gesamtstunden</th><th>Gesamtlohn</th><th>Eingesetzt bei</th></tr>';
+    Object.values(userStats).forEach(us => {
+        usrHtml += `<tr><td><b>${us.name}</b></td><td>${us.totalHours.toFixed(2)}h</td><td><b style="color:var(--green)">${fmt(us.totalCost)}</b></td><td>${Array.from(us.events).join(', ')}</td></tr>`;
+    });
+    usrHtml += '</table>';
+    if($('timesheet-users-container')) $('timesheet-users-container').innerHTML = usrHtml;
+}
+
+function openTimesheetModal(id) {
+    state.editTimesheetId = id || null;
+    const ts = id ? state.timesheets.find(t => t.id === id) : null;
     
-    const html = `
-        <html><head><title>Abrechnung - ${user.name}</title>
-        <style>body{font-family:sans-serif; padding:40px; color:#111827;} .box{border:1px solid #e5e7eb; padding:30px; border-radius:10px; max-width:600px; margin:0 auto;} h1{color:#2563eb; margin-bottom:5px;} .row{display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #f1f5f9; padding-bottom:5px;}</style>
-        </head><body>
-        <div class="box">
-            <h1>Heitmanns Pizza</h1>
-            <p style="color:#6b7280; margin-bottom:30px;">Abrechnung Event-Personal</p>
-            <div class="row"><b>Mitarbeiter:</b> <span>${user.name}</span></div>
-            <div class="row"><b>Event:</b> <span>${ev.title} (${ev.type})</span></div>
-            <div class="row"><b>Datum:</b> <span>${ev.date}</span></div>
-            <div class="row" style="margin-top:30px;"><b>Arbeitszeit:</b> <span>${hours} Stunden</span></div>
-            <div class="row"><b>Stundenlohn:</b> <span>${fmt(wage)}</span></div>
-            <div class="row" style="margin-top:20px; font-size:20px; border-bottom:none;"><b>Auszahlungsbetrag:</b> <b style="color:#2563eb;">${fmt(total)}</b></div>
-        </div>
-        <script>window.print();<\/script>
-        </body></html>
-    `;
-    const w = window.open('','_blank');
-    w.document.write(html);
-    w.document.close();
+    // Populate Dropdowns
+    $('ts-event-id').innerHTML = '<option value="">-- Event wählen --</option>' + state.events.map(e=>`<option value="${e.id}">${e.date} - ${e.title}</option>`).join('');
+    $('ts-user-id').innerHTML = '<option value="">-- Mitarbeiter wählen --</option>' + state.users.map(u=>`<option value="${u.uid}">${u.name}</option>`).join('');
+
+    if(ts) {
+        $('ts-event-id').value = ts.eventId;
+        $('ts-user-id').value = ts.userId;
+        $('ts-date').value = ts.date;
+        $('ts-start').value = ts.start;
+        $('ts-end').value = ts.end;
+        $('ts-bonus').value = ts.bonus || 0;
+    } else {
+        $('ts-date').value = new Date().toISOString().split('T')[0];
+        $('ts-start').value = '';
+        $('ts-end').value = '';
+        $('ts-bonus').value = 0;
+    }
+    
+    openModal('timesheet-modal');
+}
+
+function saveTimesheet() {
+    const id = state.editTimesheetId || 'ts_' + Date.now();
+    const eventId = $('ts-event-id').value;
+    const userId = $('ts-user-id').value;
+    const date = $('ts-date').value;
+    const start = $('ts-start').value;
+    const end = $('ts-end').value;
+    const bonus = parseFloat($('ts-bonus').value) || 0;
+
+    if(!eventId || !userId || !date || !start || !end) return alert("Bitte alle Pflichtfelder (Event, Mitarbeiter, Datum, Zeiten) ausfüllen!");
+
+    const user = state.users.find(u=>u.uid === userId);
+    const wage = user ? (user.wage || 14) : 14;
+    
+    const workHours = calculateHours(start, end);
+    const totalHours = workHours + bonus;
+    const totalCost = totalHours * wage;
+
+    const ts = {
+        id, eventId, userId, date, start, end, bonus, workHours, totalHours, wage, totalCost
+    };
+
+    db.ref('timesheets/'+id).set(ts);
+    closeModal('timesheet-modal');
+    showToast("Zeiterfassung gespeichert!");
+}
+
+function deleteTimesheet(id) {
+    if(confirm("Diese Zeiterfassung wirklich löschen?")) {
+        db.ref('timesheets/'+id).remove();
+        showToast("Erfassung gelöscht!");
+    }
 }
 
 // ============================================================================
@@ -938,6 +1109,7 @@ function getIngredient(id){ return (state.ingredients||[]).find(i=>i.id===id); }
 function renderPizzaGrid(){
     const c = $('pizza-grid');
     if(!c) return;
+    // Visually show + / - but jump in 5s
     c.innerHTML = state.pizzas.map(p => `
         <div class="card">
             <div class="card-title">${p.name} <span>${fmt(p.price)}</span></div>
@@ -1038,7 +1210,7 @@ function saveToEinkauf(){
             const a = getIngredient(art)||{}; const kg = g/1000;
             const idx = arr.findIndex(e => e.artikel === art);
             if(idx >= 0) arr[idx].menge = Number((arr[idx].menge + kg).toFixed(3));
-            else arr.push({id: Date.now().toString()+Math.random(), artikel: art, artikelnummer: a.articleNumber||'', lieferant: a.supplier||'Sonstige', kategorie: a.category||'Sonstiges', menge: parseFloat(kg.toFixed(3)), einheit: 'kg', preis: a.priceNet||0});
+            else arr.push({id: Date.now().toString()+Math.random(), artikel: art, artikelnummer: a.articleNumber||'', lieferant: a.supplier||'Sonstige', kategorie: a.category||'Sonstiges', menge: parseFloat(kg.toFixed(3)), einheit: 'kg', preis: a.priceNet||0, preisBrutto: a.priceGross||0});
         }
         return arr;
     }, (err, comm) => { if(comm) showToast('In Einkaufsliste übernommen!'); });
@@ -1106,25 +1278,33 @@ function renderEinkauf(){
     sups.forEach(sup => {
         let supT = 0;
         const rows = state.einkauf.filter(e=>e.lieferant===sup).map(e => {
-            const p = e.menge * (e.preis * 1.07); 
-            supT += p; gT += p;
+            const pNetto = e.preis || 0;
+            const pBrutto = e.preisBrutto || (pNetto * 1.07); // Fallback
+            const sumNetto = e.menge * pNetto;
+            const sumBrutto = e.menge * pBrutto;
+            
+            supT += sumBrutto; gT += sumBrutto;
             return `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9; align-items:center;">
                 <div><b>${e.artikel}</b><br><span style="font-size:11px;color:var(--muted)">Art: ${e.artikelnummer||'-'} | ${e.kategorie}</span></div>
                 <div style="text-align:right;">
                     <b style="color:var(--blue)">${e.einheit==='kg'?fmtKG(e.menge*1000):e.menge+' '+e.einheit}</b><br>
-                    <span style="font-size:11px;">~${fmt(p)}</span>
+                    <span style="font-size:11px;">Brutto: ${fmt(sumBrutto)} <span style="color:var(--muted)">(Netto: ${fmt(sumNetto)})</span></span>
                 </div>
             </div>`;
         }).join('');
         
         ht += `<div class="card" style="padding:0; margin-bottom:16px;">
-            <div style="background:#f8fafc; padding:12px 16px; border-bottom:1px solid var(--border); font-weight:700;">${sup}</div>
+            <div style="background:#f8fafc; padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; font-weight:700;">
+                <span>${sup}</span><span>${fmt(supT)}</span>
+            </div>
             <div style="padding:0 16px;">${rows}</div>
         </div>`;
     });
+    
+    ht += `<div style="background:var(--blue-light); color:var(--blue); padding:16px; border-radius:8px; font-size:18px; font-weight:700; text-align:center;">Gesamtsumme Brutto: ${fmt(gT)}</div>`;
     c.innerHTML = ht;
 }
-function clearEinkauf(){ if(confirm('Möchtest du die Liste wirklich komplett leeren?')) { db.ref('einkauf').set([]); } }
+function clearEinkauf(){ if(confirm('Möchtest du die Liste wirklich komplett leeren?')) { db.ref('einkauf').set([]); showToast("Liste geleert!"); } }
 
 // ============================================================================
 // ZUTATEN ANLEGEN
@@ -1183,7 +1363,7 @@ function saveKontakt(){
     showToast('Kontakt gespeichert');
 }
 function deleteKontakt(id){ 
-    if(confirm("Diesen Kontakt löschen?")) { db.ref(`kontakte/${id}`).remove(); showToast('Kontakt gelöscht'); }
+    if(confirm("Diesen Kontakt wirklich löschen?")) { db.ref(`kontakte/${id}`).remove(); showToast('Kontakt gelöscht'); }
 }
 function renderKontakte(){
     const c = $('kontakt-list');
@@ -1196,10 +1376,10 @@ function renderKontakte(){
             </div>
             <div class="contact-tools">
                 ${k.tel ? `<a href="javascript:void(0)" onclick="confirmAction('tel', 'tel:${k.tel}')">📞</a>` : ''}
-                ${k.adresse ? `<a href="javascript:void(0)" onclick="confirmAction('map', 'http://googleusercontent.com/maps.google.com/4{encodeURIComponent(k.adresse)}')">📍</a>` : ''}
+                ${k.adresse ? `<a href="javascript:void(0)" onclick="confirmAction('map', 'http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(k.adresse)}')">📍</a>` : ''}
                 ${k.email ? `<a href="javascript:void(0)" onclick="confirmAction('mail', 'mailto:${k.email}')">✉️</a>` : ''}
             </div>
-            <button class="btn-sm admin-only" onclick="deleteKontakt('${k.id}')" style="margin-left:10px;">Löschen</button>
+            <button class="btn-sm btn-danger admin-only" onclick="deleteKontakt('${k.id}')" style="margin-left:10px;">Löschen</button>
         </div>
     `).join('');
 }
@@ -1220,6 +1400,18 @@ function renderSettings(){
     });
     h += '</table>';
     if($('settings-art-list')) $('settings-art-list').innerHTML = h;
+
+    // Sub-Rezepte
+    let rh = '<table style="width:100%; font-size:13px;"><tr><th>Rezept</th><th>Ertrag</th></tr>';
+    (state.recipes||[]).forEach(r => { rh += `<tr><td><b>${r.name}</b></td><td>${r.yieldGrams}g</td></tr>`; });
+    rh += '</table>';
+    if($('settings-recipes-list')) $('settings-recipes-list').innerHTML = rh;
+
+    // Pizzen
+    let ph = '<table style="width:100%; font-size:13px;"><tr><th>Pizza</th><th>Preis</th></tr>';
+    (state.pizzas||[]).forEach(p => { ph += `<tr><td><b>${p.name}</b></td><td>${fmt(p.price)}</td></tr>`; });
+    ph += '</table>';
+    if($('settings-pizzas-list')) $('settings-pizzas-list').innerHTML = ph;
 
     // Catering Parameters
     const defs = state.cateringDefaults || {};
