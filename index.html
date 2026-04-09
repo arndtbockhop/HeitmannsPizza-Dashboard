@@ -186,7 +186,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
   <div class="nav-item" onclick="navTo('events',this)">Events & Staffing</div>
   <div class="nav-item admin-only" onclick="navTo('timesheet',this)">Personal & Zeiten</div>
   <div class="nav-item admin-only" onclick="navTo('catering',this)">Catering-Kalkulator</div>
-  <div class="nav-item admin-only" onclick="navTo('pizza',this)">Pizza Labor</div>
+  <div class="nav-item admin-only" onclick="navTo('pizza',this)">Pizza</div>
   <div class="nav-item admin-only" onclick="navTo('einkauf',this)">Einkaufsliste</div>
   <div class="nav-item admin-only" onclick="navTo('kontakte',this)">Kontakte</div>
   <div class="nav-item superadmin-only" onclick="navTo('settings',this)">Einstellungen</div>
@@ -294,7 +294,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
 <div class="page admin-only" id="page-pizza">
     <div class="page-header">
         <div>
-            <div class="page-title">Pizza & Dips Labor</div>
+            <div class="page-title">Pizza</div>
             <div class="page-subtitle">Verbrauchskalkulation und Warenkorb-Generierung</div>
         </div>
         <button class="btn-danger" onclick="resetPizza()">Kalkulation zurücksetzen</button>
@@ -367,7 +367,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
         </div>
         <button class="btn-primary" onclick="openKontaktModal()">Neuen Kontakt anlegen</button>
     </div>
-    <div id="kontakt-list" class="form-grid"></div>
+    <div id="kontakt-list" style="display:flex; flex-direction:column; gap:16px;"></div>
 </div>
 
 <div class="page superadmin-only" id="page-settings">
@@ -392,15 +392,17 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
             <button class="btn-primary" style="margin-top:16px; width:100%;" onclick="saveSettingsART()">Preisänderungen speichern</button>
         </div>
     </div>
+    
     <div id="panel-rezepte" class="settings-panel">
         <div class="card">
-            <div class="card-title">Gespeicherte Sub-Rezepte <button class="btn-sm" onclick="openRecipeModal()">Neues Sub-Rezept</button></div>
+            <div class="card-title">Gespeicherte Sub-Rezepte <button class="btn-sm" onclick="openRecipeModal()">Neues Rezept anlegen</button></div>
             <div class="table-wrap" id="settings-recipes-list"></div>
         </div>
     </div>
+    
     <div id="panel-pizzas" class="settings-panel">
         <div class="card">
-            <div class="card-title">Gespeicherte Pizzen <button class="btn-sm" onclick="openPizzaModal()">Neue Pizza</button></div>
+            <div class="card-title">Gespeicherte Pizzen <button class="btn-sm" onclick="openPizzaModal()">Neue Pizza anlegen</button></div>
             <div class="table-wrap" id="settings-pizzas-list"></div>
         </div>
     </div>
@@ -435,7 +437,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
     <button onclick="navTo('kalender', this)">Kalender</button>
     <button onclick="navTo('events', this)">Events</button>
     <button class="admin-only" onclick="navTo('timesheet', this)">Zeiten</button>
-    <button class="admin-only" onclick="navTo('pizza', this)">Labor</button>
+    <button class="admin-only" onclick="navTo('pizza', this)">Pizza</button>
     <button class="superadmin-only" onclick="navTo('settings', this)">Settings</button>
 </div>
 </div>
@@ -457,11 +459,11 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
                     <option>Pending...</option><option>Secured</option><option>Cancelled</option>
                 </select>
             </div>
-            <div class="form-group" style="grid-column: span 2;"><label>Datum</label><input type="date" id="ev-date"></div>
+            <div class="form-group"><label>Start Datum</label><input type="date" id="ev-date"></div>
+            <div class="form-group"><label>End Datum</label><input type="date" id="ev-endDate"></div>
             <div class="form-group"><label>Start Uhrzeit</label><input type="time" id="ev-time"></div>
-            <div class="form-group"><label>End Uhrzeit</label><input type="time" id="ev-time-end"></div>
+            <div class="form-group"><label>Gästezahl</label><input type="number" id="ev-personen"></div>
             <div class="form-group" style="grid-column: span 2;"><label>Ort / Adresse</label><input id="ev-ort"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Gästezahl</label><input type="number" id="ev-personen"></div>
         </div>
         
         <div class="form-group admin-only" style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
@@ -474,6 +476,20 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
         </div>
     </div>
     <div class="modal-footer"><button onclick="closeModal('event-modal')">Abbrechen</button><button class="btn-primary" onclick="saveEvent()">Speichern</button></div>
+</div>
+</div>
+
+<div class="modal-overlay" id="avail-modal">
+<div class="modal" style="max-width: 400px;">
+    <div class="modal-title">Verfügbarkeit bestätigen</div>
+    <div class="modal-body">
+        <p style="margin-bottom:16px; color:var(--muted); font-size:13px;">Dieses Event geht über mehrere Tage. An welchen Tagen kannst du arbeiten?</p>
+        <div id="avail-days-container" style="display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+    <div class="modal-footer">
+        <button onclick="closeModal('avail-modal')">Abbrechen</button>
+        <button class="btn-primary" onclick="saveAvailDays()">Tage speichern</button>
+    </div>
 </div>
 </div>
 
@@ -542,6 +558,12 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
             <div id="builder-items-container"></div>
             <button class="btn-sm" style="margin-top:8px; align-self:flex-start;" onclick="addBuilderItemRow()">+ Bestandteil hinzufügen</button>
         </div>
+        
+        <div id="builder-calc-preview" style="margin-top:16px; padding:12px; background:var(--blue-light); border-radius:8px; display:none;">
+            <div style="font-size:11px; color:var(--blue); font-weight:600; text-transform:uppercase;">Berechneter Wareneinsatz</div>
+            <div style="font-size:18px; font-weight:700; color:var(--blue);" id="builder-calc-total">0,00 €</div>
+        </div>
+        
     </div>
     <div class="modal-footer"><button onclick="closeModal('builder-modal')">Abbrechen</button><button class="btn-primary" onclick="saveBuilder()">Speichern</button></div>
 </div>
@@ -607,9 +629,12 @@ let state = {
 let pizzaMengen = {}, dipMengen = {aioli:0, hothoney:0};
 
 // Builder State
-let builderType = ''; // 'recipe' or 'pizza'
+let builderType = ''; 
 let builderEditId = null;
 let builderItems = []; 
+
+// Avail Modal State
+let currentAvailEventId = null;
 
 const colorMap = {'Catering':'tag-Catering', 'Event':'tag-Event', 'Meeting':'tag-Meeting', 'Preppen':'tag-Preppen', 'Einkaufen':'tag-Einkaufen', 'SocialMedia':'tag-SocialMedia'};
 
@@ -665,6 +690,8 @@ function calculateHours(startStr, endStr) {
     return (endDate - startDate) / (1000 * 60 * 60);
 }
 
+function getIngredient(id){ return (state.ingredients||[]).find(i=>i.id===id); }
+
 // ============================================================================
 // AUTHENTICATION
 // ============================================================================
@@ -680,6 +707,7 @@ auth.onAuthStateChanged(u => {
             return; 
         }
         
+        // Name Enforcement
         if(!user.name || user.name.trim() === '') {
             let n = prompt("Zwingend erforderlich: Bitte gib deinen Vor- und Nachnamen ein:");
             while(!n || n.trim() === '') {
@@ -725,7 +753,11 @@ function listenAll(){
             .filter(ev => ev && ev.id)
             .sort((a,b)=>a.date > b.date ? 1 : -1)
             .map(ev => Object.assign({}, ev, {
-                assignedCrew: ev.assignedCrew||[], availUIDs: ev.availUIDs||[], unavailUIDs: ev.unavailUIDs||[]
+                endDate: ev.endDate || ev.date,
+                assignedCrew: ev.assignedCrew||[], 
+                availUIDs: ev.availUIDs||[], 
+                unavailUIDs: ev.unavailUIDs||[],
+                availDetails: ev.availDetails||{}
             }));
         
         state.kontakte = Object.values(d.kontakte||{}).filter(k => k && k.id);
@@ -783,12 +815,16 @@ function updateDashboard(){
         }
     }
 
-    const next = state.events.filter(e => new Date(e.date) >= new Date().setHours(0,0,0,0)).slice(0,4);
+    const next = state.events.filter(e => {
+        const checkDate = e.endDate || e.date;
+        return new Date(checkDate) >= new Date().setHours(0,0,0,0);
+    }).slice(0,4);
+    
     $('dash-events').innerHTML = next.map(e => `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer;" onclick="showEventDetail('${e.id}')">
             <div>
                 <b style="font-size:14px;">${e.title}</b><br>
-                <div style="color:var(--muted); font-size:12px; margin-top:2px;">${e.date} · ${e.type}</div>
+                <div style="color:var(--muted); font-size:12px; margin-top:2px;">${e.date}${e.endDate && e.endDate!==e.date ? ' - '+e.endDate : ''} · ${e.type}</div>
             </div>
             ${statusBadge(e.status)}
         </div>
@@ -821,7 +857,13 @@ function renderCalendar(){
     
     for(let d=1; d<=daysInMonth; d++){
         const curDate = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const evs = state.events.filter(e => e.date === curDate);
+        
+        // Multi-day logic
+        const evs = state.events.filter(e => {
+            const s = e.date;
+            const en = e.endDate || e.date;
+            return curDate >= s && curDate <= en;
+        });
         
         const visibleEvs = state.role === 'staff' ? evs.filter(e => ['Catering','Event'].includes(e.type)) : evs;
         const isToday = new Date().toISOString().split('T')[0] === curDate;
@@ -860,7 +902,7 @@ function renderEventList(){
         return `
             <div class="event-card">
                 <div class="event-card-header" onclick="showEventDetail('${e.id}')">
-                    <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">${e.type} · ${e.date}</div>
+                    <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">${e.type} · ${e.date}${e.endDate && e.endDate!==e.date ? ' bis '+e.endDate : ''}</div>
                     ${statusBadge(e.status)}
                 </div>
                 <div class="event-card-body" onclick="showEventDetail('${e.id}')">
@@ -877,30 +919,92 @@ function renderEventList(){
 }
 
 function toggleAvail(eid, isAvailable) {
+    const ev = state.events.find(e => e.id === eid);
+    if (!ev) return;
     const uid = auth.currentUser.uid;
-    db.ref(`events/${eid}`).transaction(ev => {
-        if(!ev) return ev;
-        let a = ev.availUIDs || []; let u = ev.unavailUIDs || [];
+
+    if (isAvailable) {
+        // Multi-Day check
+        const start = new Date(ev.date);
+        const end = new Date(ev.endDate || ev.date);
+        const daysDiff = Math.round((end - start) / (1000 * 60 * 60 * 24));
+
+        if (daysDiff > 0) {
+            currentAvailEventId = eid;
+            let html = '';
+            for(let i=0; i<=daysDiff; i++) {
+                let d = new Date(start); d.setDate(d.getDate() + i);
+                let dStr = d.toISOString().split('T')[0];
+                let dDisp = d.toLocaleDateString('de-DE', {weekday:'short', day:'2-digit', month:'2-digit'});
+                let isChecked = (ev.availDetails && ev.availDetails[uid] && ev.availDetails[uid].includes(dStr)) ? 'checked' : '';
+                html += `<label style="display:flex; align-items:center; gap:12px; padding:12px; border-bottom:1px solid #f1f5f9; cursor:pointer;">
+                            <input type="checkbox" class="avail-cb" value="${dStr}" ${isChecked} style="width:24px; height:24px;">
+                            <span style="font-size:16px;">${dDisp}</span>
+                         </label>`;
+            }
+            $('avail-days-container').innerHTML = html;
+            openModal('avail-modal');
+            return;
+        }
+    }
+
+    // Single day or Unavailable (Direct toggle)
+    db.ref(`events/${eid}`).transaction(eData => {
+        if(!eData) return eData;
+        let a = eData.availUIDs || []; let u = eData.unavailUIDs || [];
+        let details = eData.availDetails || {};
+
         if (isAvailable) {
-            if(a.includes(uid)) a = a.filter(x=>x!==uid); else { a.push(uid); u = u.filter(x=>x!==uid); }
+            if(!a.includes(uid)) a.push(uid);
+            u = u.filter(x=>x!==uid);
+            details[uid] = [eData.date]; 
         } else {
             if(u.includes(uid)) u = u.filter(x=>x!==uid); else { u.push(uid); a = a.filter(x=>x!==uid); }
+            delete details[uid]; 
         }
-        ev.availUIDs = a; ev.unavailUIDs = u;
-        return ev;
+        eData.availUIDs = a; eData.unavailUIDs = u; eData.availDetails = details;
+        return eData;
     }, (error, comm) => { if(comm) showToast("Verfügbarkeit gespeichert!"); });
+}
+
+function saveAvailDays() {
+    const uid = auth.currentUser.uid;
+    const cbs = document.querySelectorAll('.avail-cb:checked');
+    const selectedDays = Array.from(cbs).map(cb => cb.value);
+
+    db.ref(`events/${currentAvailEventId}`).transaction(eData => {
+        if(!eData) return eData;
+        let a = eData.availUIDs || []; let u = eData.unavailUIDs || [];
+        let details = eData.availDetails || {};
+
+        if(selectedDays.length > 0) {
+            if(!a.includes(uid)) a.push(uid);
+            u = u.filter(x=>x!==uid);
+            details[uid] = selectedDays;
+        } else {
+            if(!u.includes(uid)) u.push(uid);
+            a = a.filter(x=>x!==uid);
+            delete details[uid];
+        }
+        eData.availUIDs = a; eData.unavailUIDs = u; eData.availDetails = details;
+        return eData;
+    }, (error, comm) => { 
+        if(comm) {
+            showToast("Verfügbarkeit gespeichert!");
+            closeModal('avail-modal');
+        }
+    });
 }
 
 function openEventModal(id, dateStr){
     state.editEventId = id || null;
     const ev = id ? state.events.find(e => e.id === id) : null;
     
-    const src = Object.assign({title:'', type:'Catering', date:dateStr||'', time:'', timeEnd:'', ort:'', personen:'', status:'Pending...', notizen:''}, ev || {});
+    const src = Object.assign({title:'', type:'Catering', date:dateStr||'', endDate:dateStr||'', time:'', ort:'', personen:'', status:'Pending...', notizen:''}, ev || {});
     
-    ['title','type','date','time','ort','personen','status','notizen'].forEach(f => {
+    ['title','type','date','endDate','time','ort','personen','status','notizen'].forEach(f => {
         if($(f==='notizen'?'ev-notizen':'ev-'+f)) $(f==='notizen'?'ev-notizen':'ev-'+f).value = src[f] ?? '';
     });
-    if($('ev-time-end')) $('ev-time-end').value = src.timeEnd || '';
 
     if(state.role !== 'staff'){
         $('ev-crew-select').innerHTML = state.users.map(u => {
@@ -908,7 +1012,17 @@ function openEventModal(id, dateStr){
             const hasTime = ev && ev.availUIDs && ev.availUIDs.includes(u.uid);
             const noTime = ev && ev.unavailUIDs && ev.unavailUIDs.includes(u.uid);
             
-            let icon = hasTime ? '✅' : (noTime ? '❌' : '');
+            let dateStr = '';
+            if(hasTime && ev.availDetails && ev.availDetails[u.uid]) {
+                const dates = ev.availDetails[u.uid];
+                if(dates.length > 0 && ev.date !== ev.endDate) {
+                    const shortDates = dates.map(d => { let p = d.split('-'); return p[2]+'.'+p[1]+'.'; }).join(', ');
+                    dateStr = ` (${shortDates})`;
+                }
+            }
+
+            let icon = hasTime ? `✅${dateStr}` : (noTime ? '❌' : '');
+            
             return `
                 <div class="badge ${isAssig?'badge-green':'badge-blue'} crew-chip ${isAssig?'active':''}" 
                      style="cursor:pointer; padding:6px 12px; font-size:12px;" 
@@ -931,13 +1045,15 @@ function saveEvent(){
     
     const updates = {
         id, title: $('ev-title').value, type: $('ev-type').value, date: $('ev-date').value,
-        time: $('ev-time').value, timeEnd: $('ev-time-end').value, ort: $('ev-ort').value, personen: parseInt($('ev-personen').value)||0,
+        endDate: $('ev-endDate').value || $('ev-date').value,
+        time: $('ev-time').value, ort: $('ev-ort').value, personen: parseInt($('ev-personen').value)||0,
         status: newStatus, assignedCrew: crew, notizen: $('ev-notizen').value
     };
 
     if(oldEv) {
         updates.availUIDs = oldEv.availUIDs || []; 
         updates.unavailUIDs = oldEv.unavailUIDs || [];
+        updates.availDetails = oldEv.availDetails || {};
         if(oldEv.cleaningDoneBy) updates.cleaningDoneBy = oldEv.cleaningDoneBy;
     }
 
@@ -969,7 +1085,7 @@ function showEventDetail(id){
             <div style="background:#f1f5f9; padding:16px; border-radius:10px; margin-bottom:16px;">
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:14px;">
                     <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Typ</span><br><b>${ev.type}</b></div>
-                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Zeitraum</span><br><b>${ev.date} <br>${ev.time||''} ${ev.timeEnd?'- '+ev.timeEnd:''}</b></div>
+                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Zeitraum</span><br><b>${ev.date}${ev.endDate && ev.endDate!==ev.date ? ' bis '+ev.endDate : ''} <br>${ev.time||''}</b></div>
                     <div style="grid-column:span 2;"><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Ort</span><br><b>${ev.ort||'–'}</b></div>
                     <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Gäste</span><br><b>${ev.personen||'–'}</b></div>
                 </div>
@@ -988,7 +1104,7 @@ function showEventDetail(id){
 
     html += `</div>
         <div class="modal-footer">
-            <button class="btn-danger admin-only" onclick="deleteEvent('${id}')">Löschen</button>
+            <button class="btn-danger admin-only" onclick="deleteEvent('${id}')">Event löschen</button>
             <button class="admin-only" onclick="closeModal('detail-modal'); openEventModal('${id}')">Bearbeiten</button>
             <button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button>
         </div>
@@ -1156,7 +1272,7 @@ function printReceipt(tsId) {
 }
 
 // ============================================================================
-// PIZZA LABOR, DIPS & KALKULATOR
+// PIZZA LABOR & DIPS
 // ============================================================================
 function renderPizzaGrid(){
     const c = $('pizza-grid');
@@ -1358,6 +1474,147 @@ function renderEinkauf(){
 function clearEinkauf(){ if(confirm('Möchtest du die Liste wirklich komplett leeren?')) { db.ref('einkauf').set([]); showToast("Liste geleert!"); } }
 
 // ============================================================================
+// EINSTELLUNGEN & BUILDER (PIZZEN / REZEPTE)
+// ============================================================================
+function openIngredientModal(){
+    $('ing-new-name').value = ''; $('ing-new-artnr').value = '';
+    $('ing-new-netto').value = ''; $('ing-new-brutto').value = '';
+    openModal('ingredient-modal');
+}
+function saveNewIngredient(){
+    const name = $('ing-new-name').value;
+    const artNr = $('ing-new-artnr').value;
+    const sup = $('ing-new-sup').value;
+    const cat = $('ing-new-cat').value;
+    const unit = $('ing-new-unit').value;
+    const netto = parseFloat($('ing-new-netto').value);
+    const brutto = parseFloat($('ing-new-brutto').value);
+
+    if(!name || !artNr || isNaN(netto) || isNaN(brutto)) {
+        return alert("Bitte fülle alle Felder inkl. Preise und Artikelnummer aus!");
+    }
+
+    const ing = { id: name, name: name, articleNumber: artNr, supplier: sup, category: cat, unit: unit, priceNet: netto, priceGross: brutto, active: true };
+    db.ref('ingredients/'+name).set(ing);
+    closeModal('ingredient-modal');
+    showToast('Zutat gespeichert!');
+}
+
+function renderBuilderItems() {
+    let ingOpts = state.ingredients.map(i=>`<option value="ing_${i.id}">${i.name}</option>`).join('');
+    let recOpts = state.recipes.filter(r=>r.id !== builderEditId).map(r=>`<option value="rec_${r.id}">${r.name} (Rezept)</option>`).join('');
+    
+    let html = builderItems.map((item, idx) => `
+        <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center; background:#f8fafc; padding:8px; border-radius:8px;">
+            <select style="flex:1; font-size:12px;" onchange="builderItems[${idx}].ref=this.value; calculateBuilderTotal();">
+                <option value="">-- Zutat / Rezept --</option>
+                <optgroup label="Zutaten">${ingOpts}</optgroup>
+                <optgroup label="Rezepte">${recOpts}</optgroup>
+            </select>
+            <input type="number" style="width:70px; font-size:12px;" placeholder="g/Stk" value="${item.grams}" onchange="builderItems[${idx}].grams=Number(this.value); calculateBuilderTotal();">
+            <button class="btn-danger btn-sm" onclick="builderItems.splice(${idx},1); renderBuilderItems(); calculateBuilderTotal();">X</button>
+        </div>
+    `).join('');
+    
+    $('builder-items-container').innerHTML = html;
+    const selects = $('builder-items-container').querySelectorAll('select');
+    builderItems.forEach((item, idx) => { if(selects[idx]) selects[idx].value = item.ref; });
+}
+
+function addBuilderItemRow() { builderItems.push({ref:'', grams:0}); renderBuilderItems(); }
+
+function calculateBuilderTotal() {
+    let totalCost = 0;
+    
+    const expandCost = (rId, qty) => {
+        const r = state.recipes.find(x=>x.id===rId);
+        if(!r) return 0;
+        const ratio = r.yieldGrams ? (qty/r.yieldGrams) : qty;
+        let c = 0;
+        (r.items||[]).forEach(i => {
+            if(i.recipeId) c += expandCost(i.recipeId, i.grams*ratio);
+            else if(i.ingredientId) {
+                const ing = getIngredient(i.ingredientId);
+                if(ing) c += (i.grams*ratio / 1000) * (ing.priceGross || 0);
+            }
+        });
+        return c;
+    };
+
+    builderItems.forEach(b => {
+        if(!b.ref || b.grams <= 0) return;
+        const realId = b.ref.replace(/^(ing_|rec_)/, '');
+        if(b.ref.startsWith('rec_')) {
+            totalCost += expandCost(realId, b.grams);
+        } else {
+            const ing = getIngredient(realId);
+            if(ing) totalCost += (b.grams / 1000) * (ing.priceGross || 0);
+        }
+    });
+
+    const preview = $('builder-calc-preview');
+    if(builderType === 'pizza' && totalCost > 0) {
+        preview.style.display = 'block';
+        $('builder-calc-total').textContent = fmt(totalCost);
+    } else {
+        preview.style.display = 'none';
+    }
+}
+
+function openRecipeModal(id) {
+    builderType = 'recipe'; builderEditId = id || null;
+    const r = id ? state.recipes.find(x=>x.id===id) : null;
+    
+    $('builder-title').textContent = r ? 'Rezept bearbeiten' : 'Neues Rezept';
+    $('builder-name').value = r ? r.name : '';
+    $('builder-param-label').textContent = 'Ertrag (Yield in Gramm)';
+    $('builder-param').value = r ? r.yieldGrams : 100;
+    
+    builderItems = (r?.items || []).map(i => ({ grams: i.grams, ref: i.ingredientId ? 'ing_'+i.ingredientId : (i.recipeId ? 'rec_'+i.recipeId : '') }));
+    $('builder-calc-preview').style.display = 'none';
+    renderBuilderItems(); openModal('builder-modal');
+}
+
+function openPizzaModal(id) {
+    builderType = 'pizza'; builderEditId = id || null;
+    const p = id ? state.pizzas.find(x=>x.id===id) : null;
+    
+    $('builder-title').textContent = p ? 'Pizza bearbeiten' : 'Neue Pizza';
+    $('builder-name').value = p ? p.name : '';
+    $('builder-param-label').textContent = 'Verkaufspreis (€)';
+    $('builder-param').value = p ? p.price : 0;
+    
+    builderItems = (p?.items || []).map(i => ({ grams: i.grams, ref: i.ingredientId ? 'ing_'+i.ingredientId : (i.recipeId ? 'rec_'+i.recipeId : '') }));
+    renderBuilderItems(); 
+    calculateBuilderTotal();
+    openModal('builder-modal');
+}
+
+function saveBuilder() {
+    const name = $('builder-name').value;
+    const param = parseFloat($('builder-param').value) || 0;
+    if(!name) return alert("Bitte Namen eingeben");
+
+    const items = builderItems.map(b => {
+        if(!b.ref) return null;
+        const realId = b.ref.replace(/^(ing_|rec_)/, '');
+        return b.ref.startsWith('rec_') ? {recipeId: realId, grams: b.grams} : {ingredientId: realId, grams: b.grams};
+    }).filter(Boolean);
+
+    if(builderType === 'recipe') {
+        const id = builderEditId || 'rec_' + Date.now();
+        db.ref('recipes/'+id).set({id, name, yieldGrams: param, items, active:true});
+    } else {
+        const id = builderEditId || 'p_' + Date.now();
+        db.ref('pizzas/'+id).set({id, name, price: param, items, active:true});
+    }
+    closeModal('builder-modal'); showToast("Gespeichert!");
+}
+
+function deleteRecipe(id) { if(confirm("Rezept wirklich löschen?")) db.ref('recipes/'+id).remove(); }
+function deletePizza(id) { if(confirm("Pizza wirklich löschen?")) db.ref('pizzas/'+id).remove(); }
+
+// ============================================================================
 // KONTAKTE
 // ============================================================================
 function openKontaktModal(){
@@ -1384,23 +1641,23 @@ function renderKontakte(){
     const c = $('kontakt-list');
     if(!c) return;
     c.innerHTML = state.kontakte.map(k => `
-        <div class="contact-item card">
-            <div class="event-info">
+        <div class="list-item" style="flex-wrap:wrap; align-items:center;">
+            <div style="flex:1; min-width:200px;">
                 <b style="font-size:15px;">${k.name}</b><br>
                 <small style="color:var(--muted)">${k.firma || 'Kontakt'}</small>
             </div>
-            <div class="contact-tools">
-                ${k.tel ? `<a href="javascript:void(0)" onclick="confirmAction('tel', 'tel:${k.tel}')">📞</a>` : ''}
-                ${k.adresse ? `<a href="javascript:void(0)" onclick="confirmAction('map', 'http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(k.adresse)}')">📍</a>` : ''}
-                ${k.email ? `<a href="javascript:void(0)" onclick="confirmAction('mail', 'mailto:${k.email}')">✉️</a>` : ''}
+            <div style="display:flex; gap:12px;">
+                ${k.tel ? `<button class="btn-sm" onclick="confirmAction('tel', 'tel:${k.tel}')">📞</button>` : ''}
+                ${k.adresse ? `<button class="btn-sm" onclick="confirmAction('map', 'http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(k.adresse)}')">📍</button>` : ''}
+                ${k.email ? `<button class="btn-sm" onclick="confirmAction('mail', 'mailto:${k.email}')">✉️</button>` : ''}
             </div>
-            <button class="btn-sm btn-danger admin-only" onclick="deleteKontakt('${k.id}')" style="margin-left:10px;">Löschen</button>
+            <button class="btn-sm btn-danger admin-only" onclick="deleteKontakt('${k.id}')" style="margin-left:auto;">Löschen</button>
         </div>
     `).join('');
 }
 
 // ============================================================================
-// EINSTELLUNGEN & REZEPT/PIZZA BUILDER
+// EINSTELLUNGEN RENDER
 // ============================================================================
 function renderSettings(){
     // Zutaten-Tabelle
@@ -1422,8 +1679,8 @@ function renderSettings(){
         rh += `<tr>
             <td><b>${r.name}</b></td><td>${r.yieldGrams}g</td>
             <td>
-                <button class="btn-sm" onclick="openRecipeModal('${r.id}')">✏️</button>
-                <button class="btn-sm btn-danger" onclick="deleteRecipe('${r.id}')">🗑️</button>
+                <button class="btn-sm" onclick="openRecipeModal('${r.id}')">Bearbeiten</button>
+                <button class="btn-sm btn-danger" onclick="deleteRecipe('${r.id}')">Löschen</button>
             </td>
         </tr>`; 
     });
@@ -1436,8 +1693,8 @@ function renderSettings(){
         ph += `<tr>
             <td><b>${p.name}</b></td><td>${fmt(p.price)}</td>
             <td>
-                <button class="btn-sm" onclick="openPizzaModal('${p.id}')">✏️</button>
-                <button class="btn-sm btn-danger" onclick="deletePizza('${p.id}')">🗑️</button>
+                <button class="btn-sm" onclick="openPizzaModal('${p.id}')">Bearbeiten</button>
+                <button class="btn-sm btn-danger" onclick="deletePizza('${p.id}')">Löschen</button>
             </td>
         </tr>`; 
     });
@@ -1468,7 +1725,6 @@ function renderSettings(){
     if($('team-list-container')) $('team-list-container').innerHTML = th;
 }
 
-// Zutat Speichern
 function saveSettingsART(){
   (state.ingredients||[]).forEach(ing => {
      let ex = $('set-ex-'+ing.id.replace(/\s/g,'_'));
@@ -1488,133 +1744,20 @@ function saveCateringSettings() {
 }
 
 function updateUser(uid) {
+    const newRole = $(`role-${uid}`).value;
+    const newWage = parseFloat($(`wage-${uid}`).value) || 14;
+
     db.ref(`users/${uid}`).update({
-        role: $(`role-${uid}`).value,
-        wage: parseFloat($(`wage-${uid}`).value) || 14
+        role: newRole,
+        wage: newWage
+    }, (error) => {
+        if (error) {
+            alert("Fehler beim Speichern!");
+        } else {
+            showToast('Mitarbeiterdaten erfolgreich aktualisiert!');
+        }
     });
-    showToast('Mitarbeiterdaten aktualisiert!');
 }
-
-function openIngredientModal(){
-    $('ing-new-name').value = ''; $('ing-new-artnr').value = '';
-    $('ing-new-netto').value = ''; $('ing-new-brutto').value = '';
-    openModal('ingredient-modal');
-}
-function saveNewIngredient(){
-    const name = $('ing-new-name').value;
-    const artNr = $('ing-new-artnr').value;
-    const sup = $('ing-new-sup').value;
-    const cat = $('ing-new-cat').value;
-    const unit = $('ing-new-unit').value;
-    const netto = parseFloat($('ing-new-netto').value);
-    const brutto = parseFloat($('ing-new-brutto').value);
-
-    if(!name || !artNr || isNaN(netto) || isNaN(brutto)) {
-        return alert("Bitte fülle alle Felder inkl. Preise und Artikelnummer aus!");
-    }
-
-    const ing = {
-        id: name, name: name, articleNumber: artNr, supplier: sup,
-        category: cat, unit: unit, priceNet: netto, priceGross: brutto, active: true
-    };
-    db.ref('ingredients/'+name).set(ing);
-    closeModal('ingredient-modal');
-    showToast('Zutat gespeichert!');
-}
-
-// ============================================================================
-// BUILDER: REZEPTE & PIZZEN
-// ============================================================================
-function renderBuilderItems() {
-    let ingOpts = state.ingredients.map(i=>`<option value="ing_${i.id}">${i.name}</option>`).join('');
-    let recOpts = state.recipes.filter(r=>r.id !== builderEditId).map(r=>`<option value="rec_${r.id}">${r.name} (Rezept)</option>`).join('');
-    
-    let html = builderItems.map((item, idx) => `
-        <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center; background:#f8fafc; padding:8px; border-radius:8px;">
-            <select style="flex:1" onchange="builderItems[${idx}].ref=this.value">
-                <option value="">-- Zutat / Rezept wählen --</option>
-                <optgroup label="Zutaten">${ingOpts}</optgroup>
-                <optgroup label="Rezepte">${recOpts}</optgroup>
-            </select>
-            <input type="number" style="width:80px;" placeholder="g/Stk" value="${item.grams}" onchange="builderItems[${idx}].grams=Number(this.value)">
-            <button class="btn-danger btn-sm" onclick="builderItems.splice(${idx},1); renderBuilderItems()">X</button>
-        </div>
-    `).join('');
-    
-    $('builder-items-container').innerHTML = html;
-    
-    const selects = $('builder-items-container').querySelectorAll('select');
-    builderItems.forEach((item, idx) => { if(selects[idx]) selects[idx].value = item.ref; });
-}
-
-function addBuilderItemRow() {
-    builderItems.push({ref:'', grams:0});
-    renderBuilderItems();
-}
-
-function openRecipeModal(id) {
-    builderType = 'recipe';
-    builderEditId = id || null;
-    const r = id ? state.recipes.find(x=>x.id===id) : null;
-    
-    $('builder-title').textContent = r ? 'Rezept bearbeiten' : 'Neues Rezept';
-    $('builder-name').value = r ? r.name : '';
-    $('builder-param-label').textContent = 'Ertrag (Yield in Gramm)';
-    $('builder-param').value = r ? r.yieldGrams : 100;
-    
-    builderItems = (r?.items || []).map(i => ({
-        grams: i.grams, 
-        ref: i.ingredientId ? 'ing_'+i.ingredientId : (i.recipeId ? 'rec_'+i.recipeId : '')
-    }));
-    
-    renderBuilderItems();
-    openModal('builder-modal');
-}
-
-function openPizzaModal(id) {
-    builderType = 'pizza';
-    builderEditId = id || null;
-    const p = id ? state.pizzas.find(x=>x.id===id) : null;
-    
-    $('builder-title').textContent = p ? 'Pizza bearbeiten' : 'Neue Pizza';
-    $('builder-name').value = p ? p.name : '';
-    $('builder-param-label').textContent = 'Verkaufspreis (€)';
-    $('builder-param').value = p ? p.price : 0;
-    
-    builderItems = (p?.items || []).map(i => ({
-        grams: i.grams, 
-        ref: i.ingredientId ? 'ing_'+i.ingredientId : (i.recipeId ? 'rec_'+i.recipeId : '')
-    }));
-    
-    renderBuilderItems();
-    openModal('builder-modal');
-}
-
-function saveBuilder() {
-    const name = $('builder-name').value;
-    const param = parseFloat($('builder-param').value) || 0;
-    if(!name) return alert("Bitte Namen eingeben");
-
-    const items = builderItems.map(b => {
-        if(!b.ref) return null;
-        const realId = b.ref.replace(/^(ing_|rec_)/, '');
-        return b.ref.startsWith('rec_') ? {recipeId: realId, grams: b.grams} : {ingredientId: realId, grams: b.grams};
-    }).filter(Boolean);
-
-    if(builderType === 'recipe') {
-        const id = builderEditId || 'rec_' + Date.now();
-        db.ref('recipes/'+id).set({id, name, yieldGrams: param, items, active:true});
-    } else {
-        const id = builderEditId || 'p_' + Date.now();
-        db.ref('pizzas/'+id).set({id, name, price: param, items, active:true});
-    }
-    
-    closeModal('builder-modal');
-    showToast("Gespeichert!");
-}
-
-function deleteRecipe(id) { if(confirm("Rezept wirklich löschen?")) db.ref('recipes/'+id).remove(); }
-function deletePizza(id) { if(confirm("Pizza wirklich löschen?")) db.ref('pizzas/'+id).remove(); }
 
 </script>
 </body>
