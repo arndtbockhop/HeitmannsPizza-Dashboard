@@ -1,598 +1,1288 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Heitmanns Pizza</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Heitmanns Pizza</title>
 
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="HP Logo neu.png">
-<meta name="theme-color" content="#2563eb">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="HP Logo neu.png">
+    <meta name="theme-color" content="#2563eb">
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-<style>
-/* =========================================
-   BASE STYLES & VARIABLES
-   ========================================= */
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f8fafc;--card:#fff;--text:#111827;--muted:#6b7280;--border:#e5e7eb;--blue:#2563eb;--blue-light:#eff6ff;--green:#16a34a;--green-light:#f0fdf4;--amber:#d97706;--amber-light:#fffbeb;--red:#dc2626;--red-light:#fef2f2; --purple:#8b5cf6; --pink:#ec4899; --cyan:#06b6d4;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;overflow-x:hidden;}
-.app{display:flex;min-height:100vh}
+    <style>
+        /* =========================================
+           BASE STYLES & VARIABLES
+           ========================================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-/* =========================================
-   SIDEBAR (DESKTOP)
-   ========================================= */
-.sidebar{width:220px;min-width:220px;background:var(--card);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column; z-index:50;}
-.sidebar-logo{padding:0 24px 20px;font-size:18px;font-weight:700;color:var(--text);border-bottom:1px solid var(--border);margin-bottom:12px; letter-spacing:-0.5px;}
-.nav-item{padding:12px 24px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:10px;transition:all .2s;border-left:3px solid transparent;font-size:14px; font-weight:500;}
-.nav-item:hover{background:#f1f5f9;color:var(--text)}
-.nav-item.active{background:var(--blue-light);color:var(--blue);border-left-color:var(--blue);}
+        :root {
+            --bg: #f8fafc;
+            --card: #fff;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --blue: #2563eb;
+            --blue-light: #eff6ff;
+            --green: #16a34a;
+            --green-light: #f0fdf4;
+            --amber: #d97706;
+            --amber-light: #fffbeb;
+            --red: #dc2626;
+            --red-light: #fef2f2;
+            --purple: #8b5cf6;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+        }
 
-/* =========================================
-   MAIN CONTENT AREA
-   ========================================= */
-.main{flex:1;padding:32px;overflow-y:auto;padding-bottom:100px;} 
-.page{display:none;flex-direction:column;gap:24px}
-.page.active{display:flex}
-.page-header{display:flex;justify-content:space-between;align-items:flex-end; border-bottom:1px solid var(--border); padding-bottom:16px; flex-wrap:wrap; gap:16px;}
-.page-title{font-size:24px;font-weight:700; color:var(--text); letter-spacing:-0.5px;}
-.page-subtitle{font-size:13px; color:var(--muted); margin-top:4px;}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            overflow-x: hidden;
+        }
 
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.02);}
-.card-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text);margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:8px; display:flex; justify-content:space-between; align-items:center;}
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
 
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.form-group{display:flex;flex-direction:column;gap:6px}
-.form-group label{font-size:12px;color:var(--muted);font-weight:600; text-transform:uppercase; letter-spacing:0.05em;}
+        /* =========================================
+           SIDEBAR (DESKTOP)
+           ========================================= */
+        .sidebar {
+            width: 220px;
+            min-width: 220px;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+        }
 
-input,select,textarea{width:100%;padding:10px 12px;font-size:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:inherit; transition:border 0.2s;}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue); background:var(--card);}
+        .sidebar-logo {
+            padding: 0 24px 20px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
 
-button{cursor:pointer;font-family:inherit;font-size:13px; font-weight:500; border-radius:8px; padding:8px 16px; border:1px solid var(--border); background:var(--card); color:var(--text); transition:all .2s; display:inline-flex; align-items:center; justify-content:center; gap:6px;}
-button:hover{background:#f1f5f9}
-.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
-.btn-primary:hover{background:#1d4ed8}
-.btn-danger{color:var(--red);border-color:#fecaca;background:var(--red-light)}
-.btn-danger:hover{background:#fee2e2}
-.btn-green{background:var(--green);color:#fff;border-color:var(--green)}
-.btn-sm{padding:6px 12px;font-size:12px}
+        .nav-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all .2s;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+            font-weight: 500;
+        }
 
-/* =========================================
-   LISTS, GRIDS & BADGES
-   ========================================= */
-.badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;}
-.badge-blue{background:var(--blue-light);color:var(--blue)}
-.badge-green{background:var(--green-light);color:var(--green)}
-.badge-amber{background:var(--amber-light);color:var(--amber)}
+        .nav-item:hover {
+            background: #f1f5f9;
+            color: var(--text);
+        }
 
-.event-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px; }
-.event-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; transition:all .2s; box-shadow:0 2px 4px rgba(0,0,0,0.02);}
-.event-card:hover { border-color:#cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.05); transform:translateY(-2px);}
-.event-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; cursor:pointer; }
-.event-card-body { cursor:pointer; flex:1; }
-.event-card-footer { margin-top:16px; padding-top:16px; border-top:1px solid #f1f5f9; display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+        .nav-item.active {
+            background: var(--blue-light);
+            color: var(--blue);
+            border-left-color: var(--blue);
+        }
 
-.mailbox-item { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; line-height:1.4;}
-.mailbox-item.unread { background: var(--blue-light); border-left: 3px solid var(--blue); }
+        /* =========================================
+           MAIN CONTENT AREA
+           ========================================= */
+        .main {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+            padding-bottom: 100px;
+        }
 
-.table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%; margin-bottom:16px; border-radius:8px;}
-table { width:100%; min-width:600px; border-collapse:collapse; text-align:left; font-size:13px; }
-th { padding:12px; border-bottom:2px solid var(--border); color:var(--muted); font-weight:600; text-transform:uppercase; font-size:11px;}
-td { padding:12px; border-bottom:1px solid var(--border); vertical-align:middle;}
+        .page {
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+        }
 
-/* =========================================
-   CALENDAR
-   ========================================= */
-.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
-.cal-day{min-height:90px;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12px;font-weight:500; cursor:pointer; background:var(--card); display:flex; flex-direction:column; gap:4px; transition:background 0.2s;}
-.cal-day:hover{background:#f8fafc;}
-.cal-day.today{border-color:var(--blue); border-width:2px; background:var(--blue-light);}
-.cal-header-cell{text-align:center;font-size:12px;font-weight:600;color:var(--muted);padding:8px 0;}
+        .page.active {
+            display: flex;
+        }
 
-.cal-tag{font-size:10px; font-weight:600; padding:4px 6px; border-radius:4px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-.tag-Catering { background: var(--blue); }
-.tag-Event { background: var(--amber); }
-.tag-Meeting { background: var(--purple); }
-.tag-Preppen { background: var(--green); }
-.tag-Einkaufen { background: var(--pink); }
-.tag-SocialMedia { background: var(--cyan); }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
 
-/* =========================================
-   PIZZA & DIPS LABOR
-   ========================================= */
-.pizza-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;}
-.pizza-qty { display:flex; align-items:center; justify-content:space-between; background:var(--bg); border-radius:8px; padding:4px; margin-top:10px;}
-.pizza-qty button { width:40px; height:40px; border:none; background:var(--card); box-shadow:0 1px 2px rgba(0,0,0,0.05); font-size:18px; font-weight:bold; border-radius:6px;}
-.pizza-qty input { width:60px; text-align:center; border:none; background:transparent; font-weight:700; font-size:16px; padding:0;}
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
 
-/* =========================================
-   SETTINGS TABS
-   ========================================= */
-.settings-tabs { display:flex; gap:8px; border-bottom:1px solid var(--border); margin-bottom:24px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:1px;}
-.settings-tab { padding:12px 16px; cursor:pointer; color:var(--muted); font-weight:600; border-bottom:2px solid transparent; white-space:nowrap;}
-.settings-tab.active { color:var(--blue); border-bottom-color:var(--blue);}
-.settings-panel { display:none; }
-.settings-panel.active { display:block; }
+        .page-subtitle {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
 
-/* =========================================
-   MODALS & TOASTS
-   ========================================= */
-.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:9999; align-items:center; justify-content:center; padding: 16px; backdrop-filter: blur(4px);}
-.modal-overlay.open { display:flex; }
-.modal { background: var(--card); width: 100%; max-width: 650px; max-height: 90vh; display: flex; flex-direction: column; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow:hidden;}
-.modal-title { padding: 20px 24px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border); background:#f8fafc;}
-.modal-body { padding: 24px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling:touch;}
-.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; background:#f8fafc;}
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
 
-#toast-wrap { position:fixed; bottom:20px; right:20px; z-index:99999; display:flex; flex-direction:column; gap:10px; }
-.toast { background:#111827; color:#fff; padding:12px 20px; border-radius:8px; font-size:13px; font-weight:500; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); opacity:0; transform:translateY(10px); transition:all 0.3s;}
-.toast.show { opacity:1; transform:translateY(0);}
+        .card-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text);
+            margin-bottom: 16px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-#login-screen { position:fixed; inset:0; background:var(--bg); z-index:20000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
 
-/* =========================================
-   ROLE VISIBILITY
-   ========================================= */
-body:not([data-role="superadmin"]):not([data-role="admin"]) .admin-only,
-body:not([data-role="superadmin"]) .superadmin-only { display: none !important; }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
-/* =========================================
-   MOBILE OPTIMIZATION (STRICT PARITY)
-   ========================================= */
-.mobile-bottom-nav{display:none;}
-@media (max-width: 900px){
-  .sidebar{display:none}
-  .main{padding:16px 12px 100px}
-  .page-header{flex-direction:column; align-items:flex-start; gap:12px;}
-  .form-grid{grid-template-columns:1fr}
-  .event-grid{grid-template-columns:1fr}
-  
-  input,select,textarea { font-size: 16px; min-height:44px; } /* Prevents iOS Zoom & improves touch */
-  button { min-height:44px; }
-  
-  .mobile-bottom-nav{
-      display:flex; position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,0.98); 
-      backdrop-filter: blur(10px); border-top:1px solid var(--border); 
-      padding:8px 4px calc(8px + env(safe-area-inset-bottom)); z-index:1000;
-      justify-content: space-between; overflow-x:auto; -webkit-overflow-scrolling:touch;
-  }
-  .mobile-bottom-nav button { flex:1; min-width:65px; font-size:11px; flex-direction:column; gap:4px; padding:8px 2px; border:none; background:transparent; white-space:nowrap;}
-  .mobile-bottom-nav button.active { color:var(--blue); font-weight:700;}
-  
-  .cal-day{min-height:60px; padding:4px;}
-  .modal{max-width:95%; max-height:85vh; margin:auto;}
-}
-</style>
+        .form-group label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+            transition: border 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--blue);
+            background: var(--card);
+        }
+
+        button {
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        button:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-primary {
+            background: var(--blue);
+            color: #fff;
+            border-color: var(--blue);
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-danger {
+            color: var(--red);
+            border-color: #fecaca;
+            background: var(--red-light);
+        }
+
+        .btn-danger:hover {
+            background: #fee2e2;
+        }
+
+        .btn-green {
+            background: var(--green);
+            color: #fff;
+            border-color: var(--green);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* =========================================
+           LISTS, GRIDS & BADGES
+           ========================================= */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-blue { background: var(--blue-light); color: var(--blue); }
+        .badge-green { background: var(--green-light); color: var(--green); }
+        .badge-amber { background: var(--amber-light); color: var(--amber); }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        .event-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all .2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .event-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+        }
+
+        .event-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .event-card-body {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .event-card-footer {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .mailbox-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .mailbox-item.unread {
+            background: var(--blue-light);
+            border-left: 3px solid var(--blue);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            margin-bottom: 16px;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        th {
+            padding: 12px;
+            border-bottom: 2px solid var(--border);
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            background: var(--card);
+            transition: all .2s;
+        }
+
+        .list-item:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        /* =========================================
+           CALENDAR
+           ========================================= */
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .cal-day {
+            min-height: 90px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            background: var(--card);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+
+        .cal-day:hover {
+            background: #f8fafc;
+        }
+
+        .cal-day.today {
+            border-color: var(--blue);
+            border-width: 2px;
+            background: var(--blue-light);
+        }
+
+        .cal-header-cell {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            padding: 8px 0;
+        }
+
+        .cal-tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 6px;
+            border-radius: 4px;
+            color: #fff;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .tag-Catering { background: var(--blue); }
+        .tag-Event { background: var(--amber); }
+        .tag-Meeting { background: var(--purple); }
+        .tag-Preppen { background: var(--green); }
+        .tag-Einkaufen { background: var(--pink); }
+        .tag-SocialMedia { background: var(--cyan); }
+
+        /* =========================================
+           PIZZA & DIPS LABOR
+           ========================================= */
+        .pizza-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .pizza-qty {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 4px;
+            margin-top: 10px;
+        }
+
+        .pizza-qty button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: var(--card);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 6px;
+        }
+
+        .pizza-qty input {
+            width: 60px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            font-size: 16px;
+            padding: 0;
+        }
+
+        /* =========================================
+           SETTINGS TABS
+           ========================================= */
+        .settings-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 1px;
+        }
+
+        .settings-tab {
+            padding: 12px 16px;
+            cursor: pointer;
+            color: var(--muted);
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+
+        .settings-tab.active {
+            color: var(--blue);
+            border-bottom-color: var(--blue);
+        }
+
+        .settings-panel {
+            display: none;
+        }
+
+        .settings-panel.active {
+            display: block;
+        }
+
+        /* =========================================
+           MODALS & TOASTS
+           ========================================= */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.4);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .modal-title {
+            padding: 20px 24px;
+            font-size: 18px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            background: #f8fafc;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: #f8fafc;
+        }
+
+        #toast-wrap {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: #111827;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* =========================================
+           ROLE VISIBILITY
+           ========================================= */
+        body:not([data-role="superadmin"]):not([data-role="admin"]) .admin-only,
+        body:not([data-role="superadmin"]) .superadmin-only {
+            display: none !important;
+        }
+
+        /* =========================================
+           MOBILE OPTIMIZATION (STRICT PARITY)
+           ========================================= */
+        .mobile-bottom-nav {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                padding: 16px 12px 100px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .event-grid {
+                grid-template-columns: 1fr;
+            }
+
+            input, select, textarea {
+                font-size: 16px;
+                min-height: 44px; /* Prevents iOS Zoom & improves touch */
+            }
+
+            button {
+                min-height: 44px;
+            }
+
+            .mobile-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(255,255,255,0.98);
+                backdrop-filter: blur(10px);
+                border-top: 1px solid var(--border);
+                padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+                z-index: 1000;
+                justify-content: space-between;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .mobile-bottom-nav button {
+                flex: 1;
+                min-width: 65px;
+                font-size: 11px;
+                flex-direction: column;
+                gap: 4px;
+                padding: 8px 2px;
+                border: none;
+                background: transparent;
+                white-space: nowrap;
+            }
+
+            .mobile-bottom-nav button.active {
+                color: var(--blue);
+                font-weight: 700;
+            }
+
+            .cal-day {
+                min-height: 60px;
+                padding: 4px;
+            }
+
+            .modal {
+                max-width: 95%;
+                max-height: 85vh;
+                margin: auto;
+            }
+        }
+    </style>
 </head>
 <body data-role="staff">
 
 <div id="login-screen">
-  <div class="card" style="width:100%;max-width:400px;display:flex;flex-direction:column;gap:20px;">
-     <h2 style="text-align:center; font-size:24px; letter-spacing:-0.5px;">Heitmanns Pizza Login</h2>
-     <div class="form-group"><label>E-Mail Adresse</label><input id="login-email" type="email" placeholder="name@beispiel.de" /></div>
-     <div class="form-group"><label>4-stellige PIN</label><input id="login-pass" type="password" placeholder="1234" maxlength="4" /></div>
-     <button class="btn-primary" onclick="doLogin()" style="padding:14px; font-size:15px; margin-top:8px;">Einloggen / Registrieren</button>
-  </div>
-</div>
-
-<div class="app" style="display:none" id="main-app">
-<div class="sidebar">
-  <div class="sidebar-logo">Heitmanns Pizza</div>
-  <div class="nav-item active" onclick="navTo('dashboard',this)">Dashboard</div>
-  <div class="nav-item" onclick="navTo('kalender',this)">Kalender</div>
-  <div class="nav-item" onclick="navTo('events',this)">Events & Staffing</div>
-  <div class="nav-item admin-only" onclick="navTo('timesheet',this)">Personal & Zeiten</div>
-  <div class="nav-item admin-only" onclick="navTo('catering',this)">Catering-Kalkulator</div>
-  <div class="nav-item admin-only" onclick="navTo('pizza',this)">Pizza</div>
-  <div class="nav-item admin-only" onclick="navTo('einkauf',this)">Einkaufsliste</div>
-  <div class="nav-item admin-only" onclick="navTo('kontakte',this)">Kontakte</div>
-  <div class="nav-item superadmin-only" onclick="navTo('settings',this)">Einstellungen</div>
-  <div class="nav-item" style="margin-top:auto; color:var(--red);" onclick="auth.signOut()">Logout</div>
-</div>
-
-<div class="main">
-
-<div class="page active" id="page-dashboard">
-  <div class="page-header">
-      <div>
-          <div class="page-title" id="dash-greeting">Willkommen!</div>
-          <div class="page-subtitle" id="today-date"></div>
-      </div>
-  </div>
-  
-  <div class="form-grid">
-    <div class="card">
-        <div class="card-title">Dein Postfach <button class="btn-sm" onclick="clearNotifications()">Gelesen markieren</button></div>
-        <div id="dash-mailbox" style="max-height:250px; overflow-y:auto; font-size:13px; line-height:1.5;">Keine Nachrichten.</div>
-    </div>
-    <div class="card">
-        <div class="card-title">Anstehende Events</div>
-        <div id="dash-events" style="display:flex; flex-direction:column; gap:12px;"></div>
-    </div>
-  </div>
-
-  <div class="card admin-only">
-    <div class="card-title">Allgemeine Pinnwand</div>
-    <textarea id="pinnwand" style="min-height:220px; font-size:15px; padding:16px; line-height:1.5;" placeholder="Wichtige Infos für das Team eintragen..." oninput="savePin()"></textarea>
-  </div>
-
-  <div class="card admin-only">
-    <div class="card-title">Putz-Ranking <button class="btn-sm" onclick="openRankingModal()">Komplettes Ranking ansehen</button></div>
-    <div id="cleaning-ranking-preview" style="font-size:16px; padding:10px 0;">Lade Ranking...</div>
-  </div>
-</div>
-
-<div class="page" id="page-kalender">
-  <div class="page-header">
-    <div>
-        <div class="page-title">Terminkalender</div>
-        <div class="page-subtitle" id="cal-title" style="font-weight:600; font-size:16px; color:var(--blue); margin-top:8px;"></div>
-    </div>
-    <div style="display:flex; gap:12px;">
-        <button onclick="changeMonth(-1)">Vorheriger</button>
-        <button onclick="changeMonth(1)">Nächster</button>
-        <button class="btn-primary admin-only" onclick="openEventModal()">Neuer Termin</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="cal-grid" id="cal-headers"></div>
-    <div class="cal-grid" id="cal-body"></div>
-  </div>
-</div>
-
-<div class="page" id="page-events">
-    <div class="page-header">
-        <div>
-            <div class="page-title">Events & Personalplanung</div>
-            <div class="page-subtitle">Verfügbarkeiten prüfen und Zuteilungen vornehmen</div>
+    <div class="card" style="width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 20px;">
+        <h2 style="text-align: center; font-size: 24px; letter-spacing: -0.5px;">Heitmanns Pizza Login</h2>
+        <div class="form-group">
+            <label>E-Mail Adresse</label>
+            <input id="login-email" type="email" placeholder="name@beispiel.de" />
         </div>
-        <button class="btn-primary admin-only" onclick="openEventModal()">Neues Event anlegen</button>
-    </div>
-    <div id="all-events-list" class="event-grid"></div>
-</div>
-
-<div class="page admin-only" id="page-timesheet">
-    <div class="page-header">
-        <div>
-            <div class="page-title">Personal & Zeiten</div>
-            <div class="page-subtitle">Erfassung und Auswertung von Arbeitszeiten</div>
+        <div class="form-group">
+            <label>4-stellige PIN</label>
+            <input id="login-pass" type="password" placeholder="1234" maxlength="4" />
         </div>
-        <button class="btn-primary" onclick="openTimesheetModal()">Neue Zeit erfassen</button>
-    </div>
-
-    <div class="settings-tabs">
-        <div class="settings-tab active" onclick="switchSettingsTab('ts-list', this)">Erfasste Zeiten</div>
-        <div class="settings-tab" onclick="switchSettingsTab('ts-events', this)">Event-Auswertung</div>
-        <div class="settings-tab" onclick="switchSettingsTab('ts-users', this)">Mitarbeiter-Auswertung</div>
-    </div>
-
-    <div id="panel-ts-list" class="settings-panel active">
-        <div class="card">
-            <div class="card-title">Alle erfassten Schichten</div>
-            <div class="table-wrap" id="timesheet-list-container"></div>
-        </div>
-    </div>
-
-    <div id="panel-ts-events" class="settings-panel">
-        <div class="card">
-            <div class="card-title">Kosten pro Event</div>
-            <div class="table-wrap" id="timesheet-events-container"></div>
-        </div>
-    </div>
-
-    <div id="panel-ts-users" class="settings-panel">
-        <div class="card">
-            <div class="card-title">Stunden pro Mitarbeiter</div>
-            <div class="table-wrap" id="timesheet-users-container"></div>
-        </div>
+        <button class="btn-primary" onclick="doLogin()" style="padding: 14px; font-size: 15px; margin-top: 8px;">Einloggen / Registrieren</button>
     </div>
 </div>
 
-<div class="page admin-only" id="page-pizza">
-    <div class="page-header">
-        <div>
-            <div class="page-title">Pizza</div>
-            <div class="page-subtitle">Verbrauchskalkulation und Warenkorb-Generierung</div>
-        </div>
-        <button class="btn-danger" onclick="resetPizza()">Kalkulation zurücksetzen</button>
+<div class="app" style="display: none" id="main-app">
+
+    <div class="sidebar">
+        <div class="sidebar-logo">Heitmanns Pizza</div>
+        <div class="nav-item active" onclick="navTo('dashboard', this)">Dashboard</div>
+        <div class="nav-item" onclick="navTo('kalender', this)">Kalender</div>
+        <div class="nav-item" onclick="navTo('events', this)">Events & Staffing</div>
+        <div class="nav-item admin-only" onclick="navTo('timesheet', this)">Personal & Zeiten</div>
+        <div class="nav-item admin-only" onclick="navTo('catering', this)">Catering-Kalkulator</div>
+        <div class="nav-item admin-only" onclick="navTo('pizza', this)">Pizza</div>
+        <div class="nav-item admin-only" onclick="navTo('einkauf', this)">Einkaufsliste</div>
+        <div class="nav-item admin-only" onclick="navTo('kontakte', this)">Kontakte</div>
+        <div class="nav-item superadmin-only" onclick="navTo('settings', this)">Einstellungen</div>
+        <div class="nav-item" style="margin-top: auto; color: var(--red);" onclick="auth.signOut()">Logout</div>
     </div>
-    
-    <div class="form-grid">
-        <div class="card">
-            <div class="card-title">Pizza Mengen</div>
-            <div class="pizza-grid" id="pizza-grid"></div>
-        </div>
-        <div class="card">
-            <div class="card-title">Dips Mengen</div>
-            <div class="pizza-grid">
-                <div class="card" style="border:1px solid var(--border); box-shadow:none;">
-                    <div style="font-weight:600;">Aioli</div>
-                    <div class="pizza-qty"><button onclick="changeDip('aioli',-5)">-</button><input type="number" id="dqty-aioli" value="0" readonly><button onclick="changeDip('aioli',5)">+</button></div>
-                </div>
-                <div class="card" style="border:1px solid var(--border); box-shadow:none;">
-                    <div style="font-weight:600;">Hot Honey</div>
-                    <div class="pizza-qty"><button onclick="changeDip('hothoney',-5)">-</button><input type="number" id="dqty-hothoney" value="0" readonly><button onclick="changeDip('hothoney',5)">+</button></div>
+
+    <div class="main">
+
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <div>
+                    <div class="page-title" id="dash-greeting">Willkommen!</div>
+                    <div class="page-subtitle" id="today-date"></div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="card">
-        <div class="card-title">Bedarf & Warenkorb <button class="btn-primary" onclick="saveToEinkauf()">In Einkaufsliste pushen</button></div>
-        <div id="ingredient-result"></div>
-    </div>
-</div>
-
-<div class="page admin-only" id="page-catering">
-    <div class="page-header">
-        <div>
-            <div class="page-title">Catering Kalkulator</div>
-            <div class="page-subtitle">Preisermittlung basierend auf Vorgaben</div>
-        </div>
-    </div>
-    <div class="form-grid">
-        <div class="card"><div class="card-title">Kundenangaben</div>
-            <div class="form-group"><label>Gästezahl (Mindestens 30)</label><input type="number" id="cat-gaeste" value="30" oninput="calcCatering()"></div>
-            <div class="form-group"><label>Fahrtstrecke KM (hin & zurück)</label><input type="number" id="cat-km" value="50" oninput="calcCatering()"></div>
-            <div class="form-group"><label>Ermittelte Marge</label><input id="cat-marge-display" readonly style="background:#f1f5f9;"></div>
-        </div>
-        <div class="card"><div class="card-title">Preiskalkulation</div>
-            <div id="cat-result-rows"></div>
-            <div style="background:var(--blue-light); color:var(--blue); padding:16px; border-radius:8px; margin-top:16px; font-size:18px; font-weight:700; text-align:center;">
-                Brutto Zielpreis: <span id="cat-brutto-total">0,00 €</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="page admin-only" id="page-einkauf">
-    <div class="page-header">
-        <div>
-            <div class="page-title">Zentrale Einkaufsliste</div>
-            <div class="page-subtitle">Alle gepushten Bedarfe</div>
-        </div>
-        <button class="btn-danger" onclick="clearEinkauf()">Komplette Liste leeren</button>
-    </div>
-    <div id="einkauf-kategorien"></div>
-</div>
-
-<div class="page admin-only" id="page-kontakte">
-    <div class="page-header">
-        <div>
-            <div class="page-title">Kontakte & Adressbuch</div>
-            <div class="page-subtitle">Kunden, Lieferanten und Partner</div>
-        </div>
-        <button class="btn-primary" onclick="openKontaktModal()">Neuen Kontakt anlegen</button>
-    </div>
-    <div id="kontakt-list" style="display:flex; flex-direction:column; gap:16px;"></div>
-</div>
-
-<div class="page superadmin-only" id="page-settings">
-    <div class="page-header">
-        <div>
-            <div class="page-title">System-Einstellungen</div>
-            <div class="page-subtitle">Konfiguration, Rezepte und Stammdaten</div>
-        </div>
-    </div>
-    <div class="settings-tabs">
-        <div class="settings-tab active" onclick="switchSettingsTab('zutaten', this)">Zutaten</div>
-        <div class="settings-tab" onclick="switchSettingsTab('rezepte', this)">Sub-Rezepte</div>
-        <div class="settings-tab" onclick="switchSettingsTab('pizzas', this)">Pizzen</div>
-        <div class="settings-tab" onclick="switchSettingsTab('catering', this)">Catering Parameter</div>
-        <div class="settings-tab" onclick="switchSettingsTab('team', this)">Mitarbeiter Handling</div>
-    </div>
-
-    <div id="panel-zutaten" class="settings-panel active">
-        <div class="card">
-            <div class="card-title">Stammdaten: Zutaten <button class="btn-sm" onclick="openIngredientModal()">Neue Zutat anlegen</button></div>
-            <div class="table-wrap" id="settings-art-list"></div>
-            <button class="btn-primary" style="margin-top:16px; width:100%;" onclick="saveSettingsART()">Preisänderungen speichern</button>
-        </div>
-    </div>
-    
-    <div id="panel-rezepte" class="settings-panel">
-        <div class="card">
-            <div class="card-title">Gespeicherte Sub-Rezepte <button class="btn-sm" onclick="openRecipeModal()">Neues Rezept anlegen</button></div>
-            <div class="table-wrap" id="settings-recipes-list"></div>
-        </div>
-    </div>
-    
-    <div id="panel-pizzas" class="settings-panel">
-        <div class="card">
-            <div class="card-title">Gespeicherte Pizzen <button class="btn-sm" onclick="openPizzaModal()">Neue Pizza anlegen</button></div>
-            <div class="table-wrap" id="settings-pizzas-list"></div>
-        </div>
-    </div>
-    
-    <div id="panel-catering" class="settings-panel">
-        <div class="card">
-            <div class="card-title">Globale Fixkosten & Steuern</div>
             <div class="form-grid">
-                <div class="form-group"><label>Gaspauschale (€)</label><input type="number" id="set-cat-gas" step="1"></div>
-                <div class="form-group"><label>Entsorgung (€)</label><input type="number" id="set-cat-entsorgung" step="1"></div>
-                <div class="form-group"><label>Miete (€)</label><input type="number" id="set-cat-miete" step="1"></div>
-                <div class="form-group"><label>KM-Satz (€/km)</label><input type="number" id="set-cat-kmsatz" step="0.05"></div>
-                <div class="form-group"><label>Wareneinsatz/Gast (€)</label><input type="number" id="set-cat-waren" step="0.1"></div>
-                <div class="form-group"><label>Umsatzsteuer (z.B. 1.19)</label><input type="number" id="set-cat-ust" step="0.01"></div>
+                <div class="card">
+                    <div class="card-title">Dein Postfach <button class="btn-sm" onclick="clearNotifications()">Gelesen markieren</button></div>
+                    <div id="dash-mailbox" style="max-height: 250px; overflow-y: auto; font-size: 13px; line-height: 1.5;">Keine Nachrichten.</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Anstehende Events</div>
+                    <div id="dash-events" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                </div>
             </div>
-            <button class="btn-primary" style="margin-top:20px; width:100%;" onclick="saveCateringSettings()">Parameter speichern</button>
+
+            <div class="card admin-only">
+                <div class="card-title">Allgemeine Pinnwand</div>
+                <textarea id="pinnwand" style="min-height: 220px; font-size: 15px; padding: 16px; line-height: 1.5;" placeholder="Wichtige Infos für das Team eintragen..." oninput="savePin()"></textarea>
+            </div>
+
+            <div class="card admin-only">
+                <div class="card-title">Putz-Ranking <button class="btn-sm" onclick="openRankingModal()">Komplettes Ranking ansehen</button></div>
+                <div id="cleaning-ranking-preview" style="font-size: 16px; padding: 10px 0;">Lade Ranking...</div>
+            </div>
         </div>
+
+        <div class="page" id="page-kalender">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Terminkalender</div>
+                    <div class="page-subtitle" id="cal-title" style="font-weight: 600; font-size: 16px; color: var(--blue); margin-top: 8px;"></div>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="changeMonth(-1)">Vorheriger</button>
+                    <button onclick="changeMonth(1)">Nächster</button>
+                    <button class="btn-primary admin-only" onclick="openEventModal()">Neuer Termin</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="cal-grid" id="cal-headers"></div>
+                <div class="cal-grid" id="cal-body"></div>
+            </div>
+        </div>
+
+        <div class="page" id="page-events">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Events & Personalplanung</div>
+                    <div class="page-subtitle">Verfügbarkeiten prüfen und Zuteilungen vornehmen</div>
+                </div>
+                <button class="btn-primary admin-only" onclick="openEventModal()">Neues Event anlegen</button>
+            </div>
+            <div id="all-events-list" class="event-grid"></div>
+        </div>
+
+        <div class="page admin-only" id="page-timesheet">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Personal & Zeiten</div>
+                    <div class="page-subtitle">Erfassung und Auswertung von Arbeitszeiten</div>
+                </div>
+                <button class="btn-primary" onclick="openTimesheetModal()">Neue Zeit erfassen</button>
+            </div>
+
+            <div class="settings-tabs">
+                <div class="settings-tab active" onclick="switchSettingsTab('ts-list', this)">Erfasste Zeiten</div>
+                <div class="settings-tab" onclick="switchSettingsTab('ts-events', this)">Event-Auswertung</div>
+                <div class="settings-tab" onclick="switchSettingsTab('ts-users', this)">Mitarbeiter-Auswertung</div>
+            </div>
+
+            <div id="panel-ts-list" class="settings-panel active">
+                <div class="card">
+                    <div class="card-title">Alle erfassten Schichten</div>
+                    <div class="table-wrap" id="timesheet-list-container"></div>
+                </div>
+            </div>
+
+            <div id="panel-ts-events" class="settings-panel">
+                <div class="card">
+                    <div class="card-title">Kosten pro Event</div>
+                    <div class="table-wrap" id="timesheet-events-container"></div>
+                </div>
+            </div>
+
+            <div id="panel-ts-users" class="settings-panel">
+                <div class="card">
+                    <div class="card-title">Stunden pro Mitarbeiter</div>
+                    <div class="table-wrap" id="timesheet-users-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page admin-only" id="page-pizza">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Pizza</div>
+                    <div class="page-subtitle">Verbrauchskalkulation und Warenkorb-Generierung</div>
+                </div>
+                <button class="btn-danger" onclick="resetPizza()">Kalkulation zurücksetzen</button>
+            </div>
+
+            <div class="card" style="margin-bottom: 24px;">
+                <div class="card-title">Pizza Mengen</div>
+                <div class="pizza-grid" id="pizza-grid"></div>
+            </div>
+
+            <div class="card" style="margin-bottom: 24px;">
+                <div class="card-title">Dips Mengen</div>
+                <div class="pizza-grid">
+                    <div class="card" style="border: 1px solid var(--border); box-shadow: none;">
+                        <div style="font-weight: 600;">Aioli</div>
+                        <div class="pizza-qty">
+                            <button onclick="changeDip('aioli', -5)">-</button>
+                            <input type="number" id="dqty-aioli" value="0" readonly>
+                            <button onclick="changeDip('aioli', 5)">+</button>
+                        </div>
+                    </div>
+                    <div class="card" style="border: 1px solid var(--border); box-shadow: none;">
+                        <div style="font-weight: 600;">Hot Honey</div>
+                        <div class="pizza-qty">
+                            <button onclick="changeDip('hothoney', -5)">-</button>
+                            <input type="number" id="dqty-hothoney" value="0" readonly>
+                            <button onclick="changeDip('hothoney', 5)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Bedarf & Warenkorb <button class="btn-primary" onclick="saveToEinkauf()">In Einkaufsliste pushen</button></div>
+                <div id="ingredient-result"></div>
+            </div>
+        </div>
+
+        <div class="page admin-only" id="page-catering">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Catering Kalkulator</div>
+                    <div class="page-subtitle">Preisermittlung basierend auf Vorgaben</div>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="card">
+                    <div class="card-title">Kundenangaben</div>
+                    <div class="form-group">
+                        <label>Gästezahl (Mindestens 30)</label>
+                        <input type="number" id="cat-gaeste" value="30" oninput="calcCatering()">
+                    </div>
+                    <div class="form-group">
+                        <label>Fahrtstrecke KM (hin & zurück)</label>
+                        <input type="number" id="cat-km" value="50" oninput="calcCatering()">
+                    </div>
+                    <div class="form-group">
+                        <label>Ermittelte Marge</label>
+                        <input id="cat-marge-display" readonly style="background: #f1f5f9;">
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Preiskalkulation</div>
+                    <div id="cat-result-rows"></div>
+                    <div style="background: var(--blue-light); color: var(--blue); padding: 16px; border-radius: 8px; margin-top: 16px; font-size: 18px; font-weight: 700; text-align: center;">
+                        Brutto Zielpreis: <span id="cat-brutto-total">0,00 €</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page admin-only" id="page-einkauf">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Zentrale Einkaufsliste</div>
+                    <div class="page-subtitle">Alle gepushten Bedarfe</div>
+                </div>
+                <button class="btn-danger" onclick="clearEinkauf()">Komplette Liste leeren</button>
+            </div>
+            <div id="einkauf-kategorien"></div>
+        </div>
+
+        <div class="page admin-only" id="page-kontakte">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Kontakte & Adressbuch</div>
+                    <div class="page-subtitle">Kunden, Lieferanten und Partner</div>
+                </div>
+                <button class="btn-primary" onclick="openKontaktModal()">Neuen Kontakt anlegen</button>
+            </div>
+            <div id="kontakt-list" class="form-grid"></div>
+        </div>
+
+        <div class="page superadmin-only" id="page-settings">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">System-Einstellungen</div>
+                    <div class="page-subtitle">Konfiguration, Rezepte und Stammdaten</div>
+                </div>
+            </div>
+            <div class="settings-tabs">
+                <div class="settings-tab active" onclick="switchSettingsTab('zutaten', this)">Zutaten</div>
+                <div class="settings-tab" onclick="switchSettingsTab('rezepte', this)">Sub-Rezepte</div>
+                <div class="settings-tab" onclick="switchSettingsTab('pizzas', this)">Pizzen</div>
+                <div class="settings-tab" onclick="switchSettingsTab('catering', this)">Catering Parameter</div>
+                <div class="settings-tab" onclick="switchSettingsTab('team', this)">Mitarbeiter Handling</div>
+            </div>
+
+            <div id="panel-zutaten" class="settings-panel active">
+                <div class="card">
+                    <div class="card-title">Stammdaten: Zutaten <button class="btn-sm" onclick="openIngredientModal()">Neue Zutat anlegen</button></div>
+                    <div class="table-wrap" id="settings-art-list"></div>
+                    <button class="btn-primary" style="margin-top: 16px; width: 100%;" onclick="saveSettingsART()">Preisänderungen speichern</button>
+                </div>
+            </div>
+
+            <div id="panel-rezepte" class="settings-panel">
+                <div class="card">
+                    <div class="card-title">Gespeicherte Sub-Rezepte <button class="btn-sm" onclick="openRecipeModal()">Neues Rezept anlegen</button></div>
+                    <div class="table-wrap" id="settings-recipes-list"></div>
+                </div>
+            </div>
+
+            <div id="panel-pizzas" class="settings-panel">
+                <div class="card">
+                    <div class="card-title">Gespeicherte Pizzen <button class="btn-sm" onclick="openPizzaModal()">Neue Pizza anlegen</button></div>
+                    <div class="table-wrap" id="settings-pizzas-list"></div>
+                </div>
+            </div>
+
+            <div id="panel-catering" class="settings-panel">
+                <div class="card">
+                    <div class="card-title">Globale Fixkosten & Steuern</div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Gaspauschale (€)</label><input type="number" id="set-cat-gas" step="1"></div>
+                        <div class="form-group"><label>Entsorgung (€)</label><input type="number" id="set-cat-entsorgung" step="1"></div>
+                        <div class="form-group"><label>Miete (€)</label><input type="number" id="set-cat-miete" step="1"></div>
+                        <div class="form-group"><label>KM-Satz (€/km)</label><input type="number" id="set-cat-kmsatz" step="0.05"></div>
+                        <div class="form-group"><label>Wareneinsatz/Gast (€)</label><input type="number" id="set-cat-waren" step="0.1"></div>
+                        <div class="form-group"><label>Umsatzsteuer (z.B. 1.19)</label><input type="number" id="set-cat-ust" step="0.01"></div>
+                    </div>
+                    <button class="btn-primary" style="margin-top: 20px; width: 100%;" onclick="saveCateringSettings()">Parameter speichern</button>
+                </div>
+            </div>
+
+            <div id="panel-team" class="settings-panel">
+                <div class="card">
+                    <div class="card-title">Benutzer, Rollen & Stundenlohn</div>
+                    <div class="table-wrap" id="team-list-container"></div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div id="panel-team" class="settings-panel">
-        <div class="card">
-            <div class="card-title">Benutzer, Rollen & Stundenlohn</div>
-            <div class="table-wrap" id="team-list-container"></div>
-        </div>
+    <div class="mobile-bottom-nav">
+        <button onclick="navTo('dashboard', this)" class="active">Dash</button>
+        <button onclick="navTo('kalender', this)">Kalender</button>
+        <button onclick="navTo('events', this)">Events</button>
+        <button class="admin-only" onclick="navTo('timesheet', this)">Zeiten</button>
+        <button class="admin-only" onclick="navTo('pizza', this)">Pizza</button>
+        <button class="superadmin-only" onclick="navTo('settings', this)">Settings</button>
     </div>
 </div>
 
-</div>
-
-<div class="mobile-bottom-nav">
-    <button onclick="navTo('dashboard', this)" class="active">Dash</button>
-    <button onclick="navTo('kalender', this)">Kalender</button>
-    <button onclick="navTo('events', this)">Events</button>
-    <button class="admin-only" onclick="navTo('timesheet', this)">Zeiten</button>
-    <button class="admin-only" onclick="navTo('pizza', this)">Pizza</button>
-    <button class="superadmin-only" onclick="navTo('settings', this)">Settings</button>
-</div>
+<div class="modal-overlay" id="day-events-modal">
+    <div class="modal">
+        <div class="modal-title" id="day-events-title">Events am Tag</div>
+        <div class="modal-body" id="day-events-list">
+            </div>
+        <div class="modal-footer">
+            <button class="btn-primary admin-only" id="day-events-add-btn">Neuer Termin hier</button>
+            <button onclick="closeModal('day-events-modal')">Schließen</button>
+        </div>
+    </div>
 </div>
 
 <div class="modal-overlay" id="event-modal">
-<div class="modal">
-    <div class="modal-title">Termin bearbeiten</div>
-    <div class="modal-body">
-        <div class="form-grid">
-            <div class="form-group" style="grid-column: span 2;"><label>Bezeichnung</label><input id="ev-title"></div>
-            <div class="form-group"><label>Termin Art</label>
-                <select id="ev-type">
-                    <option>Catering</option><option>Event</option><option>Meeting</option>
-                    <option>Preppen</option><option>Einkaufen</option><option>SocialMedia</option>
-                </select>
+    <div class="modal">
+        <div class="modal-title">Termin bearbeiten</div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Bezeichnung</label>
+                    <input id="ev-title">
+                </div>
+                <div class="form-group">
+                    <label>Termin Art</label>
+                    <select id="ev-type" onchange="toggleEventCrewVisibility()">
+                        <option>Catering</option>
+                        <option>Event</option>
+                        <option>Meeting</option>
+                        <option>Preppen</option>
+                        <option>Einkaufen</option>
+                        <option>SocialMedia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="ev-status">
+                        <option>Pending...</option>
+                        <option>Secured</option>
+                        <option>Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Start Datum</label>
+                    <input type="date" id="ev-date">
+                </div>
+                <div class="form-group">
+                    <label>End Datum</label>
+                    <input type="date" id="ev-endDate">
+                </div>
+                <div class="form-group">
+                    <label>Uhrzeit</label>
+                    <input type="time" id="ev-time">
+                </div>
+                <div class="form-group">
+                    <label>Gästezahl</label>
+                    <input type="number" id="ev-personen">
+                </div>
+                <div class="form-group" style="grid-column: span 2;" id="ev-customer-group">
+                    <label>Kunde (Nur für Catering)</label>
+                    <select id="ev-customer-select">
+                        <option value="">-- Keinen Kontakt zugewiesen --</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Ort / Adresse</label>
+                    <input id="ev-ort">
+                </div>
             </div>
-            <div class="form-group"><label>Status</label>
-                <select id="ev-status">
-                    <option>Pending...</option><option>Secured</option><option>Cancelled</option>
+
+            <div class="form-group admin-only" id="ev-crew-container" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
+                <label style="color: var(--blue)">Personal Zuteilung</label>
+                <select id="ev-crew-select-dropdown" style="margin-bottom: 8px;">
+                    <option value="">-- Mitarbeiter hinzufügen --</option>
                 </select>
+                <div id="ev-crew-select" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;"></div>
             </div>
-            <div class="form-group"><label>Start Datum</label><input type="date" id="ev-date"></div>
-            <div class="form-group"><label>End Datum</label><input type="date" id="ev-endDate"></div>
-            <div class="form-group"><label>Start Uhrzeit</label><input type="time" id="ev-time"></div>
-            <div class="form-group"><label>Gästezahl</label><input type="number" id="ev-personen"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Ort / Adresse</label><input id="ev-ort"></div>
+            
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Interne Notizen / Infos</label>
+                <textarea id="ev-notizen" style="min-height: 80px;"></textarea>
+            </div>
         </div>
-        
-        <div class="form-group admin-only" style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
-            <label style="color:var(--blue)">Personal Zuteilung (Klicken zum Auswählen)</label>
-            <div id="ev-crew-select" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
-        </div>
-        <div class="form-group" style="margin-top:16px;">
-            <label>Interne Notizen / Infos</label>
-            <textarea id="ev-notizen" style="min-height:80px;"></textarea>
+        <div class="modal-footer">
+            <button onclick="closeModal('event-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveEvent()">Speichern</button>
         </div>
     </div>
-    <div class="modal-footer"><button onclick="closeModal('event-modal')">Abbrechen</button><button class="btn-primary" onclick="saveEvent()">Speichern</button></div>
-</div>
 </div>
 
 <div class="modal-overlay" id="avail-modal">
-<div class="modal" style="max-width: 400px;">
-    <div class="modal-title">Verfügbarkeit bestätigen</div>
-    <div class="modal-body">
-        <p style="margin-bottom:16px; color:var(--muted); font-size:13px;">Dieses Event geht über mehrere Tage. An welchen Tagen kannst du arbeiten?</p>
-        <div id="avail-days-container" style="display:flex; flex-direction:column; gap:8px;"></div>
+    <div class="modal" style="max-width: 400px;">
+        <div class="modal-title">Verfügbarkeit bestätigen</div>
+        <div class="modal-body">
+            <p style="margin-bottom: 16px; color: var(--muted); font-size: 13px;">Dieses Event geht über mehrere Tage. An welchen Tagen kannst du arbeiten?</p>
+            <div id="avail-days-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('avail-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveAvailDays()">Tage speichern</button>
+        </div>
     </div>
-    <div class="modal-footer">
-        <button onclick="closeModal('avail-modal')">Abbrechen</button>
-        <button class="btn-primary" onclick="saveAvailDays()">Tage speichern</button>
-    </div>
-</div>
 </div>
 
 <div class="modal-overlay" id="timesheet-modal">
-<div class="modal">
-    <div class="modal-title">Zeiterfassung eintragen</div>
-    <div class="modal-body">
-        <div class="form-grid">
-            <div class="form-group" style="grid-column: span 2;"><label>Event</label>
-                <select id="ts-event-id"></select>
+    <div class="modal">
+        <div class="modal-title">Zeiterfassung eintragen</div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Event</label>
+                    <select id="ts-event-id"></select>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Mitarbeiter</label>
+                    <select id="ts-user-id"></select>
+                </div>
+                <div class="form-group">
+                    <label>Datum</label>
+                    <input type="date" id="ts-date">
+                </div>
+                <div class="form-group">
+                    <label>Trinkgeld-Zuschlag (Std., z.B. 0.25)</label>
+                    <input type="number" step="0.01" id="ts-bonus" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Beginn (Uhrzeit)</label>
+                    <input type="time" id="ts-start">
+                </div>
+                <div class="form-group">
+                    <label>Ende (Uhrzeit)</label>
+                    <input type="time" id="ts-end">
+                </div>
             </div>
-            <div class="form-group" style="grid-column: span 2;"><label>Mitarbeiter</label>
-                <select id="ts-user-id"></select>
-            </div>
-            <div class="form-group"><label>Datum</label><input type="date" id="ts-date"></div>
-            <div class="form-group"><label>Trinkgeld-Zuschlag (Std., z.B. 0.25)</label><input type="number" step="0.01" id="ts-bonus" value="0"></div>
-            <div class="form-group"><label>Beginn (Uhrzeit)</label><input type="time" id="ts-start"></div>
-            <div class="form-group"><label>Ende (Uhrzeit)</label><input type="time" id="ts-end"></div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('timesheet-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveTimesheet()">Speichern</button>
         </div>
     </div>
-    <div class="modal-footer"><button onclick="closeModal('timesheet-modal')">Abbrechen</button><button class="btn-primary" onclick="saveTimesheet()">Speichern</button></div>
-</div>
 </div>
 
 <div class="modal-overlay" id="ingredient-modal">
-<div class="modal">
-    <div class="modal-title">Neue Zutat anlegen</div>
-    <div class="modal-body">
-        <div class="form-group" style="margin-bottom:16px;"><label>Eindeutige Bezeichnung</label><input id="ing-new-name"></div>
-        <div class="form-grid">
-            <div class="form-group"><label>Artikelnummer</label><input id="ing-new-artnr"></div>
-            <div class="form-group"><label>Lieferant</label>
-                <select id="ing-new-sup">
-                    <option>Andronaco</option><option>Metro</option><option>Bührings</option><option>Edeka</option><option>Sonstige</option>
-                </select>
+    <div class="modal">
+        <div class="modal-title">Neue Zutat anlegen</div>
+        <div class="modal-body">
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label>Eindeutige Bezeichnung</label>
+                <input id="ing-new-name">
             </div>
-            <div class="form-group"><label>Kategorie</label>
-                <select id="ing-new-cat">
-                    <option>Teig</option><option>Milchprodukte / Käse</option><option>Sauce / Basis</option><option>Belag</option><option>Gemüse & Kräuter</option><option>Dips</option><option>Sonstiges</option>
-                </select>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Artikelnummer</label>
+                    <input id="ing-new-artnr">
+                </div>
+                <div class="form-group">
+                    <label>Lieferant</label>
+                    <select id="ing-new-sup">
+                        <option>Andronaco</option>
+                        <option>Metro</option>
+                        <option>Bührings</option>
+                        <option>Edeka</option>
+                        <option>Sonstige</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Kategorie</label>
+                    <select id="ing-new-cat">
+                        <option>Teig</option>
+                        <option>Milchprodukte / Käse</option>
+                        <option>Sauce / Basis</option>
+                        <option>Belag</option>
+                        <option>Gemüse & Kräuter</option>
+                        <option>Dips</option>
+                        <option>Sonstiges</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Verpackungseinheit</label>
+                    <select id="ing-new-unit">
+                        <option>kg</option>
+                        <option>Stk</option>
+                        <option>L</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Preis Netto (€)</label>
+                    <input type="number" id="ing-new-netto" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Preis Brutto (€)</label>
+                    <input type="number" id="ing-new-brutto" step="0.01">
+                </div>
             </div>
-            <div class="form-group"><label>Verpackungseinheit</label>
-                <select id="ing-new-unit"><option>kg</option><option>Stk</option><option>L</option></select>
-            </div>
-            <div class="form-group"><label>Preis Netto (€)</label><input type="number" id="ing-new-netto" step="0.01"></div>
-            <div class="form-group"><label>Preis Brutto (€)</label><input type="number" id="ing-new-brutto" step="0.01"></div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('ingredient-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveNewIngredient()">Erstellen</button>
         </div>
     </div>
-    <div class="modal-footer"><button onclick="closeModal('ingredient-modal')">Abbrechen</button><button class="btn-primary" onclick="saveNewIngredient()">Erstellen</button></div>
-</div>
 </div>
 
 <div class="modal-overlay" id="builder-modal">
-<div class="modal">
-    <div class="modal-title" id="builder-title">Bearbeiten</div>
-    <div class="modal-body">
-        <div class="form-grid" style="margin-bottom: 16px;">
-            <div class="form-group"><label>Name</label><input id="builder-name"></div>
-            <div class="form-group" id="builder-param-group">
-                <label id="builder-param-label">Wert</label>
-                <input type="number" id="builder-param" step="0.01">
+    <div class="modal">
+        <div class="modal-title" id="builder-title">Bearbeiten</div>
+        <div class="modal-body">
+            <div class="form-grid" style="margin-bottom: 16px;">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input id="builder-name">
+                </div>
+                <div class="form-group" id="builder-param-group">
+                    <label id="builder-param-label">Wert</label>
+                    <input type="number" id="builder-param" step="0.01">
+                </div>
             </div>
+            <div class="form-group">
+                <label style="border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-bottom: 8px;">Zutaten & Bestandteile</label>
+                <div id="builder-items-container"></div>
+                <button class="btn-sm" style="margin-top: 8px; align-self: flex-start;" onclick="addBuilderItemRow()">+ Bestandteil hinzufügen</button>
+            </div>
+
+            <div id="builder-calc-preview" style="margin-top: 16px; padding: 12px; background: var(--blue-light); border-radius: 8px; display: none;">
+                <div style="font-size: 11px; color: var(--blue); font-weight: 600; text-transform: uppercase;">Berechneter Wareneinsatz</div>
+                <div style="font-size: 18px; font-weight: 700; color: var(--blue);" id="builder-calc-total">0,00 €</div>
+            </div>
+
         </div>
-        <div class="form-group">
-            <label style="border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:8px;">Zutaten & Bestandteile</label>
-            <div id="builder-items-container"></div>
-            <button class="btn-sm" style="margin-top:8px; align-self:flex-start;" onclick="addBuilderItemRow()">+ Bestandteil hinzufügen</button>
+        <div class="modal-footer">
+            <button onclick="closeModal('builder-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveBuilder()">Speichern</button>
         </div>
-        
-        <div id="builder-calc-preview" style="margin-top:16px; padding:12px; background:var(--blue-light); border-radius:8px; display:none;">
-            <div style="font-size:11px; color:var(--blue); font-weight:600; text-transform:uppercase;">Berechneter Wareneinsatz</div>
-            <div style="font-size:18px; font-weight:700; color:var(--blue);" id="builder-calc-total">0,00 €</div>
-        </div>
-        
     </div>
-    <div class="modal-footer"><button onclick="closeModal('builder-modal')">Abbrechen</button><button class="btn-primary" onclick="saveBuilder()">Speichern</button></div>
-</div>
 </div>
 
 <div class="modal-overlay" id="kontakt-modal">
-<div class="modal">
-    <div class="modal-title">Kontakt bearbeiten</div>
-    <div class="modal-body">
-        <div class="form-grid">
-            <div class="form-group"><label>Voller Name</label><input id="kt-name"></div>
-            <div class="form-group"><label>Firma / Zusatz</label><input id="kt-firma"></div>
-            <div class="form-group"><label>Telefonnummer</label><input type="tel" id="kt-tel"></div>
-            <div class="form-group"><label>E-Mail Adresse</label><input type="email" id="kt-email"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Postalische Adresse</label><input id="kt-adresse"></div>
+    <div class="modal">
+        <div class="modal-title">Kontakt bearbeiten</div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Voller Name</label>
+                    <input id="kt-name">
+                </div>
+                <div class="form-group">
+                    <label>Firma / Zusatz</label>
+                    <input id="kt-firma">
+                </div>
+                <div class="form-group">
+                    <label>Telefonnummer</label>
+                    <input type="tel" id="kt-tel">
+                </div>
+                <div class="form-group">
+                    <label>E-Mail Adresse</label>
+                    <input type="email" id="kt-email">
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Postalische Adresse</label>
+                    <input id="kt-adresse">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('kontakt-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveKontakt()">Speichern</button>
         </div>
     </div>
-    <div class="modal-footer"><button onclick="closeModal('kontakt-modal')">Abbrechen</button><button class="btn-primary" onclick="saveKontakt()">Speichern</button></div>
-</div>
 </div>
 
-<div class="modal-overlay" id="detail-modal"><div class="modal" id="detail-content"></div></div>
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal" id="detail-content"></div>
+</div>
 
 <div class="modal-overlay" id="ranking-modal">
-<div class="modal">
-    <div class="modal-title">Putz-Ranking Historie</div>
-    <div class="modal-body" id="ranking-content"></div>
-    <div class="modal-footer"><button class="btn-primary" onclick="closeModal('ranking-modal')">Schließen</button></div>
-</div>
+    <div class="modal">
+        <div class="modal-title">Putz-Ranking Historie</div>
+        <div class="modal-body" id="ranking-content"></div>
+        <div class="modal-footer">
+            <button class="btn-primary" onclick="closeModal('ranking-modal')">Schließen</button>
+        </div>
+    </div>
 </div>
 
 <div class="toast-wrap" id="toast-wrap"></div>
@@ -601,32 +1291,38 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
 // ============================================================================
 // FIREBASE CONFIG & GLOBAL STATE
 // ============================================================================
-const firebaseConfig={apiKey:"AIzaSyDdtoBbNee-dLRjr6YEEhzxM6GCmVE6wTs",authDomain:"heitmannspizza-dashboard.firebaseapp.com",databaseURL:"https://heitmannspizza-dashboard-default-rtdb.europe-west1.firebasedatabase.app",projectId:"heitmannspizza-dashboard"};
+const firebaseConfig = {
+    apiKey: "AIzaSyDdtoBbNee-dLRjr6YEEhzxM6GCmVE6wTs",
+    authDomain: "heitmannspizza-dashboard.firebaseapp.com",
+    databaseURL: "https://heitmannspizza-dashboard-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "heitmannspizza-dashboard"
+};
 firebase.initializeApp(firebaseConfig); 
 const db = firebase.database();
 const auth = firebase.auth();
 
 let state = {
-    role:'staff', 
-    events:[], 
-    kontakte:[], 
-    einkauf:[], 
-    recipes:[], 
-    pizzas:[], 
-    ingredients:[], 
-    users:[], 
-    timesheets:[],
-    cateringDefaults:{}, 
-    cateringScenarios:[], 
-    calYear:new Date().getFullYear(), 
-    calMonth:new Date().getMonth(), 
-    editEventId:null, 
-    editKontaktId:null, 
-    editTimesheetId:null,
-    pinnwand:''
+    role: 'staff', 
+    events: [], 
+    kontakte: [], 
+    einkauf: [], 
+    recipes: [], 
+    pizzas: [], 
+    ingredients: [], 
+    users: [], 
+    timesheets: [],
+    cateringDefaults: {}, 
+    cateringScenarios: [], 
+    calYear: new Date().getFullYear(), 
+    calMonth: new Date().getMonth(), 
+    editEventId: null, 
+    editKontaktId: null, 
+    editTimesheetId: null,
+    pinnwand: ''
 };
 
-let pizzaMengen = {}, dipMengen = {aioli:0, hothoney:0};
+let pizzaMengen = {};
+let dipMengen = { aioli: 0, hothoney: 0 };
 
 // Builder State
 let builderType = ''; 
@@ -636,46 +1332,73 @@ let builderItems = [];
 // Avail Modal State
 let currentAvailEventId = null;
 
-const colorMap = {'Catering':'tag-Catering', 'Event':'tag-Event', 'Meeting':'tag-Meeting', 'Preppen':'tag-Preppen', 'Einkaufen':'tag-Einkaufen', 'SocialMedia':'tag-SocialMedia'};
+const colorMap = {
+    'Catering': 'tag-Catering', 
+    'Event': 'tag-Event', 
+    'Meeting': 'tag-Meeting', 
+    'Preppen': 'tag-Preppen', 
+    'Einkaufen': 'tag-Einkaufen', 
+    'SocialMedia': 'tag-SocialMedia'
+};
 
 // ============================================================================
 // CORE UTILITIES
 // ============================================================================
 const $ = id => document.getElementById(id);
 
-function showToast(m){
-    const w=$('toast-wrap'), t=document.createElement('div');
-    t.className='toast show'; t.textContent=m;
-    w.appendChild(t); setTimeout(()=>t.remove(), 2500);
+function showToast(message) {
+    const wrap = $('toast-wrap');
+    const toast = document.createElement('div');
+    toast.className = 'toast show'; 
+    toast.textContent = message;
+    wrap.appendChild(toast); 
+    setTimeout(() => toast.remove(), 2500);
 }
 
-function openModal(id){$(id).classList.add('open');}
-function closeModal(id){$(id).classList.remove('open');}
+function openModal(id) {
+    $(id).classList.add('open');
+}
 
-function switchSettingsTab(id, btn){
-    document.querySelectorAll('.settings-tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));
+function closeModal(id) {
+    $(id).classList.remove('open');
+}
+
+function switchSettingsTab(id, btn) {
+    document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    $('panel-'+id).classList.add('active');
+    $('panel-' + id).classList.add('active');
 }
 
-function navTo(id, btn){
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.querySelectorAll('.nav-item, .mobile-bottom-nav button').forEach(n=>n.classList.remove('active'));
-    $('page-'+id).classList.add('active');
-    if(btn) btn.classList.add('active');
+function navTo(id, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item, .mobile-bottom-nav button').forEach(n => n.classList.remove('active'));
+    $('page-' + id).classList.add('active');
+    if (btn) btn.classList.add('active');
 }
 
-function fmt(n){return Number(n).toLocaleString('de-DE',{style:'currency',currency:'EUR'});}
-function fmtKG(g){return (g/1000).toLocaleString('de-DE',{minimumFractionDigits:3,maximumFractionDigits:3})+' kg';}
-function statusBadge(s){
-    const m = {Secured:'badge-green', 'Pending...':'badge-amber'};
-    return `<span class="badge ${m[s]||'badge-blue'}">${s}</span>`;
+function fmt(n) {
+    return Number(n).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+}
+
+function fmtKG(g) {
+    return (g / 1000).toLocaleString('de-DE', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + ' kg';
+}
+
+function statusBadge(s) {
+    const m = { Secured: 'badge-green', 'Pending...': 'badge-amber' };
+    return `<span class="badge ${m[s] || 'badge-blue'}">${s}</span>`;
 }
 
 function confirmAction(type, url) {
-    const msgs = { tel: "Möchtest du diese Nummer wirklich anrufen?", mail: "Möchtest du eine E-Mail verfassen?", map: "Möchtest du die Adresse in Google Maps öffnen?" };
-    if(confirm(msgs[type])) window.open(url, type==='map'?'_blank':'_self');
+    const msgs = { 
+        tel: "Möchtest du diese Nummer wirklich anrufen?", 
+        mail: "Möchtest du eine E-Mail verfassen?", 
+        map: "Möchtest du die Adresse in Google Maps öffnen?" 
+    };
+    if (confirm(msgs[type])) {
+        window.open(url, type === 'map' ? '_blank' : '_self');
+    }
 }
 
 function calculateHours(startStr, endStr) {
@@ -683,101 +1406,119 @@ function calculateHours(startStr, endStr) {
     const [startH, startM] = startStr.split(':').map(Number);
     const [endH, endM] = endStr.split(':').map(Number);
     
-    let startDate = new Date(); startDate.setHours(startH, startM, 0);
-    let endDate = new Date(); endDate.setHours(endH, endM, 0);
-    if(endDate < startDate) endDate.setDate(endDate.getDate() + 1);
+    let startDate = new Date(); 
+    startDate.setHours(startH, startM, 0);
+    
+    let endDate = new Date(); 
+    endDate.setHours(endH, endM, 0);
+    
+    if (endDate < startDate) {
+        endDate.setDate(endDate.getDate() + 1);
+    }
     
     return (endDate - startDate) / (1000 * 60 * 60);
 }
 
-function getIngredient(id){ return (state.ingredients||[]).find(i=>i.id===id); }
+function getIngredient(id) {
+    return (state.ingredients || []).find(i => i.id === id);
+}
 
 // ============================================================================
 // AUTHENTICATION
 // ============================================================================
 auth.onAuthStateChanged(u => {
-  if(u){
-    $('login-screen').style.display = 'none';
-    $('main-app').style.display = 'flex';
-    
-    db.ref('users/'+u.uid).on('value', snap => {
-        const user = snap.val();
-        if(!user) { 
-            db.ref('users/'+u.uid).set({email: u.email, role: 'staff', cleaningPoints: 0, wage: 14}); 
-            return; 
-        }
+    if (u) {
+        $('login-screen').style.display = 'none';
+        $('main-app').style.display = 'flex';
         
-        // Name Enforcement
-        if(!user.name || user.name.trim() === '') {
-            let n = prompt("Zwingend erforderlich: Bitte gib deinen Vor- und Nachnamen ein:");
-            while(!n || n.trim() === '') {
-                n = prompt("Der Name darf nicht leer sein. Bitte Vor- und Nachname eingeben:");
+        db.ref('users/' + u.uid).on('value', snap => {
+            const user = snap.val();
+            if (!user) { 
+                db.ref('users/' + u.uid).set({ email: u.email, role: 'staff', cleaningPoints: 0, wage: 14 }); 
+                return; 
             }
-            db.ref(`users/${u.uid}/name`).set(n);
-            user.name = n;
-        }
+            
+            // Name Enforcement
+            if (!user.name || user.name.trim() === '') {
+                let n = prompt("Zwingend erforderlich: Bitte gib deinen Vor- und Nachnamen ein:");
+                while (!n || n.trim() === '') {
+                    n = prompt("Der Name darf nicht leer sein. Bitte Vor- und Nachname eingeben:");
+                }
+                db.ref(`users/${u.uid}/name`).set(n);
+                user.name = n;
+            }
 
-        state.role = user.role;
-        document.body.setAttribute('data-role', state.role);
-        $('dash-greeting').textContent = `Willkommen, ${user.name.split(' ')[0]}!`;
-        listenAll();
-    });
-  } else {
-    $('login-screen').style.display = 'flex';
-    $('main-app').style.display = 'none';
-  }
+            state.role = user.role;
+            document.body.setAttribute('data-role', state.role);
+            $('dash-greeting').textContent = `Willkommen, ${user.name.split(' ')[0]}!`;
+            listenAll();
+        });
+    } else {
+        $('login-screen').style.display = 'flex';
+        $('main-app').style.display = 'none';
+    }
 });
 
-function doLogin(){
-  const e=$('login-email').value, p=$('login-pass').value;
-  if(!e || p.length !== 4) return alert("Bitte gültige E-Mail und 4-stellige PIN eingeben!");
-  const pw = p + "-hp26";
-  auth.signInWithEmailAndPassword(e, pw).catch(err => {
-    if(err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found'){
-        auth.createUserWithEmailAndPassword(e, pw);
-    } else alert(err.message);
-  });
+function doLogin() {
+    const e = $('login-email').value;
+    const p = $('login-pass').value;
+    
+    if (!e || p.length !== 4) {
+        return alert("Bitte gültige E-Mail und 4-stellige PIN eingeben!");
+    }
+    
+    const pw = p + "-hp26";
+    auth.signInWithEmailAndPassword(e, pw).catch(err => {
+        if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+            auth.createUserWithEmailAndPassword(e, pw);
+        } else {
+            alert(err.message);
+        }
+    });
 }
 
 // ============================================================================
 // DATA SYNC
 // ============================================================================
-function listenAll(){
+function listenAll() {
     db.ref('/').on('value', snap => {
         const d = snap.val() || {};
-        state.ingredients = Object.values(d.ingredients||{}).filter(i=>i && i.id);
-        state.recipes = Object.values(d.recipes||{}).filter(r=>r && r.id);
-        state.pizzas = Object.values(d.pizzas||{}).filter(p=>p && p.id);
         
-        state.events = Object.values(d.events||{})
+        state.ingredients = Object.values(d.ingredients || {}).filter(i => i && i.id);
+        state.recipes = Object.values(d.recipes || {}).filter(r => r && r.id);
+        state.pizzas = Object.values(d.pizzas || {}).filter(p => p && p.id);
+        
+        state.events = Object.values(d.events || {})
             .filter(ev => ev && ev.id)
-            .sort((a,b)=>a.date > b.date ? 1 : -1)
+            .sort((a, b) => a.date > b.date ? 1 : -1)
             .map(ev => Object.assign({}, ev, {
                 endDate: ev.endDate || ev.date,
-                assignedCrew: ev.assignedCrew||[], 
-                availUIDs: ev.availUIDs||[], 
-                unavailUIDs: ev.unavailUIDs||[],
-                availDetails: ev.availDetails||{}
+                assignedCrew: ev.assignedCrew || [], 
+                availUIDs: ev.availUIDs || [], 
+                unavailUIDs: ev.unavailUIDs || [],
+                availDetails: ev.availDetails || {}
             }));
         
-        state.kontakte = Object.values(d.kontakte||{}).filter(k => k && k.id);
-        state.einkauf = Object.values(d.einkauf||{}).filter(e => e && e.id);
-        state.timesheets = Object.values(d.timesheets||{}).filter(t => t && t.id);
+        state.kontakte = Object.values(d.kontakte || {}).filter(k => k && k.id);
+        state.einkauf = Object.values(d.einkauf || {}).filter(e => e && e.id);
+        state.timesheets = Object.values(d.timesheets || {}).filter(t => t && t.id);
         
-        const usersObj = d.users||{};
-        state.users = Object.keys(usersObj).map(uid => ({uid, ...usersObj[uid]}));
+        const usersObj = d.users || {};
+        state.users = Object.keys(usersObj).map(uid => ({ uid, ...usersObj[uid] }));
 
-        state.cateringDefaults = d.cateringDefaults || {gas:10, entsorgung:15, miete:45, kmsatz:0.8, waren:3.5, ust:1.19};
-        state.cateringScenarios = d.cateringScenarios || [{min:30,max:49,label:'Klein',stunden:35,marge:0.5}];
+        state.cateringDefaults = d.cateringDefaults || { gas: 10, entsorgung: 15, miete: 45, kmsatz: 0.8, waren: 3.5, ust: 1.19 };
+        state.cateringScenarios = d.cateringScenarios || [{ min: 30, max: 49, label: 'Klein', stunden: 35, marge: 0.5 }];
         
         state.pinnwand = d.pinnwand || '';
-        if($('pinnwand') && document.activeElement !== $('pinnwand')) $('pinnwand').value = state.pinnwand;
+        if ($('pinnwand') && document.activeElement !== $('pinnwand')) {
+            $('pinnwand').value = state.pinnwand;
+        }
 
         renderAll();
     });
 }
 
-function renderAll(){
+function renderAll() {
     updateDashboard();
     renderCalendar();
     renderEventList();
@@ -785,31 +1526,34 @@ function renderAll(){
     renderPizzaGrid();
     renderEinkauf();
     renderKontakte();
-    if(state.role === 'superadmin') renderSettings();
+    if (state.role === 'superadmin') {
+        renderSettings();
+    }
 }
 
 // ============================================================================
 // DASHBOARD
 // ============================================================================
-function updateDashboard(){
-    $('today-date').textContent = new Date().toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long'});
+function updateDashboard() {
+    $('today-date').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
     
     const u = auth.currentUser;
-    if(u){
-        const myData = state.users.find(x=>x.uid===u.uid);
+    if (u) {
+        const myData = state.users.find(x => x.uid === u.uid);
         const msgs = myData?.notifications || [];
         $('dash-mailbox').innerHTML = msgs.length ? 
-            msgs.reverse().map(m => `<div class="mailbox-item unread">${m}</div>`).join('') : "Keine ungelesenen Nachrichten.";
+            msgs.reverse().map(m => `<div class="mailbox-item unread">${m}</div>`).join('') : 
+            "Keine ungelesenen Nachrichten.";
     }
 
-    if(state.role !== 'staff'){
-        const admins = state.users.filter(x=>x.role!=='staff').sort((a,b)=>(a.cleaningPoints||0)-(b.cleaningPoints||0));
-        if(admins.length > 0) {
-            $('cleaning-ranking-preview').innerHTML = `<div style="color:var(--red); font-weight:700;">Als nächstes dran: ${admins[0].name} (${admins[0].cleaningPoints||0} Pkt)</div>`;
+    if (state.role !== 'staff') {
+        const admins = state.users.filter(x => x.role !== 'staff').sort((a, b) => (a.cleaningPoints || 0) - (b.cleaningPoints || 0));
+        if (admins.length > 0) {
+            $('cleaning-ranking-preview').innerHTML = `<div style="color:var(--red); font-weight:700;">Als nächstes dran: ${admins[0].name} (${admins[0].cleaningPoints || 0} Pkt)</div>`;
             $('ranking-content').innerHTML = admins.map(a => `
                 <div class="cleaning-rank-item">
                     <span>${a.name}</span>
-                    <b>${a.cleaningPoints||0} Punkte</b>
+                    <b>${a.cleaningPoints || 0} Punkte</b>
                 </div>
             `).join('');
         }
@@ -817,46 +1561,56 @@ function updateDashboard(){
 
     const next = state.events.filter(e => {
         const checkDate = e.endDate || e.date;
-        return new Date(checkDate) >= new Date().setHours(0,0,0,0);
-    }).slice(0,4);
+        return new Date(checkDate) >= new Date().setHours(0, 0, 0, 0);
+    }).slice(0, 4);
     
     $('dash-events').innerHTML = next.map(e => `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer;" onclick="showEventDetail('${e.id}')">
             <div>
                 <b style="font-size:14px;">${e.title}</b><br>
-                <div style="color:var(--muted); font-size:12px; margin-top:2px;">${e.date}${e.endDate && e.endDate!==e.date ? ' - '+e.endDate : ''} · ${e.type}</div>
+                <div style="color:var(--muted); font-size:12px; margin-top:2px;">${e.date}${e.endDate && e.endDate !== e.date ? ' - ' + e.endDate : ''} · ${e.type}</div>
             </div>
             ${statusBadge(e.status)}
         </div>
     `).join('');
 }
 
-function clearNotifications(){
-    if(auth.currentUser) {
+function clearNotifications() {
+    if (auth.currentUser) {
         db.ref(`users/${auth.currentUser.uid}/notifications`).remove();
         showToast("Postfach geleert");
     }
 }
 
-function savePin(){ db.ref('pinnwand').set($('pinnwand').value); }
-function openRankingModal() { openModal('ranking-modal'); }
+function savePin() { 
+    db.ref('pinnwand').set($('pinnwand').value); 
+}
+
+function openRankingModal() { 
+    openModal('ranking-modal'); 
+}
 
 // ============================================================================
 // KALENDER
 // ============================================================================
-function renderCalendar(){
-    const y=state.calYear, m=state.calMonth;
-    $('cal-title').textContent = new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric'}).format(new Date(y,m));
-    const firstDay = (new Date(y,m,1).getDay() + 6) % 7;
-    const daysInMonth = new Date(y,m+1,0).getDate();
+function renderCalendar() {
+    const y = state.calYear;
+    const m = state.calMonth;
     
-    $('cal-headers').innerHTML = ['Mo','Di','Mi','Do','Fr','Sa','So'].map(d=>`<div class="cal-header-cell">${d}</div>`).join('');
+    $('cal-title').textContent = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' }).format(new Date(y, m));
+    
+    const firstDay = (new Date(y, m, 1).getDay() + 6) % 7;
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    
+    $('cal-headers').innerHTML = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(d => `<div class="cal-header-cell">${d}</div>`).join('');
     
     let html = '';
-    for(let i=0; i<firstDay; i++) html += '<div></div>';
+    for (let i = 0; i < firstDay; i++) {
+        html += '<div></div>';
+    }
     
-    for(let d=1; d<=daysInMonth; d++){
-        const curDate = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    for (let d = 1; d <= daysInMonth; d++) {
+        const curDate = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         
         // Multi-day logic
         const evs = state.events.filter(e => {
@@ -865,14 +1619,14 @@ function renderCalendar(){
             return curDate >= s && curDate <= en;
         });
         
-        const visibleEvs = state.role === 'staff' ? evs.filter(e => ['Catering','Event'].includes(e.type)) : evs;
+        const visibleEvs = state.role === 'staff' ? evs.filter(e => ['Catering', 'Event'].includes(e.type)) : evs;
         const isToday = new Date().toISOString().split('T')[0] === curDate;
         
         html += `
-            <div class="cal-day ${isToday ? 'today' : ''}" onclick="state.role!=='staff'?openEventModal(null,'${curDate}'):''">
-                <span style="color:${isToday?'var(--blue)':'inherit'}">${d}</span>
+            <div class="cal-day ${isToday ? 'today' : ''}" onclick="openDayEventsModal('${curDate}')">
+                <span style="color:${isToday ? 'var(--blue)' : 'inherit'}">${d}</span>
                 <div style="display:flex; flex-direction:column; gap:2px; margin-top:4px;">
-                ${visibleEvs.map(e => `<div class="cal-tag ${colorMap[e.type]||'tag-Event'}">${e.title}</div>`).join('')}
+                ${visibleEvs.map(e => `<div class="cal-tag ${colorMap[e.type] || 'tag-Event'}">${e.title}</div>`).join('')}
                 </div>
             </div>
         `;
@@ -880,29 +1634,82 @@ function renderCalendar(){
     $('cal-body').innerHTML = html;
 }
 
-function changeMonth(d){ 
+function changeMonth(d) { 
     state.calMonth += d; 
-    if(state.calMonth > 11){ state.calMonth = 0; state.calYear++; } 
-    if(state.calMonth < 0){ state.calMonth = 11; state.calYear--; } 
+    if (state.calMonth > 11) { state.calMonth = 0; state.calYear++; } 
+    if (state.calMonth < 0) { state.calMonth = 11; state.calYear--; } 
     renderCalendar(); 
+}
+
+function openDayEventsModal(dateStr) {
+    const evs = state.events.filter(e => {
+        const s = e.date;
+        const en = e.endDate || e.date;
+        return dateStr >= s && dateStr <= en;
+    });
+    
+    const visibleEvs = state.role === 'staff' ? evs.filter(e => ['Catering', 'Event'].includes(e.type)) : evs;
+    
+    const dispDate = new Date(dateStr).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+    $('day-events-title').textContent = `Termine am ${dispDate}`;
+    
+    let html = '';
+    if (visibleEvs.length === 0) {
+        html = '<div style="color:var(--muted); font-size:14px; padding:16px 0;">Keine Termine an diesem Tag.</div>';
+    } else {
+        html = visibleEvs.map(e => `
+            <div class="list-item" style="cursor:pointer;" onclick="closeModal('day-events-modal'); showEventDetail('${e.id}')">
+                <div style="flex:1;">
+                    <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">${e.type}</div>
+                    <div style="font-size:16px; font-weight:700;">${e.title}</div>
+                </div>
+                ${statusBadge(e.status)}
+            </div>
+        `).join('');
+    }
+    
+    $('day-events-list').innerHTML = html;
+    
+    const addBtn = $('day-events-add-btn');
+    if (addBtn) {
+        addBtn.onclick = () => {
+            closeModal('day-events-modal');
+            openEventModal(null, dateStr);
+        };
+    }
+    
+    openModal('day-events-modal');
 }
 
 // ============================================================================
 // EVENTS & STAFFING (GRID)
 // ============================================================================
-function renderEventList(){
+function renderEventList() {
     const c = $('all-events-list');
-    const filtered = state.role === 'staff' ? state.events.filter(e => ['Catering','Event'].includes(e.type)) : state.events;
+    const filtered = state.role === 'staff' ? state.events.filter(e => ['Catering', 'Event'].includes(e.type)) : state.events;
     
     c.innerHTML = filtered.map(e => {
         const uid = auth.currentUser.uid;
         const isAvail = e.availUIDs.includes(uid);
         const isUnavail = e.unavailUIDs.includes(uid);
         
+        const isPastEvent = new Date().toISOString().split('T')[0] >= e.date;
+        const loggedHours = (e.loggedHours || {})[uid] || '';
+        
+        let timeEntryHtml = '';
+        if (e.status === 'Secured' && isPastEvent) {
+            timeEntryHtml = `
+                <div style="margin-left:auto; display:flex; align-items:center; gap:8px; background:#f8fafc; padding:4px 8px; border-radius:8px;">
+                    <input type="number" id="hours-${e.id}" placeholder="Std." style="width:60px; padding:6px; border:none; background:#fff;" value="${loggedHours}">
+                    <button class="btn-sm btn-primary" onclick="logHours('${e.id}')">Speichern</button>
+                </div>
+            `;
+        }
+
         return `
             <div class="event-card">
                 <div class="event-card-header" onclick="showEventDetail('${e.id}')">
-                    <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">${e.type} · ${e.date}${e.endDate && e.endDate!==e.date ? ' bis '+e.endDate : ''}</div>
+                    <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">${e.type} · ${e.date}${e.endDate && e.endDate !== e.date ? ' bis ' + e.endDate : ''}</div>
                     ${statusBadge(e.status)}
                 </div>
                 <div class="event-card-body" onclick="showEventDetail('${e.id}')">
@@ -912,6 +1719,7 @@ function renderEventList(){
                 <div class="event-card-footer">
                     <button class="btn-sm ${isAvail ? 'btn-green' : ''}" onclick="toggleAvail('${e.id}', true)">${isAvail ? '✅ Zugesagt' : '🙋‍♂️ Habe Zeit'}</button>
                     <button class="btn-sm ${isUnavail ? 'btn-danger' : ''}" onclick="toggleAvail('${e.id}', false)">${isUnavail ? '❌ Abgesagt' : '🚫 Keine Zeit'}</button>
+                    ${timeEntryHtml}
                 </div>
             </div>
         `;
@@ -932,11 +1740,13 @@ function toggleAvail(eid, isAvailable) {
         if (daysDiff > 0) {
             currentAvailEventId = eid;
             let html = '';
-            for(let i=0; i<=daysDiff; i++) {
-                let d = new Date(start); d.setDate(d.getDate() + i);
+            for (let i = 0; i <= daysDiff; i++) {
+                let d = new Date(start); 
+                d.setDate(d.getDate() + i);
                 let dStr = d.toISOString().split('T')[0];
-                let dDisp = d.toLocaleDateString('de-DE', {weekday:'short', day:'2-digit', month:'2-digit'});
+                let dDisp = d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
                 let isChecked = (ev.availDetails && ev.availDetails[uid] && ev.availDetails[uid].includes(dStr)) ? 'checked' : '';
+                
                 html += `<label style="display:flex; align-items:center; gap:12px; padding:12px; border-bottom:1px solid #f1f5f9; cursor:pointer;">
                             <input type="checkbox" class="avail-cb" value="${dStr}" ${isChecked} style="width:24px; height:24px;">
                             <span style="font-size:16px;">${dDisp}</span>
@@ -950,21 +1760,27 @@ function toggleAvail(eid, isAvailable) {
 
     // Single day or Unavailable (Direct toggle)
     db.ref(`events/${eid}`).transaction(eData => {
-        if(!eData) return eData;
-        let a = eData.availUIDs || []; let u = eData.unavailUIDs || [];
+        if (!eData) return eData;
+        let a = eData.availUIDs || []; 
+        let u = eData.unavailUIDs || [];
         let details = eData.availDetails || {};
 
         if (isAvailable) {
-            if(!a.includes(uid)) a.push(uid);
-            u = u.filter(x=>x!==uid);
+            if (!a.includes(uid)) a.push(uid);
+            u = u.filter(x => x !== uid);
             details[uid] = [eData.date]; 
         } else {
-            if(u.includes(uid)) u = u.filter(x=>x!==uid); else { u.push(uid); a = a.filter(x=>x!==uid); }
+            if (u.includes(uid)) u = u.filter(x => x !== uid); 
+            else { u.push(uid); a = a.filter(x => x !== uid); }
             delete details[uid]; 
         }
-        eData.availUIDs = a; eData.unavailUIDs = u; eData.availDetails = details;
+        eData.availUIDs = a; 
+        eData.unavailUIDs = u; 
+        eData.availDetails = details;
         return eData;
-    }, (error, comm) => { if(comm) showToast("Verfügbarkeit gespeichert!"); });
+    }, (error, comm) => { 
+        if (comm) showToast("Verfügbarkeit gespeichert!"); 
+    });
 }
 
 function saveAvailDays() {
@@ -973,91 +1789,213 @@ function saveAvailDays() {
     const selectedDays = Array.from(cbs).map(cb => cb.value);
 
     db.ref(`events/${currentAvailEventId}`).transaction(eData => {
-        if(!eData) return eData;
-        let a = eData.availUIDs || []; let u = eData.unavailUIDs || [];
+        if (!eData) return eData;
+        let a = eData.availUIDs || []; 
+        let u = eData.unavailUIDs || [];
         let details = eData.availDetails || {};
 
-        if(selectedDays.length > 0) {
-            if(!a.includes(uid)) a.push(uid);
-            u = u.filter(x=>x!==uid);
+        if (selectedDays.length > 0) {
+            if (!a.includes(uid)) a.push(uid);
+            u = u.filter(x => x !== uid);
             details[uid] = selectedDays;
         } else {
-            if(!u.includes(uid)) u.push(uid);
-            a = a.filter(x=>x!==uid);
+            if (!u.includes(uid)) u.push(uid);
+            a = a.filter(x => x !== uid);
             delete details[uid];
         }
-        eData.availUIDs = a; eData.unavailUIDs = u; eData.availDetails = details;
+        eData.availUIDs = a; 
+        eData.unavailUIDs = u; 
+        eData.availDetails = details;
         return eData;
     }, (error, comm) => { 
-        if(comm) {
+        if (comm) {
             showToast("Verfügbarkeit gespeichert!");
             closeModal('avail-modal');
         }
     });
 }
 
-function openEventModal(id, dateStr){
+function toggleEventCrewVisibility() {
+    const evType = $('ev-type').value;
+    const crewContainer = $('ev-crew-container');
+    if (evType === 'Event' || evType === 'Catering') {
+        crewContainer.style.display = 'block';
+    } else {
+        crewContainer.style.display = 'none';
+    }
+
+    const customerContainer = $('ev-customer-group');
+    if (evType === 'Catering') {
+        customerContainer.style.display = 'flex';
+    } else {
+        customerContainer.style.display = 'none';
+    }
+}
+
+function updateEventCrewDisplay(ev) {
+    const crewDiv = $('ev-crew-select');
+    const selectedIds = Array.from(crewDiv.querySelectorAll('.crew-chip')).map(el => el.dataset.uid);
+    
+    crewDiv.innerHTML = selectedIds.map(uid => {
+        const u = state.users.find(user => user.uid === uid);
+        if (!u) return '';
+        
+        let dateStr = '';
+        if (ev && ev.availDetails && ev.availDetails[u.uid]) {
+            const dates = ev.availDetails[u.uid];
+            if (dates.length > 0 && ev.date !== ev.endDate) {
+                const shortDates = dates.map(d => { let p = d.split('-'); return p[2] + '.' + p[1] + '.'; }).join(', ');
+                dateStr = ` (${shortDates})`;
+            }
+        }
+        
+        let hasTime = ev && ev.availUIDs && ev.availUIDs.includes(u.uid);
+        let noTime = ev && ev.unavailUIDs && ev.unavailUIDs.includes(u.uid);
+        let icon = hasTime ? `✅${dateStr}` : (noTime ? '❌' : '');
+
+        return `
+            <div class="badge badge-green crew-chip active" 
+                 style="cursor:pointer; padding:6px 12px; font-size:12px; display:flex; align-items:center; gap:6px;" 
+                 data-uid="${u.uid}" 
+                 onclick="this.remove();">
+                ${u.name} ${icon} <span style="font-weight:bold; margin-left:4px;">×</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function handleCrewDropdownSelect() {
+    const dropdown = $('ev-crew-select-dropdown');
+    const uid = dropdown.value;
+    if (!uid) return;
+    
+    const crewDiv = $('ev-crew-select');
+    const existing = Array.from(crewDiv.querySelectorAll('.crew-chip')).map(el => el.dataset.uid);
+    
+    if (!existing.includes(uid)) {
+        const ev = state.editEventId ? state.events.find(e => e.id === state.editEventId) : null;
+        
+        const u = state.users.find(user => user.uid === uid);
+        let dateStr = '';
+        if (ev && ev.availDetails && ev.availDetails[u.uid]) {
+            const dates = ev.availDetails[u.uid];
+            if (dates.length > 0 && ev.date !== ev.endDate) {
+                const shortDates = dates.map(d => { let p = d.split('-'); return p[2] + '.' + p[1] + '.'; }).join(', ');
+                dateStr = ` (${shortDates})`;
+            }
+        }
+        
+        let hasTime = ev && ev.availUIDs && ev.availUIDs.includes(u.uid);
+        let noTime = ev && ev.unavailUIDs && ev.unavailUIDs.includes(u.uid);
+        let icon = hasTime ? `✅${dateStr}` : (noTime ? '❌' : '');
+
+        const chip = document.createElement('div');
+        chip.className = "badge badge-green crew-chip active";
+        chip.style.cssText = "cursor:pointer; padding:6px 12px; font-size:12px; display:flex; align-items:center; gap:6px;";
+        chip.dataset.uid = u.uid;
+        chip.innerHTML = `${u.name} ${icon} <span style="font-weight:bold; margin-left:4px;">×</span>`;
+        chip.onclick = function() { this.remove(); };
+        
+        crewDiv.appendChild(chip);
+    }
+    
+    dropdown.value = ""; // Reset dropdown
+}
+
+function openEventModal(id, dateStr) {
     state.editEventId = id || null;
     const ev = id ? state.events.find(e => e.id === id) : null;
     
-    const src = Object.assign({title:'', type:'Catering', date:dateStr||'', endDate:dateStr||'', time:'', ort:'', personen:'', status:'Pending...', notizen:''}, ev || {});
+    const src = Object.assign({
+        title: '', 
+        type: 'Catering', 
+        date: dateStr || '', 
+        endDate: dateStr || '', 
+        time: '', 
+        ort: '', 
+        personen: '', 
+        status: 'Pending...', 
+        notizen: '',
+        customerContactId: ''
+    }, ev || {});
     
-    ['title','type','date','endDate','time','ort','personen','status','notizen'].forEach(f => {
-        if($(f==='notizen'?'ev-notizen':'ev-'+f)) $(f==='notizen'?'ev-notizen':'ev-'+f).value = src[f] ?? '';
+    ['title', 'type', 'date', 'endDate', 'time', 'ort', 'personen', 'status', 'notizen'].forEach(f => {
+        if ($(f === 'notizen' ? 'ev-notizen' : 'ev-' + f)) {
+            $(f === 'notizen' ? 'ev-notizen' : 'ev-' + f).value = src[f] ?? '';
+        }
     });
 
-    if(state.role !== 'staff'){
-        $('ev-crew-select').innerHTML = state.users.map(u => {
-            const isAssig = ev && ev.assignedCrew && ev.assignedCrew.includes(u.uid);
-            const hasTime = ev && ev.availUIDs && ev.availUIDs.includes(u.uid);
-            const noTime = ev && ev.unavailUIDs && ev.unavailUIDs.includes(u.uid);
-            
-            let dateStr = '';
-            if(hasTime && ev.availDetails && ev.availDetails[u.uid]) {
-                const dates = ev.availDetails[u.uid];
-                if(dates.length > 0 && ev.date !== ev.endDate) {
-                    const shortDates = dates.map(d => { let p = d.split('-'); return p[2]+'.'+p[1]+'.'; }).join(', ');
-                    dateStr = ` (${shortDates})`;
-                }
-            }
+    // Customer Dropdown
+    let custHtml = '<option value="">-- Keinen Kontakt zugewiesen --</option>';
+    state.kontakte.forEach(k => {
+        custHtml += `<option value="${k.id}" ${k.id === src.customerContactId ? 'selected' : ''}>${k.name} ${k.firma ? '('+k.firma+')' : ''}</option>`;
+    });
+    $('ev-customer-select').innerHTML = custHtml;
 
-            let icon = hasTime ? `✅${dateStr}` : (noTime ? '❌' : '');
-            
-            return `
-                <div class="badge ${isAssig?'badge-green':'badge-blue'} crew-chip ${isAssig?'active':''}" 
-                     style="cursor:pointer; padding:6px 12px; font-size:12px;" 
-                     data-uid="${u.uid}" 
-                     onclick="this.classList.toggle('active'); this.classList.toggle('badge-green'); this.classList.toggle('badge-blue');">
-                    ${u.name} ${icon}
-                </div>
-            `;
+    toggleEventCrewVisibility();
+
+    if (state.role !== 'staff') {
+        const dropdown = $('ev-crew-select-dropdown');
+        dropdown.innerHTML = '<option value="">-- Mitarbeiter hinzufügen --</option>' + state.users.map(u => {
+            let icon = '';
+            if (ev && ev.availUIDs && ev.availUIDs.includes(u.uid)) icon = ' (✅ Zeit)';
+            if (ev && ev.unavailUIDs && ev.unavailUIDs.includes(u.uid)) icon = ' (❌ Keine Zeit)';
+            return `<option value="${u.uid}">${u.name}${icon}</option>`;
         }).join('');
+        
+        dropdown.onchange = handleCrewDropdownSelect;
+        
+        // Render existing crew
+        $('ev-crew-select').innerHTML = '';
+        if (ev && ev.assignedCrew) {
+            ev.assignedCrew.forEach(uid => {
+                const u = state.users.find(user => user.uid === uid);
+                if(u) {
+                    const tempSelect = document.createElement('select');
+                    tempSelect.value = u.uid;
+                    dropdown.value = u.uid;
+                    handleCrewDropdownSelect();
+                }
+            });
+        }
     }
+    
     openModal('event-modal');
 }
 
-function saveEvent(){
+function saveEvent() {
     const id = state.editEventId || 'ev_' + Date.now();
-    const oldEv = state.events.find(x=>x.id===id);
+    const oldEv = state.events.find(x => x.id === id);
     const oldStatus = oldEv?.status;
     const newStatus = $('ev-status').value;
     const crew = Array.from(document.querySelectorAll('.crew-chip.active')).map(el => el.dataset.uid);
     
     const updates = {
-        id, title: $('ev-title').value, type: $('ev-type').value, date: $('ev-date').value,
+        id, 
+        title: $('ev-title').value, 
+        type: $('ev-type').value, 
+        date: $('ev-date').value,
         endDate: $('ev-endDate').value || $('ev-date').value,
-        time: $('ev-time').value, ort: $('ev-ort').value, personen: parseInt($('ev-personen').value)||0,
-        status: newStatus, assignedCrew: crew, notizen: $('ev-notizen').value
+        time: $('ev-time').value, 
+        ort: $('ev-ort').value, 
+        personen: parseInt($('ev-personen').value) || 0,
+        status: newStatus, 
+        assignedCrew: crew, 
+        notizen: $('ev-notizen').value,
+        customerContactId: $('ev-customer-select').value
     };
 
-    if(oldEv) {
+    // Preserve arrays
+    if (oldEv) {
         updates.availUIDs = oldEv.availUIDs || []; 
         updates.unavailUIDs = oldEv.unavailUIDs || [];
         updates.availDetails = oldEv.availDetails || {};
-        if(oldEv.cleaningDoneBy) updates.cleaningDoneBy = oldEv.cleaningDoneBy;
+        if (oldEv.cleaningDoneBy) updates.cleaningDoneBy = oldEv.cleaningDoneBy;
+        if (oldEv.loggedHours) updates.loggedHours = oldEv.loggedHours;
     }
 
-    if(newStatus === 'Secured' && oldStatus !== 'Secured'){
+    // Auto Inbox Messaging
+    if (newStatus === 'Secured' && oldStatus !== 'Secured') {
         crew.forEach(uid => {
             db.ref(`users/${uid}/notifications`).transaction(cur => {
                 let arr = cur || [];
@@ -1067,15 +2005,23 @@ function saveEvent(){
         });
     }
 
-    db.ref('events/'+id).update(updates);
+    db.ref('events/' + id).update(updates);
     closeModal('event-modal');
     showToast('Event erfolgreich gespeichert');
 }
 
-function showEventDetail(id){
-    const ev = state.events.find(e=>e.id===id);
-    if(!ev) return;
+function showEventDetail(id) {
+    const ev = state.events.find(e => e.id === id);
+    if (!ev) return;
     
+    let mapLink = ev.ort ? `<a href="javascript:void(0)" onclick="confirmAction('map', 'http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(ev.ort)}')">📍 ${ev.ort}</a>` : '–';
+    
+    let customerStr = '';
+    if (ev.type === 'Catering' && ev.customerContactId) {
+        const cust = state.kontakte.find(k => k.id === ev.customerContactId);
+        if (cust) customerStr = `<div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Kunde</span><br><b>${cust.name} ${cust.firma ? '('+cust.firma+')' : ''}</b></div>`;
+    }
+
     let html = `
         <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;">
             <div style="font-size:20px;">${ev.title}</div>
@@ -1085,19 +2031,20 @@ function showEventDetail(id){
             <div style="background:#f1f5f9; padding:16px; border-radius:10px; margin-bottom:16px;">
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:14px;">
                     <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Typ</span><br><b>${ev.type}</b></div>
-                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Zeitraum</span><br><b>${ev.date}${ev.endDate && ev.endDate!==ev.date ? ' bis '+ev.endDate : ''} <br>${ev.time||''}</b></div>
-                    <div style="grid-column:span 2;"><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Ort</span><br><b>${ev.ort||'–'}</b></div>
-                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Gäste</span><br><b>${ev.personen||'–'}</b></div>
+                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Zeitraum</span><br><b>${ev.date}${ev.endDate && ev.endDate !== ev.date ? ' bis ' + ev.endDate : ''} <br>${ev.time || ''}</b></div>
+                    <div style="grid-column:span 2;"><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Ort</span><br><b>${mapLink}</b></div>
+                    <div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Gäste</span><br><b>${ev.personen || '–'}</b></div>
+                    ${customerStr}
                 </div>
             </div>
-            ${ev.notizen ? `<div style="padding:16px; border:1px solid var(--border); border-radius:10px; font-size:14px; line-height:1.5; margin-bottom:16px;"><b>Notizen:</b><br>${ev.notizen.replace(/\n/g,'<br>')}</div>` : ''}
+            ${ev.notizen ? `<div style="padding:16px; border:1px solid var(--border); border-radius:10px; font-size:14px; line-height:1.5; margin-bottom:16px;"><b>Notizen:</b><br>${ev.notizen.replace(/\n/g, '<br>')}</div>` : ''}
     `;
 
-    if(state.role !== 'staff' && ev.status === 'Secured') {
-        if(!ev.cleaningDoneBy) {
+    if (state.role !== 'staff' && ev.status === 'Secured') {
+        if (!ev.cleaningDoneBy) {
             html += `<button class="btn-primary" style="width:100%; padding:12px; font-size:15px;" onclick="markCleaningDone('${ev.id}')">Putzdienst für dieses Event übernehmen</button>`;
         } else {
-            const cleaner = state.users.find(u=>u.uid === ev.cleaningDoneBy)?.name || 'Ein Admin';
+            const cleaner = state.users.find(u => u.uid === ev.cleaningDoneBy)?.name || 'Ein Admin';
             html += `<div style="text-align:center; padding:10px; background:var(--green-light); color:var(--green); border-radius:8px; font-weight:600;">Putzdienst wurde erledigt von: ${cleaner}.</div>`;
         }
     }
@@ -1111,46 +2058,55 @@ function showEventDetail(id){
     `;
     
     $('detail-content').innerHTML = html;
-    if(state.role==='staff') document.querySelectorAll('#detail-content .admin-only').forEach(e=>e.style.display='none');
+    if (state.role === 'staff') {
+        document.querySelectorAll('#detail-content .admin-only').forEach(e => e.style.display = 'none');
+    }
     openModal('detail-modal');
 }
 
-function deleteEvent(id){ 
-    db.ref('events/'+id).remove(); 
+function deleteEvent(id) { 
+    db.ref('events/' + id).remove(); 
     closeModal('detail-modal'); 
     showToast('Event gelöscht'); 
 }
 
-function markCleaningDone(eid){
-    const ev = state.events.find(x=>x.id===eid);
+function markCleaningDone(eid) {
+    const ev = state.events.find(x => x.id === eid);
     const pts = ev.personen > 100 ? 3 : (ev.personen > 50 ? 2 : 1);
     const uid = auth.currentUser.uid;
-    db.ref(`users/${uid}/cleaningPoints`).transaction(cur => (cur||0) + pts);
+    db.ref(`users/${uid}/cleaningPoints`).transaction(cur => (cur || 0) + pts);
     db.ref(`events/${eid}/cleaningDoneBy`).set(uid);
     showToast(`${pts} Putz-Punkte gesammelt!`);
     closeModal('detail-modal');
+}
+
+function logHours(eid) {
+    const h = parseFloat($('hours-' + eid).value);
+    if (isNaN(h)) return showToast("Bitte gültige Zahl eingeben!");
+    db.ref(`events/${eid}/loggedHours/${auth.currentUser.uid}`).set(h);
+    showToast("Stunden erfolgreich erfasst!");
 }
 
 // ============================================================================
 // PERSONAL & ZEITEN (TIMESHEETS)
 // ============================================================================
 function renderTimesheets() {
-    if(state.role === 'staff') return;
+    if (state.role === 'staff') return;
 
     let tsListHtml = '<table style="width:100%; min-width:800px; font-size:13px;"><tr><th>Event</th><th>Mitarbeiter</th><th>Datum</th><th>Zeit</th><th>Std</th><th>Lohn</th><th>Aktion</th></tr>';
     
     let eventStats = {};
     let userStats = {};
 
-    state.timesheets.sort((a,b)=>b.date.localeCompare(a.date)).forEach(ts => {
-        const user = state.users.find(u=>u.uid === ts.userId) || {name:'Unbekannt', wage:0};
-        const ev = state.events.find(e=>e.id === ts.eventId) || {title:'Unbekanntes Event'};
+    state.timesheets.sort((a, b) => b.date.localeCompare(a.date)).forEach(ts => {
+        const user = state.users.find(u => u.uid === ts.userId) || { name: 'Unbekannt', wage: 0 };
+        const ev = state.events.find(e => e.id === ts.eventId) || { title: 'Unbekanntes Event' };
         
-        if(!eventStats[ts.eventId]) eventStats[ts.eventId] = {title: ev.title, totalHours: 0, totalCost: 0};
+        if (!eventStats[ts.eventId]) eventStats[ts.eventId] = { title: ev.title, totalHours: 0, totalCost: 0 };
         eventStats[ts.eventId].totalHours += ts.totalHours;
         eventStats[ts.eventId].totalCost += ts.totalCost;
 
-        if(!userStats[ts.userId]) userStats[ts.userId] = {name: user.name, totalHours: 0, totalCost: 0, events: new Set()};
+        if (!userStats[ts.userId]) userStats[ts.userId] = { name: user.name, totalHours: 0, totalCost: 0, events: new Set() };
         userStats[ts.userId].totalHours += ts.totalHours;
         userStats[ts.userId].totalCost += ts.totalCost;
         userStats[ts.userId].events.add(ev.title);
@@ -1160,7 +2116,7 @@ function renderTimesheets() {
             <td>${user.name}</td>
             <td>${ts.date}</td>
             <td>${ts.start} - ${ts.end}</td>
-            <td>${ts.totalHours.toFixed(2)}h ${ts.bonus > 0 ? `(+${ts.bonus}h)`:''}</td>
+            <td>${ts.totalHours.toFixed(2)}h ${ts.bonus > 0 ? `(+${ts.bonus}h)` : ''}</td>
             <td>${fmt(ts.totalCost)}</td>
             <td>
                 <button class="btn-sm" onclick="openTimesheetModal('${ts.id}')">✏️</button>
@@ -1170,31 +2126,31 @@ function renderTimesheets() {
         </tr>`;
     });
     tsListHtml += '</table>';
-    if($('timesheet-list-container')) $('timesheet-list-container').innerHTML = tsListHtml;
+    if ($('timesheet-list-container')) $('timesheet-list-container').innerHTML = tsListHtml;
 
     let evHtml = '<table style="width:100%; min-width:500px;"><tr><th>Event</th><th>Gesamtstunden</th><th>Gesamtkosten</th></tr>';
     Object.values(eventStats).forEach(es => {
         evHtml += `<tr><td><b>${es.title}</b></td><td>${es.totalHours.toFixed(2)}h</td><td><b style="color:var(--red)">${fmt(es.totalCost)}</b></td></tr>`;
     });
     evHtml += '</table>';
-    if($('timesheet-events-container')) $('timesheet-events-container').innerHTML = evHtml;
+    if ($('timesheet-events-container')) $('timesheet-events-container').innerHTML = evHtml;
 
     let usrHtml = '<table style="width:100%; min-width:600px;"><tr><th>Mitarbeiter</th><th>Gesamtstunden</th><th>Gesamtlohn</th><th>Eingesetzt bei</th></tr>';
     Object.values(userStats).forEach(us => {
         usrHtml += `<tr><td><b>${us.name}</b></td><td>${us.totalHours.toFixed(2)}h</td><td><b style="color:var(--green)">${fmt(us.totalCost)}</b></td><td>${Array.from(us.events).join(', ')}</td></tr>`;
     });
     usrHtml += '</table>';
-    if($('timesheet-users-container')) $('timesheet-users-container').innerHTML = usrHtml;
+    if ($('timesheet-users-container')) $('timesheet-users-container').innerHTML = usrHtml;
 }
 
 function openTimesheetModal(id) {
     state.editTimesheetId = id || null;
     const ts = id ? state.timesheets.find(t => t.id === id) : null;
     
-    $('ts-event-id').innerHTML = '<option value="">-- Event wählen --</option>' + state.events.map(e=>`<option value="${e.id}">${e.date} - ${e.title}</option>`).join('');
-    $('ts-user-id').innerHTML = '<option value="">-- Mitarbeiter wählen --</option>' + state.users.map(u=>`<option value="${u.uid}">${u.name}</option>`).join('');
+    $('ts-event-id').innerHTML = '<option value="">-- Event wählen --</option>' + state.events.map(e => `<option value="${e.id}">${e.date} - ${e.title}</option>`).join('');
+    $('ts-user-id').innerHTML = '<option value="">-- Mitarbeiter wählen --</option>' + state.users.map(u => `<option value="${u.uid}">${u.name}</option>`).join('');
 
-    if(ts) {
+    if (ts) {
         $('ts-event-id').value = ts.eventId;
         $('ts-user-id').value = ts.userId;
         $('ts-date').value = ts.date;
@@ -1219,9 +2175,11 @@ function saveTimesheet() {
     const end = $('ts-end').value;
     const bonus = parseFloat($('ts-bonus').value) || 0;
 
-    if(!eventId || !userId || !date || !start || !end) return alert("Bitte alle Pflichtfelder (Event, Mitarbeiter, Datum, Zeiten) ausfüllen!");
+    if (!eventId || !userId || !date || !start || !end) {
+        return alert("Bitte alle Pflichtfelder (Event, Mitarbeiter, Datum, Zeiten) ausfüllen!");
+    }
 
-    const user = state.users.find(u=>u.uid === userId);
+    const user = state.users.find(u => u.uid === userId);
     const wage = user ? (user.wage || 14) : 14;
     
     const workHours = calculateHours(start, end);
@@ -1229,23 +2187,23 @@ function saveTimesheet() {
     const totalCost = totalHours * wage;
 
     const ts = { id, eventId, userId, date, start, end, bonus, workHours, totalHours, wage, totalCost };
-    db.ref('timesheets/'+id).set(ts);
+    db.ref('timesheets/' + id).set(ts);
     closeModal('timesheet-modal');
     showToast("Zeiterfassung gespeichert!");
 }
 
 function deleteTimesheet(id) {
-    if(confirm("Diese Zeiterfassung wirklich löschen?")) {
-        db.ref('timesheets/'+id).remove();
+    if (confirm("Diese Zeiterfassung wirklich löschen?")) {
+        db.ref('timesheets/' + id).remove();
         showToast("Erfassung gelöscht!");
     }
 }
 
 function printReceipt(tsId) {
-    const ts = state.timesheets.find(t=>t.id===tsId);
-    if(!ts) return;
-    const ev = state.events.find(e=>e.id===ts.eventId) || {title:'Unbekannt', type:'-', date:ts.date};
-    const user = state.users.find(u=>u.uid===ts.userId) || {name:'Unbekannt'};
+    const ts = state.timesheets.find(t => t.id === tsId);
+    if (!ts) return;
+    const ev = state.events.find(e => e.id === ts.eventId) || { title: 'Unbekannt', type: '-', date: ts.date };
+    const user = state.users.find(u => u.uid === ts.userId) || { name: 'Unbekannt' };
     
     const html = `
         <html><head><title>Abrechnung - ${user.name}</title>
@@ -1266,7 +2224,7 @@ function printReceipt(tsId) {
         <script>window.print();<\/script>
         </body></html>
     `;
-    const w = window.open('','_blank');
+    const w = window.open('', '_blank');
     w.document.write(html);
     w.document.close();
 }
@@ -1274,15 +2232,15 @@ function printReceipt(tsId) {
 // ============================================================================
 // PIZZA LABOR & DIPS
 // ============================================================================
-function renderPizzaGrid(){
+function renderPizzaGrid() {
     const c = $('pizza-grid');
-    if(!c) return;
+    if (!c) return;
     c.innerHTML = state.pizzas.map(p => `
         <div class="card">
             <div class="card-title">${p.name} <span>${fmt(p.price)}</span></div>
             <div class="pizza-qty">
                 <button onclick="changePizza('${p.name}', -5)">-</button>
-                <input type="number" id="pqty-${p.id}" value="${pizzaMengen[p.name]||0}" readonly>
+                <input type="number" id="pqty-${p.id}" value="${pizzaMengen[p.name] || 0}" readonly>
                 <button onclick="changePizza('${p.name}', 5)">+</button>
             </div>
         </div>
@@ -1290,35 +2248,48 @@ function renderPizzaGrid(){
     renderPizzaResult();
 }
 
-function changePizza(n, d){ pizzaMengen[n] = Math.max(0, (pizzaMengen[n]||0) + d); renderAll(); }
-function changeDip(n, d){ dipMengen[n] = Math.max(0, (dipMengen[n]||0) + d); $('dqty-'+n).value = dipMengen[n]; renderPizzaResult(); }
-function resetPizza(){ pizzaMengen = {}; dipMengen = {aioli:0, hothoney:0}; renderAll(); }
+function changePizza(n, d) { 
+    pizzaMengen[n] = Math.max(0, (pizzaMengen[n] || 0) + d); 
+    renderAll(); 
+}
 
-function calcIngredients(){
-    const raw={};
-    const addG = (k,g) => { raw[k] = (raw[k]||0) + g; };
-    const expand = (rId, qty) => {
-        const r = state.recipes.find(x=>x.id===rId);
-        if(!r) return;
-        const ratio = r.yieldGrams ? (qty/r.yieldGrams) : qty;
-        (r.items||[]).forEach(i => { 
-            if(i.recipeId) expand(i.recipeId, i.grams*ratio); 
-            else if(i.ingredientId) addG(i.ingredientId, i.grams*ratio); 
+function changeDip(n, d) { 
+    dipMengen[n] = Math.max(0, (dipMengen[n] || 0) + d); 
+    $('dqty-' + n).value = dipMengen[n]; 
+    renderPizzaResult(); 
+}
+
+function resetPizza() { 
+    pizzaMengen = {}; 
+    dipMengen = { aioli: 0, hothoney: 0 }; 
+    renderAll(); 
+}
+
+function calcIngredients() {
+    const raw = {};
+    const addGrams = (key, grams) => { raw[key] = (raw[key] || 0) + grams; };
+    const expand = (recipeId, qty) => {
+        const recipe = state.recipes.find(x => x.id === recipeId);
+        if (!recipe) return;
+        const ratio = recipe.yieldGrams ? (qty / recipe.yieldGrams) : qty;
+        (recipe.items || []).forEach(item => { 
+            if (item.recipeId) expand(item.recipeId, item.grams * ratio); 
+            else if (item.ingredientId) addGrams(item.ingredientId, item.grams * ratio); 
         });
     };
 
-    state.pizzas.forEach(p => {
-        const qty = pizzaMengen[p.name]||0;
-        if(qty>0) {
-            (p.items||[]).forEach(i => { 
-                if(i.recipeId) expand(i.recipeId, i.grams*qty); 
-                else if(i.ingredientId) addG(i.ingredientId, i.grams*qty); 
+    state.pizzas.forEach(pizza => {
+        const qty = pizzaMengen[pizza.name] || 0;
+        if (qty > 0) {
+            (pizza.items || []).forEach(item => { 
+                if (item.recipeId) expand(item.recipeId, item.grams * qty); 
+                else if (item.ingredientId) addGrams(item.ingredientId, item.grams * qty); 
             });
         }
     });
     
-    if(dipMengen.aioli>0) expand('rec_aioli', dipMengen.aioli);
-    if(dipMengen.hothoney>0) expand('rec_honey', dipMengen.hothoney);
+    if (dipMengen.aioli > 0) expand('rec_aioli', dipMengen.aioli);
+    if (dipMengen.hothoney > 0) expand('rec_honey', dipMengen.hothoney);
 
     return raw;
 }
@@ -1326,85 +2297,129 @@ function calcIngredients(){
 function renderPizzaResult() {
     const raw = calcIngredients();
     const target = $('ingredient-result');
-    if(!target) return;
+    if (!target) return;
     
-    if(Object.keys(raw).length===0) { target.innerHTML = `<div style="color:var(--muted)">Keine Werte kalkuliert.</div>`; return; }
+    if (Object.keys(raw).length === 0) { 
+        target.innerHTML = `<div style="color:var(--muted)">Keine Werte kalkuliert.</div>`; 
+        return; 
+    }
     
-    const items = []; let gB = 0; let gN = 0;
-    for(const[art, g] of Object.entries(raw)){
-        if(g<0.1) continue;
-        const a = getIngredient(art) || {supplier:'Sonstige', category:'Sonstiges', priceGross:0, priceNet:0};
-        const kg = g/1000; 
-        const costBrutto = kg * (a.priceGross || 0);
-        const costNetto = kg * (a.priceNet || 0);
-        gB += costBrutto; gN += costNetto;
-        items.push({art, g, sup:a.supplier, cat:a.category, costBrutto, costNetto});
+    const items = []; 
+    let grossTotal = 0; 
+    let netTotal = 0;
+    
+    for (const [article, grams] of Object.entries(raw)) {
+        if (grams < 0.1) continue;
+        const ingredient = getIngredient(article) || { supplier: 'Sonstige', category: 'Sonstiges', priceGross: 0, priceNet: 0 };
+        const kg = grams / 1000; 
+        const costBrutto = kg * (ingredient.priceGross || 0);
+        const costNetto = kg * (ingredient.priceNet || 0);
+        grossTotal += costBrutto; 
+        netTotal += costNetto;
+        items.push({ art: article, g: grams, sup: ingredient.supplier, cat: ingredient.category, costBrutto, costNetto });
     }
 
-    const bySup = {}; items.forEach(i=>{if(!bySup[i.sup]) bySup[i.sup]=[]; bySup[i.sup].push(i);});
+    const bySup = {}; 
+    items.forEach(item => {
+        if (!bySup[item.sup]) bySup[item.sup] = []; 
+        bySup[item.sup].push(item);
+    });
     
-    let ht = '';
+    let html = '';
     Object.keys(bySup).sort().forEach(sup => {
-        let sT = 0;
-        let rows = bySup[sup].sort((a,b)=>a.art.localeCompare(b.art)).map(i => {
-            sT += i.costBrutto;
+        let subTotal = 0;
+        let rows = bySup[sup].sort((a, b) => a.art.localeCompare(b.art)).map(item => {
+            subTotal += item.costBrutto;
             return `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9;">
-                <div><b>${i.art}</b><br><span style="font-size:12px;color:var(--muted)">${fmtKG(i.g)}</span></div>
-                <div style="font-weight:600">${i.costBrutto>0?fmt(i.costBrutto):'–'}</div>
+                <div><b>${item.art}</b><br><span style="font-size:12px;color:var(--muted)">${fmtKG(item.g)}</span></div>
+                <div style="font-weight:600">${item.costBrutto > 0 ? fmt(item.costBrutto) : '–'}</div>
             </div>`;
         }).join('');
         
-        ht += `
+        html += `
             <div class="card" style="padding:0; margin-bottom:16px;">
                 <div style="background:#f8fafc; padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; font-weight:700;">
-                    <span>${sup}</span><span>${fmt(sT)}</span>
+                    <span>${sup}</span><span>${fmt(subTotal)}</span>
                 </div>
                 <div style="padding:0 16px;">${rows}</div>
             </div>
         `;
     });
-    ht += `<div style="background:var(--blue-light); color:var(--blue); padding:16px; border-radius:8px; font-size:18px; font-weight:700; text-align:center;">Gesamt Brutto: ${fmt(gB)} <br><span style="font-size:12px; font-weight:normal; color:var(--text);">Netto: ${fmt(gN)}</span></div>`;
-    target.innerHTML = ht;
+    html += `<div style="background:var(--blue-light); color:var(--blue); padding:16px; border-radius:8px; font-size:18px; font-weight:700; text-align:center;">Gesamt Brutto: ${fmt(grossTotal)} <br><span style="font-size:12px; font-weight:normal; color:var(--text);">Netto: ${fmt(netTotal)}</span></div>`;
+    target.innerHTML = html;
 }
 
-function saveToEinkauf(){
+function saveToEinkauf() {
     const raw = calcIngredients();
-    if(Object.keys(raw).length===0) return showToast('Nichts zu speichern.');
+    if (Object.keys(raw).length === 0) return showToast('Nichts zu speichern.');
     
     db.ref('einkauf').transaction(cur => {
-        let arr = Array.isArray(cur)?cur:(cur?Object.values(cur):[]);
-        for(const[art, g] of Object.entries(raw)){
-            const a = getIngredient(art)||{}; const kg = g/1000;
-            const idx = arr.findIndex(e => e.artikel === art);
-            if(idx >= 0) arr[idx].menge = Number((arr[idx].menge + kg).toFixed(3));
-            else arr.push({id: Date.now().toString()+Math.random(), artikel: art, artikelnummer: a.articleNumber||'', lieferant: a.supplier||'Sonstige', kategorie: a.category||'Sonstiges', menge: parseFloat(kg.toFixed(3)), einheit: 'kg', preis: a.priceNet||0, preisBrutto: a.priceGross||0});
+        let arr = Array.isArray(cur) ? cur : (cur ? Object.values(cur) : []);
+        
+        // Remove all previous auto-generated entries
+        arr = arr.filter(e => !e.autoGenerated);
+
+        // Add new auto-generated entries
+        for (const [article, grams] of Object.entries(raw)) {
+            const ingredient = getIngredient(article) || {}; 
+            const kg = grams / 1000;
+            
+            arr.push({
+                id: Date.now().toString() + Math.random(), 
+                artikel: article, 
+                artikelnummer: ingredient.articleNumber || '', 
+                lieferant: ingredient.supplier || 'Sonstige', 
+                kategorie: ingredient.category || 'Sonstiges', 
+                menge: parseFloat(kg.toFixed(3)), 
+                einheit: 'kg', 
+                preis: ingredient.priceNet || 0, 
+                preisBrutto: ingredient.priceGross || 0,
+                autoGenerated: true
+            });
         }
         return arr;
-    }, (err, comm) => { if(comm) showToast('In Einkaufsliste übernommen!'); });
+    }, (error, comm) => { 
+        if (comm) showToast('In Einkaufsliste übernommen!'); 
+    });
 }
 
 // ============================================================================
 // CATERING KALKULATOR
 // ============================================================================
-function calcCatering(){
+function calcCatering() {
     const gaeste = parseFloat($('cat-gaeste').value) || 0;
     const km = parseFloat($('cat-km').value) || 0;
     const rE = $('cat-result-rows');
     const tot = $('cat-brutto-total');
     
-    if(gaeste < 30) {
+    if (gaeste < 30) {
         rE.innerHTML = '<div style="color:var(--red); font-weight:600; padding:10px;">Berechnung erst ab 30 Gästen möglich.</div>';
         tot.textContent = '0,00 €';
         $('cat-marge-display').value = '-';
         return;
     }
 
-    const defs = state.cateringDefaults || {gas:10, entsorgung:15, miete:45, kmsatz:0.8, waren:3.5, ust:1.19};
+    const defs = state.cateringDefaults || { gas: 10, entsorgung: 15, miete: 45, kmsatz: 0.8, waren: 3.5, ust: 1.19 };
     const stundensatz = 14; 
-    const sz = state.cateringScenarios.find(s => gaeste >= s.min && gaeste <= s.max);
     
-    if(!sz){
-        rE.innerHTML = '<div style="color:var(--muted)">Gästezahl außerhalb der festgelegten Staffelung.</div>';
+    // Find matching scenario, or fallback to the largest one available
+    let sz = null;
+    const sortedScenarios = [...state.cateringScenarios].sort((a, b) => a.max - b.max);
+    
+    for (let s of sortedScenarios) {
+        if (gaeste >= s.min && gaeste <= s.max) {
+            sz = s;
+            break;
+        }
+    }
+    
+    // Fallback to highest if exceeding
+    if (!sz && sortedScenarios.length > 0 && gaeste > sortedScenarios[sortedScenarios.length - 1].max) {
+        sz = sortedScenarios[sortedScenarios.length - 1];
+    }
+    
+    if (!sz) {
+        rE.innerHTML = '<div style="color:var(--muted)">Keine Staffelung hinterlegt.</div>';
         return;
     }
 
@@ -1433,55 +2448,73 @@ function calcCatering(){
 // ============================================================================
 // EINKAUFSLISTE
 // ============================================================================
-function renderEinkauf(){
+function renderEinkauf() {
     const c = $('einkauf-kategorien');
-    if(!c) return;
+    if (!c) return;
     
-    if(!state.einkauf.length) { c.innerHTML = '<div class="card" style="color:var(--muted)">Liste ist leer.</div>'; return; }
+    if (!state.einkauf.length) { 
+        c.innerHTML = '<div class="card" style="color:var(--muted)">Liste ist leer.</div>'; 
+        return; 
+    }
     
-    let ht = ''; let gT = 0;
-    const sups = [...new Set(state.einkauf.map(e=>e.lieferant||'Sonstige'))].sort();
+    let html = ''; 
+    let grandTotal = 0;
+    const sups = [...new Set(state.einkauf.map(e => e.lieferant || 'Sonstige'))].sort();
     
     sups.forEach(sup => {
-        let supT = 0;
-        const rows = state.einkauf.filter(e=>e.lieferant===sup).map(e => {
+        let supTotal = 0;
+        const rows = state.einkauf.filter(e => e.lieferant === sup).map(e => {
             const pNetto = e.preis || 0;
             const pBrutto = e.preisBrutto || (pNetto * 1.07); 
             const sumNetto = e.menge * pNetto;
             const sumBrutto = e.menge * pBrutto;
             
-            supT += sumBrutto; gT += sumBrutto;
+            supTotal += sumBrutto; 
+            grandTotal += sumBrutto;
+            
             return `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9; align-items:center;">
-                <div><b>${e.artikel}</b><br><span style="font-size:11px;color:var(--muted)">Art: ${e.artikelnummer||'-'} | ${e.kategorie}</span></div>
+                <div>
+                    <b>${e.artikel}</b> ${e.autoGenerated ? '<span style="color:var(--blue); font-size:10px;">(Auto)</span>' : ''}<br>
+                    <span style="font-size:11px;color:var(--muted)">Art: ${e.artikelnummer || '-'} | ${e.kategorie}</span>
+                </div>
                 <div style="text-align:right;">
-                    <b style="color:var(--blue)">${e.einheit==='kg'?fmtKG(e.menge*1000):e.menge+' '+e.einheit}</b><br>
+                    <b style="color:var(--blue)">${e.einheit === 'kg' ? fmtKG(e.menge * 1000) : e.menge + ' ' + e.einheit}</b><br>
                     <span style="font-size:11px;">Brutto: ${fmt(sumBrutto)} <span style="color:var(--muted)">(Netto: ${fmt(sumNetto)})</span></span>
                 </div>
             </div>`;
         }).join('');
         
-        ht += `<div class="card" style="padding:0; margin-bottom:16px;">
+        html += `<div class="card" style="padding:0; margin-bottom:16px;">
             <div style="background:#f8fafc; padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; font-weight:700;">
-                <span>${sup}</span><span>${fmt(supT)}</span>
+                <span>${sup}</span><span>${fmt(supTotal)}</span>
             </div>
             <div style="padding:0 16px;">${rows}</div>
         </div>`;
     });
     
-    ht += `<div style="background:var(--blue-light); color:var(--blue); padding:16px; border-radius:8px; font-size:18px; font-weight:700; text-align:center;">Gesamtsumme Brutto: ${fmt(gT)}</div>`;
-    c.innerHTML = ht;
+    html += `<div style="background:var(--blue-light); color:var(--blue); padding:16px; border-radius:8px; font-size:18px; font-weight:700; text-align:center;">Gesamtsumme Brutto: ${fmt(grandTotal)}</div>`;
+    c.innerHTML = html;
 }
-function clearEinkauf(){ if(confirm('Möchtest du die Liste wirklich komplett leeren?')) { db.ref('einkauf').set([]); showToast("Liste geleert!"); } }
+
+function clearEinkauf() { 
+    if (confirm('Möchtest du die Liste wirklich komplett leeren?')) { 
+        db.ref('einkauf').set([]); 
+        showToast("Liste geleert!"); 
+    } 
+}
 
 // ============================================================================
-// EINSTELLUNGEN & BUILDER (PIZZEN / REZEPTE)
+// BUILDER (ZUTATEN / REZEPTE / PIZZEN)
 // ============================================================================
-function openIngredientModal(){
-    $('ing-new-name').value = ''; $('ing-new-artnr').value = '';
-    $('ing-new-netto').value = ''; $('ing-new-brutto').value = '';
+function openIngredientModal() {
+    $('ing-new-name').value = ''; 
+    $('ing-new-artnr').value = '';
+    $('ing-new-netto').value = ''; 
+    $('ing-new-brutto').value = '';
     openModal('ingredient-modal');
 }
-function saveNewIngredient(){
+
+function saveNewIngredient() {
     const name = $('ing-new-name').value;
     const artNr = $('ing-new-artnr').value;
     const sup = $('ing-new-sup').value;
@@ -1490,19 +2523,19 @@ function saveNewIngredient(){
     const netto = parseFloat($('ing-new-netto').value);
     const brutto = parseFloat($('ing-new-brutto').value);
 
-    if(!name || !artNr || isNaN(netto) || isNaN(brutto)) {
+    if (!name || !artNr || isNaN(netto) || isNaN(brutto)) {
         return alert("Bitte fülle alle Felder inkl. Preise und Artikelnummer aus!");
     }
 
     const ing = { id: name, name: name, articleNumber: artNr, supplier: sup, category: cat, unit: unit, priceNet: netto, priceGross: brutto, active: true };
-    db.ref('ingredients/'+name).set(ing);
+    db.ref('ingredients/' + name).set(ing);
     closeModal('ingredient-modal');
     showToast('Zutat gespeichert!');
 }
 
 function renderBuilderItems() {
-    let ingOpts = state.ingredients.map(i=>`<option value="ing_${i.id}">${i.name}</option>`).join('');
-    let recOpts = state.recipes.filter(r=>r.id !== builderEditId).map(r=>`<option value="rec_${r.id}">${r.name} (Rezept)</option>`).join('');
+    let ingOpts = state.ingredients.map(i => `<option value="ing_${i.id}">${i.name}</option>`).join('');
+    let recOpts = state.recipes.filter(r => r.id !== builderEditId).map(r => `<option value="rec_${r.id}">${r.name} (Rezept)</option>`).join('');
     
     let html = builderItems.map((item, idx) => `
         <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center; background:#f8fafc; padding:8px; border-radius:8px;">
@@ -1518,42 +2551,48 @@ function renderBuilderItems() {
     
     $('builder-items-container').innerHTML = html;
     const selects = $('builder-items-container').querySelectorAll('select');
-    builderItems.forEach((item, idx) => { if(selects[idx]) selects[idx].value = item.ref; });
+    builderItems.forEach((item, idx) => { 
+        if (selects[idx]) selects[idx].value = item.ref; 
+    });
 }
 
-function addBuilderItemRow() { builderItems.push({ref:'', grams:0}); renderBuilderItems(); }
+function addBuilderItemRow() { 
+    builderItems.push({ ref: '', grams: 0 }); 
+    renderBuilderItems(); 
+}
 
 function calculateBuilderTotal() {
     let totalCost = 0;
     
     const expandCost = (rId, qty) => {
-        const r = state.recipes.find(x=>x.id===rId);
-        if(!r) return 0;
-        const ratio = r.yieldGrams ? (qty/r.yieldGrams) : qty;
+        const r = state.recipes.find(x => x.id === rId);
+        if (!r) return 0;
+        const ratio = r.yieldGrams ? (qty / r.yieldGrams) : qty;
         let c = 0;
-        (r.items||[]).forEach(i => {
-            if(i.recipeId) c += expandCost(i.recipeId, i.grams*ratio);
-            else if(i.ingredientId) {
+        (r.items || []).forEach(i => {
+            if (i.recipeId) {
+                c += expandCost(i.recipeId, i.grams * ratio);
+            } else if (i.ingredientId) {
                 const ing = getIngredient(i.ingredientId);
-                if(ing) c += (i.grams*ratio / 1000) * (ing.priceGross || 0);
+                if (ing) c += (i.grams * ratio / 1000) * (ing.priceGross || 0);
             }
         });
         return c;
     };
 
     builderItems.forEach(b => {
-        if(!b.ref || b.grams <= 0) return;
+        if (!b.ref || b.grams <= 0) return;
         const realId = b.ref.replace(/^(ing_|rec_)/, '');
-        if(b.ref.startsWith('rec_')) {
+        if (b.ref.startsWith('rec_')) {
             totalCost += expandCost(realId, b.grams);
         } else {
             const ing = getIngredient(realId);
-            if(ing) totalCost += (b.grams / 1000) * (ing.priceGross || 0);
+            if (ing) totalCost += (b.grams / 1000) * (ing.priceGross || 0);
         }
     });
 
     const preview = $('builder-calc-preview');
-    if(builderType === 'pizza' && totalCost > 0) {
+    if (builderType === 'pizza' && totalCost > 0) {
         preview.style.display = 'block';
         $('builder-calc-total').textContent = fmt(totalCost);
     } else {
@@ -1562,29 +2601,40 @@ function calculateBuilderTotal() {
 }
 
 function openRecipeModal(id) {
-    builderType = 'recipe'; builderEditId = id || null;
-    const r = id ? state.recipes.find(x=>x.id===id) : null;
+    builderType = 'recipe'; 
+    builderEditId = id || null;
+    const r = id ? state.recipes.find(x => x.id === id) : null;
     
     $('builder-title').textContent = r ? 'Rezept bearbeiten' : 'Neues Rezept';
     $('builder-name').value = r ? r.name : '';
     $('builder-param-label').textContent = 'Ertrag (Yield in Gramm)';
     $('builder-param').value = r ? r.yieldGrams : 100;
     
-    builderItems = (r?.items || []).map(i => ({ grams: i.grams, ref: i.ingredientId ? 'ing_'+i.ingredientId : (i.recipeId ? 'rec_'+i.recipeId : '') }));
+    builderItems = (r?.items || []).map(i => ({ 
+        grams: i.grams, 
+        ref: i.ingredientId ? 'ing_' + i.ingredientId : (i.recipeId ? 'rec_' + i.recipeId : '') 
+    }));
+    
     $('builder-calc-preview').style.display = 'none';
-    renderBuilderItems(); openModal('builder-modal');
+    renderBuilderItems(); 
+    openModal('builder-modal');
 }
 
 function openPizzaModal(id) {
-    builderType = 'pizza'; builderEditId = id || null;
-    const p = id ? state.pizzas.find(x=>x.id===id) : null;
+    builderType = 'pizza'; 
+    builderEditId = id || null;
+    const p = id ? state.pizzas.find(x => x.id === id) : null;
     
     $('builder-title').textContent = p ? 'Pizza bearbeiten' : 'Neue Pizza';
     $('builder-name').value = p ? p.name : '';
     $('builder-param-label').textContent = 'Verkaufspreis (€)';
     $('builder-param').value = p ? p.price : 0;
     
-    builderItems = (p?.items || []).map(i => ({ grams: i.grams, ref: i.ingredientId ? 'ing_'+i.ingredientId : (i.recipeId ? 'rec_'+i.recipeId : '') }));
+    builderItems = (p?.items || []).map(i => ({ 
+        grams: i.grams, 
+        ref: i.ingredientId ? 'ing_' + i.ingredientId : (i.recipeId ? 'rec_' + i.recipeId : '') 
+    }));
+    
     renderBuilderItems(); 
     calculateBuilderTotal();
     openModal('builder-modal');
@@ -1593,53 +2643,64 @@ function openPizzaModal(id) {
 function saveBuilder() {
     const name = $('builder-name').value;
     const param = parseFloat($('builder-param').value) || 0;
-    if(!name) return alert("Bitte Namen eingeben");
+    if (!name) return alert("Bitte Namen eingeben");
 
     const items = builderItems.map(b => {
-        if(!b.ref) return null;
+        if (!b.ref) return null;
         const realId = b.ref.replace(/^(ing_|rec_)/, '');
-        return b.ref.startsWith('rec_') ? {recipeId: realId, grams: b.grams} : {ingredientId: realId, grams: b.grams};
+        return b.ref.startsWith('rec_') ? { recipeId: realId, grams: b.grams } : { ingredientId: realId, grams: b.grams };
     }).filter(Boolean);
 
-    if(builderType === 'recipe') {
+    if (builderType === 'recipe') {
         const id = builderEditId || 'rec_' + Date.now();
-        db.ref('recipes/'+id).set({id, name, yieldGrams: param, items, active:true});
+        db.ref('recipes/' + id).set({ id, name, yieldGrams: param, items, active: true });
     } else {
         const id = builderEditId || 'p_' + Date.now();
-        db.ref('pizzas/'+id).set({id, name, price: param, items, active:true});
+        db.ref('pizzas/' + id).set({ id, name, price: param, items, active: true });
     }
-    closeModal('builder-modal'); showToast("Gespeichert!");
+    
+    closeModal('builder-modal'); 
+    showToast("Gespeichert!");
 }
-
-function deleteRecipe(id) { if(confirm("Rezept wirklich löschen?")) db.ref('recipes/'+id).remove(); }
-function deletePizza(id) { if(confirm("Pizza wirklich löschen?")) db.ref('pizzas/'+id).remove(); }
 
 // ============================================================================
 // KONTAKTE
 // ============================================================================
-function openKontaktModal(){
+function openKontaktModal() {
     state.editKontaktId = null;
-    $('kt-name').value = ''; $('kt-firma').value = '';
-    $('kt-tel').value = ''; $('kt-email').value = ''; $('kt-adresse').value = '';
+    $('kt-name').value = ''; 
+    $('kt-firma').value = '';
+    $('kt-tel').value = ''; 
+    $('kt-email').value = ''; 
+    $('kt-adresse').value = '';
     openModal('kontakt-modal');
 }
-function saveKontakt(){
+
+function saveKontakt() {
     const k = {
         id: state.editKontaktId || Date.now().toString(),
         name: $('kt-name').value || 'Unbekannt',
-        firma: $('kt-firma').value, tel: $('kt-tel').value,
-        email: $('kt-email').value, adresse: $('kt-adresse').value
+        firma: $('kt-firma').value, 
+        tel: $('kt-tel').value,
+        email: $('kt-email').value, 
+        adresse: $('kt-adresse').value
     };
     db.ref(`kontakte/${k.id}`).set(k);
     closeModal('kontakt-modal');
     showToast('Kontakt gespeichert');
 }
-function deleteKontakt(id){ 
-    if(confirm("Diesen Kontakt wirklich löschen?")) { db.ref(`kontakte/${id}`).remove(); showToast('Kontakt gelöscht'); }
+
+function deleteKontakt(id) { 
+    if (confirm("Diesen Kontakt wirklich löschen?")) { 
+        db.ref(`kontakte/${id}`).remove(); 
+        showToast('Kontakt gelöscht'); 
+    }
 }
-function renderKontakte(){
+
+function renderKontakte() {
     const c = $('kontakt-list');
-    if(!c) return;
+    if (!c) return;
+    
     c.innerHTML = state.kontakte.map(k => `
         <div class="list-item" style="flex-wrap:wrap; align-items:center;">
             <div style="flex:1; min-width:200px;">
@@ -1659,23 +2720,23 @@ function renderKontakte(){
 // ============================================================================
 // EINSTELLUNGEN RENDER
 // ============================================================================
-function renderSettings(){
+function renderSettings() {
     // Zutaten-Tabelle
     let h = '<table style="width:100%; font-size:13px;"><tr><th>Zutat</th><th>Lieferant / Art-Nr</th><th>Netto</th><th>Brutto</th></tr>';
-    (state.ingredients||[]).sort((a,b)=>a.name.localeCompare(b.name)).forEach(i => {
+    (state.ingredients || []).sort((a, b) => a.name.localeCompare(b.name)).forEach(i => {
         h += `<tr>
             <td style="max-width:150px; word-wrap:break-word;"><b>${i.name}</b></td>
-            <td>${i.supplier}<br><span style="font-size:10px;color:var(--muted)">Art: ${i.articleNumber||'-'}</span></td>
+            <td>${i.supplier}<br><span style="font-size:10px;color:var(--muted)">Art: ${i.articleNumber || '-'}</span></td>
             <td><input type="number" step="0.01" id="set-ex-${i.id.replace(/\s/g, '_')}" value="${i.priceNet}" style="width:70px; padding:6px;"></td>
             <td><input type="number" step="0.01" id="set-inc-${i.id.replace(/\s/g, '_')}" value="${i.priceGross}" style="width:70px; padding:6px;"></td>
         </tr>`;
     });
     h += '</table>';
-    if($('settings-art-list')) $('settings-art-list').innerHTML = h;
+    if ($('settings-art-list')) $('settings-art-list').innerHTML = h;
 
     // Sub-Rezepte Liste
     let rh = '<table style="width:100%; font-size:13px;"><tr><th>Rezept</th><th>Ertrag (g)</th><th>Aktion</th></tr>';
-    (state.recipes||[]).forEach(r => { 
+    (state.recipes || []).forEach(r => { 
         rh += `<tr>
             <td><b>${r.name}</b></td><td>${r.yieldGrams}g</td>
             <td>
@@ -1685,11 +2746,11 @@ function renderSettings(){
         </tr>`; 
     });
     rh += '</table>';
-    if($('settings-recipes-list')) $('settings-recipes-list').innerHTML = rh;
+    if ($('settings-recipes-list')) $('settings-recipes-list').innerHTML = rh;
 
     // Pizzen Liste
     let ph = '<table style="width:100%; font-size:13px;"><tr><th>Pizza</th><th>Preis</th><th>Aktion</th></tr>';
-    (state.pizzas||[]).forEach(p => { 
+    (state.pizzas || []).forEach(p => { 
         ph += `<tr>
             <td><b>${p.name}</b></td><td>${fmt(p.price)}</td>
             <td>
@@ -1699,46 +2760,50 @@ function renderSettings(){
         </tr>`; 
     });
     ph += '</table>';
-    if($('settings-pizzas-list')) $('settings-pizzas-list').innerHTML = ph;
+    if ($('settings-pizzas-list')) $('settings-pizzas-list').innerHTML = ph;
 
     // Catering Parameters
     const defs = state.cateringDefaults || {};
-    ['gas','entsorgung','miete','kmsatz','waren','ust'].forEach(k => { if($('set-cat-'+k)) $('set-cat-'+k).value = defs[k]||0; });
+    ['gas', 'entsorgung', 'miete', 'kmsatz', 'waren', 'ust'].forEach(k => { 
+        if ($('set-cat-' + k)) $('set-cat-' + k).value = defs[k] || 0; 
+    });
 
     // Team & Wages
     let th = '<table style="width:100%; font-size:13px;"><tr><th>Name</th><th>Rolle</th><th>Lohn (€)</th><th>Aktion</th></tr>';
     state.users.forEach(u => {
         th += `<tr>
-            <td><b>${u.name||u.email}</b><br><span style="font-size:10px;color:var(--muted)">${u.email}</span></td>
+            <td><b>${u.name || u.email}</b><br><span style="font-size:10px;color:var(--muted)">${u.email}</span></td>
             <td>
                 <select id="role-${u.uid}" style="padding:6px;">
-                    <option value="staff" ${u.role==='staff'?'selected':''}>Mitarbeiter</option>
-                    <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option>
-                    <option value="superadmin" ${u.role==='superadmin'?'selected':''}>Superadmin</option>
+                    <option value="staff" ${u.role === 'staff' ? 'selected' : ''}>Mitarbeiter</option>
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                    <option value="superadmin" ${u.role === 'superadmin' ? 'selected' : ''}>Superadmin</option>
                 </select>
             </td>
-            <td><input type="number" id="wage-${u.uid}" value="${u.wage||14}" style="width:70px; padding:6px;"></td>
+            <td><input type="number" id="wage-${u.uid}" value="${u.wage || 14}" style="width:70px; padding:6px;"></td>
             <td><button class="btn-primary btn-sm" onclick="updateUser('${u.uid}')">Speichern</button></td>
         </tr>`;
     });
     th += '</table>';
-    if($('team-list-container')) $('team-list-container').innerHTML = th;
+    if ($('team-list-container')) $('team-list-container').innerHTML = th;
 }
 
-function saveSettingsART(){
-  (state.ingredients||[]).forEach(ing => {
-     let ex = $('set-ex-'+ing.id.replace(/\s/g,'_'));
-     let inc = $('set-inc-'+ing.id.replace(/\s/g,'_'));
-     if(ex) ing.priceNet = parseFloat(ex.value)||0;
-     if(inc) ing.priceGross = parseFloat(inc.value)||0;
-     db.ref(`ingredients/${ing.id}`).update({priceNet: ing.priceNet, priceGross: ing.priceGross});
-  });
-  showToast('Preise aktualisiert!');
+function saveSettingsART() {
+    (state.ingredients || []).forEach(ing => {
+        let ex = $('set-ex-' + ing.id.replace(/\s/g, '_'));
+        let inc = $('set-inc-' + ing.id.replace(/\s/g, '_'));
+        if (ex) ing.priceNet = parseFloat(ex.value) || 0;
+        if (inc) ing.priceGross = parseFloat(inc.value) || 0;
+        db.ref(`ingredients/${ing.id}`).update({ priceNet: ing.priceNet, priceGross: ing.priceGross });
+    });
+    showToast('Preise aktualisiert!');
 }
 
 function saveCateringSettings() {
     const defs = {};
-    ['gas','entsorgung','miete','kmsatz','waren','ust'].forEach(k => { defs[k] = parseFloat($('set-cat-'+k).value)||0; });
+    ['gas', 'entsorgung', 'miete', 'kmsatz', 'waren', 'ust'].forEach(k => { 
+        defs[k] = parseFloat($('set-cat-' + k).value) || 0; 
+    });
     db.ref('cateringDefaults').update(defs);
     showToast('Catering Parameter gespeichert!');
 }
