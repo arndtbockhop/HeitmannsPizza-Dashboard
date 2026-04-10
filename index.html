@@ -1297,19 +1297,25 @@ function enforceRBAC() {
 function initGranularListeners() {
     unsubscribers.push(onValue(ref(db, 'events'), snap => {
         const d = snap.val() || {};
-        state.events = Object.values(d).filter(ev => ev && ev.id)
-            .sort((a, b) => (a.date || '') > (b.date || '') ? 1 : -1)
-            .map(ev => Object.assign({}, ev, {
+        
+        state.events = Object.entries(d)
+            .filter(([key, ev]) => ev !== null && typeof ev === 'object')
+            .map(([key, ev]) => Object.assign({}, ev, {
+                id: key, // <--- Zwingt die App, den echten Firebase-Pfad als ID zu nutzen!
                 endDate: ev.endDate || ev.date,
                 assignedCrew: ev.assignedCrew || [],
                 availUIDs: ev.availUIDs || [],
                 unavailUIDs: ev.unavailUIDs || [],
                 availDetails: ev.availDetails || {}
-            }));
+            }))
+            .sort((a, b) => (a.date || '') > (b.date || '') ? 1 : -1);
+            
         renderEventList();
         renderCalendar();
         updateDashboard();
     }));
+
+    // ... (hier geht es normal weiter mit unsubscribers.push(onValue(ref(db, 'users')...)
 
     unsubscribers.push(onValue(ref(db, 'users'), snap => {
         const d = snap.val() || {};
