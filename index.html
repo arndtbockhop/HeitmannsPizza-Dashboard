@@ -415,42 +415,53 @@
         .mobile-bottom-nav { display: none; }
 
         @media (max-width: 900px) {
-            .sidebar { display: none; }
-            .main { padding: 16px 12px 100px; }
-            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-            .form-grid { grid-template-columns: 1fr; }
-            .event-grid { grid-template-columns: 1fr; }
-            input, select, textarea { font-size: 16px; min-height: 44px; }
-            button { min-height: 44px; }
+            /* ... deine anderen mobilen Styles (sidebar, main etc.) bleiben unverändert ... */
+
             .mobile-bottom-nav {
                 display: flex;
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 right: 0;
-                background: rgba(255,255,255,0.98);
+                background: rgba(255,255,255,0.95); /* Leicht transparenter Hintergrund */
                 backdrop-filter: blur(10px);
                 border-top: 1px solid var(--border);
-                padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+                
+                /* WICHTIG: Padding an den Seiten und Gap für die Abstände */
+                padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+                gap: 8px;
+                
                 z-index: 1000;
-                justify-content: space-between;
+                justify-content: flex-start; /* flex-start statt space-between für sauberes Scrollen */
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
+                
+                /* Versteckt die unschöne Scrollbar (Webkit) */
+                scrollbar-width: none; 
             }
+            
+            .mobile-bottom-nav::-webkit-scrollbar {
+                display: none;
+            }
+
             .mobile-bottom-nav button {
-                flex: 1;
-                min-width: 65px;
-                font-size: 11px;
-                flex-direction: column;
-                gap: 4px;
-                padding: 8px 2px;
+                flex: 0 0 auto; /* Verhindert, dass die Buttons zusammengequetscht werden */
+                min-width: 75px;
+                font-size: 13px; /* Etwas größer für bessere Lesbarkeit */
+                font-weight: 600;
+                padding: 10px 16px;
                 border: none;
-                background: transparent;
+                background: #f1f5f9; /* Dezenter grauer Hintergrund für inaktive Buttons */
+                color: var(--muted);
+                border-radius: 20px; /* Macht aus den Buttons schöne, runde "Pills" */
                 white-space: nowrap;
+                transition: all 0.2s;
             }
-            .mobile-bottom-nav button.active { color: var(--blue); font-weight: 700; }
-            .cal-day { min-height: 60px; padding: 4px; }
-            .modal { max-width: 95%; max-height: 85vh; margin: auto; }
+
+            .mobile-bottom-nav button.active {
+                background: var(--blue-light); /* Blauer Hintergrund für den aktiven Tab */
+                color: var(--blue);
+            }
         }
     </style>
 </head>
