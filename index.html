@@ -612,7 +612,7 @@ const $ = id => document.getElementById(id);
 
 const esc = (str) => {
     if (str === null || str === undefined) return '';
-    return String(str).replace(/[&<>'"`]/g, t => ({'&':'&','<':'<','>':'>',"'":'&#39;','"':'&quot;','`':'&#96;'}[t]));
+    return String(str).replace(/[&<>'"`]/g, t => ({'&':'&','<':'<','>':'>',"'":''','"':'"','`':'`'}[t]));
 };
 const escJs = (str) => String(str || '').replace(/['"\\]/g, '\\$&');
 
@@ -779,7 +779,6 @@ function doLogin() {
     const pw = p + "-hp26";
     signInWithEmailAndPassword(auth, e, pw).catch(err => {
         if (['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password'].includes(err.code)) {
-            // Automatische Account-Erstellung wieder aktiv
             createUserWithEmailAndPassword(auth, e, pw).catch(regErr => {
                 alert("Fehler bei der Anmeldung/Registrierung: " + regErr.message);
             });
@@ -923,13 +922,17 @@ function updateDashboard() {
             : "Keine ungelesenen Nachrichten.";
     }
     if (isAdminRole()) {
-        const admins = state.users.filter(x => x.role !== 'staff')
+        // FIX: Filtere explizit nach Admin oder Superadmin anstatt "!= staff"
+        const admins = state.users.filter(x => x.role === 'admin' || x.role === 'superadmin')
             .sort((a, b) => (b.cleaningPoints || 0) - (a.cleaningPoints || 0));
         const prev = $('cleaning-ranking-preview');
         const cont = $('ranking-content');
-        if (admins.length > 0 && prev) {
-            const next = admins[0];
-            prev.innerHTML = `<div style="color:var(--red); font-weight:700;">Als nächstes dran: ${esc(next.name)} (${Number(next.cleaningPoints) || 0} Pkt)</div>`;
+        
+        if (admins.length > 0) {
+            if (prev) {
+                const next = admins[0];
+                prev.innerHTML = `<div style="color:var(--red); font-weight:700;">Als nächstes dran: ${esc(next.name)} (${Number(next.cleaningPoints) || 0} Pkt)</div>`;
+            }
             if (cont) {
                 const isSuper = state.role === 'superadmin';
                 cont.innerHTML = admins.map(a => `
@@ -942,8 +945,12 @@ function updateDashboard() {
                         </div>
                     </div>`).join('');
             }
+        } else {
+            if (prev) prev.innerHTML = '<div class="muted">Kein Admin-Personal vorhanden.</div>';
+            if (cont) cont.innerHTML = '<div class="muted" style="padding:10px;">Keine Einträge.</div>';
         }
     }
+    
     const todayStr = today();
     const next = state.events.filter(e => (e.endDate || e.date) >= todayStr).slice(0, 4);
     const de = $('dash-events');
@@ -1361,6 +1368,7 @@ function markCleaningDone(eid) {
         .catch(() => showToast('Fehler beim Speichern.', 'error'));
 }
 
+// NEU: Funktionen zum Bearbeiten/Zurücksetzen der Putzpunkte für Superadmins
 function changeCleaningPoints(uid, delta) {
     if (state.role !== 'superadmin') return;
     runTransaction(ref(db, `users/${uid}/cleaningPoints`), cur => Math.max(0, (cur || 0) + delta))
@@ -1369,17 +1377,26 @@ function changeCleaningPoints(uid, delta) {
 
 function resetCleaningRanking() {
     if (state.role !== 'superadmin') return;
-    if (!confirm("Soll das Putz-Ranking für ALLE Mitarbeiter wirklich auf 0 zurückgesetzt werden?")) return;
+    if (!confirm("Soll das Putz-Ranking für ALLE Admins wirklich auf 0 zurückgesetzt werden?")) return;
+    
     const updates = {};
     state.users.forEach(u => {
-        if (u.cleaningPoints !== undefined && u.cleaningPoints !== 0) updates[`users/${u.uid}/cleaningPoints`] = 0;
+        if ((u.role === 'admin' || u.role === 'superadmin') && u.cleaningPoints !== undefined && u.cleaningPoints !== 0) {
+            updates[`users/${u.uid}/cleaningPoints`] = 0;
+        }
     });
-    if (Object.keys(updates).length > 0) dbAction(update(ref(db), updates), 'Putz-Ranking erfolgreich zurückgesetzt!');
-    else { showToast('Ranking ist bereits auf 0.', 'success'); closeModal('ranking-modal'); }
+    
+    if (Object.keys(updates).length > 0) {
+        dbAction(update(ref(db), updates), 'Putz-Ranking erfolgreich zurückgesetzt!');
+    } else {
+        showToast('Ranking ist bereits auf 0.', 'success');
+        closeModal('ranking-modal');
+    }
 }
 
 function logHours(eid) {
-    const startEl = $('ts-start-' + eid), endEl = $('ts-end-' + eid);
+    const startEl = $('ts-start-' + eid);
+    const endEl = $('ts-end-' + eid);
     if (!startEl || !endEl) return;
     const startVal = startEl.value, endVal = endEl.value;
     if (!startVal || !endVal) return showToast("Bitte Start- und Endzeit angeben!", 'error');
@@ -1397,8 +1414,10 @@ function logHours(eid) {
     const ts = {
         id: tsId, eventId: eid, userId: uid, date: ev.date,
         start: startVal, end: endVal, bonus,
-        workHours: Number(h.toFixed(2)), totalHours: Number(totalHours.toFixed(2)),
-        wage: Number(wage), totalCost: Number((totalHours * wage).toFixed(2))
+        workHours: Number(h.toFixed(2)),
+        totalHours: Number(totalHours.toFixed(2)),
+        wage: Number(wage),
+        totalCost: Number((totalHours * wage).toFixed(2))
     };
     dbAction(set(ref(db, 'timesheets/' + tsId), ts), 'Zeiten erfasst!');
 }
@@ -1728,7 +1747,7 @@ function calcCatering() {
 }
 
 // ============================================================================
-// EINKAUFSLISTE 
+// EINKAUFSLISTE
 // ============================================================================
 function renderEinkauf() {
     const c = $('einkauf-kategorien');
@@ -1771,7 +1790,7 @@ function clearEinkauf() {
 }
 
 // ============================================================================
-// KONTAKTE 
+// KONTAKTE
 // ============================================================================
 function openKontaktModal(id) {
     if (id && typeof id === 'object') id = null; 
