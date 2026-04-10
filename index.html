@@ -164,7 +164,7 @@
             <label for="login-pass">4-stellige PIN</label>
             <input id="login-pass" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" placeholder="••••" maxlength="4" />
         </div>
-        <button class="btn-primary" onclick="doLogin()" style="padding: 14px; font-size: 15px; margin-top: 8px;">Einloggen</button>
+        <button class="btn-primary" onclick="doLogin()" style="padding: 14px; font-size: 15px; margin-top: 8px;">Einloggen / Registrieren</button>
         <div style="font-size: 11px; color: var(--muted); text-align: center; line-height: 1.5;">
             Die App legt deinen Account automatisch an, falls er noch nicht existiert.
         </div>
@@ -720,25 +720,16 @@ onAuthStateChanged(auth, u => {
         const unsubUser = onValue(userRef, snap => {
             const user = snap.val();
             if (!user) {
-                set(userRef, { email: u.email, role: 'staff', cleaningPoints: 0, wage: 14 })
+                // Keine nervigen Popups mehr, der Name wird einfach aus der E-Mail abgeleitet
+                const defaultName = u.email.split('@')[0];
+                set(userRef, { email: u.email, name: defaultName, role: 'staff', cleaningPoints: 0, wage: 14 })
                     .catch(() => showToast('Profil konnte nicht angelegt werden.', 'error'));
                 return;
             }
             if (!user.name || user.name.trim() === '') {
-                let attempts = 0;
-                let n = prompt("Bitte gib deinen Vor- und Nachnamen ein:");
-                while ((!n || n.trim() === '') && attempts < 3) {
-                    attempts++;
-                    n = prompt("Der Name darf nicht leer sein. Bitte Vor- und Nachname:");
-                }
-                if (n && n.trim() !== '') {
-                    set(ref(db, `users/${u.uid}/name`), n.trim());
-                    user.name = n.trim();
-                } else {
-                    showToast('Ohne Namen ist keine Nutzung möglich.', 'error');
-                    signOut(auth);
-                    return;
-                }
+                const defaultName = u.email.split('@')[0];
+                set(ref(db, `users/${u.uid}/name`), defaultName);
+                user.name = defaultName;
             }
             state.role = user.role || 'staff';
             state.currentUserName = user.name;
@@ -776,15 +767,20 @@ function doLogin() {
     const e = $('login-email').value.trim();
     const p = $('login-pass').value;
     if (!e || p.length !== 4) return alert("Bitte gültige E-Mail und 4-stellige PIN eingeben!");
+    
     const pw = p + "-hp26";
+    
     signInWithEmailAndPassword(auth, e, pw).catch(err => {
-        if (['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password'].includes(err.code)) {
-            createUserWithEmailAndPassword(auth, e, pw).catch(regErr => {
-                alert("Fehler bei der Anmeldung/Registrierung: " + regErr.message);
-            });
-        } else {
-            alert("Login-Fehler: " + (err.message || err.code));
-        }
+        // Egal welcher Fehler (z.B. user-not-found oder falsches passwort), 
+        // wir versuchen im Hintergrund einfach den Account anzulegen.
+        createUserWithEmailAndPassword(auth, e, pw).catch(regErr => {
+            if (regErr.code === 'auth/email-already-in-use') {
+                // Wenn die E-Mail schon da ist, wissen wir: Die PIN war falsch!
+                alert("Falsche PIN für diesen Account!");
+            } else {
+                alert("Login/Registrierungs-Fehler: " + regErr.message);
+            }
+        });
     });
 }
 
@@ -922,7 +918,6 @@ function updateDashboard() {
             : "Keine ungelesenen Nachrichten.";
     }
     if (isAdminRole()) {
-        // FIX: Filtere explizit nach Admin oder Superadmin anstatt "!= staff"
         const admins = state.users.filter(x => x.role === 'admin' || x.role === 'superadmin')
             .sort((a, b) => (b.cleaningPoints || 0) - (a.cleaningPoints || 0));
         const prev = $('cleaning-ranking-preview');
@@ -1368,7 +1363,7 @@ function markCleaningDone(eid) {
         .catch(() => showToast('Fehler beim Speichern.', 'error'));
 }
 
-// NEU: Funktionen zum Bearbeiten/Zurücksetzen der Putzpunkte für Superadmins
+// Funktionen zum Bearbeiten/Zurücksetzen der Putzpunkte für Superadmins
 function changeCleaningPoints(uid, delta) {
     if (state.role !== 'superadmin') return;
     runTransaction(ref(db, `users/${uid}/cleaningPoints`), cur => Math.max(0, (cur || 0) + delta))
@@ -1395,8 +1390,7 @@ function resetCleaningRanking() {
 }
 
 function logHours(eid) {
-    const startEl = $('ts-start-' + eid);
-    const endEl = $('ts-end-' + eid);
+    const startEl = $('ts-start-' + eid), endEl = $('ts-end-' + eid);
     if (!startEl || !endEl) return;
     const startVal = startEl.value, endVal = endEl.value;
     if (!startVal || !endVal) return showToast("Bitte Start- und Endzeit angeben!", 'error');
@@ -1414,10 +1408,8 @@ function logHours(eid) {
     const ts = {
         id: tsId, eventId: eid, userId: uid, date: ev.date,
         start: startVal, end: endVal, bonus,
-        workHours: Number(h.toFixed(2)),
-        totalHours: Number(totalHours.toFixed(2)),
-        wage: Number(wage),
-        totalCost: Number((totalHours * wage).toFixed(2))
+        workHours: Number(h.toFixed(2)), totalHours: Number(totalHours.toFixed(2)),
+        wage: Number(wage), totalCost: Number((totalHours * wage).toFixed(2))
     };
     dbAction(set(ref(db, 'timesheets/' + tsId), ts), 'Zeiten erfasst!');
 }
