@@ -1,3 +1,595 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heitmanns Pizza</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="HP Logo neu.png">
+    <meta name="theme-color" content="#2563eb">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f8fafc; --card: #fff; --text: #111827; --muted: #6b7280;
+            --border: #e5e7eb; --blue: #2563eb; --blue-light: #eff6ff;
+            --green: #16a34a; --green-light: #f0fdf4; --amber: #d97706;
+            --amber-light: #fffbeb; --red: #dc2626; --red-light: #fef2f2;
+            --purple: #8b5cf6; --pink: #ec4899; --cyan: #06b6d4;
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; overflow-x: hidden; }
+        .app { display: flex; min-height: 100dvh; }
+
+        .sidebar { width: 220px; min-width: 220px; background: var(--card); border-right: 1px solid var(--border); padding: 24px 0; display: flex; flex-direction: column; z-index: 50; }
+        .sidebar-logo { padding: 0 24px 20px; font-size: 18px; font-weight: 700; color: var(--text); border-bottom: 1px solid var(--border); margin-bottom: 12px; letter-spacing: -0.5px; }
+        
+        .nav-item { padding: 12px 24px; cursor: pointer; color: var(--muted); display: flex; align-items: center; gap: 10px; transition: all .2s; border-left: 3px solid transparent; font-size: 14px; font-weight: 500; background: none; border: none; width: 100%; text-align: left; font-family: inherit; }
+        .nav-item:hover { background: #f1f5f9; color: var(--text); }
+        .nav-item.active { background: var(--blue-light); color: var(--blue); border-left-color: var(--blue); }
+
+        .main { flex: 1; padding: 32px; overflow-y: auto; padding-bottom: 120px; }
+        .page { display: none; flex-direction: column; gap: 24px; }
+        .page.active { display: flex; }
+
+        .page-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border); padding-bottom: 16px; flex-wrap: wrap; gap: 16px; }
+        .page-title { font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+        .page-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text); margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; }
+
+        input, select, textarea { width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: inherit; transition: border 0.2s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); background: var(--card); }
+
+        button { cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; border-radius: 8px; padding: 8px 16px; border: 1px solid var(--border); background: var(--card); color: var(--text); transition: all .2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        button:hover { background: #f1f5f9; }
+        .btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-danger { color: var(--red); border-color: #fecaca; background: var(--red-light); }
+        .btn-danger:hover { background: #fee2e2; }
+        .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .badge-blue { background: var(--blue-light); color: var(--blue); }
+        .badge-green { background: var(--green-light); color: var(--green); }
+        .badge-amber { background: var(--amber-light); color: var(--amber); }
+        .badge-red { background: var(--red-light); color: var(--red); }
+
+        .row-between { display: flex; justify-content: space-between; align-items: center; }
+        .row-list { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+        .label-tag { color: var(--muted); font-size: 11px; text-transform: uppercase; font-weight: 600; }
+        .summary-bar { background: var(--blue-light); color: var(--blue); padding: 16px; border-radius: 8px; font-size: 18px; font-weight: 700; text-align: center; }
+        .muted-empty { color: var(--muted); font-size: 13px; padding: 16px 0; text-align: center; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .section-head { background: #f8fafc; padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-weight: 700; }
+        .muted { color: var(--muted); }
+
+        .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+        .event-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; transition: all .2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .event-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: translateY(-2px); }
+        .event-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; cursor: pointer; }
+        .event-card-body { cursor: pointer; flex: 1; }
+        .event-card-footer { margin-top: 16px; padding-top: 16px; border-top: 1px solid #f1f5f9; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+        .mailbox-item { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.4; }
+        .mailbox-item.unread { background: var(--blue-light); border-left: 3px solid var(--blue); }
+
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; margin-bottom: 16px; border-radius: 8px; }
+        table { width: 100%; min-width: 600px; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th { padding: 12px; border-bottom: 2px solid var(--border); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 11px; }
+        td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+
+        .list-item { display: flex; align-items: flex-start; gap: 16px; padding: 16px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; background: var(--card); transition: all .2s; }
+        .list-item:hover { border-color: #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+
+        .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+        .cal-day { min-height: 90px; border: 1px solid var(--border); border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 500; cursor: pointer; background: var(--card); display: flex; flex-direction: column; gap: 4px; transition: background 0.2s; }
+        .cal-day:hover { background: #f8fafc; }
+        .cal-day.today { border-color: var(--blue); border-width: 2px; background: var(--blue-light); }
+        .cal-header-cell { text-align: center; font-size: 12px; font-weight: 600; color: var(--muted); padding: 8px 0; }
+        .cal-tag { font-size: 10px; font-weight: 600; padding: 4px 6px; border-radius: 4px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        .tag-Catering { background: var(--blue); }
+        .tag-Event { background: var(--amber); }
+        .tag-Meeting { background: var(--purple); }
+        .tag-Preppen { background: var(--green); }
+        .tag-Einkaufen { background: var(--pink); }
+        .tag-SocialMedia { background: var(--cyan); }
+
+        .pizza-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .pizza-qty { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border-radius: 8px; padding: 4px; margin-top: 10px; }
+        .pizza-qty button { width: 40px; height: 40px; border: none; background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 18px; font-weight: bold; border-radius: 6px; }
+        .pizza-qty input { width: 60px; text-align: center; border: none; background: transparent; font-weight: 700; font-size: 16px; padding: 0; }
+
+        .settings-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border); margin-bottom: 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 1px; }
+        .settings-tab { padding: 12px 16px; cursor: pointer; color: var(--muted); font-weight: 600; border-bottom: 2px solid transparent; white-space: nowrap; }
+        .settings-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+        .settings-panel { display: none; }
+        .settings-panel.active { display: block; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 9999; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--card); width: 100%; max-width: 650px; max-height: 90vh; display: flex; flex-direction: column; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; }
+        .modal-title { padding: 20px 24px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border); background: #f8fafc; }
+        .modal-body { padding: 24px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; background: #f8fafc; flex-wrap: wrap; }
+
+        #toast-wrap { position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: #111827; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); opacity: 0; transform: translateY(10px); transition: all 0.3s; max-width: 320px; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.error { background: var(--red); }
+        .toast.success { background: var(--green); }
+
+        #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+
+        body:not([data-role="superadmin"]):not([data-role="admin"]) .admin-only,
+        body:not([data-role="superadmin"]) .superadmin-only { display: none !important; }
+
+        .mobile-bottom-nav { display: none; }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none !important; }
+            .main { padding: 16px 12px 100px; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .form-grid, .event-grid, .cards-grid { grid-template-columns: 1fr; }
+            input, select, textarea { font-size: 16px; min-height: 44px; }
+            button { min-height: 44px; }
+            .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); gap: 8px; z-index: 1000; justify-content: flex-start; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+            .mobile-bottom-nav::-webkit-scrollbar { display: none; }
+            .mobile-bottom-nav button { flex: 0 0 auto; min-width: 75px; font-size: 13px; font-weight: 600; padding: 10px 16px; border: none; background: #f1f5f9; color: var(--muted); border-radius: 20px; white-space: nowrap; transition: all 0.2s; }
+            .mobile-bottom-nav button.active { background: var(--blue-light); color: var(--blue); }
+            .cal-day { min-height: 60px; padding: 4px; }
+            .modal { max-width: 95%; max-height: 85vh; margin: auto; }
+        }
+    </style>
+</head>
+<body data-role="staff">
+
+<div id="login-screen">
+    <div class="card" style="width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 20px;">
+        <h2 style="text-align: center; font-size: 24px; letter-spacing: -0.5px;">Heitmanns Pizza Login</h2>
+        <div class="form-group">
+            <label for="login-email">E-Mail Adresse</label>
+            <input id="login-email" type="email" autocomplete="email" placeholder="name@beispiel.de" />
+        </div>
+        <div class="form-group">
+            <label for="login-pass">4-stellige PIN</label>
+            <input id="login-pass" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" placeholder="••••" maxlength="4" />
+        </div>
+        <button class="btn-primary" onclick="doLogin()" style="padding: 14px; font-size: 15px; margin-top: 8px;">Einloggen</button>
+        <div style="font-size: 11px; color: var(--muted); text-align: center; line-height: 1.5;">
+            Die App legt deinen Account automatisch an, falls er noch nicht existiert.
+        </div>
+    </div>
+</div>
+
+<div class="app" style="display: none" id="main-app">
+    <aside class="sidebar">
+        <div class="sidebar-logo">Heitmanns Pizza</div>
+        <button class="nav-item active" onclick="navTo('dashboard', this)">Dashboard</button>
+        <button class="nav-item" onclick="navTo('kalender', this)">Kalender</button>
+        <button class="nav-item" onclick="navTo('events', this)">Events</button>
+        <button class="nav-item admin-only" onclick="navTo('timesheet', this)">Personal & Zeiten</button>
+        <button class="nav-item admin-only" onclick="navTo('catering', this)">Catering-Kalkulator</button>
+        <button class="nav-item admin-only" onclick="navTo('pizza', this)">Pizza</button>
+        <button class="nav-item admin-only" onclick="navTo('einkauf', this)">Einkaufsliste</button>
+        <button class="nav-item admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
+        <button class="nav-item superadmin-only" onclick="navTo('settings', this)">Einstellungen</button>
+        <button class="nav-item" style="margin-top: auto; color: var(--red);" onclick="authSignOut()">Logout</button>
+    </aside>
+    <main class="main">
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <div>
+                    <div class="page-title" id="dash-greeting">Willkommen!</div>
+                    <div class="page-subtitle" id="today-date"></div>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="card">
+                    <div class="card-title">Dein Postfach <button class="btn-sm" onclick="clearNotifications()">Gelesen markieren</button></div>
+                    <div id="dash-mailbox" style="max-height: 250px; overflow-y: auto; font-size: 13px; line-height: 1.5;">Keine Nachrichten.</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Anstehende Events</div>
+                    <div id="dash-events" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                </div>
+            </div>
+            <div class="card admin-only">
+                <div class="card-title"><label for="pinnwand">Allgemeine Pinnwand</label></div>
+                <textarea id="pinnwand" style="min-height: 220px; font-size: 15px; padding: 16px; line-height: 1.5;" placeholder="Wichtige Infos für das Team eintragen..." oninput="savePin()"></textarea>
+            </div>
+            <div class="card admin-only">
+                <div class="card-title">Putz-Ranking <button class="btn-sm" onclick="openRankingModal()">Komplettes Ranking bearbeiten</button></div>
+                <div id="cleaning-ranking-preview" style="font-size: 16px; padding: 10px 0;">Lade Ranking...</div>
+            </div>
+        </div>
+
+        <div class="page" id="page-kalender">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Terminkalender</div>
+                    <div class="page-subtitle" id="cal-title" style="font-weight: 600; font-size: 16px; color: var(--blue); margin-top: 8px;"></div>
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button onclick="changeMonth(-1)">Vorheriger</button>
+                    <button onclick="changeMonth(1)">Nächster</button>
+                    <button class="btn-primary admin-only" onclick="openEventModal()">Neuer Termin</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="cal-grid" id="cal-headers"></div>
+                <div class="cal-grid" id="cal-body"></div>
+            </div>
+        </div>
+
+        <div class="page" id="page-events">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Events</div>
+                    <div class="page-subtitle">Verfügbarkeiten prüfen und ansehen</div>
+                </div>
+                <button class="btn-primary admin-only" onclick="openEventModal()">Neues Event anlegen</button>
+            </div>
+            <div id="all-events-list" class="event-grid"></div>
+        </div>
+
+        <div class="page admin-only" id="page-timesheet">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Personal & Zeiten</div>
+                    <div class="page-subtitle">Planung, Erfassung und Auswertung von Schichten</div>
+                </div>
+                <button class="btn-primary" onclick="openTimesheetModal()">Neue Zeiterfassung</button>
+            </div>
+            <div class="settings-tabs">
+                <div class="settings-tab active" onclick="switchSettingsTab('ts-planner', this)">Event Planer</div>
+                <div class="settings-tab" onclick="switchSettingsTab('ts-list', this)">Erfasste Zeiten</div>
+                <div class="settings-tab" onclick="switchSettingsTab('ts-events', this)">Event-Auswertung</div>
+                <div class="settings-tab" onclick="switchSettingsTab('ts-users', this)">Mitarbeiter-Auswertung</div>
+            </div>
+            <div id="panel-ts-planner" class="settings-panel active">
+                <div class="card"><div class="card-title">Event Planer (Anstehende Events)</div><div id="planner-events-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;"></div></div>
+            </div>
+            <div id="panel-ts-list" class="settings-panel"><div class="card"><div class="card-title">Alle erfassten Schichten</div><div class="table-wrap" id="timesheet-list-container"></div></div></div>
+            <div id="panel-ts-events" class="settings-panel"><div class="card"><div class="card-title">Kosten pro Event</div><div class="table-wrap" id="timesheet-events-container"></div></div></div>
+            <div id="panel-ts-users" class="settings-panel"><div class="card"><div class="card-title">Stunden pro Mitarbeiter</div><div class="table-wrap" id="timesheet-users-container"></div></div></div>
+        </div>
+
+        <div class="page admin-only" id="page-pizza">
+            <div class="page-header">
+                <div><div class="page-title">Pizza</div><div class="page-subtitle">Verbrauchskalkulation und Warenkorb-Generierung</div></div>
+                <button class="btn-danger" onclick="resetPizza()">Kalkulation zurücksetzen</button>
+            </div>
+            <div class="card" style="margin-bottom: 24px;">
+                <div class="card-title">Pizza Mengen</div>
+                <div class="pizza-grid" id="pizza-grid"></div>
+            </div>
+            <div class="card" style="margin-bottom: 24px;">
+                <div class="card-title">Dips Mengen</div>
+                <div class="pizza-grid">
+                    <div class="card" style="border: 1px solid var(--border); box-shadow: none;">
+                        <div style="font-weight: 600;">Aioli</div>
+                        <div class="pizza-qty">
+                            <button onclick="changeDip('aioli', -5)">-</button>
+                            <input type="number" id="dqty-aioli" value="0" readonly>
+                            <button onclick="changeDip('aioli', 5)">+</button>
+                        </div>
+                    </div>
+                    <div class="card" style="border: 1px solid var(--border); box-shadow: none;">
+                        <div style="font-weight: 600;">Hot Honey</div>
+                        <div class="pizza-qty">
+                            <button onclick="changeDip('hothoney', -5)">-</button>
+                            <input type="number" id="dqty-hothoney" value="0" readonly>
+                            <button onclick="changeDip('hothoney', 5)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Bedarf & Warenkorb <button class="btn-primary" onclick="saveToEinkauf()">In Einkaufsliste pushen</button></div>
+                <div id="ingredient-result"></div>
+            </div>
+        </div>
+
+        <div class="page admin-only" id="page-catering">
+            <div class="page-header"><div><div class="page-title">Catering Kalkulator</div><div class="page-subtitle">Preisermittlung basierend auf Vorgaben</div></div></div>
+            <div class="form-grid">
+                <div class="card">
+                    <div class="card-title">Kundenangaben</div>
+                    <div class="form-group"><label for="cat-gaeste">Gästezahl (Mindestens 30)</label><input type="number" id="cat-gaeste" value="30" oninput="calcCatering()"></div>
+                    <div class="form-group"><label for="cat-km">Fahrtstrecke KM (hin & zurück)</label><input type="number" id="cat-km" value="50" oninput="calcCatering()"></div>
+                    <div class="form-group"><label for="cat-marge-display">Ermittelte Marge</label><input id="cat-marge-display" readonly style="background: #f1f5f9;"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Preiskalkulation</div>
+                    <div id="cat-result-rows"></div>
+                    <div class="summary-bar" style="margin-top: 16px;">Brutto Zielpreis: <span id="cat-brutto-total">0,00 €</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page admin-only" id="page-einkauf">
+            <div class="page-header"><div><div class="page-title">Zentrale Einkaufsliste</div><div class="page-subtitle">Alle gepushten Bedarfe</div></div><button class="btn-danger" onclick="clearEinkauf()">Komplette Liste leeren</button></div>
+            <div id="einkauf-kategorien"></div>
+        </div>
+
+        <div class="page admin-only" id="page-kontakte">
+            <div class="page-header"><div><div class="page-title">Kontakte & Adressbuch</div><div class="page-subtitle">Kunden, Lieferanten, Mitarbeiter und Partner</div></div><button class="btn-primary" onclick="openKontaktModal()">Neuen Kontakt anlegen</button></div>
+            <div id="kontakt-list"></div>
+        </div>
+
+        <div class="page superadmin-only" id="page-settings">
+            <div class="page-header"><div><div class="page-title">System-Einstellungen</div><div class="page-subtitle">Konfiguration, Rezepte und Stammdaten</div></div></div>
+            <div class="settings-tabs">
+                <div class="settings-tab active" onclick="switchSettingsTab('zutaten', this)">Zutaten</div>
+                <div class="settings-tab" onclick="switchSettingsTab('rezepte', this)">Sub-Rezepte</div>
+                <div class="settings-tab" onclick="switchSettingsTab('pizzas', this)">Pizzen</div>
+                <div class="settings-tab" onclick="switchSettingsTab('catering', this)">Catering Parameter</div>
+                <div class="settings-tab" onclick="switchSettingsTab('scenarios', this)">Catering Staffeln</div>
+                <div class="settings-tab" onclick="switchSettingsTab('team', this)">Mitarbeiter Handling</div>
+            </div>
+            <div id="panel-zutaten" class="settings-panel active">
+                <div class="card">
+                    <div class="card-title">Stammdaten: Zutaten <button class="btn-sm" onclick="openIngredientModal()">Neue Zutat anlegen</button></div>
+                    <div class="table-wrap" id="settings-art-list"></div>
+                    <button class="btn-primary" style="margin-top: 16px; width: 100%;" onclick="saveSettingsART()">Preisänderungen speichern</button>
+                </div>
+            </div>
+            <div id="panel-rezepte" class="settings-panel"><div class="card"><div class="card-title">Gespeicherte Sub-Rezepte <button class="btn-sm" onclick="openRecipeModal()">Neues Rezept anlegen</button></div><div class="table-wrap" id="settings-recipes-list"></div></div></div>
+            <div id="panel-pizzas" class="settings-panel"><div class="card"><div class="card-title">Gespeicherte Pizzen <button class="btn-sm" onclick="openPizzaModal()">Neue Pizza anlegen</button></div><div class="table-wrap" id="settings-pizzas-list"></div></div></div>
+            <div id="panel-catering" class="settings-panel">
+                <div class="card">
+                    <div class="card-title">Globale Fixkosten & Steuern</div>
+                    <div class="form-grid">
+                        <div class="form-group"><label for="set-cat-gas">Gaspauschale (€)</label><input type="number" id="set-cat-gas" step="1"></div>
+                        <div class="form-group"><label for="set-cat-entsorgung">Entsorgung (€)</label><input type="number" id="set-cat-entsorgung" step="1"></div>
+                        <div class="form-group"><label for="set-cat-miete">Miete (€)</label><input type="number" id="set-cat-miete" step="1"></div>
+                        <div class="form-group"><label for="set-cat-kmsatz">KM-Satz (€/km)</label><input type="number" id="set-cat-kmsatz" step="0.05"></div>
+                        <div class="form-group"><label for="set-cat-waren">Wareneinsatz/Gast (€)</label><input type="number" id="set-cat-waren" step="0.1"></div>
+                        <div class="form-group"><label for="set-cat-ust">Umsatzsteuer (z.B. 1.19)</label><input type="number" id="set-cat-ust" step="0.01"></div>
+                        <div class="form-group"><label for="set-cat-stundensatz">Standard-Stundensatz (€)</label><input type="number" id="set-cat-stundensatz" step="0.5"></div>
+                    </div>
+                    <button class="btn-primary" style="margin-top: 20px; width: 100%;" onclick="saveCateringSettings()">Parameter speichern</button>
+                </div>
+            </div>
+            <div id="panel-scenarios" class="settings-panel">
+                <div class="card">
+                    <div class="card-title">Catering Staffeln <button class="btn-sm" onclick="addScenarioRow()">+ Staffel</button></div>
+                    <div class="table-wrap" id="scenarios-container"></div>
+                    <button class="btn-primary" style="margin-top: 16px; width: 100%;" onclick="saveScenarios()">Staffeln speichern</button>
+                </div>
+            </div>
+            <div id="panel-team" class="settings-panel"><div class="card"><div class="card-title">Benutzer, Rollen & Stundenlohn</div><div class="table-wrap" id="team-list-container"></div></div></div>
+        </div>
+    </main>
+    <nav class="mobile-bottom-nav">
+        <button onclick="navTo('dashboard', this)" class="active">Dash</button>
+        <button onclick="navTo('kalender', this)">Kalender</button>
+        <button onclick="navTo('events', this)">Events</button>
+        <button class="admin-only" onclick="navTo('timesheet', this)">Zeiten</button>
+        <button class="admin-only" onclick="navTo('pizza', this)">Pizza</button>
+        <button class="admin-only" onclick="navTo('einkauf', this)">Einkauf</button>
+        <button class="admin-only" onclick="navTo('catering', this)">Catering</button>
+        <button class="admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
+        <button class="superadmin-only" onclick="navTo('settings', this)">Settings</button>
+    </nav>
+</div>
+
+<div class="modal-overlay" id="planner-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="planner-modal-title">
+        <div class="modal-title" id="planner-modal-title">Personal einteilen</div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div>
+                    <h4 style="margin-bottom: 10px; color: var(--green);">Verfügbar (Zugesagt)</h4>
+                    <div id="planner-avail-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 10px; color: var(--blue);">Eingeteilt</h4>
+                    <div id="planner-assigned-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('planner-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="savePlanner()">Speichern & Benachrichtigen</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="day-events-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="day-events-title">
+        <div class="modal-title" id="day-events-title">Events am Tag</div>
+        <div class="modal-body" id="day-events-list"></div>
+        <div class="modal-footer">
+            <button class="btn-primary admin-only" id="day-events-add-btn">Neuer Termin hier</button>
+            <button onclick="closeModal('day-events-modal')">Schließen</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="event-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+        <div class="modal-title" id="event-modal-title">Termin bearbeiten</div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: span 2;"><label for="ev-title">Bezeichnung</label><input id="ev-title"></div>
+                <div class="form-group"><label for="ev-type">Termin Art</label>
+                    <select id="ev-type" onchange="toggleEventCrewVisibility()">
+                        <option>Catering</option><option>Event</option><option>Meeting</option>
+                        <option>Preppen</option><option>Einkaufen</option><option>SocialMedia</option>
+                    </select>
+                </div>
+                <div class="form-group"><label for="ev-status">Status</label>
+                    <select id="ev-status"><option>Pending...</option><option>Secured</option><option>Cancelled</option></select>
+                </div>
+                <div class="form-group"><label for="ev-date">Start Datum</label><input type="date" id="ev-date"></div>
+                <div class="form-group"><label for="ev-endDate">End Datum</label><input type="date" id="ev-endDate"></div>
+                <div class="form-group"><label for="ev-time">Start Uhrzeit</label><input type="time" id="ev-time"></div>
+                <div class="form-group"><label for="ev-time-end">End Uhrzeit</label><input type="time" id="ev-time-end"></div>
+                <div class="form-group"><label for="ev-personen">Gästezahl</label><input type="number" id="ev-personen"></div>
+                <div class="form-group" style="grid-column: span 2;" id="ev-customer-group">
+                    <label for="ev-customer-select">Kunde (Nur für Catering)</label>
+                    <select id="ev-customer-select"><option value="">-- Keinen Kontakt zugewiesen --</option></select>
+                </div>
+                <div class="form-group" style="grid-column: span 2;"><label for="ev-ort">Ort / Adresse</label><input id="ev-ort"></div>
+            </div>
+            <div class="form-group" style="margin-top: 16px;">
+                <label for="ev-notizen">Interne Notizen / Infos</label>
+                <textarea id="ev-notizen" style="min-height: 80px;"></textarea>
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-top:12px; padding:10px; background:#f8fafc; border-radius:6px;" class="admin-only">
+                💡 Personal-Zuteilung erfolgt im "Event Planer" Reiter unter Personal & Zeiten.
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('event-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveEvent()">Speichern</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="avail-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="avail-modal-title" style="max-width: 400px;">
+        <div class="modal-title" id="avail-modal-title">Verfügbarkeit bestätigen</div>
+        <div class="modal-body">
+            <p style="margin-bottom: 16px; color: var(--muted); font-size: 13px;">Dieses Event geht über mehrere Tage. An welchen Tagen kannst du arbeiten?</p>
+            <div id="avail-days-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('avail-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveAvailDays()">Tage speichern</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="ingredient-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ingredient-modal-title">
+        <div class="modal-title" id="ingredient-modal-title">Neue Zutat anlegen</div>
+        <div class="modal-body">
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label for="ing-new-name">Eindeutige Bezeichnung</label>
+                <input id="ing-new-name">
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label for="ing-new-artnr">Artikelnummer</label><input id="ing-new-artnr"></div>
+                <div class="form-group"><label for="ing-new-sup">Lieferant</label>
+                    <select id="ing-new-sup"><option>Andronaco</option><option>Metro</option><option>Bührings</option><option>Edeka</option><option>Sonstige</option></select>
+                </div>
+                <div class="form-group"><label for="ing-new-cat">Kategorie</label>
+                    <select id="ing-new-cat"><option>Teig</option><option>Milchprodukte / Käse</option><option>Sauce / Basis</option><option>Belag</option><option>Gemüse & Kräuter</option><option>Dips</option><option>Sonstiges</option></select>
+                </div>
+                <div class="form-group"><label for="ing-new-unit">Verpackungseinheit</label>
+                    <select id="ing-new-unit"><option>kg</option><option>Stk</option><option>L</option></select>
+                </div>
+                <div class="form-group"><label for="ing-new-netto">Preis Netto (€)</label><input type="number" id="ing-new-netto" step="0.01"></div>
+                <div class="form-group"><label for="ing-new-brutto">Preis Brutto (€)</label><input type="number" id="ing-new-brutto" step="0.01"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('ingredient-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveNewIngredient()">Erstellen</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="builder-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="builder-title">
+        <div class="modal-title" id="builder-title">Bearbeiten</div>
+        <div class="modal-body">
+            <div class="form-grid" style="margin-bottom: 16px;">
+                <div class="form-group"><label for="builder-name">Name</label><input id="builder-name"></div>
+                <div class="form-group" id="builder-param-group">
+                    <label id="builder-param-label" for="builder-param">Wert</label>
+                    <input type="number" id="builder-param" step="0.01">
+                </div>
+            </div>
+            <div class="form-group">
+                <label style="border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-bottom: 8px;">Zutaten & Bestandteile</label>
+                <div id="builder-items-container"></div>
+                <button class="btn-sm" style="margin-top: 8px; align-self: flex-start;" onclick="addBuilderItemRow()">+ Bestandteil hinzufügen</button>
+            </div>
+            <div id="builder-calc-preview" style="margin-top: 16px; padding: 12px; background: var(--blue-light); border-radius: 8px; display: none;">
+                <div style="font-size: 11px; color: var(--blue); font-weight: 600; text-transform: uppercase;">Berechneter Wareneinsatz</div>
+                <div style="font-size: 18px; font-weight: 700; color: var(--blue);" id="builder-calc-total-gross">0,00 € (Brutto)</div>
+                <div style="font-size: 13px; color: var(--blue);" id="builder-calc-total-net">0,00 € (Netto)</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('builder-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveBuilder()">Speichern</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="kontakt-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="kontakt-modal-title">
+        <div class="modal-title" id="kontakt-modal-title">Kontakt bearbeiten</div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: span 2;"><label for="kt-kategorie">Kategorie</label>
+                    <select id="kt-kategorie"><option>Kunde</option><option>Lieferant</option><option>Mitarbeiter</option><option>CEO</option></select>
+                </div>
+                <div class="form-group"><label for="kt-name">Voller Name / Firma</label><input id="kt-name"></div>
+                <div class="form-group"><label for="kt-firma">Zusatz (z.B. AP, Abteilung)</label><input id="kt-firma"></div>
+                <div class="form-group"><label for="kt-tel">Telefonnummer</label><input type="tel" id="kt-tel"></div>
+                <div class="form-group"><label for="kt-email">E-Mail Adresse</label><input type="email" id="kt-email"></div>
+                <div class="form-group" style="grid-column: span 2;"><label for="kt-adresse">Postalische Adresse</label><input id="kt-adresse"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('kontakt-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveKontakt()">Speichern</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="timesheet-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="timesheet-modal-title">
+        <div class="modal-title" id="timesheet-modal-title">Zeiterfassung</div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: span 2;"><label for="ts-event-id">Event</label><select id="ts-event-id"></select></div>
+                <div class="form-group" style="grid-column: span 2;"><label for="ts-user-id">Mitarbeiter</label><select id="ts-user-id"></select></div>
+                <div class="form-group"><label for="ts-date">Datum</label><input type="date" id="ts-date"></div>
+                <div class="form-group"><label for="ts-bonus">Zuschlag (h)</label><input type="number" id="ts-bonus" step="0.25" value="0"></div>
+                <div class="form-group"><label for="ts-start">Start</label><input type="time" id="ts-start"></div>
+                <div class="form-group"><label for="ts-end">Ende</label><input type="time" id="ts-end"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('timesheet-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveTimesheet()">Speichern</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal" id="detail-content" role="dialog" aria-modal="true"></div>
+</div>
+
+<div class="modal-overlay" id="ranking-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ranking-modal-title">
+        <div class="modal-title" id="ranking-modal-title">Putz-Ranking Historie</div>
+        <div class="modal-body" id="ranking-content"></div>
+        <div class="modal-footer">
+            <button class="btn-danger superadmin-only" onclick="resetCleaningRanking()">Alle zurücksetzen</button>
+            <button class="btn-primary" onclick="closeModal('ranking-modal')">Schließen</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast-wrap"></div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -14,14 +606,18 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 // ============================================================================
-// HELPERS & SECURITY (HIER WAR DER SYNTAX-FEHLER, JETZT BEHOBEN!)
+// HELPERS
 // ============================================================================
 const $ = id => document.getElementById(id);
 
 const esc = (str) => {
     if (str === null || str === undefined) return '';
     return String(str).replace(/[&<>'"]/g, tag => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
     }[tag] || tag));
 };
 const escJs = (str) => String(str || '').replace(/['"\\]/g, '\\$&');
@@ -120,7 +716,7 @@ let listenersInitialized = false;
 let unsubscribers = [];
 
 // ============================================================================
-// AUTHENTICATION
+// AUTH
 // ============================================================================
 onAuthStateChanged(auth, u => {
     if (u) {
@@ -180,14 +776,13 @@ function doLogin() {
     const pw = p + "-hp26";
     
     signInWithEmailAndPassword(auth, e, pw).catch(err => {
-        // Falls Login fehlschlägt (Falsches Passwort ODER Account nicht vorhanden)
-        // versuchen wir den Account neu zu registrieren.
+        // Falls der Account noch nicht existiert oder das Pw falsch war: Wir probieren die Registrierung.
         createUserWithEmailAndPassword(auth, e, pw).catch(regErr => {
             if (regErr.code === 'auth/email-already-in-use') {
-                // Wenn E-Mail schon vergeben, dann war die PIN beim Login definitiv falsch!
+                // Wenn die E-Mail schon da ist, war schlichtweg die PIN falsch!
                 alert("Falsche PIN für diesen Account!");
             } else {
-                alert("Login/Registrierungs-Fehler: " + regErr.message);
+                alert("Login-Fehler: " + regErr.message);
             }
         });
     });
@@ -346,8 +941,12 @@ function updateDashboard() {
                         </div>
                     </div>`).join('');
             }
+        } else {
+            if (prev) prev.innerHTML = '<div class="muted">Kein Admin-Personal vorhanden.</div>';
+            if (cont) cont.innerHTML = '<div class="muted" style="padding:10px;">Keine Einträge.</div>';
         }
     }
+    
     const todayStr = today();
     const next = state.events.filter(e => (e.endDate || e.date) >= todayStr).slice(0, 4);
     const de = $('dash-events');
@@ -634,6 +1233,12 @@ function savePlanner() {
 // ============================================================================
 // EVENT MODAL & DETAIL
 // ============================================================================
+function toggleEventCrewVisibility() {
+    const evType = $('ev-type').value;
+    const customerContainer = $('ev-customer-group');
+    if (customerContainer) customerContainer.style.display = (evType === 'Catering') ? 'flex' : 'none';
+}
+
 function openEventModal(id, dateStr) {
     if (id && typeof id === 'object') id = null; 
     state.editEventId = id || null;
@@ -654,14 +1259,8 @@ function openEventModal(id, dateStr) {
         custHtml += `<option value="${esc(k.id)}" ${sel}>${esc(k.name)}${k.firma ? ' (' + esc(k.firma) + ')' : ''}</option>`;
     });
     $('ev-customer-select').innerHTML = custHtml;
-    $('ev-customer-group').style.display = src.type === 'Catering' ? 'flex' : 'none';
+    toggleEventCrewVisibility();
     openModal('event-modal');
-}
-
-function toggleEventCrewVisibility() {
-    const evType = $('ev-type').value;
-    const customerContainer = $('ev-customer-group');
-    if (customerContainer) customerContainer.style.display = (evType === 'Catering') ? 'flex' : 'none';
 }
 
 function saveEvent() {
