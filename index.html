@@ -493,7 +493,7 @@
         <div class="sidebar-logo">Heitmanns Pizza</div>
         <button class="nav-item active" onclick="navTo('dashboard', this)">Dashboard</button>
         <button class="nav-item" onclick="navTo('kalender', this)">Kalender</button>
-        <button class="nav-item" onclick="navTo('events', this)">Events & Staffing</button>
+        <button class="nav-item" onclick="navTo('events', this)">Events</button>
         <button class="nav-item admin-only" onclick="navTo('timesheet', this)">Personal & Zeiten</button>
         <button class="nav-item admin-only" onclick="navTo('catering', this)">Catering-Kalkulator</button>
         <button class="nav-item admin-only" onclick="navTo('pizza', this)">Pizza</button>
@@ -556,8 +556,8 @@
         <div class="page" id="page-events">
             <div class="page-header">
                 <div>
-                    <div class="page-title">Events & Personalplanung</div>
-                    <div class="page-subtitle">Verfügbarkeiten prüfen und Zuteilungen vornehmen</div>
+                    <div class="page-title">Events</div>
+                    <div class="page-subtitle">Verfügbarkeiten prüfen und ansehen</div>
                 </div>
                 <button class="btn-primary admin-only" onclick="openEventModal()">Neues Event anlegen</button>
             </div>
@@ -568,18 +568,42 @@
             <div class="page-header">
                 <div>
                     <div class="page-title">Personal & Zeiten</div>
-                    <div class="page-subtitle">Erfassung und Auswertung von Arbeitszeiten</div>
+                    <div class="page-subtitle">Planung, Erfassung und Auswertung von Schichten</div>
                 </div>
-                <button class="btn-primary" onclick="openTimesheetModal()">Neue Erfassung</button>
+                <button class="btn-primary" onclick="openTimesheetModal()">Neue Zeiterfassung</button>
             </div>
 
             <div class="settings-tabs">
-                <div class="settings-tab active" onclick="switchSettingsTab('ts-list', this)">Erfasste Zeiten</div>
+                <div class="settings-tab active" onclick="switchSettingsTab('ts-planner', this)">Event Planer</div>
+                <div class="settings-tab" onclick="switchSettingsTab('ts-list', this)">Erfasste Zeiten</div>
                 <div class="settings-tab" onclick="switchSettingsTab('ts-events', this)">Event-Auswertung</div>
                 <div class="settings-tab" onclick="switchSettingsTab('ts-users', this)">Mitarbeiter-Auswertung</div>
             </div>
 
-            <div id="panel-ts-list" class="settings-panel active">
+            <div id="panel-ts-planner" class="settings-panel active">
+                <div class="card">
+                    <div class="card-title">Mitarbeiter einteilen</div>
+                    <div class="form-group">
+                        <label for="planner-event-select">Event auswählen</label>
+                        <select id="planner-event-select" onchange="loadPlannerEvent()"></select>
+                    </div>
+                    <div id="planner-ui" style="display:none; margin-top: 20px;">
+                        <div class="form-grid">
+                            <div>
+                                <h4 style="margin-bottom: 10px; color: var(--green);">Verfügbar (Zugesagt)</h4>
+                                <div id="planner-avail-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+                            </div>
+                            <div>
+                                <h4 style="margin-bottom: 10px; color: var(--blue);">Eingeteilt</h4>
+                                <div id="planner-assigned-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+                            </div>
+                        </div>
+                        <button class="btn-primary" style="margin-top: 24px; width: 100%; padding: 12px; font-size: 15px;" onclick="savePlanner()">Speichern & Benachrichtigen</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="panel-ts-list" class="settings-panel">
                 <div class="card">
                     <div class="card-title">Alle erfassten Schichten</div>
                     <div class="table-wrap" id="timesheet-list-container"></div>
@@ -1096,11 +1120,10 @@ const auth = getAuth(app);
 const esc = (str) => {
     if (str === null || str === undefined) return '';
     return String(str).replace(/[&<>'"`]/g, tag => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;', '`': '&#96;'
+        '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '&quot;', '`': '&#96;'
     }[tag] || tag));
 };
 
-// Maskiert Strings extrem sicher für die direkte Injektion in Javascript-Funktionsaufrufe im HTML (z.B. onclick='foo("ID")')
 const escJs = (str) => String(str || '').replace(/['"\\]/g, '\\$&');
 
 // ============================================================================
@@ -1126,6 +1149,10 @@ let builderEditId = null;
 let builderItems = [];
 let currentAvailEventId = null;
 let scenarioRows = [];
+
+// Event Planner State
+let plannerCurrentEventId = null;
+let plannerAssigned = [];
 
 const colorMap = {
     'Catering': 'tag-Catering', 'Event': 'tag-Event', 'Meeting': 'tag-Meeting',
@@ -1153,13 +1180,8 @@ function showToast(message, type = '') {
 function openModal(id) { const m = $(id); if (m) m.classList.add('open'); }
 function closeModal(id) { const m = $(id); if (m) m.classList.remove('open'); }
 
-function fmt(n) {
-    return Number(n || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-}
-
-function fmtKG(g) {
-    return (g / 1000).toLocaleString('de-DE', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + ' kg';
-}
+function fmt(n) { return Number(n || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' }); }
+function fmtKG(g) { return (g / 1000).toLocaleString('de-DE', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + ' kg'; }
 
 function statusBadge(s) {
     const m = { Secured: 'badge-green', 'Pending...': 'badge-amber', Cancelled: 'badge-red' };
@@ -1177,7 +1199,6 @@ function confirmAction(type, url) {
     }
 }
 
-// Korrekte Berechnung der Stunden, falls Schichten über Nacht gehen
 function calculateHours(startStr, endStr, startDateStr, endDateStr) {
     if (!startStr || !endStr) return 0;
     const [sH, sM] = startStr.split(':').map(Number);
@@ -1189,10 +1210,7 @@ function calculateHours(startStr, endStr, startDateStr, endDateStr) {
     const eDate = endDateStr ? new Date(endDateStr) : new Date(sDate);
     eDate.setHours(eH, eM, 0, 0);
 
-    // Fallback: Wenn Enddatum fehlt, aber Uhrzeit kleiner ist -> Mitternachtssprung annehmen
-    if (!endDateStr && eDate < sDate) {
-        eDate.setDate(eDate.getDate() + 1);
-    }
+    if (!endDateStr && eDate < sDate) eDate.setDate(eDate.getDate() + 1);
 
     const diff = (eDate - sDate) / (1000 * 60 * 60);
     return diff > 0 ? diff : 0;
@@ -1279,7 +1297,7 @@ function doLogin() {
     const pw = p + "-hp26";
     signInWithEmailAndPassword(auth, e, pw).catch(err => {
         if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-            alert("Login fehlgeschlagen. Falls du noch keinen Account hast, melde dich beim Admin – Accounts werden manuell angelegt.");
+            alert("Login fehlgeschlagen. Falls du noch keinen Account hast, melde dich beim Admin.");
         } else {
             alert("Login-Fehler: " + (err.message || err.code));
         }
@@ -1297,11 +1315,10 @@ function enforceRBAC() {
 function initGranularListeners() {
     unsubscribers.push(onValue(ref(db, 'events'), snap => {
         const d = snap.val() || {};
-        
         state.events = Object.entries(d)
             .filter(([key, ev]) => ev !== null && typeof ev === 'object')
             .map(([key, ev]) => Object.assign({}, ev, {
-                id: key, // <--- Zwingt die App, den echten Firebase-Pfad als ID zu nutzen!
+                id: key,
                 endDate: ev.endDate || ev.date,
                 assignedCrew: ev.assignedCrew || [],
                 availUIDs: ev.availUIDs || [],
@@ -1313,15 +1330,17 @@ function initGranularListeners() {
         renderEventList();
         renderCalendar();
         updateDashboard();
+        if (isAdminRole()) renderPlanner(); // Event Planner aktualisieren
     }));
-
-    // ... (hier geht es normal weiter mit unsubscribers.push(onValue(ref(db, 'users')...)
 
     unsubscribers.push(onValue(ref(db, 'users'), snap => {
         const d = snap.val() || {};
         state.users = Object.entries(d).map(([uid, data]) => ({ uid, ...data }));
         updateDashboard();
-        if (isAdminRole()) renderTimesheets();
+        if (isAdminRole()) {
+            renderTimesheets();
+            renderPlanner(); // Namen könnten sich geändert haben
+        }
         if (state.role === 'superadmin') renderSettings();
     }));
 
@@ -1369,7 +1388,7 @@ function initGranularListeners() {
     if (isAdminRole()) {
         unsubscribers.push(onValue(ref(db, 'kontakte'), snap => {
             const d = snap.val() || {};
-            state.kontakte = Object.values(d).filter(k => k && k.id);
+            state.kontakte = Object.entries(d).filter(([key, k]) => k !== null && typeof k === 'object').map(([key, k]) => ({...k, id: key}));
             renderKontakte();
         }));
 
@@ -1383,13 +1402,11 @@ function initGranularListeners() {
             const d = snap.val() || {};
             state.timesheets = Object.values(d).filter(t => t && t.id);
             renderTimesheets();
-            renderEventList(); // Weil auch hier die eigenen Zeiten der User drinstehen
+            renderEventList();
         }));
     } else {
-        // Staff muss seine eigenen erfassten Zeiten lesen dürfen, um sie in der Eventliste zu sehen
         unsubscribers.push(onValue(ref(db, 'timesheets'), snap => {
             const d = snap.val() || {};
-            // Firebase filtert über die Rules bereits aus, aber zur Sicherheit lokal:
             state.timesheets = Object.values(d).filter(t => t && t.id && t.userId === auth.currentUser.uid);
             renderEventList();
         }));
@@ -1438,7 +1455,7 @@ function updateDashboard() {
 
     if (isAdminRole()) {
         const admins = state.users.filter(x => x.role !== 'staff')
-            .sort((a, b) => (a.cleaningPoints || 0) - (b.cleaningPoints || 0));
+            .sort((a, b) => (b.cleaningPoints || 0) - (a.cleaningPoints || 0));
         const prev = $('cleaning-ranking-preview');
         const cont = $('ranking-content');
         if (admins.length > 0 && prev) {
@@ -1455,10 +1472,10 @@ function updateDashboard() {
         }
     }
 
-    const today = new Date().setHours(0, 0, 0, 0);
+    const today = new Date().toISOString().split('T')[0];
     const next = state.events.filter(e => {
         const checkDate = e.endDate || e.date;
-        return new Date(checkDate) >= today;
+        return checkDate >= today;
     }).slice(0, 4);
 
     const de = $('dash-events');
@@ -1577,7 +1594,7 @@ function openDayEventsModal(dateStr) {
 }
 
 // ============================================================================
-// EVENTS & STAFFING (inkl. Zeiterfassung Update)
+// EVENTS & STAFFING (UI)
 // ============================================================================
 function renderEventList() {
     const c = $('all-events-list');
@@ -1763,7 +1780,7 @@ function handleCrewDropdownSelect() {
 }
 
 function openEventModal(id, dateStr) {
-    if (id && typeof id === 'object') id = null; // Bugfix: Verhindert, dass Event-Objekte beim leeren onclick reinkommen
+    if (id && typeof id === 'object') id = null;
     state.editEventId = id || null;
     
     const ev = id ? state.events.find(e => String(e.id) === String(id)) : null;
@@ -1817,7 +1834,6 @@ function openEventModal(id, dateStr) {
 function saveEvent() {
     const id = state.editEventId || 'ev_' + Date.now();
     const oldEv = state.events.find(x => String(x.id) === String(id));
-    const oldStatus = oldEv ? oldEv.status : null;
     const newStatus = $('ev-status').value;
     const crew = Array.from(document.querySelectorAll('.crew-chip.active')).map(el => el.dataset.uid);
 
@@ -1843,7 +1859,8 @@ function saveEvent() {
         if (oldEv.loggedHours) updates.loggedHours = oldEv.loggedHours;
     }
 
-    if (newStatus === 'Secured' && oldStatus !== 'Secured') {
+    // Alte Benachrichtigungslogik aus dem EventModal (wird vom neuen EventPlaner abgelöst, aber bleibt als Fallback aktiv)
+    if (oldEv && newStatus === 'Secured' && oldEv.status !== 'Secured') {
         crew.forEach(uid => {
             runTransaction(ref(db, `users/${uid}/notifications`), cur => {
                 let arr = cur || [];
@@ -1959,7 +1976,7 @@ function logHours(eid) {
     const h = calculateHours(startVal, endVal, evStartDate, evEndDate);
     if (h <= 0) return showToast("Zeitraum ist ungültig oder 0 Stunden.", 'error');
 
-    // Single Source of Truth
+    // Legacy Support Updates
     set(ref(db, `events/${eid}/loggedHours/${uid}`), h);
 
     const existingTs = state.timesheets.find(t => String(t.eventId) === String(eid) && String(t.userId) === String(uid));
@@ -1980,7 +1997,122 @@ function logHours(eid) {
 }
 
 // ============================================================================
-// PERSONAL & ZEITEN
+// EVENT PLANER (NEU)
+// ============================================================================
+function renderPlanner() {
+    const select = $('planner-event-select');
+    if (!select) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    // Nur anstehende Events anzeigen
+    const upcoming = state.events.filter(e => {
+        const d = e.endDate || e.date;
+        return d >= today;
+    });
+
+    const currentVal = select.value;
+
+    select.innerHTML = '<option value="">-- Bitte Event wählen --</option>' +
+        upcoming.map(e => `<option value="${esc(e.id)}">${esc(e.date)} - ${esc(e.title)}</option>`).join('');
+
+    if (currentVal && upcoming.find(e => String(e.id) === String(currentVal))) {
+        select.value = currentVal;
+    } else {
+        $('planner-ui').style.display = 'none';
+    }
+
+    if (select.value) loadPlannerEvent();
+}
+
+function loadPlannerEvent() {
+    const eid = $('planner-event-select').value;
+    if (!eid) {
+        $('planner-ui').style.display = 'none';
+        return;
+    }
+    plannerCurrentEventId = eid;
+    const ev = state.events.find(e => String(e.id) === String(eid));
+    if (!ev) return;
+
+    // Local Array für die UI-Bearbeitung zurücksetzen
+    plannerAssigned = [...(ev.assignedCrew || [])];
+    renderPlannerUI();
+}
+
+function renderPlannerUI() {
+    $('planner-ui').style.display = 'block';
+    const ev = state.events.find(e => String(e.id) === String(plannerCurrentEventId));
+    if (!ev) return;
+
+    const availDiv = $('planner-avail-list');
+    const assignedDiv = $('planner-assigned-list');
+
+    let availHtml = '';
+    let assignedHtml = '';
+
+    // Alle die zugesagt haben (in availUIDs) aber NOCH NICHT in plannerAssigned sind
+    const availPool = (ev.availUIDs || []).filter(uid => !plannerAssigned.includes(uid));
+
+    availPool.forEach(uid => {
+        const u = state.users.find(x => x.uid === uid);
+        if (!u) return;
+        availHtml += `<div class="list-item" style="padding:10px; margin-bottom:0; justify-content:space-between; align-items:center;">
+            <span>${esc(u.name)}</span>
+            <button class="btn-sm btn-green" onclick="plannerMove('${escJs(uid)}', 'add')">+</button>
+        </div>`;
+    });
+
+    plannerAssigned.forEach(uid => {
+        const u = state.users.find(x => x.uid === uid);
+        if (!u) return;
+        assignedHtml += `<div class="list-item" style="padding:10px; margin-bottom:0; justify-content:space-between; align-items:center;">
+            <span>${esc(u.name)}</span>
+            <button class="btn-sm btn-danger" onclick="plannerMove('${escJs(uid)}', 'remove')">-</button>
+        </div>`;
+    });
+
+    availDiv.innerHTML = availHtml || '<div style="color:var(--muted); font-size:13px; padding: 10px;">Keine (weiteren) Zusagen vorhanden.</div>';
+    assignedDiv.innerHTML = assignedHtml || '<div style="color:var(--muted); font-size:13px; padding: 10px;">Noch niemand eingeteilt.</div>';
+}
+
+function plannerMove(uid, action) {
+    if (action === 'add') {
+        if (!plannerAssigned.includes(uid)) plannerAssigned.push(uid);
+    } else {
+        plannerAssigned = plannerAssigned.filter(id => id !== uid);
+    }
+    renderPlannerUI();
+}
+
+function savePlanner() {
+    if (!plannerCurrentEventId) return;
+    const ev = state.events.find(e => String(e.id) === String(plannerCurrentEventId));
+    if (!ev) return;
+
+    const oldAssigned = ev.assignedCrew || [];
+    
+    // Ermittle, wer *neu* hinzugefügt wurde, um Spam zu vermeiden
+    const newlyAssigned = plannerAssigned.filter(uid => !oldAssigned.includes(uid));
+
+    // Neue Leute benachrichtigen
+    newlyAssigned.forEach(uid => {
+        runTransaction(ref(db, `users/${uid}/notifications`), cur => {
+            let arr = cur || [];
+            arr.push(`Du wurdest für das Event "${ev.title}" am ${ev.date} fest eingeteilt!`);
+            return arr;
+        });
+    });
+
+    // In der Datenbank speichern
+    update(ref(db, `events/${plannerCurrentEventId}`), { assignedCrew: plannerAssigned })
+        .then(() => {
+            showToast('Einteilung gespeichert & benachrichtigt!', 'success');
+        })
+        .catch(() => showToast('Fehler beim Speichern der Einteilung.', 'error'));
+}
+
+// ============================================================================
+// PERSONAL & ZEITEN (Tabellen)
 // ============================================================================
 function renderTimesheets() {
     if (!isAdminRole()) return;
@@ -2143,7 +2275,7 @@ function printReceipt(tsId) {
 }
 
 // ============================================================================
-// PIZZA LABOR & DIPS (mit localStorage-Persistenz)
+// PIZZA LABOR & DIPS
 // ============================================================================
 function loadPizzaMengenFromStorage() {
     try {
@@ -2663,7 +2795,6 @@ function deleteIngredient(id) {
 // KONTAKTE
 // ============================================================================
 function openKontaktModal(id) {
-    // Bugfix: Wenn "Neuer Kontakt" geklickt wird, übergibt der Browser manchmal das Event-Objekt
     if (id && typeof id === 'object') id = null; 
     
     state.editKontaktId = id || null;
@@ -2905,7 +3036,10 @@ Object.assign(window, {
     deleteRecipe, deletePizza, deleteIngredient,
     saveSettingsART, saveCateringSettings, updateUser,
     addScenarioRow, saveScenarios,
-    confirmAction
+    confirmAction,
+    
+    // NEU HINZUGEFÜGT FÜR EVENT PLANER:
+    loadPlannerEvent, plannerMove, savePlanner
 });
 </script>
 </body>
