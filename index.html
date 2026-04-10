@@ -415,37 +415,14 @@
         .mobile-bottom-nav { display: none; }
 
         @media (max-width: 900px) {
-            /* 1. Sidebar auf dem Handy zwingend ausblenden */
-            .sidebar { 
-                display: none !important; 
-            }
+            .sidebar { display: none !important; }
+            .main { padding: 16px 12px 100px; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .form-grid, .event-grid { grid-template-columns: 1fr; }
 
-            /* 2. Abstände für den Hauptbereich anpassen */
-            .main { 
-                padding: 16px 12px 100px; 
-            }
+            input, select, textarea { font-size: 16px; min-height: 44px; }
+            button { min-height: 44px; }
 
-            .page-header { 
-                flex-direction: column; 
-                align-items: flex-start; 
-                gap: 12px; 
-            }
-
-            .form-grid, .event-grid { 
-                grid-template-columns: 1fr; 
-            }
-
-            /* 3. Verhindert den automatischen iOS Zoom in Formularfeldern */
-            input, select, textarea { 
-                font-size: 16px; 
-                min-height: 44px; 
-            }
-
-            button { 
-                min-height: 44px; 
-            }
-
-            /* 4. Die neue, scrollbare Kachel-Navigation */
             .mobile-bottom-nav {
                 display: flex;
                 position: fixed;
@@ -461,12 +438,10 @@
                 justify-content: flex-start;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
-                scrollbar-width: none; /* Firefox */
+                scrollbar-width: none;
             }
             
-            .mobile-bottom-nav::-webkit-scrollbar {
-                display: none; /* Chrome, Safari */
-            }
+            .mobile-bottom-nav::-webkit-scrollbar { display: none; }
 
             .mobile-bottom-nav button {
                 flex: 0 0 auto;
@@ -487,17 +462,8 @@
                 color: var(--blue);
             }
 
-            /* 5. Kleinere Anpassungen für Kalender & Modals */
-            .cal-day { 
-                min-height: 60px; 
-                padding: 4px; 
-            }
-
-            .modal { 
-                max-width: 95%; 
-                max-height: 85vh; 
-                margin: auto; 
-            }
+            .cal-day { min-height: 60px; padding: 4px; }
+            .modal { max-width: 95%; max-height: 85vh; margin: auto; }
         }
     </style>
 </head>
@@ -527,8 +493,8 @@
         <div class="sidebar-logo">Heitmanns Pizza</div>
         <button class="nav-item active" onclick="navTo('dashboard', this)">Dashboard</button>
         <button class="nav-item" onclick="navTo('kalender', this)">Kalender</button>
-        <button class="nav-item" onclick="navTo('events', this)">Events &amp; Staffing</button>
-        <button class="nav-item admin-only" onclick="navTo('timesheet', this)">Personal &amp; Zeiten</button>
+        <button class="nav-item" onclick="navTo('events', this)">Events & Staffing</button>
+        <button class="nav-item admin-only" onclick="navTo('timesheet', this)">Personal & Zeiten</button>
         <button class="nav-item admin-only" onclick="navTo('catering', this)">Catering-Kalkulator</button>
         <button class="nav-item admin-only" onclick="navTo('pizza', this)">Pizza</button>
         <button class="nav-item admin-only" onclick="navTo('einkauf', this)">Einkaufsliste</button>
@@ -590,7 +556,7 @@
         <div class="page" id="page-events">
             <div class="page-header">
                 <div>
-                    <div class="page-title">Events &amp; Personalplanung</div>
+                    <div class="page-title">Events & Personalplanung</div>
                     <div class="page-subtitle">Verfügbarkeiten prüfen und Zuteilungen vornehmen</div>
                 </div>
                 <button class="btn-primary admin-only" onclick="openEventModal()">Neues Event anlegen</button>
@@ -601,7 +567,7 @@
         <div class="page admin-only" id="page-timesheet">
             <div class="page-header">
                 <div>
-                    <div class="page-title">Personal &amp; Zeiten</div>
+                    <div class="page-title">Personal & Zeiten</div>
                     <div class="page-subtitle">Erfassung und Auswertung von Arbeitszeiten</div>
                 </div>
                 <button class="btn-primary" onclick="openTimesheetModal()">Neue Erfassung</button>
@@ -672,7 +638,7 @@
             </div>
 
             <div class="card">
-                <div class="card-title">Bedarf &amp; Warenkorb <button class="btn-primary" onclick="saveToEinkauf()">In Einkaufsliste pushen</button></div>
+                <div class="card-title">Bedarf & Warenkorb <button class="btn-primary" onclick="saveToEinkauf()">In Einkaufsliste pushen</button></div>
                 <div id="ingredient-result"></div>
             </div>
         </div>
@@ -692,7 +658,7 @@
                         <input type="number" id="cat-gaeste" value="30" oninput="calcCatering()">
                     </div>
                     <div class="form-group">
-                        <label for="cat-km">Fahrtstrecke KM (hin &amp; zurück)</label>
+                        <label for="cat-km">Fahrtstrecke KM (hin & zurück)</label>
                         <input type="number" id="cat-km" value="50" oninput="calcCatering()">
                     </div>
                     <div class="form-group">
@@ -724,7 +690,7 @@
         <div class="page admin-only" id="page-kontakte">
             <div class="page-header">
                 <div>
-                    <div class="page-title">Kontakte &amp; Adressbuch</div>
+                    <div class="page-title">Kontakte & Adressbuch</div>
                     <div class="page-subtitle">Kunden, Lieferanten und Partner</div>
                 </div>
                 <button class="btn-primary" onclick="openKontaktModal()">Neuen Kontakt anlegen</button>
@@ -772,7 +738,7 @@
 
             <div id="panel-catering" class="settings-panel">
                 <div class="card">
-                    <div class="card-title">Globale Fixkosten &amp; Steuern</div>
+                    <div class="card-title">Globale Fixkosten & Steuern</div>
                     <div class="form-grid">
                         <div class="form-group"><label for="set-cat-gas">Gaspauschale (€)</label><input type="number" id="set-cat-gas" step="1"></div>
                         <div class="form-group"><label for="set-cat-entsorgung">Entsorgung (€)</label><input type="number" id="set-cat-entsorgung" step="1"></div>
@@ -788,7 +754,7 @@
 
             <div id="panel-scenarios" class="settings-panel">
                 <div class="card">
-                    <div class="card-title">Catering Staffeln (Gästezahl → Stunden &amp; Marge) <button class="btn-sm" onclick="addScenarioRow()">+ Staffel</button></div>
+                    <div class="card-title">Catering Staffeln (Gästezahl → Stunden & Marge) <button class="btn-sm" onclick="addScenarioRow()">+ Staffel</button></div>
                     <div class="table-wrap" id="scenarios-container"></div>
                     <button class="btn-primary" style="margin-top: 16px; width: 100%;" onclick="saveScenarios()">Staffeln speichern</button>
                 </div>
@@ -796,7 +762,7 @@
 
             <div id="panel-team" class="settings-panel">
                 <div class="card">
-                    <div class="card-title">Benutzer, Rollen &amp; Stundenlohn</div>
+                    <div class="card-title">Benutzer, Rollen & Stundenlohn</div>
                     <div class="table-wrap" id="team-list-container"></div>
                 </div>
             </div>
@@ -818,8 +784,6 @@
         <button class="superadmin-only" onclick="navTo('settings', this)">Settings</button>
     </nav>
 </div>
-
-<!-- ========== MODALS ========== -->
 
 <div class="modal-overlay" id="day-events-modal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="day-events-title">
@@ -956,7 +920,7 @@
                         <option>Milchprodukte / Käse</option>
                         <option>Sauce / Basis</option>
                         <option>Belag</option>
-                        <option>Gemüse &amp; Kräuter</option>
+                        <option>Gemüse & Kräuter</option>
                         <option>Dips</option>
                         <option>Sonstiges</option>
                     </select>
@@ -1001,7 +965,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label style="border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-bottom: 8px;">Zutaten &amp; Bestandteile</label>
+                <label style="border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-bottom: 8px;">Zutaten & Bestandteile</label>
                 <div id="builder-items-container"></div>
                 <button class="btn-sm" style="margin-top: 8px; align-self: flex-start;" onclick="addBuilderItemRow()">+ Bestandteil hinzufügen</button>
             </div>
@@ -1110,7 +1074,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, onValue, set, update, remove, runTransaction, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, onValue, set, update, remove, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 // ============================================================================
 // FIREBASE CONFIG
@@ -1127,7 +1091,7 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 // ============================================================================
-// XSS ESCAPING (zentral)
+// XSS ESCAPING & SICHERHEIT
 // ============================================================================
 const esc = (str) => {
     if (str === null || str === undefined) return '';
@@ -1136,8 +1100,8 @@ const esc = (str) => {
     }[tag] || tag));
 };
 
-// Erlaubt nur sichere Zeichen in IDs für die Verwendung in onclick-Handlern
-const safeId = (id) => String(id || '').replace(/[^a-zA-Z0-9_\-]/g, '');
+// Maskiert Strings extrem sicher für die direkte Injektion in Javascript-Funktionsaufrufe im HTML (z.B. onclick='foo("ID")')
+const escJs = (str) => String(str || '').replace(/['"\\]/g, '\\$&');
 
 // ============================================================================
 // STATE
@@ -1154,7 +1118,6 @@ let state = {
     currentUserName: ''
 };
 
-// Pizza-Mengen werden in localStorage persistiert (per User, nicht synchronisiert über Geräte)
 let pizzaMengen = {};
 let dipMengen = { aioli: 0, hothoney: 0 };
 
@@ -1169,7 +1132,6 @@ const colorMap = {
     'Preppen': 'tag-Preppen', 'Einkaufen': 'tag-Einkaufen', 'SocialMedia': 'tag-SocialMedia'
 };
 
-// Listener-Tracking gegen Mehrfach-Init (FIX aus Runde 2)
 let listenersInitialized = false;
 let unsubscribers = [];
 
@@ -1215,7 +1177,7 @@ function confirmAction(type, url) {
     }
 }
 
-// FIX (Runde 1, Punkt 10): Stundenberechnung mit korrektem Datum bei Mehrtages-Events
+// Korrekte Berechnung der Stunden, falls Schichten über Nacht gehen
 function calculateHours(startStr, endStr, startDateStr, endDateStr) {
     if (!startStr || !endStr) return 0;
     const [sH, sM] = startStr.split(':').map(Number);
@@ -1227,7 +1189,7 @@ function calculateHours(startStr, endStr, startDateStr, endDateStr) {
     const eDate = endDateStr ? new Date(endDateStr) : new Date(sDate);
     eDate.setHours(eH, eM, 0, 0);
 
-    // Falls kein End-Datum gegeben und Ende < Start → Mitternachtssprung
+    // Fallback: Wenn Enddatum fehlt, aber Uhrzeit kleiner ist -> Mitternachtssprung annehmen
     if (!endDateStr && eDate < sDate) {
         eDate.setDate(eDate.getDate() + 1);
     }
@@ -1236,18 +1198,9 @@ function calculateHours(startStr, endStr, startDateStr, endDateStr) {
     return diff > 0 ? diff : 0;
 }
 
-function getIngredient(id) {
-    return (state.ingredients || []).find(i => i.id === id);
-}
-
-function isAdminRole() {
-    return state.role === 'admin' || state.role === 'superadmin';
-}
-
-// FIX (Runde 1, Punkt 8): Korrekte Google Maps URL
-function mapsUrl(addr) {
-    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addr);
-}
+function getIngredient(id) { return (state.ingredients || []).find(i => i.id === id); }
+function isAdminRole() { return state.role === 'admin' || state.role === 'superadmin'; }
+function mapsUrl(addr) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addr); }
 
 // ============================================================================
 // AUTHENTICATION
@@ -1257,19 +1210,15 @@ onAuthStateChanged(auth, u => {
         $('login-screen').style.display = 'none';
         $('main-app').style.display = 'flex';
 
-        // Eigenes User-Profil hören (für Rolle und Name)
         const userRef = ref(db, 'users/' + u.uid);
         const unsubUser = onValue(userRef, snap => {
             const user = snap.val();
             if (!user) {
-                // FIX (Runde 2): Self-Registration entfernt.
-                // Wenn User zwar in Auth existiert, aber nicht in DB → Profil minimal anlegen
                 set(userRef, { email: u.email, role: 'staff', cleaningPoints: 0, wage: 14 })
                     .catch(() => showToast('Profil konnte nicht angelegt werden. Bitte beim Admin melden.', 'error'));
                 return;
             }
 
-            // FIX (Runde 1): Cancel-safer Name-Prompt
             if (!user.name || user.name.trim() === '') {
                 let attempts = 0;
                 let n = prompt("Bitte gib deinen Vor- und Nachnamen ein:");
@@ -1294,7 +1243,6 @@ onAuthStateChanged(auth, u => {
 
             enforceRBAC();
 
-            // FIX (Runde 2): Listener nur EINMAL initialisieren
             if (!listenersInitialized) {
                 listenersInitialized = true;
                 initGranularListeners();
@@ -1305,7 +1253,6 @@ onAuthStateChanged(auth, u => {
     } else {
         $('login-screen').style.display = 'flex';
         $('main-app').style.display = 'none';
-        // Cleanup beim Logout
         teardownListeners();
         listenersInitialized = false;
         state.role = 'staff';
@@ -1327,16 +1274,11 @@ function doLogin() {
     const e = $('login-email').value.trim();
     const p = $('login-pass').value;
 
-    if (!e || p.length !== 4) {
-        return alert("Bitte gültige E-Mail und 4-stellige PIN eingeben!");
-    }
+    if (!e || p.length !== 4) return alert("Bitte gültige E-Mail und 4-stellige PIN eingeben!");
 
     const pw = p + "-hp26";
-    // FIX (Runde 2, kritisch): KEINE automatische Registrierung mehr
     signInWithEmailAndPassword(auth, e, pw).catch(err => {
-        if (err.code === 'auth/invalid-credential' ||
-            err.code === 'auth/user-not-found' ||
-            err.code === 'auth/wrong-password') {
+        if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
             alert("Login fehlgeschlagen. Falls du noch keinen Account hast, melde dich beim Admin – Accounts werden manuell angelegt.");
         } else {
             alert("Login-Fehler: " + (err.message || err.code));
@@ -1344,21 +1286,15 @@ function doLogin() {
     });
 }
 
-// FIX (Runde 2): Härteres RBAC – entfernt sensible Elemente komplett aus dem DOM
 function enforceRBAC() {
-    if (!isAdminRole()) {
-        document.querySelectorAll('.admin-only').forEach(el => el.remove());
-    }
-    if (state.role !== 'superadmin') {
-        document.querySelectorAll('.superadmin-only').forEach(el => el.remove());
-    }
+    if (!isAdminRole()) document.querySelectorAll('.admin-only').forEach(el => el.remove());
+    if (state.role !== 'superadmin') document.querySelectorAll('.superadmin-only').forEach(el => el.remove());
 }
 
 // ============================================================================
-// LISTENERS – granular, mit bedingten Subscriptions je nach Rolle
+// LISTENERS
 // ============================================================================
 function initGranularListeners() {
-    // Alle Rollen brauchen: events, users (Namen), ingredients, recipes, pizzas
     unsubscribers.push(onValue(ref(db, 'events'), snap => {
         const d = snap.val() || {};
         state.events = Object.values(d).filter(ev => ev && ev.id)
@@ -1424,7 +1360,6 @@ function initGranularListeners() {
         if (p && document.activeElement !== p) p.value = state.pinnwand;
     }));
 
-    // Admin-only: kontakte, einkauf, timesheets
     if (isAdminRole()) {
         unsubscribers.push(onValue(ref(db, 'kontakte'), snap => {
             const d = snap.val() || {};
@@ -1442,6 +1377,15 @@ function initGranularListeners() {
             const d = snap.val() || {};
             state.timesheets = Object.values(d).filter(t => t && t.id);
             renderTimesheets();
+            renderEventList(); // Weil auch hier die eigenen Zeiten der User drinstehen
+        }));
+    } else {
+        // Staff muss seine eigenen erfassten Zeiten lesen dürfen, um sie in der Eventliste zu sehen
+        unsubscribers.push(onValue(ref(db, 'timesheets'), snap => {
+            const d = snap.val() || {};
+            // Firebase filtert über die Rules bereits aus, aber zur Sicherheit lokal:
+            state.timesheets = Object.values(d).filter(t => t && t.id && t.userId === auth.currentUser.uid);
+            renderEventList();
         }));
     }
 }
@@ -1458,7 +1402,6 @@ function navTo(id, btn) {
 }
 
 function switchSettingsTab(id, btn) {
-    // Nur die Tabs des aktuell aktiven Settings-Containers anfassen
     const container = btn.closest('.page');
     if (!container) return;
     container.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
@@ -1515,7 +1458,7 @@ function updateDashboard() {
     const de = $('dash-events');
     if (de) {
         de.innerHTML = next.map(e => `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer;" onclick="showEventDetail('${safeId(e.id)}')">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer;" onclick="showEventDetail('${escJs(e.id)}')">
                 <div>
                     <b style="font-size:14px;">${esc(e.title)}</b><br>
                     <div style="color:var(--muted); font-size:12px; margin-top:2px;">${esc(e.date)}${e.endDate && e.endDate !== e.date ? ' - ' + esc(e.endDate) : ''} · ${esc(e.type)}</div>
@@ -1604,7 +1547,7 @@ function openDayEventsModal(dateStr) {
         html = '<div style="color:var(--muted); font-size:14px; padding:16px 0;">Keine Termine an diesem Tag.</div>';
     } else {
         html = visibleEvs.map(e => `
-            <div class="list-item" style="cursor:pointer; margin-bottom:8px; padding:12px;" onclick="closeModal('day-events-modal'); showEventDetail('${safeId(e.id)}')">
+            <div class="list-item" style="cursor:pointer; margin-bottom:8px; padding:12px;" onclick="closeModal('day-events-modal'); showEventDetail('${escJs(e.id)}')">
                 <div style="flex:1;">
                     <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">${esc(e.type)}</div>
                     <div style="font-size:16px; font-weight:700;">${esc(e.title)}</div>
@@ -1628,7 +1571,7 @@ function openDayEventsModal(dateStr) {
 }
 
 // ============================================================================
-// EVENTS & STAFFING
+// EVENTS & STAFFING (inkl. Zeiterfassung Update)
 // ============================================================================
 function renderEventList() {
     const c = $('all-events-list');
@@ -1642,35 +1585,36 @@ function renderEventList() {
         const todayStr = new Date().toISOString().split('T')[0];
         const isPastEvent = todayStr >= e.date;
 
-        // Stunden lesen: Single Source via timesheets, Fallback events.loggedHours (Legacy)
-        let loggedHours = '';
-        const userTs = state.timesheets.find(ts => ts.eventId === e.id && ts.userId === uid);
-        if (userTs) loggedHours = userTs.totalHours;
-        else if (e.loggedHours && e.loggedHours[uid] !== undefined) loggedHours = e.loggedHours[uid];
-
         let timeEntryHtml = '';
         if (e.status === 'Secured' && isPastEvent) {
+            const userTs = state.timesheets.find(ts => ts.eventId === e.id && ts.userId === uid);
+            
             timeEntryHtml = `
-                <div style="margin-left:auto; display:flex; align-items:center; gap:8px; background:#f8fafc; padding:4px 8px; border-radius:8px;">
-                    <input type="number" id="hours-${safeId(e.id)}" placeholder="Std." style="width:60px; padding:6px; border:none; background:#fff;" value="${esc(loggedHours)}">
-                    <button class="btn-sm btn-primary" onclick="logHours('${safeId(e.id)}')">Speichern</button>
+                <div style="width:100%; margin-top:12px; display:flex; align-items:center; gap:8px; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid var(--border); flex-wrap:wrap;">
+                    <div style="font-size:11px; font-weight:700; color:var(--muted); width:100%;">MEINE ZEITEN ERFASSEN:</div>
+                    <div style="display:flex; flex:1; gap:6px; align-items:center;">
+                        <input type="time" id="ts-start-${esc(e.id)}" value="${esc(userTs ? userTs.start : (e.time || ''))}" style="padding:8px; background:#fff; border:1px solid var(--border);">
+                        <span style="font-size:12px; color:var(--muted);">bis</span>
+                        <input type="time" id="ts-end-${esc(e.id)}" value="${esc(userTs ? userTs.end : (e.timeEnd || ''))}" style="padding:8px; background:#fff; border:1px solid var(--border);">
+                    </div>
+                    <button class="btn-sm btn-primary" style="height:36px;" onclick="logHours('${escJs(e.id)}')">Speichern</button>
                 </div>
             `;
         }
 
         return `
             <div class="event-card">
-                <div class="event-card-header" onclick="showEventDetail('${safeId(e.id)}')">
+                <div class="event-card-header" onclick="showEventDetail('${escJs(e.id)}')">
                     <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">${esc(e.type)} · ${esc(e.date)}${e.endDate && e.endDate !== e.date ? ' bis ' + esc(e.endDate) : ''}</div>
                     ${statusBadge(e.status)}
                 </div>
-                <div class="event-card-body" onclick="showEventDetail('${safeId(e.id)}')">
+                <div class="event-card-body" onclick="showEventDetail('${escJs(e.id)}')">
                     <div style="font-size:18px; font-weight:700;">${esc(e.title)}</div>
                     <div style="color:var(--muted); font-size:13px; margin-top:4px;">📍 ${esc(e.ort || 'Kein Ort angegeben')}</div>
                 </div>
                 <div class="event-card-footer">
-                    <button class="btn-sm ${isAvail ? 'btn-green' : ''}" onclick="toggleAvail('${safeId(e.id)}', true)">${isAvail ? '✅ Zugesagt' : '🙋‍♂️ Habe Zeit'}</button>
-                    <button class="btn-sm ${isUnavail ? 'btn-danger' : ''}" onclick="toggleAvail('${safeId(e.id)}', false)">${isUnavail ? '❌ Abgesagt' : '🚫 Keine Zeit'}</button>
+                    <button class="btn-sm ${isAvail ? 'btn-green' : ''}" onclick="toggleAvail('${escJs(e.id)}', true)">${isAvail ? '✅ Zugesagt' : '🙋‍♂️ Habe Zeit'}</button>
+                    <button class="btn-sm ${isUnavail ? 'btn-danger' : ''}" onclick="toggleAvail('${escJs(e.id)}', false)">${isUnavail ? '❌ Abgesagt' : '🚫 Keine Zeit'}</button>
                     ${timeEntryHtml}
                 </div>
             </div>
@@ -1679,7 +1623,7 @@ function renderEventList() {
 }
 
 function toggleAvail(eid, isAvailable) {
-    const ev = state.events.find(e => e.id === eid);
+    const ev = state.events.find(e => String(e.id) === String(eid));
     if (!ev) return;
     const uid = auth.currentUser.uid;
 
@@ -1782,7 +1726,7 @@ function handleCrewDropdownSelect() {
     const existing = Array.from(crewDiv.querySelectorAll('.crew-chip')).map(el => el.dataset.uid);
 
     if (!existing.includes(uid)) {
-        const ev = state.editEventId ? state.events.find(e => e.id === state.editEventId) : null;
+        const ev = state.editEventId ? state.events.find(e => String(e.id) === String(state.editEventId)) : null;
         const u = state.users.find(user => user.uid === uid);
         if (!u) { dropdown.value = ''; return; }
 
@@ -1813,8 +1757,10 @@ function handleCrewDropdownSelect() {
 }
 
 function openEventModal(id, dateStr) {
+    if (id && typeof id === 'object') id = null; // Bugfix: Verhindert, dass Event-Objekte beim leeren onclick reinkommen
     state.editEventId = id || null;
-    const ev = id ? state.events.find(e => e.id === id) : null;
+    
+    const ev = id ? state.events.find(e => String(e.id) === String(id)) : null;
 
     const src = Object.assign({
         title: '', type: 'Catering', date: dateStr || '', endDate: dateStr || '',
@@ -1831,7 +1777,7 @@ function openEventModal(id, dateStr) {
 
     let custHtml = '<option value="">-- Keinen Kontakt zugewiesen --</option>';
     state.kontakte.forEach(k => {
-        const sel = k.id === src.customerContactId ? 'selected' : '';
+        const sel = String(k.id) === String(src.customerContactId) ? 'selected' : '';
         custHtml += `<option value="${esc(k.id)}" ${sel}>${esc(k.name)}${k.firma ? ' (' + esc(k.firma) + ')' : ''}</option>`;
     });
     $('ev-customer-select').innerHTML = custHtml;
@@ -1864,7 +1810,7 @@ function openEventModal(id, dateStr) {
 
 function saveEvent() {
     const id = state.editEventId || 'ev_' + Date.now();
-    const oldEv = state.events.find(x => x.id === id);
+    const oldEv = state.events.find(x => String(x.id) === String(id));
     const oldStatus = oldEv ? oldEv.status : null;
     const newStatus = $('ev-status').value;
     const crew = Array.from(document.querySelectorAll('.crew-chip.active')).map(el => el.dataset.uid);
@@ -1907,16 +1853,16 @@ function saveEvent() {
 }
 
 function showEventDetail(id) {
-    const ev = state.events.find(e => e.id === id);
+    const ev = state.events.find(e => String(e.id) === String(id));
     if (!ev) return;
 
     const mapLink = ev.ort
-        ? `<a href="javascript:void(0)" onclick="confirmAction('map', '${esc(mapsUrl(ev.ort))}')">📍 ${esc(ev.ort)}</a>`
+        ? `<a href="javascript:void(0)" onclick="confirmAction('map', '${escJs(mapsUrl(ev.ort))}')">📍 ${esc(ev.ort)}</a>`
         : '–';
 
     let customerStr = '';
     if (ev.type === 'Catering' && ev.customerContactId) {
-        const cust = state.kontakte.find(k => k.id === ev.customerContactId);
+        const cust = state.kontakte.find(k => String(k.id) === String(ev.customerContactId));
         if (cust) customerStr = `<div><span style="color:var(--muted); font-size:11px; text-transform:uppercase;">Kunde</span><br><b>${esc(cust.name)}${cust.firma ? ' (' + esc(cust.firma) + ')' : ''}</b></div>`;
     }
 
@@ -1940,7 +1886,7 @@ function showEventDetail(id) {
 
     if (isAdminRole() && ev.status === 'Secured') {
         if (!ev.cleaningDoneBy) {
-            html += `<button class="btn-primary" style="width:100%; padding:12px; font-size:15px;" onclick="markCleaningDone('${safeId(ev.id)}')">Putzdienst für dieses Event übernehmen</button>`;
+            html += `<button class="btn-primary" style="width:100%; padding:12px; font-size:15px;" onclick="markCleaningDone('${escJs(ev.id)}')">Putzdienst für dieses Event übernehmen</button>`;
         } else {
             const cleaner = state.users.find(u => u.uid === ev.cleaningDoneBy);
             const cleanerName = cleaner ? cleaner.name : 'Ein Admin';
@@ -1950,8 +1896,8 @@ function showEventDetail(id) {
 
     html += `</div>
         <div class="modal-footer">
-            ${isAdminRole() ? `<button class="btn-danger" onclick="deleteEvent('${safeId(id)}')">Event löschen</button>
-            <button onclick="closeModal('detail-modal'); openEventModal('${safeId(id)}')">Bearbeiten</button>` : ''}
+            ${isAdminRole() ? `<button class="btn-danger" onclick="deleteEvent('${escJs(id)}')">Event löschen</button>
+            <button onclick="closeModal('detail-modal'); openEventModal('${escJs(id)}')">Bearbeiten</button>` : ''}
             <button class="btn-primary" onclick="closeModal('detail-modal')">Schließen</button>
         </div>
     `;
@@ -1964,7 +1910,7 @@ function deleteEvent(id) {
     if (!confirm("Möchtest du dieses Event und alle zugehörigen Daten wirklich löschen?")) return;
 
     remove(ref(db, 'events/' + id)).then(() => {
-        const relatedTimesheets = state.timesheets.filter(ts => ts.eventId === id);
+        const relatedTimesheets = state.timesheets.filter(ts => String(ts.eventId) === String(id));
         const promises = relatedTimesheets.map(ts => remove(ref(db, 'timesheets/' + ts.id)));
         return Promise.all(promises);
     }).then(() => {
@@ -1974,7 +1920,7 @@ function deleteEvent(id) {
 }
 
 function markCleaningDone(eid) {
-    const ev = state.events.find(x => x.id === eid);
+    const ev = state.events.find(x => String(x.id) === String(eid));
     if (!ev) return;
     const pts = ev.personen > 100 ? 3 : (ev.personen > 50 ? 2 : 1);
     const uid = auth.currentUser.uid;
@@ -1985,35 +1931,46 @@ function markCleaningDone(eid) {
 }
 
 function logHours(eid) {
-    const inputEl = $('hours-' + eid);
-    if (!inputEl) return;
-    const h = parseFloat(inputEl.value);
-    if (isNaN(h) || h < 0 || h > 24) return showToast("Bitte gültige Zahl (0-24) eingeben!", 'error');
+    const startEl = $('ts-start-' + eid);
+    const endEl = $('ts-end-' + eid);
+    
+    if (!startEl || !endEl) return;
+    const startVal = startEl.value;
+    const endVal = endEl.value;
+
+    if (!startVal || !endVal) return showToast("Bitte Start- und Endzeit angeben!", 'error');
 
     const uid = auth.currentUser.uid;
-    const ev = state.events.find(e => e.id === eid);
+    const ev = state.events.find(e => String(e.id) === String(eid));
     if (!ev) return;
+
     const user = state.users.find(u => u.uid === uid);
     const wage = user ? (Number(user.wage) || 14) : 14;
 
-    // Single Source of Truth: Wir schreiben primär ins Timesheets-Node
-    // Legacy events.loggedHours wird parallel aktuell gehalten für Rückwärtskompatibilität
+    const evStartDate = ev.date;
+    const evEndDate = ev.endDate || ev.date;
+
+    const h = calculateHours(startVal, endVal, evStartDate, evEndDate);
+    if (h <= 0) return showToast("Zeitraum ist ungültig oder 0 Stunden.", 'error');
+
+    // Single Source of Truth
     set(ref(db, `events/${eid}/loggedHours/${uid}`), h);
 
-    if (isAdminRole()) {
-        // Admin darf ein vollständiges Timesheet-Objekt schreiben
-        const existingTs = state.timesheets.find(t => t.eventId === eid && t.userId === uid);
-        const tsId = existingTs ? existingTs.id : 'ts_' + Date.now() + '_' + uid;
-        const ts = {
-            id: tsId, eventId: eid, userId: uid, date: ev.date,
-            start: ev.time || "00:00", end: ev.timeEnd || "00:00",
-            bonus: 0, workHours: Number(h.toFixed(2)), totalHours: Number(h.toFixed(2)),
-            wage: Number(wage), totalCost: Number((h * wage).toFixed(2))
-        };
-        set(ref(db, 'timesheets/' + tsId), ts);
-    }
+    const existingTs = state.timesheets.find(t => String(t.eventId) === String(eid) && String(t.userId) === String(uid));
+    const tsId = existingTs ? existingTs.id : 'ts_' + Date.now() + '_' + uid;
+    const bonus = existingTs ? existingTs.bonus : 0;
+    const totalHours = h + bonus;
 
-    showToast("Stunden erfasst!", 'success');
+    const ts = {
+        id: tsId, eventId: eid, userId: uid, date: ev.date,
+        start: startVal, end: endVal,
+        bonus: bonus, workHours: Number(h.toFixed(2)), totalHours: Number(totalHours.toFixed(2)),
+        wage: Number(wage), totalCost: Number((totalHours * wage).toFixed(2))
+    };
+
+    set(ref(db, 'timesheets/' + tsId), ts)
+        .then(() => showToast("Zeiten erfasst!", 'success'))
+        .catch(() => showToast("Fehler beim Speichern.", 'error'));
 }
 
 // ============================================================================
@@ -2029,8 +1986,8 @@ function renderTimesheets() {
     let userStats = {};
 
     validTimesheets.sort((a, b) => (b.date || "").localeCompare(a.date || "")).forEach(ts => {
-        const user = state.users.find(u => u.uid === ts.userId) || { name: 'Gelöschter User', wage: 0 };
-        const ev = state.events.find(e => e.id === ts.eventId) || { title: 'Gelöschtes Event' };
+        const user = state.users.find(u => String(u.uid) === String(ts.userId)) || { name: 'Gelöschter User', wage: 0 };
+        const ev = state.events.find(e => String(e.id) === String(ts.eventId)) || { title: 'Gelöschtes Event' };
         const tHours = Number(ts.totalHours) || 0;
         const tCost = Number(ts.totalCost) || 0;
 
@@ -2051,9 +2008,9 @@ function renderTimesheets() {
             <td>${tHours.toFixed(2)}h ${Number(ts.bonus) > 0 ? `(+${esc(ts.bonus)}h)` : ''}</td>
             <td>${fmt(tCost)}</td>
             <td>
-                <button class="btn-sm" onclick="openTimesheetModal('${safeId(ts.id)}')">✏️</button>
-                <button class="btn-sm btn-danger" onclick="deleteTimesheet('${safeId(ts.id)}')">🗑️</button>
-                <button class="btn-sm btn-primary" onclick="printReceipt('${safeId(ts.id)}')">PDF</button>
+                <button class="btn-sm" onclick="openTimesheetModal('${escJs(ts.id)}')">✏️</button>
+                <button class="btn-sm btn-danger" onclick="deleteTimesheet('${escJs(ts.id)}')">🗑️</button>
+                <button class="btn-sm btn-primary" onclick="printReceipt('${escJs(ts.id)}')">PDF</button>
             </td>
         </tr>`;
     });
@@ -2080,8 +2037,9 @@ function renderTimesheets() {
 }
 
 function openTimesheetModal(id) {
+    if (id && typeof id === 'object') id = null;
     state.editTimesheetId = id || null;
-    const ts = id ? state.timesheets.find(t => t.id === id) : null;
+    const ts = id ? state.timesheets.find(t => String(t.id) === String(id)) : null;
 
     $('ts-event-id').innerHTML = '<option value="">-- Event wählen --</option>' +
         state.events.map(e => `<option value="${esc(e.id)}">${esc(e.date)} - ${esc(e.title)}</option>`).join('');
@@ -2119,10 +2077,10 @@ function saveTimesheet() {
         return alert("Bitte alle Pflichtfelder (Event, Mitarbeiter, Datum, Zeiten) ausfüllen!");
     }
 
-    const user = state.users.find(u => u.uid === userId);
+    const user = state.users.find(u => String(u.uid) === String(userId));
     const wage = user ? (Number(user.wage) || 14) : 14;
 
-    const ev = state.events.find(e => e.id === eventId);
+    const ev = state.events.find(e => String(e.id) === String(eventId));
     const evStartDate = ev ? ev.date : date;
     const evEndDate = ev ? (ev.endDate || ev.date) : date;
 
@@ -2150,10 +2108,10 @@ function deleteTimesheet(id) {
 }
 
 function printReceipt(tsId) {
-    const ts = state.timesheets.find(t => t.id === tsId);
+    const ts = state.timesheets.find(t => String(t.id) === String(tsId));
     if (!ts) return;
-    const ev = state.events.find(e => e.id === ts.eventId) || { title: 'Unbekannt', type: '-', date: ts.date };
-    const user = state.users.find(u => u.uid === ts.userId) || { name: 'Unbekannt' };
+    const ev = state.events.find(e => String(e.id) === String(ts.eventId)) || { title: 'Unbekannt', type: '-', date: ts.date };
+    const user = state.users.find(u => String(u.uid) === String(ts.userId)) || { name: 'Unbekannt' };
 
     const html = `
         <html><head><title>Abrechnung - ${esc(user.name)}</title>
@@ -2205,9 +2163,9 @@ function renderPizzaGrid() {
         <div class="card">
             <div class="card-title">${esc(p.name)} <span>${fmt(p.price)}</span></div>
             <div class="pizza-qty">
-                <button onclick="changePizza('${esc(p.name)}', -5)">-</button>
-                <input type="number" id="pqty-${safeId(p.id)}" value="${pizzaMengen[p.name] || 0}" readonly>
-                <button onclick="changePizza('${esc(p.name)}', 5)">+</button>
+                <button onclick="changePizza('${escJs(p.name)}', -5)">-</button>
+                <input type="number" id="pqty-${esc(p.id)}" value="${pizzaMengen[p.name] || 0}" readonly>
+                <button onclick="changePizza('${escJs(p.name)}', 5)">+</button>
             </div>
         </div>
     `).join('');
@@ -2244,7 +2202,7 @@ function calcIngredients() {
     const raw = {};
     const addGrams = (key, grams) => { raw[key] = (raw[key] || 0) + grams; };
     const expand = (recipeId, qty) => {
-        const recipe = state.recipes.find(x => x.id === recipeId);
+        const recipe = state.recipes.find(x => String(x.id) === String(recipeId));
         if (!recipe) return;
         const ratio = recipe.yieldGrams ? (qty / recipe.yieldGrams) : qty;
         (recipe.items || []).forEach(item => {
@@ -2497,7 +2455,6 @@ function saveNewIngredient() {
         return alert("Bitte fülle alle Felder inkl. Preise und Artikelnummer aus!");
     }
 
-    // Firebase-Pfade dürfen ., #, $, [, ], / nicht enthalten
     if (/[.#$\[\]\/]/.test(name)) {
         return alert("Der Name darf keine der Zeichen . # $ [ ] / enthalten.");
     }
@@ -2510,7 +2467,7 @@ function saveNewIngredient() {
 
 function renderBuilderItems() {
     const ingOpts = state.ingredients.map(i => `<option value="ing_${esc(i.id)}">${esc(i.name)}</option>`).join('');
-    const recOpts = state.recipes.filter(r => r.id !== builderEditId).map(r => `<option value="rec_${esc(r.id)}">${esc(r.name)} (Rezept)</option>`).join('');
+    const recOpts = state.recipes.filter(r => String(r.id) !== String(builderEditId)).map(r => `<option value="rec_${esc(r.id)}">${esc(r.name)} (Rezept)</option>`).join('');
 
     const html = builderItems.map((item, idx) => `
         <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center; background:#f8fafc; padding:8px; border-radius:8px;">
@@ -2527,7 +2484,6 @@ function renderBuilderItems() {
     const c = $('builder-items-container');
     c.innerHTML = html;
 
-    // Vorhandene Werte setzen + Listener anhängen (kein inline onclick mit Index → vermeidet Race)
     c.querySelectorAll('.builder-ref-select').forEach(sel => {
         const idx = Number(sel.dataset.idx);
         sel.value = builderItems[idx] ? builderItems[idx].ref : '';
@@ -2563,7 +2519,7 @@ function calculateBuilderTotal() {
     let totalCostNet = 0;
 
     const expandCost = (rId, qty) => {
-        const r = state.recipes.find(x => x.id === rId);
+        const r = state.recipes.find(x => String(x.id) === String(rId));
         if (!r) return { gross: 0, net: 0 };
         const ratio = r.yieldGrams ? (qty / r.yieldGrams) : qty;
         let cGross = 0, cNet = 0;
@@ -2610,9 +2566,10 @@ function calculateBuilderTotal() {
 }
 
 function openRecipeModal(id) {
+    if (id && typeof id === 'object') id = null;
     builderType = 'recipe';
     builderEditId = id || null;
-    const r = id ? state.recipes.find(x => x.id === id) : null;
+    const r = id ? state.recipes.find(x => String(x.id) === String(id)) : null;
 
     $('builder-title').textContent = r ? 'Rezept bearbeiten' : 'Neues Rezept';
     $('builder-name').value = r ? r.name : '';
@@ -2631,9 +2588,10 @@ function openRecipeModal(id) {
 }
 
 function openPizzaModal(id) {
+    if (id && typeof id === 'object') id = null;
     builderType = 'pizza';
     builderEditId = id || null;
-    const p = id ? state.pizzas.find(x => x.id === id) : null;
+    const p = id ? state.pizzas.find(x => String(x.id) === String(id)) : null;
 
     $('builder-title').textContent = p ? 'Pizza bearbeiten' : 'Neue Pizza';
     $('builder-name').value = p ? p.name : '';
@@ -2674,7 +2632,6 @@ function saveBuilder() {
     }
 }
 
-// FIX (Runde 1, Punkt 18): deleteRecipe und deletePizza fehlten
 function deleteRecipe(id) {
     if (!confirm("Dieses Rezept wirklich löschen? Pizzen, die es verwenden, könnten danach falsch kalkulieren.")) return;
     remove(ref(db, 'recipes/' + id))
@@ -2700,13 +2657,18 @@ function deleteIngredient(id) {
 // KONTAKTE
 // ============================================================================
 function openKontaktModal(id) {
+    // Bugfix: Wenn "Neuer Kontakt" geklickt wird, übergibt der Browser manchmal das Event-Objekt
+    if (id && typeof id === 'object') id = null; 
+    
     state.editKontaktId = id || null;
-    const k = id ? state.kontakte.find(x => x.id === id) : null;
+    const k = id ? state.kontakte.find(x => String(x.id) === String(id)) : null;
+    
     $('kt-name').value = k ? (k.name || '') : '';
     $('kt-firma').value = k ? (k.firma || '') : '';
     $('kt-tel').value = k ? (k.tel || '') : '';
     $('kt-email').value = k ? (k.email || '') : '';
     $('kt-adresse').value = k ? (k.adresse || '') : '';
+    
     openModal('kontakt-modal');
 }
 
@@ -2742,14 +2704,14 @@ function renderKontakte() {
                     <div style="font-size: 18px; font-weight: 700; color: var(--text);">${esc(k.name)}</div>
                     ${k.firma ? `<div style="font-size: 13px; color: var(--muted); margin-top: 4px;">🏢 ${esc(k.firma)}</div>` : ''}
                     <div style="display:flex; flex-direction:column; gap:4px; margin-top: 12px; font-size:13px;">
-                        ${k.tel ? `<div>📞 <a href="javascript:void(0)" onclick="confirmAction('tel', 'tel:${esc(k.tel)}')" style="color:var(--text); text-decoration:none;">${esc(k.tel)}</a></div>` : ''}
-                        ${k.email ? `<div>✉️ <a href="javascript:void(0)" onclick="confirmAction('mail', 'mailto:${esc(k.email)}')" style="color:var(--text); text-decoration:none;">${esc(k.email)}</a></div>` : ''}
-                        ${k.adresse ? `<div>📍 <a href="javascript:void(0)" onclick="confirmAction('map', '${esc(mapsUrl(k.adresse))}')" style="color:var(--text); text-decoration:none;">${esc(k.adresse)}</a></div>` : ''}
+                        ${k.tel ? `<div>📞 <a href="javascript:void(0)" onclick="confirmAction('tel', 'tel:${escJs(k.tel)}')" style="color:var(--text); text-decoration:none;">${esc(k.tel)}</a></div>` : ''}
+                        ${k.email ? `<div>✉️ <a href="javascript:void(0)" onclick="confirmAction('mail', 'mailto:${escJs(k.email)}')" style="color:var(--text); text-decoration:none;">${esc(k.email)}</a></div>` : ''}
+                        ${k.adresse ? `<div>📍 <a href="javascript:void(0)" onclick="confirmAction('map', '${escJs(mapsUrl(k.adresse))}')" style="color:var(--text); text-decoration:none;">${esc(k.adresse)}</a></div>` : ''}
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button class="btn-sm" onclick="openKontaktModal('${safeId(k.id)}')">Bearbeiten</button>
-                    <button class="btn-danger btn-sm" onclick="deleteKontakt('${safeId(k.id)}')">Löschen</button>
+                    <button class="btn-sm" onclick="openKontaktModal('${escJs(k.id)}')">Bearbeiten</button>
+                    <button class="btn-danger btn-sm" onclick="deleteKontakt('${escJs(k.id)}')">Löschen</button>
                 </div>
             </div>
         </div>
@@ -2760,30 +2722,27 @@ function renderKontakte() {
 // EINSTELLUNGEN
 // ============================================================================
 function renderSettings() {
-    // Zutaten-Tabelle
     let h = '<table><tr><th>Zutat</th><th>Lieferant / Art-Nr</th><th>Netto</th><th>Brutto</th><th>Aktion</th></tr>';
     [...(state.ingredients || [])].sort((a, b) => a.name.localeCompare(b.name)).forEach(i => {
-        const safeKey = safeId(i.id) + '_' + (i.id ? i.id.length : 0);
         h += `<tr>
             <td style="max-width:150px; word-wrap:break-word;"><b>${esc(i.name)}</b></td>
             <td>${esc(i.supplier)}<br><span style="font-size:10px;color:var(--muted)">Art: ${esc(i.articleNumber || '-')}</span></td>
             <td><input type="number" step="0.01" data-ing-net="${esc(i.id)}" value="${esc(i.priceNet)}" style="width:70px; padding:6px;"></td>
             <td><input type="number" step="0.01" data-ing-gross="${esc(i.id)}" value="${esc(i.priceGross)}" style="width:70px; padding:6px;"></td>
-            <td><button class="btn-danger btn-sm" onclick="deleteIngredient('${esc(i.id).replace(/'/g,"\\'")}')">Löschen</button></td>
+            <td><button class="btn-danger btn-sm" onclick="deleteIngredient('${escJs(i.id)}')">Löschen</button></td>
         </tr>`;
     });
     h += '</table>';
     const sa = $('settings-art-list');
     if (sa) sa.innerHTML = h;
 
-    // Sub-Rezepte Liste
     let rh = '<table><tr><th>Rezept</th><th>Ertrag (g)</th><th>Aktion</th></tr>';
     (state.recipes || []).forEach(r => {
         rh += `<tr>
             <td><b>${esc(r.name)}</b></td><td>${esc(r.yieldGrams)}g</td>
             <td>
-                <button class="btn-sm" onclick="openRecipeModal('${safeId(r.id)}')">Bearbeiten</button>
-                <button class="btn-sm btn-danger" onclick="deleteRecipe('${safeId(r.id)}')">Löschen</button>
+                <button class="btn-sm" onclick="openRecipeModal('${escJs(r.id)}')">Bearbeiten</button>
+                <button class="btn-sm btn-danger" onclick="deleteRecipe('${escJs(r.id)}')">Löschen</button>
             </td>
         </tr>`;
     });
@@ -2791,14 +2750,13 @@ function renderSettings() {
     const sr = $('settings-recipes-list');
     if (sr) sr.innerHTML = rh;
 
-    // Pizzen Liste
     let ph = '<table><tr><th>Pizza</th><th>Preis</th><th>Aktion</th></tr>';
     (state.pizzas || []).forEach(p => {
         ph += `<tr>
             <td><b>${esc(p.name)}</b></td><td>${fmt(p.price)}</td>
             <td>
-                <button class="btn-sm" onclick="openPizzaModal('${safeId(p.id)}')">Bearbeiten</button>
-                <button class="btn-sm btn-danger" onclick="deletePizza('${safeId(p.id)}')">Löschen</button>
+                <button class="btn-sm" onclick="openPizzaModal('${escJs(p.id)}')">Bearbeiten</button>
+                <button class="btn-sm btn-danger" onclick="deletePizza('${escJs(p.id)}')">Löschen</button>
             </td>
         </tr>`;
     });
@@ -2806,30 +2764,27 @@ function renderSettings() {
     const sp = $('settings-pizzas-list');
     if (sp) sp.innerHTML = ph;
 
-    // Catering Parameters
     const defs = state.cateringDefaults || {};
     ['gas', 'entsorgung', 'miete', 'kmsatz', 'waren', 'ust', 'stundensatz'].forEach(k => {
         const el = $('set-cat-' + k);
         if (el) el.value = defs[k] !== undefined ? defs[k] : 0;
     });
 
-    // Catering Scenarios
     renderScenarios();
 
-    // Team
     let th = '<table><tr><th>Name</th><th>Rolle</th><th>Lohn (€)</th><th>Aktion</th></tr>';
     state.users.forEach(u => {
         th += `<tr>
             <td><b>${esc(u.name || u.email)}</b><br><span style="font-size:10px;color:var(--muted)">${esc(u.email)}</span></td>
             <td>
-                <select id="role-${safeId(u.uid)}" style="padding:6px;">
+                <select id="role-${esc(u.uid)}" style="padding:6px;">
                     <option value="staff" ${u.role === 'staff' ? 'selected' : ''}>Mitarbeiter</option>
                     <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
                     <option value="superadmin" ${u.role === 'superadmin' ? 'selected' : ''}>Superadmin</option>
                 </select>
             </td>
-            <td><input type="number" id="wage-${safeId(u.uid)}" value="${esc(u.wage || 14)}" style="width:70px; padding:6px;"></td>
-            <td><button class="btn-primary btn-sm" onclick="updateUser('${safeId(u.uid)}')">Speichern</button></td>
+            <td><input type="number" id="wage-${esc(u.uid)}" value="${esc(u.wage || 14)}" style="width:70px; padding:6px;"></td>
+            <td><button class="btn-primary btn-sm" onclick="updateUser('${escJs(u.uid)}')">Speichern</button></td>
         </tr>`;
     });
     th += '</table>';
@@ -2866,7 +2821,6 @@ function renderScenarios() {
         btn.addEventListener('click', () => {
             const i = Number(btn.dataset.scDel);
             scenarioRows.splice(i, 1);
-            // Sync zurück & rerendern
             state.cateringScenarios = [...scenarioRows];
             renderScenarios();
         });
@@ -2924,40 +2878,27 @@ function updateUser(uid) {
 }
 
 // ============================================================================
-// EXPORT TO WINDOW (alle von HTML referenzierten Funktionen)
+// EXPORT TO WINDOW
 // ============================================================================
 Object.assign(window, {
-    // Auth & Navigation
     doLogin, authSignOut, navTo, switchSettingsTab,
-    // Modals
     openModal, closeModal,
-    // Dashboard
     clearNotifications, savePin, openRankingModal,
-    // Calendar
     changeMonth, openDayEventsModal,
-    // Events
     openEventModal, saveEvent, showEventDetail, deleteEvent,
     toggleAvail, saveAvailDays, toggleEventCrewVisibility, handleCrewDropdownSelect,
     markCleaningDone, logHours,
-    // Timesheets
     openTimesheetModal, saveTimesheet, deleteTimesheet, printReceipt,
-    // Pizza
     changePizza, changeDip, resetPizza, saveToEinkauf,
-    // Catering
     calcCatering,
-    // Einkauf
     clearEinkauf,
-    // Kontakte
     openKontaktModal, saveKontakt, deleteKontakt,
-    // Builder
     openIngredientModal, saveNewIngredient,
     openRecipeModal, openPizzaModal, saveBuilder,
     addBuilderItemRow,
     deleteRecipe, deletePizza, deleteIngredient,
-    // Settings
     saveSettingsART, saveCateringSettings, updateUser,
     addScenarioRow, saveScenarios,
-    // Helpers
     confirmAction
 });
 </script>
