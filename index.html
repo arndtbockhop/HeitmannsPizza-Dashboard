@@ -1,127 +1,480 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Heitmanns Pizza</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="HP Logo neu.png">
-<meta name="theme-color" content="#2563eb">
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-    --bg: #f8fafc; --card: #fff; --text: #111827; --muted: #6b7280;
-    --border: #e5e7eb; --blue: #2563eb; --blue-light: #eff6ff;
-    --green: #16a34a; --green-light: #f0fdf4; --amber: #d97706;
-    --amber-light: #fffbeb; --red: #dc2626; --red-light: #fef2f2;
-    --purple: #8b5cf6; --pink: #ec4899; --cyan: #06b6d4;
-}
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; overflow-x: hidden; }
-.app { display: flex; min-height: 100dvh; }
-.sidebar { width: 220px; min-width: 220px; background: var(--card); border-right: 1px solid var(--border); padding: 24px 0; display: flex; flex-direction: column; z-index: 50; }
-.sidebar-logo { padding: 0 24px 20px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border); margin-bottom: 12px; letter-spacing: -0.5px; }
-.nav-item { padding: 12px 24px; cursor: pointer; color: var(--muted); display: flex; align-items: center; gap: 10px; transition: all .2s; border-left: 3px solid transparent; font-size: 14px; font-weight: 500; background: none; border-top: none; border-right: none; border-bottom: none; width: 100%; text-align: left; font-family: inherit; }
-.nav-item:hover { background: #f1f5f9; color: var(--text); }
-.nav-item.active { background: var(--blue-light); color: var(--blue); border-left-color: var(--blue); }
-.main { flex: 1; padding: 32px; overflow-y: auto; padding-bottom: 120px; }
-.page { display: none; flex-direction: column; gap: 24px; }
-.page.active { display: flex; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border); padding-bottom: 16px; flex-wrap: wrap; gap: 16px; }
-.page-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
-.page-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-.card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; }
-input, select, textarea { width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: inherit; transition: border 0.2s; }
-input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); background: var(--card); }
-button { cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; border-radius: 8px; padding: 8px 16px; border: 1px solid var(--border); background: var(--card); color: var(--text); transition: all .2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-button:hover { background: #f1f5f9; }
-.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
-.btn-primary:hover { background: #1d4ed8; }
-.btn-danger { color: var(--red); border-color: #fecaca; background: var(--red-light); }
-.btn-danger:hover { background: #fee2e2; }
-.btn-green { background: var(--green); color: #fff; border-color: var(--green); }
-.btn-sm { padding: 6px 12px; font-size: 12px; }
-.badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-.badge-blue { background: var(--blue-light); color: var(--blue); }
-.badge-green { background: var(--green-light); color: var(--green); }
-.badge-amber { background: var(--amber-light); color: var(--amber); }
-.badge-red { background: var(--red-light); color: var(--red); }
-.row-between { display: flex; justify-content: space-between; align-items: center; }
-.row-list { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
-.label-tag { color: var(--muted); font-size: 11px; text-transform: uppercase; font-weight: 600; }
-.summary-bar { background: var(--blue-light); color: var(--blue); padding: 16px; border-radius: 8px; font-size: 18px; font-weight: 700; text-align: center; }
-.muted-empty { color: var(--muted); font-size: 13px; padding: 16px 0; }
-.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-.section-head { background: #f8fafc; padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-weight: 700; }
-.muted { color: var(--muted); }
-.event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-.event-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; transition: all .2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-.event-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: translateY(-2px); }
-.event-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; cursor: pointer; }
-.event-card-body { cursor: pointer; flex: 1; }
-.event-card-footer { margin-top: 16px; padding-top: 16px; border-top: 1px solid #f1f5f9; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.mailbox-item { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.4; }
-.mailbox-item.unread { background: var(--blue-light); border-left: 3px solid var(--blue); }
-.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; margin-bottom: 16px; border-radius: 8px; }
-table { width: 100%; min-width: 600px; border-collapse: collapse; text-align: left; font-size: 13px; }
-th { padding: 12px; border-bottom: 2px solid var(--border); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 11px; }
-td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-.list-item { display: flex; align-items: flex-start; gap: 16px; padding: 16px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; background: var(--card); transition: all .2s; }
-.list-item:hover { border-color: #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
-.cal-day { min-height: 90px; border: 1px solid var(--border); border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 500; cursor: pointer; background: var(--card); display: flex; flex-direction: column; gap: 4px; transition: background 0.2s; }
-.cal-day:hover { background: #f8fafc; }
-.cal-day.today { border-color: var(--blue); border-width: 2px; background: var(--blue-light); }
-.cal-header-cell { text-align: center; font-size: 12px; font-weight: 600; color: var(--muted); padding: 8px 0; }
-.cal-tag { font-size: 10px; font-weight: 600; padding: 4px 6px; border-radius: 4px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tag-Catering { background: var(--blue); }
-.tag-Event { background: var(--amber); }
-.tag-Meeting { background: var(--purple); }
-.tag-Preppen { background: var(--green); }
-.tag-Einkaufen { background: var(--pink); }
-.tag-SocialMedia { background: var(--cyan); }
-.pizza-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
-.pizza-qty { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border-radius: 8px; padding: 4px; margin-top: 10px; }
-.pizza-qty button { width: 40px; height: 40px; border: none; background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 18px; font-weight: bold; border-radius: 6px; }
-.pizza-qty input { width: 60px; text-align: center; border: none; background: transparent; font-weight: 700; font-size: 16px; padding: 0; }
-.settings-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border); margin-bottom: 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 1px; }
-.settings-tab { padding: 12px 16px; cursor: pointer; color: var(--muted); font-weight: 600; border-bottom: 2px solid transparent; white-space: nowrap; }
-.settings-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-.settings-panel { display: none; }
-.settings-panel.active { display: block; }
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 9999; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); }
-.modal-overlay.open { display: flex; }
-.modal { background: var(--card); width: 100%; max-width: 650px; max-height: 90vh; display: flex; flex-direction: column; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; }
-.modal-title { padding: 20px 24px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border); background: #f8fafc; }
-.modal-body { padding: 24px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
-.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; background: #f8fafc; flex-wrap: wrap; }
-#toast-wrap { position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; }
-.toast { background: #111827; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); opacity: 0; transform: translateY(10px); transition: all 0.3s; max-width: 320px; }
-.toast.show { opacity: 1; transform: translateY(0); }
-.toast.error { background: var(--red); }
-.toast.success { background: var(--green); }
-#login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-body:not([data-role="superadmin"]):not([data-role="admin"]) .admin-only,
-body:not([data-role="superadmin"]) .superadmin-only { display: none !important; }
-.mobile-bottom-nav { display: none; }
-@media (max-width: 900px) {
-    .sidebar { display: none !important; }
-    .main { padding: 16px 12px 100px; }
-    .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .form-grid, .event-grid, .cards-grid { grid-template-columns: 1fr; }
-    input, select, textarea { font-size: 16px; min-height: 44px; }
-    button { min-height: 44px; }
-    .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); gap: 8px; z-index: 1000; justify-content: flex-start; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .mobile-bottom-nav::-webkit-scrollbar { display: none; }
-    .mobile-bottom-nav button { flex: 0 0 auto; min-width: 75px; font-size: 13px; font-weight: 600; padding: 10px 16px; border: none; background: #f1f5f9; color: var(--muted); border-radius: 20px; white-space: nowrap; transition: all 0.2s; }
-    .mobile-bottom-nav button.active { background: var(--blue-light); color: var(--blue); }
-    .cal-day { min-height: 60px; padding: 4px; }
-    .modal { max-width: 95%; max-height: 85vh; margin: auto; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heitmanns Pizza</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="HP Logo neu.png">
+    <meta name="theme-color" content="#2563eb">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f8fafc;
+            --card: #fff;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --blue: #2563eb;
+            --blue-light: #eff6ff;
+            --green: #16a34a;
+            --green-light: #f0fdf4;
+            --amber: #d97706;
+            --amber-light: #fffbeb;
+            --red: #dc2626;
+            --red-light: #fef2f2;
+            --purple: #8b5cf6;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            overflow-x: hidden;
+        }
+
+        .app { display: flex; min-height: 100dvh; }
+
+        .sidebar {
+            width: 220px;
+            min-width: 220px;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        .sidebar-logo {
+            padding: 0 24px 20px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all .2s;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+            font-weight: 500;
+            background: none;
+            border-top: none;
+            border-right: none;
+            border-bottom: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .nav-item:hover { background: #f1f5f9; color: var(--text); }
+        .nav-item.active { background: var(--blue-light); color: var(--blue); border-left-color: var(--blue); }
+
+        .main { flex: 1; padding: 32px; overflow-y: auto; padding-bottom: 120px; }
+
+        .page { display: none; flex-direction: column; gap: 24px; }
+        .page.active { display: flex; }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title { font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+        .page-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text);
+            margin-bottom: 16px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+            transition: border 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); background: var(--card); }
+
+        button {
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        button:hover { background: #f1f5f9; }
+
+        .btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-danger { color: var(--red); border-color: #fecaca; background: var(--red-light); }
+        .btn-danger:hover { background: #fee2e2; }
+        .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .badge-blue { background: var(--blue-light); color: var(--blue); }
+        .badge-green { background: var(--green-light); color: var(--green); }
+        .badge-amber { background: var(--amber-light); color: var(--amber); }
+        .badge-red { background: var(--red-light); color: var(--red); }
+
+        .row-between { display: flex; justify-content: space-between; align-items: center; }
+        .row-list { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+        .label-tag { color: var(--muted); font-size: 11px; text-transform: uppercase; font-weight: 600; }
+        .summary-bar { background: var(--blue-light); color: var(--blue); padding: 16px; border-radius: 8px; font-size: 18px; font-weight: 700; text-align: center; }
+        .muted-empty { color: var(--muted); font-size: 13px; padding: 16px 0; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .section-head { background: #f8fafc; padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-weight: 700; }
+        .muted { color: var(--muted); }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        .event-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all .2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .event-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: translateY(-2px); }
+        .event-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; cursor: pointer; }
+        .event-card-body { cursor: pointer; flex: 1; }
+        .event-card-footer {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .mailbox-item { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.4; }
+        .mailbox-item.unread { background: var(--blue-light); border-left: 3px solid var(--blue); }
+
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; margin-bottom: 16px; border-radius: 8px; }
+        table { width: 100%; min-width: 600px; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th { padding: 12px; border-bottom: 2px solid var(--border); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 11px; }
+        td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+
+        .list-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            background: var(--card);
+            transition: all .2s;
+        }
+        .list-item:hover { border-color: #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+
+        .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+        .cal-day {
+            min-height: 90px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            background: var(--card);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+        .cal-day:hover { background: #f8fafc; }
+        .cal-day.today { border-color: var(--blue); border-width: 2px; background: var(--blue-light); }
+        .cal-header-cell { text-align: center; font-size: 12px; font-weight: 600; color: var(--muted); padding: 8px 0; }
+        .cal-tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 6px;
+            border-radius: 4px;
+            color: #fff;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .tag-Catering { background: var(--blue); }
+        .tag-Event { background: var(--amber); }
+        .tag-Meeting { background: var(--purple); }
+        .tag-Preppen { background: var(--green); }
+        .tag-Einkaufen { background: var(--pink); }
+        .tag-SocialMedia { background: var(--cyan); }
+
+        .pizza-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .pizza-qty {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 4px;
+            margin-top: 10px;
+        }
+
+        .pizza-qty button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: var(--card);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 6px;
+        }
+
+        .pizza-qty input {
+            width: 60px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            font-size: 16px;
+            padding: 0;
+        }
+
+        .settings-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 1px;
+        }
+
+        .settings-tab {
+            padding: 12px 16px;
+            cursor: pointer;
+            color: var(--muted);
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+        .settings-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+        .settings-panel { display: none; }
+        .settings-panel.active { display: block; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.4);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: var(--card);
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .modal-title { padding: 20px 24px; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border); background: #f8fafc; }
+        .modal-body { padding: 24px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: #f8fafc;
+            flex-wrap: wrap;
+        }
+
+        #toast-wrap {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: #111827;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            max-width: 320px;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.error { background: var(--red); }
+        .toast.success { background: var(--green); }
+
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        body:not([data-role="superadmin"]):not([data-role="admin"]) .admin-only,
+        body:not([data-role="superadmin"]) .superadmin-only {
+            display: none !important;
+        }
+
+        .mobile-bottom-nav { display: none; }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none !important; }
+            .main { padding: 16px 12px 100px; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .form-grid, .event-grid, .cards-grid { grid-template-columns: 1fr; }
+
+            input, select, textarea { font-size: 16px; min-height: 44px; }
+            button { min-height: 44px; }
+
+            .mobile-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(255,255,255,0.95);
+                backdrop-filter: blur(10px);
+                border-top: 1px solid var(--border);
+                padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+                gap: 8px;
+                z-index: 1000;
+                justify-content: flex-start;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            
+            .mobile-bottom-nav::-webkit-scrollbar { display: none; }
+
+            .mobile-bottom-nav button {
+                flex: 0 0 auto;
+                min-width: 75px;
+                font-size: 13px;
+                font-weight: 600;
+                padding: 10px 16px;
+                border: none;
+                background: #f1f5f9;
+                color: var(--muted);
+                border-radius: 20px;
+                white-space: nowrap;
+                transition: all 0.2s;
+            }
+
+            .mobile-bottom-nav button.active {
+                background: var(--blue-light);
+                color: var(--blue);
+            }
+
+            .cal-day { min-height: 60px; padding: 4px; }
+            .modal { max-width: 95%; max-height: 85vh; margin: auto; }
+        }
+    </style>
 </head>
 <body data-role="staff">
 
@@ -149,7 +502,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
         <button class="nav-item active" onclick="navTo('dashboard', this)">Dashboard</button>
         <button class="nav-item" onclick="navTo('kalender', this)">Kalender</button>
         <button class="nav-item" onclick="navTo('events', this)">Events</button>
-        <button class="nav-item admin-only" onclick="navTo('timesheet', this)">Personal &amp; Zeiten</button>
+        <button class="nav-item admin-only" onclick="navTo('timesheet', this)">Personal & Zeiten</button>
         <button class="nav-item admin-only" onclick="navTo('catering', this)">Catering-Kalkulator</button>
         <button class="nav-item admin-only" onclick="navTo('pizza', this)">Pizza</button>
         <button class="nav-item admin-only" onclick="navTo('einkauf', this)">Einkaufsliste</button>
@@ -217,7 +570,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
         <div class="page admin-only" id="page-timesheet">
             <div class="page-header">
                 <div>
-                    <div class="page-title">Personal &amp; Zeiten</div>
+                    <div class="page-title">Personal & Zeiten</div>
                     <div class="page-subtitle">Planung, Erfassung und Auswertung von Schichten</div>
                 </div>
                 <button class="btn-primary" onclick="openTimesheetModal()">Neue Zeiterfassung</button>
@@ -267,7 +620,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
                 </div>
             </div>
             <div class="card">
-                <div class="card-title">Bedarf &amp; Warenkorb <button class="btn-primary" onclick="saveToEinkauf()">In Einkaufsliste pushen</button></div>
+                <div class="card-title">Bedarf & Warenkorb <button class="btn-primary" onclick="saveToEinkauf()">In Einkaufsliste pushen</button></div>
                 <div id="ingredient-result"></div>
             </div>
         </div>
@@ -278,7 +631,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
                 <div class="card">
                     <div class="card-title">Kundenangaben</div>
                     <div class="form-group"><label for="cat-gaeste">Gästezahl (Mindestens 30)</label><input type="number" id="cat-gaeste" value="30" oninput="calcCatering()"></div>
-                    <div class="form-group"><label for="cat-km">Fahrtstrecke KM (hin &amp; zurück)</label><input type="number" id="cat-km" value="50" oninput="calcCatering()"></div>
+                    <div class="form-group"><label for="cat-km">Fahrtstrecke KM (hin & zurück)</label><input type="number" id="cat-km" value="50" oninput="calcCatering()"></div>
                     <div class="form-group"><label for="cat-marge-display">Ermittelte Marge</label><input id="cat-marge-display" readonly style="background: #f1f5f9;"></div>
                 </div>
                 <div class="card">
@@ -295,7 +648,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
         </div>
 
         <div class="page admin-only" id="page-kontakte">
-            <div class="page-header"><div><div class="page-title">Kontakte &amp; Adressbuch</div><div class="page-subtitle">Kunden, Lieferanten, Mitarbeiter und Partner</div></div><button class="btn-primary" onclick="openKontaktModal()">Neuen Kontakt anlegen</button></div>
+            <div class="page-header"><div><div class="page-title">Kontakte & Adressbuch</div><div class="page-subtitle">Kunden, Lieferanten, Mitarbeiter und Partner</div></div><button class="btn-primary" onclick="openKontaktModal()">Neuen Kontakt anlegen</button></div>
             <div id="kontakt-list"></div>
         </div>
 
@@ -320,7 +673,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
             <div id="panel-pizzas" class="settings-panel"><div class="card"><div class="card-title">Gespeicherte Pizzen <button class="btn-sm" onclick="openPizzaModal()">Neue Pizza anlegen</button></div><div class="table-wrap" id="settings-pizzas-list"></div></div></div>
             <div id="panel-catering" class="settings-panel">
                 <div class="card">
-                    <div class="card-title">Globale Fixkosten &amp; Steuern</div>
+                    <div class="card-title">Globale Fixkosten & Steuern</div>
                     <div class="form-grid">
                         <div class="form-group"><label for="set-cat-gas">Gaspauschale (€)</label><input type="number" id="set-cat-gas" step="1"></div>
                         <div class="form-group"><label for="set-cat-entsorgung">Entsorgung (€)</label><input type="number" id="set-cat-entsorgung" step="1"></div>
@@ -340,7 +693,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
                     <button class="btn-primary" style="margin-top: 16px; width: 100%;" onclick="saveScenarios()">Staffeln speichern</button>
                 </div>
             </div>
-            <div id="panel-team" class="settings-panel"><div class="card"><div class="card-title">Benutzer, Rollen &amp; Stundenlohn</div><div class="table-wrap" id="team-list-container"></div></div></div>
+            <div id="panel-team" class="settings-panel"><div class="card"><div class="card-title">Benutzer, Rollen & Stundenlohn</div><div class="table-wrap" id="team-list-container"></div></div></div>
         </div>
     </main>
     <nav class="mobile-bottom-nav">
@@ -356,7 +709,6 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
     </nav>
 </div>
 
-<!-- ========== MODALS ========== -->
 <div class="modal-overlay" id="planner-modal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="planner-modal-title">
         <div class="modal-title" id="planner-modal-title">Personal einteilen</div>
@@ -374,7 +726,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
         </div>
         <div class="modal-footer">
             <button onclick="closeModal('planner-modal')">Abbrechen</button>
-            <button class="btn-primary" onclick="savePlanner()">Speichern &amp; Benachrichtigen</button>
+            <button class="btn-primary" onclick="savePlanner()">Speichern & Benachrichtigen</button>
         </div>
     </div>
 </div>
@@ -421,7 +773,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
                 <textarea id="ev-notizen" style="min-height: 80px;"></textarea>
             </div>
             <div style="font-size:11px; color:var(--muted); margin-top:12px; padding:10px; background:#f8fafc; border-radius:6px;">
-                💡 Personal-Zuteilung erfolgt im "Event Planer" Reiter unter Personal &amp; Zeiten.
+                💡 Personal-Zuteilung erfolgt im "Event Planer" Reiter unter Personal & Zeiten.
             </div>
         </div>
         <div class="modal-footer">
@@ -459,7 +811,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
                     <select id="ing-new-sup"><option>Andronaco</option><option>Metro</option><option>Bührings</option><option>Edeka</option><option>Sonstige</option></select>
                 </div>
                 <div class="form-group"><label for="ing-new-cat">Kategorie</label>
-                    <select id="ing-new-cat"><option>Teig</option><option>Milchprodukte / Käse</option><option>Sauce / Basis</option><option>Belag</option><option>Gemüse &amp; Kräuter</option><option>Dips</option><option>Sonstiges</option></select>
+                    <select id="ing-new-cat"><option>Teig</option><option>Milchprodukte / Käse</option><option>Sauce / Basis</option><option>Belag</option><option>Gemüse & Kräuter</option><option>Dips</option><option>Sonstiges</option></select>
                 </div>
                 <div class="form-group"><label for="ing-new-unit">Verpackungseinheit</label>
                     <select id="ing-new-unit"><option>kg</option><option>Stk</option><option>L</option></select>
@@ -487,7 +839,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
                 </div>
             </div>
             <div class="form-group">
-                <label style="border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-bottom: 8px;">Zutaten &amp; Bestandteile</label>
+                <label style="border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-bottom: 8px;">Zutaten & Bestandteile</label>
                 <div id="builder-items-container"></div>
                 <button class="btn-sm" style="margin-top: 8px; align-self: flex-start;" onclick="addBuilderItemRow()">+ Bestandteil hinzufügen</button>
             </div>
@@ -555,6 +907,7 @@ body:not([data-role="superadmin"]) .superadmin-only { display: none !important; 
         <div class="modal-title" id="ranking-modal-title">Putz-Ranking Historie</div>
         <div class="modal-body" id="ranking-content"></div>
         <div class="modal-footer">
+            <button class="btn-danger superadmin-only" onclick="resetCleaningRanking()">Alle zurücksetzen</button>
             <button class="btn-primary" onclick="closeModal('ranking-modal')">Schließen</button>
         </div>
     </div>
@@ -578,13 +931,13 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 // ============================================================================
-// HELPERS (zentrale Helfer reduzieren Wiederholung)
+// HELPERS
 // ============================================================================
 const $ = id => document.getElementById(id);
 
 const esc = (str) => {
     if (str === null || str === undefined) return '';
-    return String(str).replace(/[&<>'"`]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;','`':'&#x60;'}[t]));
+    return String(str).replace(/[&<>'"`]/g, t => ({'&':'&','<':'<','>':'>',"'":''','"':'"','`':'`'}[t]));
 };
 const escJs = (str) => String(str || '').replace(/['"\\]/g, '\\$&');
 
@@ -608,7 +961,6 @@ function showToast(message, type = '') {
 const openModal = id => { const m = $(id); if (m) m.classList.add('open'); };
 const closeModal = id => { const m = $(id); if (m) m.classList.remove('open'); };
 
-// dbAction: zentralisiert das ständige .then(success).catch(error) Pattern
 function dbAction(promise, okMsg, errMsg = 'Fehler beim Speichern.') {
     return promise
         .then(() => { if (okMsg) showToast(okMsg, 'success'); })
@@ -646,7 +998,6 @@ const getIngredient = id => find(state.ingredients, id);
 const isAdminRole = () => state.role === 'admin' || state.role === 'superadmin';
 const mapsUrl = addr => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addr);
 
-// Tabellen-Builder spart in renderTimesheets/Settings ~50 Zeilen
 function buildTable(headers, rows, emptyMsg = 'Keine Daten.') {
     if (!rows.length) return `<div class="muted">${emptyMsg}</div>`;
     return `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
@@ -673,7 +1024,7 @@ let currentAvailEventId = null;
 let scenarioRows = [];
 let plannerCurrentEventId = null;
 let plannerAssigned = [];
-let pinTimer = null; // FIX: Debounce für Pinnwand
+let pinTimer = null; 
 
 const colorMap = {
     'Catering': 'tag-Catering', 'Event': 'tag-Event', 'Meeting': 'tag-Meeting',
@@ -746,7 +1097,6 @@ function authSignOut() {
     signOut(auth);
 }
 
-// FIX 1: Self-Registration ENTFERNT
 function doLogin() {
     const e = $('login-email').value.trim();
     const p = $('login-pass').value;
@@ -896,16 +1246,24 @@ function updateDashboard() {
     }
     if (isAdminRole()) {
         const admins = state.users.filter(x => x.role !== 'staff')
-            .sort((a, b) => (a.cleaningPoints || 0) - (b.cleaningPoints || 0));
+            .sort((a, b) => (b.cleaningPoints || 0) - (a.cleaningPoints || 0));
         const prev = $('cleaning-ranking-preview');
         const cont = $('ranking-content');
         if (admins.length > 0 && prev) {
             const next = admins[0];
             prev.innerHTML = `<div style="color:var(--red); font-weight:700;">Als nächstes dran: ${esc(next.name)} (${Number(next.cleaningPoints) || 0} Pkt)</div>`;
-            if (cont) cont.innerHTML = admins.map(a => `
-                <div class="row-between" style="padding:10px; border-bottom:1px solid #f1f5f9;">
-                    <span>${esc(a.name)}</span><b>${Number(a.cleaningPoints) || 0} Punkte</b>
-                </div>`).join('');
+            if (cont) {
+                const isSuper = state.role === 'superadmin';
+                cont.innerHTML = admins.map(a => `
+                    <div class="row-between" style="padding:10px; border-bottom:1px solid #f1f5f9; align-items:center;">
+                        <span>${esc(a.name)}</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            ${isSuper ? `<button class="btn-sm" style="padding:4px 8px;" onclick="changeCleaningPoints('${escJs(a.uid)}', -1)">-</button>` : ''}
+                            <b style="min-width:55px; text-align:center;">${Number(a.cleaningPoints) || 0} Pkt</b>
+                            ${isSuper ? `<button class="btn-sm" style="padding:4px 8px;" onclick="changeCleaningPoints('${escJs(a.uid)}', 1)">+</button>` : ''}
+                        </div>
+                    </div>`).join('');
+            }
         }
     }
     const todayStr = today();
@@ -928,7 +1286,6 @@ function clearNotifications() {
     }
 }
 
-// FIX 5: Debounce - schreibt nicht mehr bei jedem Tastendruck
 function savePin() {
     if (!isAdminRole()) return;
     clearTimeout(pinTimer);
@@ -1042,7 +1399,6 @@ function renderEventList() {
     }).join('');
 }
 
-// FIX 3: runTransaction wieder eingeführt - Race Conditions verhindert
 function toggleAvail(eid, isAvailable) {
     const uid = auth.currentUser.uid;
     const ev = find(state.events, eid);
@@ -1172,7 +1528,6 @@ function plannerMove(uid, action) {
     renderPlannerUI();
 }
 
-// FIX 3: Notifications via Transaction (verhindert Race Conditions)
 function savePlanner() {
     if (!plannerCurrentEventId) return;
     const ev = find(state.events, plannerCurrentEventId);
@@ -1185,7 +1540,7 @@ function savePlanner() {
                 runTransaction(ref(db, `users/${uid}/notifications`), arr => {
                     const list = arr || [];
                     list.push(`Du wurdest für das Event "${ev.title}" am ${ev.date} fest eingeteilt!`);
-                    return list.slice(-50); // Hard cap gegen unkontrolliertes Wachstum
+                    return list.slice(-50); 
                 });
             });
             closeModal('planner-modal');
@@ -1204,7 +1559,7 @@ function toggleEventCrewVisibility() {
 }
 
 function openEventModal(id, dateStr) {
-    if (id && typeof id === 'object') id = null; // FIX 6: Schutz gegen falsche Aufrufe
+    if (id && typeof id === 'object') id = null; 
     state.editEventId = id || null;
     const ev = id ? find(state.events, id) : null;
     const src = Object.assign({
@@ -1314,7 +1669,6 @@ function deleteEvent(id) {
     }).catch(() => showToast('Fehler beim Löschen.', 'error'));
 }
 
-// FIX 3: markCleaningDone via Transaction
 function markCleaningDone(eid) {
     const ev = find(state.events, eid);
     if (!ev) return;
@@ -1327,6 +1681,32 @@ function markCleaningDone(eid) {
             closeModal('detail-modal');
         })
         .catch(() => showToast('Fehler beim Speichern.', 'error'));
+}
+
+// NEU: Funktionen zum Bearbeiten/Zurücksetzen der Putzpunkte für Superadmins
+function changeCleaningPoints(uid, delta) {
+    if (state.role !== 'superadmin') return;
+    runTransaction(ref(db, `users/${uid}/cleaningPoints`), cur => Math.max(0, (cur || 0) + delta))
+        .catch(() => showToast('Fehler beim Ändern der Punkte.', 'error'));
+}
+
+function resetCleaningRanking() {
+    if (state.role !== 'superadmin') return;
+    if (!confirm("Soll das Putz-Ranking für ALLE Mitarbeiter wirklich auf 0 zurückgesetzt werden?")) return;
+    
+    const updates = {};
+    state.users.forEach(u => {
+        if (u.cleaningPoints !== undefined && u.cleaningPoints !== 0) {
+            updates[`users/${u.uid}/cleaningPoints`] = 0;
+        }
+    });
+    
+    if (Object.keys(updates).length > 0) {
+        dbAction(update(ref(db), updates), 'Putz-Ranking erfolgreich zurückgesetzt!');
+    } else {
+        showToast('Ranking ist bereits auf 0.', 'success');
+        closeModal('ranking-modal');
+    }
 }
 
 function logHours(eid) {
@@ -1406,7 +1786,7 @@ function renderTimesheets() {
 }
 
 function openTimesheetModal(id) {
-    if (id && typeof id === 'object') id = null; // FIX 6
+    if (id && typeof id === 'object') id = null; 
     state.editTimesheetId = id || null;
     const ts = id ? find(state.timesheets, id) : null;
     $('ts-event-id').innerHTML = '<option value="">-- Event wählen --</option>' +
@@ -1682,7 +2062,7 @@ function calcCatering() {
 }
 
 // ============================================================================
-// EINKAUFSLISTE  (FIX 2: war fehlend)
+// EINKAUFSLISTE
 // ============================================================================
 function renderEinkauf() {
     const c = $('einkauf-kategorien');
@@ -1725,10 +2105,10 @@ function clearEinkauf() {
 }
 
 // ============================================================================
-// KONTAKTE  (FIX 2: war fehlend)
+// KONTAKTE
 // ============================================================================
 function openKontaktModal(id) {
-    if (id && typeof id === 'object') id = null; // FIX 6
+    if (id && typeof id === 'object') id = null; 
     state.editKontaktId = id || null;
     const k = id ? find(state.kontakte, id) : null;
     $('kt-kategorie').value = k && k.kategorie ? k.kategorie : 'Kunde';
@@ -1989,7 +2369,7 @@ function deleteIngredient(id) {
 }
 
 // ============================================================================
-// SETTINGS RENDER  (FIX 2: war fehlend)
+// SETTINGS RENDER 
 // ============================================================================
 function renderSettings() {
     // Zutaten
@@ -2141,7 +2521,8 @@ Object.assign(window, {
     saveSettingsART, saveCateringSettings, updateUser,
     addScenarioRow, saveScenarios,
     confirmAction,
-    openPlannerModal, plannerMove, savePlanner
+    openPlannerModal, plannerMove, savePlanner,
+    changeCleaningPoints, resetCleaningRanking // NEW
 });
 </script>
 </body>
