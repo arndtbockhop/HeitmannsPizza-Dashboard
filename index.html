@@ -165,7 +165,7 @@
             <label for="login-pass">4-stellige PIN</label>
             <input id="login-pass" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" placeholder="••••" maxlength="4" />
         </div>
-        <button class="btn-primary" onclick="doLogin()" style="padding: 14px; font-size: 15px; margin-top: 8px;">Einloggen</button>
+        <button class="btn-primary" onclick="doLogin()" style="padding: 14px; font-size: 15px; margin-top: 8px;">Einloggen / Registrieren</button>
         <div style="font-size: 11px; color: var(--muted); text-align: center; line-height: 1.5;">
             Die App legt deinen Account automatisch an, falls er noch nicht existiert.
         </div>
@@ -652,7 +652,7 @@ const auth = getAuth(app);
 // ============================================================================
 const $ = id => document.getElementById(id);
 
-// Das hier ist der korrigierte, absturzsichere Escape-Code:
+// Vollkommen sicheres Entschärfen von Sonderzeichen für HTML (Ohne kaputte Quotes!)
 const esc = (str) => {
     if (str == null) return '';
     const map = {
