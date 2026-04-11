@@ -47,7 +47,6 @@
 
         input, select, textarea { width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: inherit; transition: border 0.2s; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); background: var(--card); }
-        input[type="checkbox"] { width: auto; transform: scale(1.2); margin-right: 8px; cursor: pointer; }
 
         button { cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; border-radius: 8px; padding: 8px 16px; border: 1px solid var(--border); background: var(--card); color: var(--text); transition: all .2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
         button:hover { background: #f1f5f9; }
@@ -165,7 +164,7 @@
             <label for="login-pass">4-stellige PIN</label>
             <input id="login-pass" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" placeholder="••••" maxlength="4" />
         </div>
-        <button class="btn-primary" onclick="doLogin()" style="padding: 14px; font-size: 15px; margin-top: 8px;">Einloggen / Registrieren</button>
+        <button class="btn-primary" onclick="doLogin()" style="padding: 14px; font-size: 15px; margin-top: 8px;">Einloggen</button>
         <div style="font-size: 11px; color: var(--muted); text-align: center; line-height: 1.5;">
             Die App legt deinen Account automatisch an, falls er noch nicht existiert.
         </div>
@@ -181,7 +180,6 @@
         <button class="nav-item admin-only" onclick="navTo('timesheet', this)">Personal & Zeiten</button>
         <button class="nav-item admin-only" onclick="navTo('catering', this)">Catering-Kalkulator</button>
         <button class="nav-item admin-only" onclick="navTo('pizza', this)">Pizza</button>
-        <button class="nav-item admin-only" onclick="navTo('preppen', this)">Preppen</button>
         <button class="nav-item admin-only" onclick="navTo('einkauf', this)">Einkaufsliste</button>
         <button class="nav-item admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
         <button class="nav-item superadmin-only" onclick="navTo('settings', this)">Einstellungen</button>
@@ -272,13 +270,6 @@
                 <button class="btn-danger" onclick="resetPizza()">Kalkulation zurücksetzen</button>
             </div>
             <div class="card" style="margin-bottom: 24px;">
-                <div class="row-between" style="border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 16px; flex-wrap:wrap; gap:12px;">
-                    <div style="flex:1;">
-                        <label class="label-tag">Für Event kalkulieren:</label>
-                        <select id="pizza-event-select" style="margin-top: 6px;" onchange="loadPizzaEvent()"></select>
-                    </div>
-                    <button class="btn-primary" onclick="savePizzasToEvent()">Im Event speichern</button>
-                </div>
                 <div class="card-title">Pizza Mengen</div>
                 <div class="pizza-grid" id="pizza-grid"></div>
             </div>
@@ -306,24 +297,6 @@
             <div class="card">
                 <div class="card-title">Bedarf & Warenkorb <button class="btn-primary" onclick="saveToEinkauf()">In Einkaufsliste pushen</button></div>
                 <div id="ingredient-result"></div>
-            </div>
-        </div>
-
-        <div class="page admin-only" id="page-preppen">
-            <div class="page-header">
-                <div>
-                    <div class="page-title">Prep-Liste</div>
-                    <div class="page-subtitle">Anstehende Events vorbereiten und abhaken (Echtzeit-Sync)</div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="form-group" style="margin-bottom: 24px;">
-                    <label>Event auswählen</label>
-                    <select id="prep-event-select" onchange="renderPrepList()"></select>
-                </div>
-                <div id="prep-list-container" style="display: flex; flex-direction: column; gap: 8px;">
-                    <div class="muted-empty">Bitte Event wählen, für das die Pizzamengen gespeichert wurden.</div>
-                </div>
             </div>
         </div>
 
@@ -371,13 +344,7 @@
                     <button class="btn-primary" style="margin-top: 16px; width: 100%;" onclick="saveSettingsART()">Preisänderungen speichern</button>
                 </div>
             </div>
-            <div id="panel-rezepte" class="settings-panel">
-                <div class="card">
-                    <div class="card-title">Gespeicherte Sub-Rezepte <button class="btn-sm" onclick="openRecipeModal()">Neues Rezept anlegen</button></div>
-                    <div class="table-wrap" id="settings-recipes-list"></div>
-                    <button class="btn-primary" style="margin-top: 16px; width: 100%;" onclick="saveSettingsREC()">Änderungen speichern</button>
-                </div>
-            </div>
+            <div id="panel-rezepte" class="settings-panel"><div class="card"><div class="card-title">Gespeicherte Sub-Rezepte <button class="btn-sm" onclick="openRecipeModal()">Neues Rezept anlegen</button></div><div class="table-wrap" id="settings-recipes-list"></div></div></div>
             <div id="panel-pizzas" class="settings-panel"><div class="card"><div class="card-title">Gespeicherte Pizzen <button class="btn-sm" onclick="openPizzaModal()">Neue Pizza anlegen</button></div><div class="table-wrap" id="settings-pizzas-list"></div></div></div>
             <div id="panel-catering" class="settings-panel">
                 <div class="card">
@@ -410,7 +377,6 @@
         <button onclick="navTo('events', this)">Events</button>
         <button class="admin-only" onclick="navTo('timesheet', this)">Zeiten</button>
         <button class="admin-only" onclick="navTo('pizza', this)">Pizza</button>
-        <button class="admin-only" onclick="navTo('preppen', this)">Preppen</button>
         <button class="admin-only" onclick="navTo('einkauf', this)">Einkauf</button>
         <button class="admin-only" onclick="navTo('catering', this)">Catering</button>
         <button class="admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
@@ -528,10 +494,6 @@
                 <div class="form-group"><label for="ing-new-netto">Preis Netto (€)</label><input type="number" id="ing-new-netto" step="0.01"></div>
                 <div class="form-group"><label for="ing-new-brutto">Preis Brutto (€)</label><input type="number" id="ing-new-brutto" step="0.01"></div>
             </div>
-            <div class="form-group" style="margin-top: 16px; flex-direction:row; align-items:center;">
-                <input type="checkbox" id="ing-new-prep">
-                <label for="ing-new-prep" style="margin:0;">Muss für Events gepreppt werden</label>
-            </div>
         </div>
         <div class="modal-footer">
             <button onclick="closeModal('ingredient-modal')">Abbrechen</button>
@@ -550,10 +512,6 @@
                     <label id="builder-param-label" for="builder-param">Wert</label>
                     <input type="number" id="builder-param" step="0.01">
                 </div>
-            </div>
-            <div class="form-group" id="builder-prep-group" style="margin-bottom: 16px; flex-direction:row; align-items:center;">
-                <input type="checkbox" id="builder-prep">
-                <label for="builder-prep" style="margin:0;">Dieses Rezept muss gepreppt werden</label>
             </div>
             <div class="form-group">
                 <label style="border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-bottom: 8px;">Zutaten & Bestandteile</label>
@@ -652,19 +610,16 @@ const auth = getAuth(app);
 // ============================================================================
 const $ = id => document.getElementById(id);
 
-// Vollkommen sicheres Entschärfen von Sonderzeichen für HTML (Ohne kaputte Quotes!)
 const esc = (str) => {
-    if (str == null) return '';
-    const map = {
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/[&<>'"]/g, tag => ({
         '&': '&amp;',
         '<': '&lt;',
         '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-    };
-    return String(str).replace(/[&<>"']/g, function(m) { return map[m]; });
+        "'": '&#39;',
+        '"': '&quot;'
+    }[tag] || tag));
 };
-
 const escJs = (str) => String(str || '').replace(/['"\\]/g, '\\$&');
 
 const today = () => new Date().toISOString().split('T')[0];
@@ -761,7 +716,7 @@ let listenersInitialized = false;
 let unsubscribers = [];
 
 // ============================================================================
-// AUTHENTICATION
+// AUTH
 // ============================================================================
 onAuthStateChanged(auth, u => {
     if (u) {
@@ -784,7 +739,7 @@ onAuthStateChanged(auth, u => {
             state.role = user.role || 'staff';
             state.currentUserName = user.name;
             document.body.setAttribute('data-role', state.role);
-            $('dash-greeting').textContent = `Willkommen, ${esc(user.name.split(' ')[0])}!`;
+            $('dash-greeting').textContent = `Willkommen, ${user.name.split(' ')[0]}!`;
             enforceRBAC();
             if (!listenersInitialized) {
                 listenersInitialized = true;
@@ -821,8 +776,10 @@ function doLogin() {
     const pw = p + "-hp26";
     
     signInWithEmailAndPassword(auth, e, pw).catch(err => {
+        // Falls der Account noch nicht existiert oder das Pw falsch war: Wir probieren die Registrierung.
         createUserWithEmailAndPassword(auth, e, pw).catch(regErr => {
             if (regErr.code === 'auth/email-already-in-use') {
+                // Wenn die E-Mail schon da ist, war schlichtweg die PIN falsch!
                 alert("Falsche PIN für diesen Account!");
             } else {
                 alert("Login-Fehler: " + regErr.message);
@@ -851,13 +808,8 @@ function initGranularListeners() {
                 availDetails: ev.availDetails || {}
             }))
             .sort((a, b) => (a.date || '') > (b.date || '') ? 1 : -1);
-        
-        renderPizzaEventSelect();
         renderEventList(); renderCalendar(); updateDashboard();
-        if (isAdminRole()) {
-            renderPlanner();
-            renderPrepList(); 
-        }
+        if (isAdminRole()) renderPlanner();
     }));
 
     unsubscribers.push(onValue(ref(db, 'users'), snap => {
@@ -872,21 +824,18 @@ function initGranularListeners() {
         state.ingredients = Object.values(snap.val() || {}).filter(i => i && i.id);
         if (state.role === 'superadmin') renderSettings();
         renderPizzaResult();
-        if (isAdminRole()) renderPrepList();
     }));
 
     unsubscribers.push(onValue(ref(db, 'recipes'), snap => {
         state.recipes = Object.values(snap.val() || {}).filter(r => r && r.id);
         if (state.role === 'superadmin') renderSettings();
         renderPizzaResult();
-        if (isAdminRole()) renderPrepList();
     }));
 
     unsubscribers.push(onValue(ref(db, 'pizzas'), snap => {
         state.pizzas = Object.values(snap.val() || {}).filter(p => p && p.id);
         renderPizzaGrid();
         if (state.role === 'superadmin') renderSettings();
-        if (isAdminRole()) renderPrepList();
     }));
 
     unsubscribers.push(onValue(ref(db, 'cateringDefaults'), snap => {
@@ -936,6 +885,9 @@ function initGranularListeners() {
     }
 }
 
+// ============================================================================
+// NAVIGATION
+// ============================================================================
 function navTo(id, btn) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-item, .mobile-bottom-nav button').forEach(n => n.classList.remove('active'));
@@ -954,6 +906,9 @@ function switchSettingsTab(id, btn) {
     if (panel) panel.classList.add('active');
 }
 
+// ============================================================================
+// DASHBOARD
+// ============================================================================
 function updateDashboard() {
     const td = $('today-date');
     if (td) td.textContent = fmtDate(new Date(), { weekday: 'long', day: 'numeric', month: 'long' });
@@ -971,12 +926,9 @@ function updateDashboard() {
             .sort((a, b) => (b.cleaningPoints || 0) - (a.cleaningPoints || 0));
         const prev = $('cleaning-ranking-preview');
         const cont = $('ranking-content');
-        
-        if (admins.length > 0) {
-            if (prev) {
-                const next = admins[0];
-                prev.innerHTML = `<div style="color:var(--red); font-weight:700;">Als nächstes dran: ${esc(next.name)} (${Number(next.cleaningPoints) || 0} Pkt)</div>`;
-            }
+        if (admins.length > 0 && prev) {
+            const next = admins[0];
+            prev.innerHTML = `<div style="color:var(--red); font-weight:700;">Als nächstes dran: ${esc(next.name)} (${Number(next.cleaningPoints) || 0} Pkt)</div>`;
             if (cont) {
                 const isSuper = state.role === 'superadmin';
                 cont.innerHTML = admins.map(a => `
@@ -1088,53 +1040,27 @@ function renderEventList() {
     if (!c) return;
     const filtered = state.role === 'staff' ? state.events.filter(e => ['Catering', 'Event'].includes(e.type)) : state.events;
     const uid = auth.currentUser ? auth.currentUser.uid : '';
-    
     c.innerHTML = filtered.map(e => {
         const isAvail = e.availUIDs.includes(uid);
         const isUnavail = e.unavailUIDs.includes(uid);
-        const todayStr = today();
-        const isPastEvent = todayStr >= e.date;
+        const isPastEvent = today() >= e.date;
         let timeEntryHtml = '';
-
         if (e.status === 'Secured' && isPastEvent) {
-            let startD = new Date(e.date);
-            let endD = new Date(e.endDate || e.date);
-            let daysCount = Math.round((endD - startD)/(1000*60*60*24));
-            
-            let daysHtml = '';
-            let hasAnyEdit = false;
-
-            for(let i=0; i<=daysCount; i++) {
-                let cur = new Date(startD); 
-                cur.setDate(cur.getDate() + i);
-                let dStr = cur.toISOString().split('T')[0];
-                let disp = cur.toLocaleDateString('de-DE', { weekday:'short', day:'2-digit', month:'2-digit'});
-                
-                const userTs = state.timesheets.find(t => eq(t.eventId, e.id) && eq(t.userId, uid) && eq(t.date, dStr));
-                if (userTs) hasAnyEdit = true;
-                
-                daysHtml += `
-                <div class="row-between" style="width:100%; border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:8px;">
-                    <span style="width:70px; font-weight:600;">${disp}</span>
-                    <div style="display:flex; gap:4px; align-items:center;">
-                        <input type="time" id="ts-start-${esc(e.id)}-${dStr}" value="${esc(userTs ? userTs.start : (e.time || ''))}" style="padding:6px; max-width:100px;">
-                        <span class="muted" style="font-size:10px;">bis</span>
-                        <input type="time" id="ts-end-${esc(e.id)}-${dStr}" value="${esc(userTs ? userTs.end : (e.timeEnd || ''))}" style="padding:6px; max-width:100px;">
-                    </div>
-                </div>`;
-            }
-
-            const titleText = hasAnyEdit ? `MEINE ZEITEN BEARBEITEN` : `MEINE ZEITEN ERFASSEN`;
-            const btnText = hasAnyEdit ? `Aktualisieren` : `Speichern`;
-            
+            const userTs = state.timesheets.find(t => eq(t.eventId, e.id) && eq(t.userId, uid));
+            const isEdit = !!userTs;
+            const titleText = isEdit ? `MEINE ZEITEN BEARBEITEN (${userTs.totalHours}h erfasst):` : `MEINE ZEITEN ERFASSEN:`;
+            const btnText = isEdit ? `Aktualisieren` : `Speichern`;
             timeEntryHtml = `
-                <div style="width:100%; margin-top:12px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid var(--border);">
-                    <div style="font-size:11px; font-weight:700; color:var(--blue); margin-bottom:12px;">${titleText}</div>
-                    ${daysHtml}
-                    <button class="btn-sm btn-primary" style="width:100%; margin-top:4px; padding:10px;" onclick="logHoursMulti('${escJs(e.id)}')">${btnText}</button>
+                <div style="width:100%; margin-top:12px; display:flex; align-items:center; gap:8px; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid var(--border); flex-wrap:wrap;">
+                    <div style="font-size:11px; font-weight:700; color:var(--blue); width:100%;">${titleText}</div>
+                    <div style="display:flex; flex:1; gap:6px; align-items:center;">
+                        <input type="time" id="ts-start-${esc(e.id)}" value="${esc(userTs ? userTs.start : (e.time || ''))}" style="padding:8px; background:#fff; border:1px solid var(--border);">
+                        <span class="muted" style="font-size:12px;">bis</span>
+                        <input type="time" id="ts-end-${esc(e.id)}" value="${esc(userTs ? userTs.end : (e.timeEnd || ''))}" style="padding:8px; background:#fff; border:1px solid var(--border);">
+                    </div>
+                    <button class="btn-sm btn-primary" style="height:36px;" onclick="logHours('${escJs(e.id)}')">${btnText}</button>
                 </div>`;
         }
-
         return `
             <div class="event-card">
                 <div class="event-card-header" onclick="showEventDetail('${escJs(e.id)}')">
@@ -1171,7 +1097,7 @@ function toggleAvail(eid, isAvailable) {
                 const dDisp = d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
                 const isChecked = (ev.availDetails && ev.availDetails[uid] && ev.availDetails[uid].includes(dStr)) ? 'checked' : '';
                 html += `<label style="display:flex; align-items:center; gap:12px; padding:12px; border-bottom:1px solid #f1f5f9; cursor:pointer;">
-                    <input type="checkbox" class="avail-cb" value="${esc(dStr)}" ${isChecked}>
+                    <input type="checkbox" class="avail-cb" value="${esc(dStr)}" ${isChecked} style="width:24px; height:24px;">
                     <span style="font-size:16px;">${esc(dDisp)}</span>
                 </label>`;
             }
@@ -1221,64 +1147,6 @@ function saveAvailDays() {
         showToast("Verfügbarkeit gespeichert!", 'success');
         closeModal('avail-modal');
     }).catch(() => showToast("Fehler beim Speichern.", 'error'));
-}
-
-function logHoursMulti(eid) {
-    const ev = find(state.events, eid);
-    if(!ev) return;
-    const uid = auth.currentUser.uid;
-    const user = find(state.users, uid, 'uid');
-    const wage = user ? (Number(user.wage) || 14) : 14;
-
-    let startD = new Date(ev.date);
-    let endD = new Date(ev.endDate || ev.date);
-    let daysCount = Math.round((endD - startD)/(1000*60*60*24));
-
-    let updates = {};
-    let hasErrors = false;
-    let hasValid = false;
-
-    for(let i=0; i<=daysCount; i++) {
-        let cur = new Date(startD); cur.setDate(cur.getDate() + i);
-        let dStr = cur.toISOString().split('T')[0];
-        
-        let startEl = $(`ts-start-${eid}-${dStr}`);
-        let endEl = $(`ts-end-${eid}-${dStr}`);
-        if(!startEl || !endEl) continue;
-        
-        let startVal = startEl.value;
-        let endVal = endEl.value;
-        
-        if(!startVal && !endVal) continue; 
-        if(!startVal || !endVal) { hasErrors = true; continue; }
-
-        let h = calculateHours(startVal, endVal, dStr, dStr);
-        let existingTs = state.timesheets.find(t => eq(t.eventId, eid) && eq(t.userId, uid) && eq(t.date, dStr));
-        let tsId = existingTs ? existingTs.id : 'ts_' + Date.now() + '_' + Math.random().toString(36).substring(2,7);
-        let bonus = existingTs ? existingTs.bonus : 0;
-        let totalHours = h + bonus;
-
-        if (h > 0) {
-            updates[`timesheets/${tsId}`] = {
-                id: tsId, eventId: eid, userId: uid, date: dStr,
-                start: startVal, end: endVal, bonus,
-                workHours: Number(h.toFixed(2)), totalHours: Number(totalHours.toFixed(2)),
-                wage: Number(wage), totalCost: Number((totalHours * wage).toFixed(2))
-            };
-            hasValid = true;
-        } else if(existingTs && h === 0) {
-            updates[`timesheets/${tsId}`] = null; 
-            hasValid = true;
-        }
-    }
-
-    if(hasErrors) showToast("Einige Tage hatten unvollständige Zeiten und wurden ignoriert.", "error");
-    
-    if(hasValid) {
-        dbAction(update(ref(db), updates), 'Zeiten erfasst!');
-    } else if(!hasErrors) {
-        showToast("Keine Zeiten zum Speichern eingegeben.", "error");
-    }
 }
 
 // ============================================================================
@@ -1417,9 +1285,6 @@ function saveEvent() {
         updates.availDetails = oldEv.availDetails || {};
         if (oldEv.cleaningDoneBy) updates.cleaningDoneBy = oldEv.cleaningDoneBy;
         if (oldEv.loggedHours) updates.loggedHours = oldEv.loggedHours;
-        if (oldEv.pizzas) updates.pizzas = oldEv.pizzas;
-        if (oldEv.dips) updates.dips = oldEv.dips;
-        if (oldEv.prepStatus) updates.prepStatus = oldEv.prepStatus;
     }
     dbAction(set(ref(db, 'events/' + id), updates), 'Event gespeichert')
         .then(() => closeModal('event-modal'));
@@ -1522,6 +1387,31 @@ function resetCleaningRanking() {
         showToast('Ranking ist bereits auf 0.', 'success');
         closeModal('ranking-modal');
     }
+}
+
+function logHours(eid) {
+    const startEl = $('ts-start-' + eid), endEl = $('ts-end-' + eid);
+    if (!startEl || !endEl) return;
+    const startVal = startEl.value, endVal = endEl.value;
+    if (!startVal || !endVal) return showToast("Bitte Start- und Endzeit angeben!", 'error');
+    const uid = auth.currentUser.uid;
+    const ev = find(state.events, eid);
+    if (!ev) return;
+    const user = find(state.users, uid, 'uid');
+    const wage = user ? (Number(user.wage) || 14) : 14;
+    const h = calculateHours(startVal, endVal, ev.date, ev.endDate || ev.date);
+    if (h <= 0) return showToast("Zeitraum ist ungültig oder 0 Stunden.", 'error');
+    const existingTs = state.timesheets.find(t => eq(t.eventId, eid) && eq(t.userId, uid));
+    const tsId = existingTs ? existingTs.id : 'ts_' + Date.now() + '_' + uid;
+    const bonus = existingTs ? existingTs.bonus : 0;
+    const totalHours = h + bonus;
+    const ts = {
+        id: tsId, eventId: eid, userId: uid, date: ev.date,
+        start: startVal, end: endVal, bonus,
+        workHours: Number(h.toFixed(2)), totalHours: Number(totalHours.toFixed(2)),
+        wage: Number(wage), totalCost: Number((totalHours * wage).toFixed(2))
+    };
+    dbAction(set(ref(db, 'timesheets/' + tsId), ts), 'Zeiten erfasst!');
 }
 
 // ============================================================================
@@ -1654,7 +1544,7 @@ function printReceipt(tsId) {
 }
 
 // ============================================================================
-// PIZZA LABOR & EVENT-KALKULATION
+// PIZZA & DIPS
 // ============================================================================
 function loadPizzaMengenFromStorage() {
     try {
@@ -1663,7 +1553,6 @@ function loadPizzaMengenFromStorage() {
         const savedDips = localStorage.getItem('hp_dipMengen');
         if (savedDips) dipMengen = JSON.parse(savedDips);
     } catch (e) {}
-    renderPizzaEventSelect();
     renderPizzaGrid();
 }
 
@@ -1672,38 +1561,6 @@ function savePizzaMengenToStorage() {
         localStorage.setItem('hp_pizzaMengen', JSON.stringify(pizzaMengen));
         localStorage.setItem('hp_dipMengen', JSON.stringify(dipMengen));
     } catch (e) {}
-}
-
-function renderPizzaEventSelect() {
-    const opts = '<option value="">-- Frei kalkulieren (Speichert lokal) --</option>' + 
-        state.events.filter(e => (e.endDate || e.date) >= today())
-        .map(e => `<option value="${esc(e.id)}">${esc(e.date)} - ${esc(e.title)}</option>`).join('');
-    
-    const pSel = $('pizza-event-select');
-    if(pSel && pSel.innerHTML === '') pSel.innerHTML = opts;
-
-    const prSel = $('prep-event-select');
-    if(prSel && prSel.innerHTML === '') prSel.innerHTML = opts;
-}
-
-function loadPizzaEvent() {
-    const eid = $('pizza-event-select').value;
-    if(!eid) {
-        loadPizzaMengenFromStorage();
-        return;
-    }
-    const ev = find(state.events, eid);
-    if(ev) {
-        pizzaMengen = ev.pizzas || {};
-        dipMengen = ev.dips || { aioli: 0, hothoney: 0 };
-    }
-    renderPizzaGrid();
-}
-
-function savePizzasToEvent() {
-    const eid = $('pizza-event-select').value;
-    if(!eid) return showToast("Bitte wähle zuerst oben ein Event aus!", "error");
-    dbAction(update(ref(db, `events/${eid}`), { pizzas: pizzaMengen, dips: dipMengen }), "Kalkulation im Event gespeichert!");
 }
 
 function renderPizzaGrid() {
@@ -1725,21 +1582,22 @@ function renderPizzaGrid() {
 
 function changePizza(n, d) {
     pizzaMengen[n] = Math.max(0, (pizzaMengen[n] || 0) + d);
-    if(!$('pizza-event-select').value) savePizzaMengenToStorage();
+    savePizzaMengenToStorage();
     renderPizzaGrid();
 }
 
 function changeDip(n, d) {
     dipMengen[n] = Math.max(0, (dipMengen[n] || 0) + d);
-    if(!$('pizza-event-select').value) savePizzaMengenToStorage();
+    savePizzaMengenToStorage();
     const el = $('dqty-' + n); if (el) el.value = dipMengen[n];
     renderPizzaResult();
 }
 
 function resetPizza() {
-    if (!confirm("Pizza-Kalkulation wirklich nullen?")) return;
-    pizzaMengen = {}; dipMengen = { aioli: 0, hothoney: 0 };
-    if(!$('pizza-event-select').value) savePizzaMengenToStorage();
+    if (!confirm("Pizza-Kalkulation wirklich zurücksetzen?")) return;
+    pizzaMengen = {};
+    dipMengen = { aioli: 0, hothoney: 0 };
+    savePizzaMengenToStorage();
     renderPizzaGrid();
 }
 
@@ -1830,95 +1688,6 @@ function saveToEinkauf() {
         }
         dbAction(set(ref(db, 'einkauf'), arr), 'In Einkaufsliste übernommen!');
     });
-}
-
-// ============================================================================
-// PREPPEN
-// ============================================================================
-function calcPrepRequirements(eventPizzas, eventDips) {
-    const prepNeeds = {}; 
-    const addNeed = (id, grams) => { prepNeeds[id] = (prepNeeds[id] || 0) + grams; };
-
-    const expand = (recipeId, qty) => {
-        const r = find(state.recipes, recipeId);
-        if (!r) return;
-        if (r.needsPrep) addNeed('rec_' + recipeId, qty);
-        
-        const ratio = r.yieldGrams ? (qty / r.yieldGrams) : qty;
-        (r.items || []).forEach(item => {
-            const childQty = item.grams * ratio;
-            if (item.recipeId) expand(item.recipeId, childQty);
-            else if (item.ingredientId) {
-                const ing = getIngredient(item.ingredientId);
-                if (ing && ing.needsPrep) addNeed('ing_' + item.ingredientId, childQty);
-            }
-        });
-    };
-
-    state.pizzas.forEach(p => {
-        const qty = eventPizzas[p.name] || 0;
-        if (qty > 0) {
-            (p.items || []).forEach(item => {
-                const childQty = item.grams * qty;
-                if (item.recipeId) expand(item.recipeId, childQty);
-                else if (item.ingredientId) {
-                    const ing = getIngredient(item.ingredientId);
-                    if (ing && ing.needsPrep) addNeed('ing_' + item.ingredientId, childQty);
-                }
-            });
-        }
-    });
-    
-    if (eventDips.aioli > 0) expand('rec_aioli', eventDips.aioli);
-    if (eventDips.hothoney > 0) expand('rec_honey', eventDips.hothoney);
-
-    return prepNeeds;
-}
-
-function renderPrepList() {
-    const c = $('prep-list-container');
-    const eid = $('prep-event-select').value;
-    if(!eid) { c.innerHTML = '<div class="muted-empty">Bitte Event wählen.</div>'; return; }
-    
-    const ev = find(state.events, eid);
-    if(!ev || !ev.pizzas) { 
-        c.innerHTML = '<div class="muted-empty">Für dieses Event wurde noch keine Pizza-Kalkulation gespeichert.</div>'; 
-        return; 
-    }
-
-    const reqs = calcPrepRequirements(ev.pizzas || {}, ev.dips || {aioli:0,hothoney:0});
-    const status = ev.prepStatus || {};
-
-    if(Object.keys(reqs).length === 0) {
-        c.innerHTML = '<div class="muted-empty">Aktuell müssen keine Zutaten oder Rezepte gepreppt werden. (Tipp: Haken in den Einstellungen setzen).</div>'; 
-        return;
-    }
-
-    let html = '';
-    for(const [key, grams] of Object.entries(reqs)) {
-        const isRec = key.startsWith('rec_');
-        const realId = key.replace(/^(rec_|ing_)/, '');
-        const obj = isRec ? find(state.recipes, realId) : getIngredient(realId);
-        if(!obj) continue;
-
-        const isDone = !!status[key];
-        const textStyle = isDone ? 'text-decoration: line-through; color: var(--muted); opacity:0.6;' : 'font-weight: 600;';
-        
-        html += `
-        <div class="list-item row-between" style="padding: 12px; margin-bottom: 8px; align-items:center;">
-            <div style="${textStyle}">
-                <span style="font-size:16px;">${esc(obj.name)}</span>
-                <div style="font-size:12px; margin-top:2px;">Menge: ${fmtKG(grams)}</div>
-            </div>
-            <input type="checkbox" ${isDone ? 'checked' : ''} 
-                   onchange="togglePrepItem('${escJs(eid)}', '${escJs(key)}', this.checked)">
-        </div>`;
-    }
-    c.innerHTML = html;
-}
-
-function togglePrepItem(eid, key, isDone) {
-    set(ref(db, `events/${eid}/prepStatus/${key}`), isDone);
 }
 
 // ============================================================================
@@ -2091,7 +1860,6 @@ function renderKontakte() {
 // ============================================================================
 function openIngredientModal() {
     ['ing-new-name', 'ing-new-artnr', 'ing-new-netto', 'ing-new-brutto'].forEach(id => $(id).value = '');
-    $('ing-new-prep').checked = false;
     openModal('ingredient-modal');
 }
 
@@ -2111,8 +1879,7 @@ function saveNewIngredient() {
         supplier: $('ing-new-sup').value,
         category: $('ing-new-cat').value,
         unit: $('ing-new-unit').value,
-        priceNet: netto, priceGross: brutto, active: true,
-        needsPrep: $('ing-new-prep').checked
+        priceNet: netto, priceGross: brutto, active: true
     };
     dbAction(set(ref(db, 'ingredients/' + name), ing), 'Zutat gespeichert!')
         .then(() => closeModal('ingredient-modal'));
@@ -2217,11 +1984,6 @@ function openRecipeModal(id) {
     $('builder-name').value = r ? r.name : '';
     $('builder-param-label').textContent = 'Ertrag (Yield in Gramm)';
     $('builder-param').value = r ? r.yieldGrams : 100;
-    
-    const prepGroup = $('builder-prep-group');
-    if(prepGroup) prepGroup.style.display = 'flex';
-    if($('builder-prep')) $('builder-prep').checked = r ? !!r.needsPrep : false;
-
     builderItems = (r && r.items ? r.items : []).map(i => ({
         grams: i.grams,
         ref: i.ingredientId ? 'ing_' + i.ingredientId : (i.recipeId ? 'rec_' + i.recipeId : '')
@@ -2241,10 +2003,6 @@ function openPizzaModal(id) {
     $('builder-name').value = p ? p.name : '';
     $('builder-param-label').textContent = 'Verkaufspreis (€)';
     $('builder-param').value = p ? p.price : 0;
-    
-    const prepGroup = $('builder-prep-group');
-    if(prepGroup) prepGroup.style.display = 'none';
-
     builderItems = (p && p.items ? p.items : []).map(i => ({
         grams: i.grams,
         ref: i.ingredientId ? 'ing_' + i.ingredientId : (i.recipeId ? 'rec_' + i.recipeId : '')
@@ -2263,11 +2021,9 @@ function saveBuilder() {
         const realId = b.ref.replace(/^(ing_|rec_)/, '');
         return b.ref.startsWith('rec_') ? { recipeId: realId, grams: b.grams } : { ingredientId: realId, grams: b.grams };
     }).filter(Boolean);
-
     if (builderType === 'recipe') {
         const id = builderEditId || 'rec_' + Date.now();
-        const needsPrep = $('builder-prep') ? $('builder-prep').checked : false;
-        dbAction(set(ref(db, 'recipes/' + id), { id, name, yieldGrams: param, items, active: true, needsPrep }), 'Rezept gespeichert!')
+        dbAction(set(ref(db, 'recipes/' + id), { id, name, yieldGrams: param, items, active: true }), 'Rezept gespeichert!')
             .then(() => closeModal('builder-modal'));
     } else {
         const id = builderEditId || 'p_' + Date.now();
@@ -2296,23 +2052,22 @@ function renderSettings() {
     const ingRows = [...(state.ingredients || [])].sort((a, b) => a.name.localeCompare(b.name)).map(i => `<tr>
         <td style="max-width:150px; word-wrap:break-word;"><b>${esc(i.name)}</b></td>
         <td>${esc(i.supplier)}<br><span style="font-size:10px;" class="muted">Art: ${esc(i.articleNumber || '-')}</span></td>
-        <td><input type="number" step="0.01" data-ing-net="${esc(i.id)}" value="${esc(i.priceNet)}" style="width:60px; padding:6px;"></td>
-        <td style="text-align:center;"><input type="checkbox" data-ing-prep="${esc(i.id)}" ${i.needsPrep ? 'checked' : ''}></td>
+        <td><input type="number" step="0.01" data-ing-net="${esc(i.id)}" value="${esc(i.priceNet)}" style="width:70px; padding:6px;"></td>
+        <td><input type="number" step="0.01" data-ing-gross="${esc(i.id)}" value="${esc(i.priceGross)}" style="width:70px; padding:6px;"></td>
         <td><button class="btn-danger btn-sm" onclick="deleteIngredient('${escJs(i.id)}')">Löschen</button></td>
     </tr>`);
     const sa = $('settings-art-list');
-    if (sa) sa.innerHTML = buildTable(['Zutat', 'Lieferant / Art-Nr', 'Netto', 'Prep?', 'Aktion'], ingRows, 'Keine Zutaten angelegt.');
+    if (sa) sa.innerHTML = buildTable(['Zutat', 'Lieferant / Art-Nr', 'Netto', 'Brutto', 'Aktion'], ingRows, 'Keine Zutaten angelegt.');
 
     const recRows = (state.recipes || []).map(r => `<tr>
         <td><b>${esc(r.name)}</b></td><td>${esc(r.yieldGrams)}g</td>
-        <td style="text-align:center;"><input type="checkbox" data-rec-prep="${esc(r.id)}" ${r.needsPrep ? 'checked' : ''}></td>
         <td>
             <button class="btn-sm" onclick="openRecipeModal('${escJs(r.id)}')">Bearbeiten</button>
             <button class="btn-sm btn-danger" onclick="deleteRecipe('${escJs(r.id)}')">Löschen</button>
         </td>
     </tr>`);
     const sr = $('settings-recipes-list');
-    if (sr) sr.innerHTML = buildTable(['Rezept', 'Ertrag (g)', 'Prep?', 'Aktion'], recRows, 'Keine Rezepte angelegt.');
+    if (sr) sr.innerHTML = buildTable(['Rezept', 'Ertrag (g)', 'Aktion'], recRows, 'Keine Rezepte angelegt.');
 
     const pizRows = (state.pizzas || []).map(p => `<tr>
         <td><b>${esc(p.name)}</b></td><td>${fmt(p.price)}</td>
@@ -2393,22 +2148,10 @@ function saveSettingsART() {
     document.querySelectorAll('[data-ing-net]').forEach(el => {
         updates[`ingredients/${el.dataset.ingNet}/priceNet`] = parseFloat(el.value) || 0;
     });
-    document.querySelectorAll('[data-ing-prep]').forEach(el => {
-        updates[`ingredients/${el.dataset.ingPrep}/needsPrep`] = el.checked;
+    document.querySelectorAll('[data-ing-gross]').forEach(el => {
+        updates[`ingredients/${el.dataset.ingGross}/priceGross`] = parseFloat(el.value) || 0;
     });
-    dbAction(update(ref(db), updates), 'Zutaten aktualisiert!');
-}
-
-function saveSettingsREC() {
-    const updates = {};
-    document.querySelectorAll('[data-rec-prep]').forEach(el => {
-        updates[`recipes/${el.dataset.recPrep}/needsPrep`] = el.checked;
-    });
-    if(Object.keys(updates).length > 0) {
-        dbAction(update(ref(db), updates), 'Rezepte aktualisiert!');
-    } else {
-        showToast('Keine Änderungen.');
-    }
+    dbAction(update(ref(db), updates), 'Preise aktualisiert!');
 }
 
 function saveCateringSettings() {
@@ -2438,18 +2181,16 @@ Object.assign(window, {
     changeMonth, openDayEventsModal,
     openEventModal, saveEvent, showEventDetail, deleteEvent,
     toggleAvail, saveAvailDays, toggleEventCrewVisibility,
-    markCleaningDone, logHours, logHoursMulti,
+    markCleaningDone, logHours,
     openTimesheetModal, saveTimesheet, deleteTimesheet, printReceipt,
     changePizza, changeDip, resetPizza, saveToEinkauf,
-    loadPizzaEvent, savePizzasToEvent,
-    renderPrepList, togglePrepItem,
     calcCatering,
     clearEinkauf,
     openKontaktModal, saveKontakt, deleteKontakt,
     openIngredientModal, saveNewIngredient,
     openRecipeModal, openPizzaModal, saveBuilder, addBuilderItemRow,
     deleteRecipe, deletePizza, deleteIngredient,
-    saveSettingsART, saveSettingsREC, saveCateringSettings, updateUser,
+    saveSettingsART, saveCateringSettings, updateUser,
     addScenarioRow, saveScenarios,
     confirmAction,
     openPlannerModal, plannerMove, savePlanner,
