@@ -648,11 +648,10 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 // ============================================================================
-// HELPERS (inkl. robustem ESCAPE)
+// HELPERS
 // ============================================================================
 const $ = id => document.getElementById(id);
 
-// Neue, unzerstörbare XSS Maskierung (Verhindert Syntax Errors durch Quotes)
 const esc = (str) => {
     if (str == null) return '';
     return String(str)
@@ -662,7 +661,6 @@ const esc = (str) => {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 };
-
 const escJs = (str) => String(str || '').replace(/['"\\]/g, '\\$&');
 
 const today = () => new Date().toISOString().split('T')[0];
@@ -1523,7 +1521,7 @@ function resetCleaningRanking() {
 }
 
 // ============================================================================
-// PERSONAL & ZEITEN (Tabellen)
+// PERSONAL & ZEITEN
 // ============================================================================
 function renderTimesheets() {
     if (!isAdminRole()) return;
