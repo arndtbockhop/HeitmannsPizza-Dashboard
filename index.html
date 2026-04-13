@@ -437,6 +437,7 @@
                 <div class="form-group"><label for="ev-time">Start Uhrzeit</label><input type="time" id="ev-time"></div>
                 <div class="form-group"><label for="ev-time-end">End Uhrzeit</label><input type="time" id="ev-time-end"></div>
                 <div class="form-group"><label for="ev-personen">Gästezahl</label><input type="number" id="ev-personen"></div>
+                <div class="form-group"><label for="ev-bonus-per-day">Trinkgeld-Zuschlag pro Tag (€)</label><input type="number" id="ev-bonus-per-day" step="0.01" value="0"></div>
                 <div class="form-group" style="grid-column: span 2;" id="ev-customer-group">
                     <label for="ev-customer-select">Kunde (Nur für Catering)</label>
                     <select id="ev-customer-select"><option value="">-- Keinen Kontakt zugewiesen --</option></select>
@@ -1263,11 +1264,11 @@ function openEventModal(id, dateStr) {
     const src = Object.assign({
         title: '', type: 'Catering', date: dateStr || '', endDate: dateStr || '',
         time: '', timeEnd: '', ort: '', personen: '', status: 'Pending...',
-        notizen: '', customerContactId: ''
+        notizen: '', customerContactId: '', bonusPerDay: 0
     }, ev || {});
     [['title','ev-title'],['type','ev-type'],['date','ev-date'],['endDate','ev-endDate'],
      ['time','ev-time'],['timeEnd','ev-time-end'],['ort','ev-ort'],['personen','ev-personen'],
-     ['status','ev-status'],['notizen','ev-notizen']].forEach(([f, inputId]) => {
+     ['status','ev-status'],['notizen','ev-notizen'],['bonusPerDay','ev-bonus-per-day']].forEach(([f, inputId]) => {
         const el = $(inputId); if (el) el.value = src[f] ?? '';
     });
     let custHtml = '<option value="">-- Keinen Kontakt zugewiesen --</option>';
@@ -1294,7 +1295,8 @@ function saveEvent() {
         id, title: $('ev-title').value, type: $('ev-type').value, date: startDate, endDate: endDateVal,
         time: $('ev-time').value, timeEnd: $('ev-time-end').value, ort: $('ev-ort').value,
         personen: parseInt($('ev-personen').value) || 0, status: newStatus,
-        notizen: $('ev-notizen').value, customerContactId: $('ev-customer-select').value
+        notizen: $('ev-notizen').value, customerContactId: $('ev-customer-select').value,
+        bonusPerDay: Number($('ev-bonus-per-day').value) || 0
     };
     if (oldEv) {
         updates.assignedCrew = oldEv.assignedCrew || [];
