@@ -580,6 +580,37 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="user-create-modal">
+    <div class="modal admin-only" role="dialog" aria-modal="true" aria-labelledby="user-create-modal-title">
+        <div class="modal-title" id="user-create-modal-title">Neuer Mitarbeiter</div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group"><label for="uc-name">Name*</label><input type="text" id="uc-name" required></div>
+                <div class="form-group"><label for="uc-email">Email*</label><input type="email" id="uc-email" required></div>
+                <div class="form-group"><label for="uc-phone">Telefon</label><input type="tel" id="uc-phone"></div>
+                <div class="form-group"><label for="uc-address">Adresse</label><input type="text" id="uc-address"></div>
+                <div class="form-group"><label for="uc-birthdate">Geburtsdatum</label><input type="date" id="uc-birthdate"></div>
+                <div class="form-group"><label for="uc-hiredate">Eintrittsdatum</label><input type="date" id="uc-hiredate"></div>
+                <div class="form-group">
+                    <label for="uc-role">Rolle*</label>
+                    <select id="uc-role">
+                        <option value="staff" selected>Staff</option>
+                        <option value="admin">Admin</option>
+                        <option value="superadmin">Superadmin</option>
+                    </select>
+                </div>
+                <div class="form-group"><label for="uc-wage">Stundenlohn (€)*</label><input type="number" id="uc-wage" step="0.5" min="0" value="14" required></div>
+                <div class="form-group" style="grid-column: span 2;"><label for="uc-notes">Notiz</label><textarea id="uc-notes" rows="2"></textarea></div>
+                <div class="form-group" style="grid-column: span 2;"><label><input type="checkbox" id="uc-canlogin" checked> Kann sich einloggen</label></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('user-create-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveNewUser()">Anlegen</button>
+        </div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="detail-modal">
     <div class="modal" id="detail-content" role="dialog" aria-modal="true"></div>
 </div>
@@ -2193,6 +2224,9 @@ function renderSettings() {
 
     renderScenarios();
 
+    const createBtn = isAdminRole()
+        ? `<button class="btn-primary" style="margin-bottom:12px;" onclick="openModal('user-create-modal')">+ Neuer Mitarbeiter</button>`
+        : '';
     const teamRows = state.users.map(u => `<tr>
         <td><b>${esc(u.name || u.email)}</b><br><span style="font-size:10px;" class="muted">${esc(u.email)}</span></td>
         <td>
@@ -2206,7 +2240,7 @@ function renderSettings() {
         <td><button class="btn-primary btn-sm" onclick="updateUser('${escJs(u.uid)}')">Speichern</button></td>
     </tr>`);
     const tc = $('team-list-container');
-    if (tc) tc.innerHTML = buildTable(['Name', 'Rolle', 'Lohn (€)', 'Aktion'], teamRows, 'Keine User vorhanden.');
+    if (tc) tc.innerHTML = createBtn + buildTable(['Name', 'Rolle', 'Lohn (€)', 'Aktion'], teamRows, 'Keine User vorhanden.');
 }
 
 function renderScenarios() {
@@ -2277,6 +2311,45 @@ function updateUser(uid) {
     }), 'Mitarbeiterdaten aktualisiert!');
 }
 
+async function saveNewUser() {
+    if (!isAdminRole()) return showToast('Keine Berechtigung.', 'error');
+    const name = $('uc-name').value.trim();
+    const email = $('uc-email').value.trim().toLowerCase();
+    if (!name || !email) return showToast('Name und Email sind Pflicht.', 'error');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showToast('Ungültige Email.', 'error');
+    if (state.users.some(u => (u.email || '').toLowerCase() === email)) {
+        return showToast('Diese Email existiert bereits.', 'error');
+    }
+    const newId = 'u_' + Date.now();
+    const data = {
+        uid: newId,
+        name,
+        email,
+        phone: $('uc-phone').value.trim(),
+        address: $('uc-address').value.trim(),
+        birthDate: $('uc-birthdate').value,
+        hireDate: $('uc-hiredate').value,
+        role: $('uc-role').value || 'staff',
+        wage: Number($('uc-wage').value) || 14,
+        notes: $('uc-notes').value.trim(),
+        canLogin: $('uc-canlogin').checked,
+        createdByAdmin: true,
+        cleaningPoints: 0
+    };
+    try {
+        await set(ref(db, 'users/' + newId), data);
+        showToast(`${name} angelegt.`, 'success');
+        closeModal('user-create-modal');
+        ['uc-name','uc-email','uc-phone','uc-address','uc-birthdate','uc-hiredate','uc-notes']
+            .forEach(id => $(id).value = '');
+        $('uc-wage').value = 14;
+        $('uc-role').value = 'staff';
+        $('uc-canlogin').checked = true;
+    } catch (e) {
+        showToast('Fehler beim Speichern: ' + e.message, 'error');
+    }
+}
+
 // ============================================================================
 // EXPORT TO WINDOW
 // ============================================================================
@@ -2296,7 +2369,7 @@ Object.assign(window, {
     openIngredientModal, saveNewIngredient,
     openRecipeModal, openPizzaModal, saveBuilder, addBuilderItemRow,
     deleteRecipe, deletePizza, deleteIngredient,
-    saveSettingsART, saveCateringSettings, updateUser,
+    saveSettingsART, saveCateringSettings, updateUser, saveNewUser,
     addScenarioRow, saveScenarios,
     confirmAction,
     openPlannerModal, plannerMove, savePlanner,
