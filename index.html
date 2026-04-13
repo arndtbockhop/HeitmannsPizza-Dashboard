@@ -1089,6 +1089,7 @@ function renderEventList() {
 }
 
 function toggleAvail(eid, isAvailable) {
+    if (!auth.currentUser) { showToast('Nicht angemeldet', 'error'); return; }
     const uid = auth.currentUser.uid;
     const ev = find(state.events, eid);
     if (!ev) return;
@@ -1134,6 +1135,7 @@ function toggleAvail(eid, isAvailable) {
 }
 
 function saveAvailDays() {
+    if (!auth.currentUser) { showToast('Nicht angemeldet', 'error'); return; }
     const uid = auth.currentUser.uid;
     const selectedDays = Array.from(document.querySelectorAll('.avail-cb:checked')).map(cb => cb.value);
     runTransaction(ref(db, `events/${currentAvailEventId}`), eData => {
@@ -1218,6 +1220,7 @@ function plannerMove(uid, action) {
 }
 
 function savePlanner() {
+    if (!auth.currentUser) { showToast('Nicht angemeldet', 'error'); return; }
     if (!plannerCurrentEventId) return;
     const ev = find(state.events, plannerCurrentEventId);
     if (!ev) return;
@@ -1272,6 +1275,7 @@ function openEventModal(id, dateStr) {
 }
 
 function saveEvent() {
+    if (!auth.currentUser) { showToast('Nicht angemeldet', 'error'); return; }
     const id = state.editEventId || 'ev_' + Date.now();
     const oldEv = find(state.events, id);
     const newStatus = $('ev-status').value;
@@ -1359,6 +1363,7 @@ function deleteEvent(id) {
 }
 
 function markCleaningDone(eid) {
+    if (!auth.currentUser) { showToast('Nicht angemeldet', 'error'); return; }
     const ev = find(state.events, eid);
     if (!ev) return;
     const pts = ev.personen > 100 ? 3 : (ev.personen > 50 ? 2 : 1);
@@ -1373,6 +1378,7 @@ function markCleaningDone(eid) {
 }
 
 function changeCleaningPoints(uid, delta) {
+    if (!auth.currentUser) { showToast('Nicht angemeldet', 'error'); return; }
     if (state.role !== 'superadmin') return;
     runTransaction(ref(db, `users/${uid}/cleaningPoints`), cur => Math.max(0, (cur || 0) + delta))
         .catch(() => showToast('Fehler beim Ändern der Punkte.', 'error'));
@@ -1398,6 +1404,7 @@ function resetCleaningRanking() {
 }
 
 function logHours(eid) {
+    if (!auth.currentUser) { showToast('Nicht angemeldet', 'error'); return; }
     const startEl = $('ts-start-' + eid), endEl = $('ts-end-' + eid);
     if (!startEl || !endEl) return;
     const startVal = startEl.value, endVal = endEl.value;
