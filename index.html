@@ -180,6 +180,7 @@
         <button class="nav-item admin-only" onclick="navTo('timesheet', this)">Personal & Zeiten</button>
         <button class="nav-item admin-only" onclick="navTo('catering', this)">Catering-Kalkulator</button>
         <button class="nav-item admin-only" onclick="navTo('pizza', this)">Pizza</button>
+        <button class="nav-item" onclick="navTo('preppen', this)">Preppen</button>
         <button class="nav-item admin-only" onclick="navTo('einkauf', this)">Einkaufsliste</button>
         <button class="nav-item admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
         <button class="nav-item superadmin-only" onclick="navTo('settings', this)">Einstellungen</button>
@@ -317,6 +318,22 @@
             </div>
         </div>
 
+        <div class="page" id="page-preppen">
+            <div class="page-header">
+                <div><div class="page-title">Preppen</div><div class="page-subtitle">Was muss für das nächste Event vorbereitet werden?</div></div>
+            </div>
+            <div class="card" style="margin-bottom: 24px;">
+                <div class="card-title">Event wählen</div>
+                <select id="prep-event-select" style="padding:8px; width:100%;" onchange="loadPrepForEvent(this.value)">
+                    <option value="">-- Event wählen --</option>
+                </select>
+            </div>
+            <div class="card">
+                <div class="card-title">Prep-Liste</div>
+                <div id="prep-list-container"><div class="muted">Bitte zuerst ein Event wählen.</div></div>
+            </div>
+        </div>
+
         <div class="page admin-only" id="page-catering">
             <div class="page-header"><div><div class="page-title">Catering Kalkulator</div><div class="page-subtitle">Preisermittlung basierend auf Vorgaben</div></div></div>
             <div class="form-grid">
@@ -394,6 +411,7 @@
         <button onclick="navTo('events', this)">Events</button>
         <button class="admin-only" onclick="navTo('timesheet', this)">Zeiten</button>
         <button class="admin-only" onclick="navTo('pizza', this)">Pizza</button>
+        <button onclick="navTo('preppen', this)">Preppen</button>
         <button class="admin-only" onclick="navTo('einkauf', this)">Einkauf</button>
         <button class="admin-only" onclick="navTo('catering', this)">Catering</button>
         <button class="admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
@@ -551,6 +569,19 @@
         <div class="modal-footer">
             <button onclick="closeModal('builder-modal')">Abbrechen</button>
             <button class="btn-primary" onclick="saveBuilder()">Speichern</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="prep-detail-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="prep-detail-title">
+        <div class="modal-title" id="prep-detail-title">Prep-Details</div>
+        <div class="modal-body">
+            <div class="muted" style="font-size:12px; margin-bottom:8px;">Vollständig aufgeschlüsselte Zutaten:</div>
+            <div id="prep-detail-list"></div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('prep-detail-modal')">Schließen</button>
         </div>
     </div>
 </div>
@@ -735,6 +766,9 @@ let dipMengen = { aioli: 0, hothoney: 0 };
 let pizzaMode = 'standalone';
 let pizzaModeEventId = '';
 let pizzaWriteTimer = null;
+let prepCurrentEventId = '';
+let prepStatusUnsub = null;
+let prepStatusCache = {};
 let builderType = '', builderEditId = null, builderItems = [];
 let currentAvailEventId = null;
 let scenarioRows = [];
@@ -1976,6 +2010,48 @@ function calcPrepItems(eventData) {
     return acc;
 }
 
+function populatePrepEventSelect() {
+    const sel = $('prep-event-select');
+    if (!sel) return;
+    const todayStr = today();
+    const upcoming = state.events
+        .filter(e => (e.endDate || e.date) >= todayStr)
+        .filter(e => (e.pizzas && Object.keys(e.pizzas).length > 0) || (e.dips && Object.keys(e.dips).length > 0))
+        .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    const opts = ['<option value="">-- Event wählen --</option>'].concat(
+        upcoming.map(e => `<option value="${esc(e.id)}">${esc(e.date)} - ${esc(e.title)}</option>`)
+    );
+    sel.innerHTML = opts.join('');
+    sel.value = prepCurrentEventId || '';
+}
+
+function loadPrepForEvent(eid) {
+    prepCurrentEventId = eid || '';
+    const container = $('prep-list-container');
+    if (prepStatusUnsub) { try { prepStatusUnsub(); } catch (e) {} prepStatusUnsub = null; }
+    if (!eid) {
+        if (container) container.innerHTML = '<div class="muted">Bitte zuerst ein Event wählen.</div>';
+        return;
+    }
+    prepStatusUnsub = onValue(ref(db, `events/${eid}/prepStatus`), snap => {
+        prepStatusCache = snap.val() || {};
+        renderPrepList();
+    });
+    unsubscribers.push(prepStatusUnsub);
+}
+
+function renderPrepList() {
+    const container = $('prep-list-container');
+    if (!container) return;
+    container.innerHTML = '<div class="muted">Lade…</div>';
+}
+
+function togglePrep(eid, itemId, done) {
+}
+
+function openPrepDetail(itemId, amount) {
+}
+
 function expandFully(refKey, multiplierGrams) {
     const acc = {};
     const walk = (key, grams) => {
@@ -2571,6 +2647,7 @@ Object.assign(window, {
     openTimesheetModal, saveTimesheet, deleteTimesheet, printReceipt,
     changePizza, changeDip, resetPizza, saveToEinkauf,
     setPizzaMode, loadPizzaModeEvent,
+    loadPrepForEvent, togglePrep, openPrepDetail,
     calcCatering,
     clearEinkauf,
     openKontaktModal, saveKontakt, deleteKontakt,
