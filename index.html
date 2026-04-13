@@ -256,6 +256,7 @@
                     <div class="page-subtitle">Planung, Erfassung und Auswertung von Schichten</div>
                 </div>
                 <button class="btn-primary" onclick="openTimesheetModal()">Neue Zeiterfassung</button>
+                <button class="btn btn-primary" onclick="openRangeExportModal()">Zeitraum-Export</button>
             </div>
             <div class="settings-tabs">
                 <div class="settings-tab active" onclick="switchSettingsTab('ts-planner', this)">Event Planer</div>
@@ -698,6 +699,23 @@
     </div>
 </div>
 
+<div id="range-export-modal" class="modal">
+  <div class="modal-content admin-only">
+    <span class="close" onclick="closeModal('range-export-modal')">&times;</span>
+    <h2>Zeitraum-Export</h2>
+    <div class="form-row"><label>Von</label><input type="date" id="re-from"></div>
+    <div class="form-row"><label>Bis</label><input type="date" id="re-to"></div>
+    <div class="form-row"><label>Mitarbeiter (optional)</label>
+      <select id="re-user"><option value="">Alle</option></select></div>
+    <div class="form-row"><label>Event (optional)</label>
+      <select id="re-event"><option value="">Alle</option></select></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="runRangeExport()">Exportieren</button>
+      <button class="btn" onclick="closeModal('range-export-modal')">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-wrap"></div>
 
 <script type="module">
@@ -861,6 +879,339 @@ function timesheetsByUser(uid, fromDate = null, toDate = null) {
             return true;
         })
         .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+}
+
+// ============================================================================
+// PDF HELPERS (jsPDF)
+// ============================================================================
+function pdfDoc() {
+    const { jsPDF } = window.jspdf || {};
+    if (!jsPDF) { showToast('jsPDF nicht geladen', 'error'); return null; }
+    return new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+}
+
+function pdfHeader(doc, title, subtitle = '') {
+    if (LOGO_DATAURL) {
+        try { doc.addImage(LOGO_DATAURL, 'PNG', 15, 10, 20, 20); } catch(e){}
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text('Heitmanns Pizza', 40, 18);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+    doc.text('Event-Catering · Hamburg', 40, 24);
+    doc.setTextColor(0);
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text(title, 15, 40);
+    if (subtitle) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(80);
+        doc.text(subtitle, 15, 46);
+        doc.setTextColor(0);
+    }
+    doc.setDrawColor(200);
+    doc.line(15, 50, 195, 50);
+    return 56;
+}
+
+function pdfFooter(doc) {
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(120);
+        doc.text(`Seite ${i} / ${pageCount}`, 15, 287);
+        const now = new Date().toLocaleDateString('de-DE');
+        doc.text(`Erstellt: ${now}`, 195, 287, { align: 'right' });
+        doc.setTextColor(0);
+    }
+}
+
+function pdfCurrency(n) {
+    return (Number(n) || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+}
+function pdfHours(n) {
+    return (Number(n) || 0).toLocaleString('de-DE',
+        { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' h';
+}
+function pdfFilename(prefix, parts) {
+    const slug = s => (s || '').toString().toLowerCase()
+        .replace(/[äöüß]/g, m => ({'ä':'ae','ö':'oe','ü':'ue','ß':'ss'}[m]))
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return `heitmanns-${prefix}-${parts.map(slug).filter(Boolean).join('-')}.pdf`;
+}
+
+const PDF_HEAD_STYLES = { fillColor: [200, 30, 30], textColor: 255, fontStyle: 'bold' };
+const PDF_STYLES = { fontSize: 9, cellPadding: 2 };
+
+// ============================================================================
+// PDF EXPORT FUNCTIONS
+// ============================================================================
+function exportUserMonth(uid, year, month) {
+    const user = find(state.users, uid, 'uid');
+    if (!user) return showToast('Mitarbeiter nicht gefunden', 'error');
+    const mm = String(month).padStart(2, '0');
+    const lastDay = new Date(year, month, 0).getDate();
+    const from = `${year}-${mm}-01`;
+    const to   = `${year}-${mm}-${String(lastDay).padStart(2,'0')}`;
+    const list = timesheetsByUser(uid, from, to);
+    const monthName = new Date(year, month - 1, 1)
+        .toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    const doc = pdfDoc();
+    if (!doc) return;
+    const startY = pdfHeader(doc, `Zeiterfassung ${user.name || user.email}`, monthName);
+    doc.setFontSize(9);
+    doc.text(`Email: ${user.email || ''}`, 15, startY);
+    doc.text(`Telefon: ${user.phone || '-'}`, 15, startY + 5);
+    doc.text(`Stundenlohn: ${pdfCurrency(user.wage || 14)}`, 15, startY + 10);
+
+    let totalH = 0, totalC = 0;
+    const body = list.map(t => {
+        totalH += Number(t.totalHours) || 0;
+        totalC += Number(t.totalCost) || 0;
+        const ev = find(state.events, t.eventId) || { title: '?' };
+        const over = getDailyHours(t.userId, t.date) > 10;
+        const row = [
+            fmtDate(t.date), ev.title || '',
+            t.start || '', t.end || '',
+            `${Number(t.breakMinutes || 0)}`,
+            pdfHours(t.workHours),
+            Number(t.bonus || 0).toLocaleString('de-DE'),
+            pdfHours(t.totalHours),
+            pdfCurrency(t.wage),
+            pdfCurrency(t.totalCost)
+        ];
+        row._over = over;
+        return row;
+    });
+    doc.autoTable({
+        startY: startY + 16,
+        head: [['Datum','Event','Start','Ende','Pause','Arbeit','Bonus','Gesamt','Lohn','Kosten']],
+        body,
+        theme: 'grid',
+        headStyles: PDF_HEAD_STYLES,
+        styles: PDF_STYLES,
+        columnStyles: {
+            0: { halign: 'center' },
+            5: { halign: 'right' },
+            6: { halign: 'right' },
+            7: { halign: 'right' },
+            8: { halign: 'right' },
+            9: { halign: 'right' }
+        },
+        didParseCell(data) {
+            if (data.section === 'body' && data.row.raw && data.row.raw._over) {
+                data.cell.styles.fillColor = [255, 230, 230];
+            }
+        },
+        foot: [[
+            { content: 'Summe', colSpan: 7, styles: { halign: 'right', fontStyle: 'bold' } },
+            { content: pdfHours(totalH), styles: { halign: 'right', fontStyle: 'bold' } },
+            '',
+            { content: pdfCurrency(totalC), styles: { halign: 'right', fontStyle: 'bold' } }
+        ]]
+    });
+    const y = doc.lastAutoTable.finalY + 20;
+    doc.setFontSize(9);
+    doc.text('_______________________', 15, y + 10);
+    doc.text('Mitarbeiter', 15, y + 15);
+    doc.text('_______________________', 80, y + 10);
+    doc.text('Arbeitgeber', 80, y + 15);
+    doc.text('_______________________', 145, y + 10);
+    doc.text('Datum', 145, y + 15);
+    pdfFooter(doc);
+    doc.save(pdfFilename('ma', [user.name || uid, `${year}-${mm}`]));
+}
+
+function exportEvent(eventId) {
+    const ev = find(state.events, eventId);
+    if (!ev) return showToast('Event nicht gefunden', 'error');
+    const list = timesheetsByEvent(eventId);
+    const doc = pdfDoc();
+    if (!doc) return;
+    const subtitle = ev.endDate && ev.endDate !== ev.date
+        ? `${fmtDate(ev.date)} – ${fmtDate(ev.endDate)}`
+        : fmtDate(ev.date || '');
+    const startY = pdfHeader(doc, `Event: ${ev.title || ''}`, subtitle);
+    doc.setFontSize(9);
+    doc.text(`Typ: ${ev.type || '-'}`, 15, startY);
+    doc.text(`Ort: ${ev.ort || '-'}`, 15, startY + 5);
+    doc.text(`Personen: ${ev.personen || '-'}`, 15, startY + 10);
+
+    const byUser = {};
+    list.forEach(t => {
+        if (!byUser[t.userId]) byUser[t.userId] = [];
+        byUser[t.userId].push(t);
+    });
+    let totalH = 0, totalC = 0;
+    const body = [];
+    Object.entries(byUser).forEach(([uid, arr]) => {
+        const u = find(state.users, uid, 'uid') || { name: 'Geloescht' };
+        let subH = 0, subC = 0;
+        arr.forEach(t => {
+            subH += Number(t.totalHours) || 0;
+            subC += Number(t.totalCost) || 0;
+            totalH += Number(t.totalHours) || 0;
+            totalC += Number(t.totalCost) || 0;
+            const over = getDailyHours(t.userId, t.date) > 10;
+            const row = [
+                u.name || '',
+                fmtDate(t.date),
+                `${t.start}–${t.end}`,
+                `${Number(t.breakMinutes || 0)} min`,
+                pdfHours(t.workHours),
+                pdfHours(t.totalHours),
+                pdfCurrency(t.totalCost)
+            ];
+            row._over = over;
+            body.push(row);
+        });
+        body.push([
+            { content: `Sigma ${u.name}`, colSpan: 5, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240,240,240] } },
+            { content: pdfHours(subH), styles: { halign: 'right', fontStyle: 'bold', fillColor: [240,240,240] } },
+            { content: pdfCurrency(subC), styles: { halign: 'right', fontStyle: 'bold', fillColor: [240,240,240] } }
+        ]);
+    });
+    doc.autoTable({
+        startY: startY + 18,
+        head: [['Mitarbeiter','Datum','Zeit','Pause','Arbeit','Gesamt','Kosten']],
+        body,
+        theme: 'grid',
+        headStyles: PDF_HEAD_STYLES,
+        styles: PDF_STYLES,
+        didParseCell(data) {
+            if (data.section === 'body' && data.row.raw && data.row.raw._over) {
+                data.cell.styles.fillColor = [255, 230, 230];
+            }
+        },
+        foot: [[
+            { content: 'Event-Summe', colSpan: 5, styles: { halign: 'right', fontStyle: 'bold' } },
+            { content: pdfHours(totalH), styles: { halign: 'right', fontStyle: 'bold' } },
+            { content: pdfCurrency(totalC), styles: { halign: 'right', fontStyle: 'bold' } }
+        ]]
+    });
+    pdfFooter(doc);
+    doc.save(pdfFilename('event', [ev.title || eventId, ev.date || '']));
+}
+
+function exportRange({ from, to, uid = null, eventId = null }) {
+    if (!from || !to) return showToast('Zeitraum fehlt', 'error');
+    let list = state.timesheets.filter(t => t && t.date >= from && t.date <= to);
+    if (uid)     list = list.filter(t => eq(t.userId, uid));
+    if (eventId) list = list.filter(t => eq(t.eventId, eventId));
+    list.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    const doc = pdfDoc();
+    if (!doc) return;
+    const subtitleParts = [`${fmtDate(from)} – ${fmtDate(to)}`];
+    if (uid) {
+        const u = find(state.users, uid, 'uid');
+        subtitleParts.push(`Mitarbeiter: ${u ? u.name : uid}`);
+    }
+    if (eventId) {
+        const ev = find(state.events, eventId);
+        subtitleParts.push(`Event: ${ev ? ev.title : eventId}`);
+    }
+    const startY = pdfHeader(doc, 'Zeiterfassung Zeitraum', subtitleParts.join(' · '));
+    let totalH = 0, totalC = 0;
+    const body = list.map(t => {
+        totalH += Number(t.totalHours) || 0;
+        totalC += Number(t.totalCost) || 0;
+        const u = find(state.users, t.userId, 'uid') || { name: '?' };
+        const ev = find(state.events, t.eventId) || { title: '?' };
+        const over = getDailyHours(t.userId, t.date) > 10;
+        const row = [
+            fmtDate(t.date),
+            u.name || '',
+            ev.title || '',
+            `${t.start}–${t.end}`,
+            `${Number(t.breakMinutes || 0)}`,
+            pdfHours(t.totalHours),
+            pdfCurrency(t.totalCost)
+        ];
+        row._over = over;
+        return row;
+    });
+    doc.autoTable({
+        startY: startY + 6,
+        head: [['Datum','Mitarbeiter','Event','Zeit','Pause','Gesamt','Kosten']],
+        body,
+        theme: 'grid',
+        headStyles: PDF_HEAD_STYLES,
+        styles: PDF_STYLES,
+        didParseCell(data) {
+            if (data.section === 'body' && data.row.raw && data.row.raw._over) {
+                data.cell.styles.fillColor = [255, 230, 230];
+            }
+        },
+        foot: [[
+            { content: 'Summe', colSpan: 5, styles: { halign: 'right', fontStyle: 'bold' } },
+            { content: pdfHours(totalH), styles: { halign: 'right', fontStyle: 'bold' } },
+            { content: pdfCurrency(totalC), styles: { halign: 'right', fontStyle: 'bold' } }
+        ]]
+    });
+    pdfFooter(doc);
+    doc.save(pdfFilename('range', [from, to]));
+}
+
+function exportSingleShift(tsId) {
+    const ts = find(state.timesheets, tsId);
+    if (!ts) return showToast('Eintrag nicht gefunden', 'error');
+    const ev = find(state.events, ts.eventId) || { title: '?', type: '-', date: ts.date };
+    const u  = find(state.users, ts.userId, 'uid') || { name: '?' };
+    const doc = pdfDoc();
+    if (!doc) return;
+    const startY = pdfHeader(doc, `Einzel-Schicht`, `${u.name} · ${fmtDate(ts.date)}`);
+    doc.setFontSize(11);
+    const lines = [
+        ['Mitarbeiter:',       u.name || ''],
+        ['Event:',             `${ev.title} (${ev.type || '-'})`],
+        ['Datum:',             fmtDate(ts.date)],
+        ['Start–Ende:',        `${ts.start} – ${ts.end}`],
+        ['Pause:',             `${Number(ts.breakMinutes || 0)} min`],
+        ['Arbeitszeit:',       pdfHours(ts.workHours)],
+        ['Bonus:',             `${Number(ts.bonus || 0).toLocaleString('de-DE')} h`],
+        ['Gesamtstunden:',     pdfHours(ts.totalHours)],
+        ['Stundenlohn:',       pdfCurrency(ts.wage)],
+        ['Auszahlungsbetrag:', pdfCurrency(ts.totalCost)]
+    ];
+    let y = startY + 4;
+    lines.forEach(([k, v]) => {
+        doc.setFont('helvetica', 'bold');
+        doc.text(k, 15, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(v, 70, y);
+        y += 7;
+    });
+    pdfFooter(doc);
+    doc.save(pdfFilename('schicht', [u.name || '', ts.date || '']));
+}
+
+// printReceipt als Alias behalten
+function printReceipt(tsId) { return exportSingleShift(tsId); }
+
+function openRangeExportModal() {
+    $('re-user').innerHTML = '<option value="">Alle</option>' +
+        state.users.map(u => `<option value="${esc(u.uid)}">${esc(u.name || u.email)}</option>`).join('');
+    $('re-event').innerHTML = '<option value="">Alle</option>' +
+        state.events.map(e => `<option value="${esc(e.id)}">${esc(e.date)} · ${esc(e.title)}</option>`).join('');
+    const now = new Date();
+    const first = new Date(now.getFullYear(), now.getMonth(), 1);
+    $('re-from').value = first.toISOString().slice(0, 10);
+    $('re-to').value   = now.toISOString().slice(0, 10);
+    openModal('range-export-modal');
+}
+function runRangeExport() {
+    const from = $('re-from').value, to = $('re-to').value;
+    if (!from || !to) return showToast('Zeitraum fehlt', 'error');
+    exportRange({
+        from, to,
+        uid:     $('re-user').value || null,
+        eventId: $('re-event').value || null
+    });
+    closeModal('range-export-modal');
 }
 
 const getIngredient = id => find(state.ingredients, id);
@@ -1630,7 +1981,6 @@ function openTimesheetModalForEvent(eventId) {
     updateTimesheetLivePreview();
 }
 window.openTimesheetModalForEvent = openTimesheetModalForEvent;
-window.exportEvent = window.exportEvent || function(id){ showToast('PDF-Export folgt', 'info'); };
 
 function deleteEvent(id) {
     if (!confirm("Möchtest du dieses Event und alle zugehörigen Daten wirklich löschen?")) return;
@@ -1812,7 +2162,6 @@ function renderTimesheets() {
     const uc = $('timesheet-users-container');
     if (uc) uc.innerHTML = buildTable(['Mitarbeiter', 'Gesamtstunden', 'Gesamtlohn', 'Eingesetzt bei'], usrRows, 'Keine Mitarbeiter-Daten.');
 }
-window.exportSingleShift = window.exportSingleShift || function(id){ showToast('PDF-Export folgt', 'info'); };
 
 function openTimesheetModal(id) {
     if (id && typeof id === 'object') id = null;
@@ -1959,33 +2308,6 @@ function deleteTimesheet(id) {
         remove(ref(db, 'timesheets/' + id));
         showToast("Erfassung gelöscht!", 'success');
     }
-}
-
-function printReceipt(tsId) {
-    const ts = find(state.timesheets, tsId);
-    if (!ts) return;
-    const ev = find(state.events, ts.eventId) || { title: 'Unbekannt', type: '-', date: ts.date };
-    const user = find(state.users, ts.userId, 'uid') || { name: 'Unbekannt' };
-    const html = `
-        <html><head><title>Abrechnung - ${esc(user.name)}</title>
-        <style>body{font-family:sans-serif; padding:40px; color:#111827;} .box{border:1px solid #e5e7eb; padding:30px; border-radius:10px; max-width:600px; margin:0 auto;} h1{color:#2563eb; margin-bottom:5px;} .row{display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #f1f5f9; padding-bottom:5px;}</style>
-        </head><body>
-        <div class="box">
-            <h1>Heitmanns Pizza</h1>
-            <p style="color:#6b7280; margin-bottom:30px;">Abrechnung Event-Personal</p>
-            <div class="row"><b>Mitarbeiter:</b> <span>${esc(user.name)}</span></div>
-            <div class="row"><b>Event:</b> <span>${esc(ev.title)} (${esc(ev.type)})</span></div>
-            <div class="row"><b>Datum:</b> <span>${esc(ts.date)}</span></div>
-            <div class="row"><b>Arbeitszeit:</b> <span>${esc(ts.start)} - ${esc(ts.end)} (${Number(ts.workHours).toFixed(2)}h)</span></div>
-            ${Number(ts.bonus) > 0 ? `<div class="row"><b>Zuschlag:</b> <span>+${esc(ts.bonus)}h</span></div>` : ''}
-            <div class="row" style="margin-top:30px;"><b>Gesamtstunden:</b> <span>${Number(ts.totalHours).toFixed(2)} Stunden</span></div>
-            <div class="row"><b>Stundenlohn:</b> <span>${fmt(ts.wage)}</span></div>
-            <div class="row" style="margin-top:20px; font-size:20px; border-bottom:none;"><b>Auszahlungsbetrag:</b> <b style="color:#2563eb;">${fmt(ts.totalCost)}</b></div>
-        </div>
-        <script>window.print();<\/script>
-        </body></html>`;
-    const w = window.open('', '_blank');
-    if (w) { w.document.write(html); w.document.close(); }
 }
 
 // ============================================================================
@@ -2810,9 +3132,6 @@ function exportUserRangeFromDetail() {
     exportRange({ from, to, uid });
 }
 
-window.exportUserMonth = window.exportUserMonth || function(){ showToast('PDF-Export folgt','info'); };
-window.exportRange     = window.exportRange     || function(){ showToast('PDF-Export folgt','info'); };
-
 // ============================================================================
 // EXPORT TO WINDOW
 // ============================================================================
@@ -2839,7 +3158,8 @@ Object.assign(window, {
     confirmAction,
     openPlannerModal, plannerMove, savePlanner,
     changeCleaningPoints, resetCleaningRanking,
-    showUserDetail, refreshUserDetail, exportUserMonthFromDetail, exportUserRangeFromDetail
+    showUserDetail, refreshUserDetail, exportUserMonthFromDetail, exportUserRangeFromDetail,
+    exportUserMonth, exportEvent, exportRange, exportSingleShift, openRangeExportModal, runRangeExport
 });
 </script>
 </body>
