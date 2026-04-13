@@ -853,6 +853,40 @@ let listenersInitialized = false;
 let unsubscribers = [];
 
 // ============================================================================
+// AUTH HELPERS
+// ============================================================================
+async function ensureUserRecord(authUser) {
+    const uid = authUser.uid;
+    const email = (authUser.email || '').toLowerCase();
+    const ownSnap = await get(ref(db, 'users/' + uid));
+    if (ownSnap.exists()) return;
+
+    const allSnap = await get(ref(db, 'users'));
+    const all = allSnap.val() || {};
+    const match = Object.entries(all).find(([id, u]) =>
+        u && u.createdByAdmin === true &&
+        (u.email || '').toLowerCase() === email
+    );
+    if (match) {
+        const [oldId, oldData] = match;
+        const merged = { ...oldData, uid, createdByAdmin: false };
+        await update(ref(db), {
+            ['users/' + uid]: merged,
+            ['users/' + oldId]: null
+        });
+        return;
+    }
+    await set(ref(db, 'users/' + uid), {
+        uid,
+        email,
+        name: authUser.displayName || email.split('@')[0],
+        role: 'staff',
+        wage: 14,
+        cleaningPoints: 0
+    });
+}
+
+// ============================================================================
 // AUTH
 // ============================================================================
 onAuthStateChanged(auth, u => {
@@ -860,12 +894,10 @@ onAuthStateChanged(auth, u => {
         $('login-screen').style.display = 'none';
         $('main-app').style.display = 'flex';
         const userRef = ref(db, 'users/' + u.uid);
-        const unsubUser = onValue(userRef, snap => {
+        const unsubUser = onValue(userRef, async snap => {
             const user = snap.val();
             if (!user) {
-                const defaultName = u.email.split('@')[0];
-                set(userRef, { email: u.email, name: defaultName, role: 'staff', cleaningPoints: 0, wage: 14 })
-                    .catch(() => showToast('Profil konnte nicht angelegt werden.', 'error'));
+                await ensureUserRecord(u);
                 return;
             }
             if (!user.name || user.name.trim() === '') {
