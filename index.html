@@ -1432,25 +1432,29 @@ function resetCleaningRanking() {
     }
 }
 
-function logHours(eid) {
+function logHours(eid, date) {
     if (!auth.currentUser) { showToast('Nicht angemeldet', 'error'); return; }
-    const startEl = $('ts-start-' + eid), endEl = $('ts-end-' + eid);
+    const uid = auth.currentUser.uid;
+    const tsId = `ts_${eid}_${uid}_${date}`;
+    const startEl = $(`ts-start-${eid}-${date}`), endEl = $(`ts-end-${eid}-${date}`);
     if (!startEl || !endEl) return;
     const startVal = startEl.value, endVal = endEl.value;
+    if (!startVal && !endVal) {
+        dbAction(remove(ref(db, 'timesheets/' + tsId)), 'Tag entfernt');
+        return;
+    }
     if (!startVal || !endVal) return showToast("Bitte Start- und Endzeit angeben!", 'error');
-    const uid = auth.currentUser.uid;
     const ev = find(state.events, eid);
     if (!ev) return;
     const user = find(state.users, uid, 'uid');
     const wage = user ? (Number(user.wage) || 14) : 14;
-    const h = calculateHours(startVal, endVal, ev.date, ev.endDate || ev.date);
+    const h = calculateHours(startVal, endVal, date, date);
     if (h <= 0) return showToast("Zeitraum ist ungültig oder 0 Stunden.", 'error');
-    const existingTs = state.timesheets.find(t => eq(t.eventId, eid) && eq(t.userId, uid));
-    const tsId = existingTs ? existingTs.id : 'ts_' + Date.now() + '_' + uid;
-    const bonus = existingTs ? existingTs.bonus : 0;
-    const totalHours = h + bonus;
+    const bonus = Number(ev.bonusPerDay) || 0;
+    const extraHours = wage > 0 ? bonus / wage : 0;
+    const totalHours = h + extraHours;
     const ts = {
-        id: tsId, eventId: eid, userId: uid, date: ev.date,
+        id: tsId, eventId: eid, userId: uid, date,
         start: startVal, end: endVal, bonus,
         workHours: Number(h.toFixed(2)), totalHours: Number(totalHours.toFixed(2)),
         wage: Number(wage), totalCost: Number((totalHours * wage).toFixed(2))
