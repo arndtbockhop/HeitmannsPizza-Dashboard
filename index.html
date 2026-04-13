@@ -2224,8 +2224,8 @@ function renderSettings() {
 
     renderScenarios();
 
-    const createBtn = isAdminRole()
-        ? `<button class="btn-primary" style="margin-bottom:12px;" onclick="openModal('user-create-modal')">+ Neuer Mitarbeiter</button>`
+    const createBtn = state.role === 'superadmin'
+        ? `<button class="btn-primary" style="margin-bottom:12px;" onclick="openModal('user-create-modal')">Neuer Mitarbeiter</button>`
         : '';
     const teamRows = state.users.map(u => `<tr>
         <td><b>${esc(u.name || u.email)}</b><br><span style="font-size:10px;" class="muted">${esc(u.email)}</span></td>
@@ -2312,7 +2312,7 @@ function updateUser(uid) {
 }
 
 async function saveNewUser() {
-    if (!isAdminRole()) return showToast('Keine Berechtigung.', 'error');
+    if (state.role !== 'superadmin') return showToast('Keine Berechtigung.', 'error');
     const name = $('uc-name').value.trim();
     const email = $('uc-email').value.trim().toLowerCase();
     if (!name || !email) return showToast('Name und Email sind Pflicht.', 'error');
@@ -2346,7 +2346,7 @@ async function saveNewUser() {
         $('uc-role').value = 'staff';
         $('uc-canlogin').checked = true;
     } catch (e) {
-        showToast('Fehler beim Speichern: ' + e.message, 'error');
+        showToast('Fehler beim Speichern.', 'error');
     }
 }
 
