@@ -512,6 +512,12 @@
                     <label id="builder-param-label" for="builder-param">Wert</label>
                     <input type="number" id="builder-param" step="0.01">
                 </div>
+                <div class="form-group" id="builder-prep-group" style="display:none;">
+                    <label for="builder-needs-prep" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="builder-needs-prep" style="width:20px; height:20px;">
+                        <span>Muss vorbereitet werden (Prep-Liste)</span>
+                    </label>
+                </div>
             </div>
             <div class="form-group">
                 <label style="border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-bottom: 8px;">Zutaten & Bestandteile</label>
@@ -1999,6 +2005,8 @@ function openRecipeModal(id) {
     $('builder-name').value = r ? r.name : '';
     $('builder-param-label').textContent = 'Ertrag (Yield in Gramm)';
     $('builder-param').value = r ? r.yieldGrams : 100;
+    $('builder-prep-group').style.display = 'block';
+    $('builder-needs-prep').checked = !!(r && r.needsPrep);
     builderItems = (r && r.items ? r.items : []).map(i => ({
         grams: i.grams,
         ref: i.ingredientId ? 'ing_' + i.ingredientId : (i.recipeId ? 'rec_' + i.recipeId : '')
@@ -2018,6 +2026,8 @@ function openPizzaModal(id) {
     $('builder-name').value = p ? p.name : '';
     $('builder-param-label').textContent = 'Verkaufspreis (€)';
     $('builder-param').value = p ? p.price : 0;
+    $('builder-prep-group').style.display = 'none';
+    $('builder-needs-prep').checked = false;
     builderItems = (p && p.items ? p.items : []).map(i => ({
         grams: i.grams,
         ref: i.ingredientId ? 'ing_' + i.ingredientId : (i.recipeId ? 'rec_' + i.recipeId : '')
@@ -2038,7 +2048,8 @@ function saveBuilder() {
     }).filter(Boolean);
     if (builderType === 'recipe') {
         const id = builderEditId || 'rec_' + Date.now();
-        dbAction(set(ref(db, 'recipes/' + id), { id, name, yieldGrams: param, items, active: true }), 'Rezept gespeichert!')
+        const needsPrep = !!$('builder-needs-prep').checked;
+        dbAction(set(ref(db, 'recipes/' + id), { id, name, yieldGrams: param, items, active: true, needsPrep }), 'Rezept gespeichert!')
             .then(() => closeModal('builder-modal'));
     } else {
         const id = builderEditId || 'p_' + Date.now();
@@ -2076,7 +2087,7 @@ function renderSettings() {
     if (sa) sa.innerHTML = buildTable(['Zutat', 'Lieferant / Art-Nr', 'Netto', 'Brutto', 'Prep', 'Aktion'], ingRows, 'Keine Zutaten angelegt.');
 
     const recRows = (state.recipes || []).map(r => `<tr>
-        <td><b>${esc(r.name)}</b></td><td>${esc(r.yieldGrams)}g</td>
+        <td><b>${esc(r.name)}</b>${r.needsPrep ? ' <span class="badge badge-blue" style="font-size:10px;">Prep</span>' : ''}</td><td>${esc(r.yieldGrams)}g</td>
         <td>
             <button class="btn-sm" onclick="openRecipeModal('${escJs(r.id)}')">Bearbeiten</button>
             <button class="btn-sm btn-danger" onclick="deleteRecipe('${escJs(r.id)}')">Löschen</button>
