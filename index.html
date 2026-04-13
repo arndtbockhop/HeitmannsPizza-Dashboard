@@ -695,15 +695,15 @@ function timeSelectHTML(id, selected = '') {
     const opts = ['<option value="">--:--</option>'].concat(
         TIME_SLOTS.map(t => `<option value="${t}"${t === selected ? ' selected' : ''}>${t}</option>`)
     ).join('');
-    return `<select id="${id}">${opts}</select>`;
+    return `<select id="${esc(id)}">${opts}</select>`;
 }
 function breakSelectHTML(id, selected = 0) {
-    return `<select id="${id}">` + BREAK_OPTIONS.map(m =>
+    return `<select id="${esc(id)}">` + BREAK_OPTIONS.map(m =>
         `<option value="${m}"${m === Number(selected) ? ' selected' : ''}>${m} min</option>`
     ).join('') + '</select>';
 }
 function bonusSelectHTML(id, selected = 0) {
-    return `<select id="${id}">` + BONUS_OPTIONS.map(b =>
+    return `<select id="${esc(id)}">` + BONUS_OPTIONS.map(b =>
         `<option value="${b}"${b === Number(selected) ? ' selected' : ''}>${b.toLocaleString('de-DE')} h</option>`
     ).join('') + '</select>';
 }
