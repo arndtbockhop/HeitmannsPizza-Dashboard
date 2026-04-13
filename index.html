@@ -1487,12 +1487,12 @@ function renderTimesheets() {
             <td>${esc(user.name)}</td>
             <td>${esc(ts.date || '-')}</td>
             <td>${esc(ts.start || '-')} - ${esc(ts.end || '-')}</td>
-            <td>${tHours.toFixed(2)}h ${Number(ts.bonus) > 0 ? `(+${esc(ts.bonus)}h)` : ''}</td>
+            <td>${tHours.toFixed(2)}h ${Number(ts.bonus) > 0 ? `(+${fmt(Number(ts.bonus))})` : ''}</td>
             <td>${fmt(tCost)}</td>
             <td>
                 <button class="btn-sm" onclick="openTimesheetModal('${escJs(ts.id)}')">✏️</button>
                 <button class="btn-sm btn-danger" onclick="deleteTimesheet('${escJs(ts.id)}')">🗑️</button>
-                <button class="btn-sm btn-primary" onclick="printReceipt('${escJs(ts.id)}')">PDF</button>
+                <button class="btn-sm btn-primary" onclick="printReceipt('${escJs(ts.eventId)}', '${escJs(ts.userId)}')">PDF</button>
             </td>
         </tr>`);
     });
