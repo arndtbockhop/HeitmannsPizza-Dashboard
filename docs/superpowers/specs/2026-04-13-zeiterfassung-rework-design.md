@@ -552,7 +552,7 @@ Da es **keine Build- oder Test-Infrastruktur** gibt, verläuft das Testing manue
 
 - **Firebase Auth Legacy-Users:** User, die vor dem Rework per Self-Login angelegt wurden, haben `createdByAdmin === undefined`. Das Login-Matching prüft explizit `=== true`, also kein Doppel-Match-Risiko.
 - **Pausen-Feld nicht in alten Daten:** Rückwirkend nicht problematisch, aber alte Einträge zeigen keine Pause an. Optional: Migration, die pro Event-Typ eine Default-Pause einträgt — **nicht im Scope**, weil User-Entscheidung.
-- **jsPDF Logo als DataURL:** Logo muss einmal als Base64 in den Code eingebettet werden (ca. 10–30 kB). Alternative: direkt aus Git laden und per fetch in DataURL wandeln bei Initialisierung.
+- **jsPDF Logo:** Logo liegt unter `assets/logo-heitmanns.png` im Repo. Bei der Implementierung wird es einmal beim Seiten-Load per `fetch` → `FileReader.readAsDataURL` in eine globale Konstante `LOGO_DATAURL` geladen und in `pdfHeader(doc, ...)` via `doc.addImage(LOGO_DATAURL, 'PNG', x, y, w, h)` eingefügt.
 - **Mobile Usability:** Tages-Listen bei langen Mehrtages-Events (>7 Tage) auf dem Handy — `<details>` collapsible macht es managebar, aber in der ersten Version ist das UX-Limit "paar Tage". Ab 10+ Tagen wäre ein anderes Layout nötig (YAGNI für den Moment).
 - **Keine Tests automatisiert:** Manuelles Testing ist die einzige Option bei diesem Stack. Änderungen an `calculateHours` und `getDailyHours` sind besonders sensibel und sollten mit mehreren konkreten Eingaben verifiziert werden (siehe Checklist).
 
