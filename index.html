@@ -1832,6 +1832,84 @@ function calcIngredients() {
     return raw;
 }
 
+function addToPrepAcc(acc, id, name, amount, unit, type) {
+    if (!acc[id]) acc[id] = { id, name, amount: 0, unit, type };
+    acc[id].amount += Number(amount) || 0;
+}
+
+function walkRecipeForPrep(refKey, multiplierGrams, acc, isTop) {
+    if (!refKey) return;
+    if (refKey.startsWith('ing_')) {
+        const ing = find(state.ingredients, refKey.slice(4));
+        if (!ing) return;
+        if (ing.needsPrep) addToPrepAcc(acc, refKey, ing.name, multiplierGrams, 'g', 'ingredient');
+        return;
+    }
+    if (refKey.startsWith('rec_')) {
+        const recipe = find(state.recipes, refKey.slice(4));
+        if (!recipe) return;
+        if (recipe.needsPrep && !isTop) {
+            addToPrepAcc(acc, refKey, recipe.name, multiplierGrams, 'g', 'recipe');
+            return;
+        }
+        const ratio = recipe.yieldGrams ? (multiplierGrams / recipe.yieldGrams) : multiplierGrams;
+        (recipe.items || []).forEach(item => {
+            const g = (Number(item.grams) || 0) * ratio;
+            if (item.recipeId) walkRecipeForPrep('rec_' + item.recipeId, g, acc, false);
+            else if (item.ingredientId) walkRecipeForPrep('ing_' + item.ingredientId, g, acc, false);
+        });
+    }
+}
+
+function calcPrepItems(eventData) {
+    const acc = {};
+    if (!eventData) return acc;
+    const pizzas = eventData.pizzas || {};
+    Object.entries(pizzas).forEach(([name, qty]) => {
+        const pizza = state.pizzas.find(p => p.name === name);
+        const q = Number(qty) || 0;
+        if (!pizza || q <= 0) return;
+        (pizza.items || []).forEach(item => {
+            const g = (Number(item.grams) || 0) * q;
+            if (item.recipeId) walkRecipeForPrep('rec_' + item.recipeId, g, acc, false);
+            else if (item.ingredientId) walkRecipeForPrep('ing_' + item.ingredientId, g, acc, false);
+        });
+    });
+    const dips = eventData.dips || {};
+    Object.entries(dips).forEach(([key, grams]) => {
+        const g = Number(grams) || 0;
+        if (g <= 0) return;
+        walkRecipeForPrep('rec_' + key, g, acc, false);
+    });
+    return acc;
+}
+
+function expandFully(refKey, multiplierGrams) {
+    const acc = {};
+    const walk = (key, grams) => {
+        if (!key) return;
+        if (key.startsWith('ing_')) {
+            const ing = find(state.ingredients, key.slice(4));
+            if (!ing) return;
+            if (!acc[key]) acc[key] = { id: key, name: ing.name, amount: 0, unit: 'g', type: 'ingredient' };
+            acc[key].amount += Number(grams) || 0;
+            return;
+        }
+        if (key.startsWith('rec_')) {
+            const recipe = find(state.recipes, key.slice(4));
+            if (!recipe) return;
+            const ratio = recipe.yieldGrams ? (grams / recipe.yieldGrams) : grams;
+            (recipe.items || []).forEach(item => {
+                const g = (Number(item.grams) || 0) * ratio;
+                if (item.recipeId) walk('rec_' + item.recipeId, g);
+                else if (item.ingredientId) walk('ing_' + item.ingredientId, g);
+            });
+        }
+    };
+    walk(refKey, Number(multiplierGrams) || 0);
+    return acc;
+}
+
 function renderPizzaResult() {
     const raw = calcIngredients();
     const target = $('ingredient-result');
