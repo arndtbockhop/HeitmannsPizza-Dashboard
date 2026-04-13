@@ -1649,7 +1649,7 @@ function renderEventList() {
                 </div>
                 <div class="event-card-body" onclick="showEventDetail('${escJs(e.id)}')">
                     <div style="font-size:18px; font-weight:700;">${esc(e.title)}</div>
-                    <div class="muted" style="font-size:13px; margin-top:4px;">📍 ${esc(e.ort || 'Kein Ort angegeben')}</div>
+                    <div class="muted" style="font-size:13px; margin-top:4px;">${esc(e.ort || 'Kein Ort angegeben')}</div>
                 </div>
                 <div class="event-card-footer">
                     <button class="btn-sm ${isAvail ? 'btn-green' : ''}" onclick="toggleAvail('${escJs(e.id)}', true)">${isAvail ? '✅ Zugesagt' : '🙋‍♂️ Habe Zeit'}</button>
@@ -2078,10 +2078,9 @@ async function saveInlineTimesheet(eventId, date, existingTsId) {
     if (!start || !end) return showToast('Bitte Start und Ende auswählen!', 'error');
     const ev = find(state.events, eventId);
     if (!ev) return;
-    const evEnd = ev.endDate || ev.date;
     const user = find(state.users, uid, 'uid');
     const wage = user ? (Number(user.wage) || 14) : 14;
-    const workHours = calculateHours(start, end, ev.date, evEnd, breakMinutes);
+    const workHours = calculateHours(start, end, date, null, breakMinutes);
     if (workHours <= 0) return showToast('Arbeitszeit ist 0 oder negativ.', 'error');
     const totalHours = workHours + bonus;
     const daily = getDailyHours(uid, date, existingTsId || null) + totalHours;
@@ -2215,11 +2214,7 @@ function updateTimesheetLivePreview() {
     const date = $('ts-date')?.value;
     const user = find(state.users, uid, 'uid');
     const wage = user ? Number(user.wage) || 14 : 14;
-    const evId = $('ts-event-id')?.value;
-    const ev = find(state.events, evId);
-    const evStart = ev ? ev.date : date;
-    const evEnd = ev ? (ev.endDate || ev.date) : date;
-    const work = calculateHours(start, end, evStart, evEnd, brk);
+    const work = calculateHours(start, end, date, null, brk);
     const total = work + bonus;
     const cost = total * wage;
     let warn = '';
@@ -2253,9 +2248,7 @@ async function saveTimesheet(nextDay = false) {
     const user = find(state.users, userId, 'uid');
     const wage = user ? (Number(user.wage) || 14) : 14;
     const ev = find(state.events, eventId);
-    const evStart = ev ? ev.date : date;
-    const evEnd = ev ? (ev.endDate || ev.date) : date;
-    const workHours = calculateHours(start, end, evStart, evEnd, breakMinutes);
+    const workHours = calculateHours(start, end, date, null, breakMinutes);
     if (workHours <= 0)
         return showToast('Arbeitszeit ist 0 oder negativ (Pause zu lang?).', 'error');
     const totalHours = workHours + bonus;
@@ -2987,9 +2980,9 @@ Du kannst Dich ab sofort im Dashboard einloggen:
 https://arndtbockhop.github.io/HeitmannsPizza-Dashboard/
 
 Email: ${email}
-PIN: Beim ersten Login waehlst Du eine 4-stellige PIN.
+PIN: Beim ersten Login wählst Du eine 4-stellige PIN.
 
-Viele Gruesse
+Viele Grüße
 Heitmanns Pizza`);
     location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 }
@@ -3114,7 +3107,7 @@ function refreshUserDetail() {
     $('ud-summary').innerHTML = `
         <b>Gesamt:</b> ${totalH.toFixed(2)} h &nbsp;|&nbsp;
         <b>${fmt(totalC)}</b>
-        ${violationDays.size ? ` &nbsp;|&nbsp; <span style="color:#b91c1c;"><b>10h-Verstoesse:</b> ${violationDays.size} Tag${violationDays.size>1?'e':''}</span>` : ''}
+        ${violationDays.size ? ` &nbsp;|&nbsp; <span style="color:#b91c1c;"><b>10h-Verstöße:</b> ${violationDays.size} Tag${violationDays.size>1?'e':''}</span>` : ''}
     `;
 }
 
