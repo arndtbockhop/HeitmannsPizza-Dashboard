@@ -270,6 +270,23 @@
                 <button class="btn-danger" onclick="resetPizza()">Kalkulation zurücksetzen</button>
             </div>
             <div class="card" style="margin-bottom: 24px;">
+                <div class="card-title">Modus</div>
+                <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                        <input type="radio" name="pizza-mode" value="standalone" onchange="setPizzaMode('standalone')" checked>
+                        <span>Standalone (lokal gespeichert)</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                        <input type="radio" name="pizza-mode" value="event" onchange="setPizzaMode('event')">
+                        <span>Event-Modus (speichert am Event)</span>
+                    </label>
+                    <select id="pizza-event-select" style="padding:6px; display:none;" onchange="loadPizzaModeEvent(this.value)">
+                        <option value="">-- Event wählen --</option>
+                    </select>
+                </div>
+                <div id="pizza-mode-info" class="muted" style="font-size:11px; margin-top:8px;">Werte werden lokal im Browser gespeichert.</div>
+            </div>
+            <div class="card" style="margin-bottom: 24px;">
                 <div class="card-title">Pizza Mengen</div>
                 <div class="pizza-grid" id="pizza-grid"></div>
             </div>
@@ -715,6 +732,9 @@ let state = {
 
 let pizzaMengen = {};
 let dipMengen = { aioli: 0, hothoney: 0 };
+let pizzaMode = 'standalone';
+let pizzaModeEventId = '';
+let pizzaWriteTimer = null;
 let builderType = '', builderEditId = null, builderItems = [];
 let currentAvailEventId = null;
 let scenarioRows = [];
@@ -825,6 +845,8 @@ function initGranularListeners() {
             .sort((a, b) => (a.date || '') > (b.date || '') ? 1 : -1);
         renderEventList(); renderCalendar(); updateDashboard();
         if (isAdminRole()) renderPlanner();
+        applyPizzaModeUI();
+        if (typeof populatePrepEventSelect === 'function') populatePrepEventSelect();
     }));
 
     unsubscribers.push(onValue(ref(db, 'users'), snap => {
@@ -1759,8 +1781,14 @@ function loadPizzaMengenFromStorage() {
         if (saved) pizzaMengen = JSON.parse(saved);
         const savedDips = localStorage.getItem('hp_dipMengen');
         if (savedDips) dipMengen = JSON.parse(savedDips);
+        const savedMode = sessionStorage.getItem('hp_pizzaMode');
+        const savedEvent = sessionStorage.getItem('hp_pizzaModeEvent');
+        if (savedMode) pizzaMode = savedMode;
+        if (savedEvent) pizzaModeEventId = savedEvent;
     } catch (e) {}
+    applyPizzaModeUI();
     renderPizzaGrid();
+    if (pizzaMode === 'event' && pizzaModeEventId) loadPizzaModeEvent(pizzaModeEventId);
 }
 
 function savePizzaMengenToStorage() {
@@ -1768,6 +1796,70 @@ function savePizzaMengenToStorage() {
         localStorage.setItem('hp_pizzaMengen', JSON.stringify(pizzaMengen));
         localStorage.setItem('hp_dipMengen', JSON.stringify(dipMengen));
     } catch (e) {}
+}
+
+function applyPizzaModeUI() {
+    const sel = $('pizza-event-select');
+    const info = $('pizza-mode-info');
+    const radios = document.querySelectorAll('input[name="pizza-mode"]');
+    radios.forEach(r => { r.checked = (r.value === pizzaMode); });
+    if (sel) {
+        sel.style.display = pizzaMode === 'event' ? 'inline-block' : 'none';
+        const upcoming = state.events.filter(e => (e.endDate || e.date) >= today());
+        const opts = ['<option value="">-- Event wählen --</option>'].concat(
+            upcoming.map(e => `<option value="${esc(e.id)}">${esc(e.date)} - ${esc(e.title)}</option>`)
+        );
+        sel.innerHTML = opts.join('');
+        sel.value = pizzaModeEventId || '';
+    }
+    if (info) {
+        if (pizzaMode === 'standalone') info.textContent = 'Werte werden lokal im Browser gespeichert.';
+        else if (pizzaModeEventId) info.textContent = 'Werte werden direkt am gewählten Event gespeichert.';
+        else info.textContent = 'Bitte ein Event auswählen, damit Werte gespeichert werden.';
+    }
+}
+
+function setPizzaMode(mode) {
+    pizzaMode = mode;
+    try { sessionStorage.setItem('hp_pizzaMode', mode); } catch (e) {}
+    if (mode === 'standalone') {
+        pizzaModeEventId = '';
+        try { sessionStorage.removeItem('hp_pizzaModeEvent'); } catch (e) {}
+        loadPizzaMengenFromStorage();
+        return;
+    }
+    applyPizzaModeUI();
+}
+
+function loadPizzaModeEvent(eid) {
+    pizzaModeEventId = eid || '';
+    try {
+        if (eid) sessionStorage.setItem('hp_pizzaModeEvent', eid);
+        else sessionStorage.removeItem('hp_pizzaModeEvent');
+    } catch (e) {}
+    if (!eid) { applyPizzaModeUI(); return; }
+    get(ref(db, 'events/' + eid)).then(snap => {
+        const data = snap.val() || {};
+        pizzaMengen = data.pizzas || {};
+        dipMengen = Object.assign({ aioli: 0, hothoney: 0 }, data.dips || {});
+        applyPizzaModeUI();
+        renderPizzaGrid();
+    }).catch(() => showToast('Event konnte nicht geladen werden', 'error'));
+}
+
+function persistPizzaState() {
+    if (pizzaMode === 'standalone') {
+        savePizzaMengenToStorage();
+        return;
+    }
+    if (!pizzaModeEventId) return;
+    if (pizzaWriteTimer) clearTimeout(pizzaWriteTimer);
+    pizzaWriteTimer = setTimeout(() => {
+        update(ref(db, 'events/' + pizzaModeEventId), {
+            pizzas: pizzaMengen,
+            dips: dipMengen
+        }).catch(() => showToast('Event-Speicherung fehlgeschlagen', 'error'));
+    }, 500);
 }
 
 function renderPizzaGrid() {
@@ -1789,13 +1881,13 @@ function renderPizzaGrid() {
 
 function changePizza(n, d) {
     pizzaMengen[n] = Math.max(0, (pizzaMengen[n] || 0) + d);
-    savePizzaMengenToStorage();
+    persistPizzaState();
     renderPizzaGrid();
 }
 
 function changeDip(n, d) {
     dipMengen[n] = Math.max(0, (dipMengen[n] || 0) + d);
-    savePizzaMengenToStorage();
+    persistPizzaState();
     const el = $('dqty-' + n); if (el) el.value = dipMengen[n];
     renderPizzaResult();
 }
@@ -1804,7 +1896,7 @@ function resetPizza() {
     if (!confirm("Pizza-Kalkulation wirklich zurücksetzen?")) return;
     pizzaMengen = {};
     dipMengen = { aioli: 0, hothoney: 0 };
-    savePizzaMengenToStorage();
+    persistPizzaState();
     renderPizzaGrid();
 }
 
@@ -2478,6 +2570,7 @@ Object.assign(window, {
     markCleaningDone, logHours,
     openTimesheetModal, saveTimesheet, deleteTimesheet, printReceipt,
     changePizza, changeDip, resetPizza, saveToEinkauf,
+    setPizzaMode, loadPizzaModeEvent,
     calcCatering,
     clearEinkauf,
     openKontaktModal, saveKontakt, deleteKontakt,
