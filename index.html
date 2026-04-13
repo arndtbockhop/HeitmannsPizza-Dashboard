@@ -1049,7 +1049,7 @@ function exportEvent(eventId) {
     let totalH = 0, totalC = 0;
     const body = [];
     Object.entries(byUser).forEach(([uid, arr]) => {
-        const u = find(state.users, uid, 'uid') || { name: 'Geloescht' };
+        const u = find(state.users, uid, 'uid') || { name: 'Gelöscht' };
         let subH = 0, subC = 0;
         arr.forEach(t => {
             subH += Number(t.totalHours) || 0;
@@ -1070,7 +1070,7 @@ function exportEvent(eventId) {
             body.push(row);
         });
         body.push([
-            { content: `Sigma ${u.name}`, colSpan: 5, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240,240,240] } },
+            { content: `Summe ${u.name}`, colSpan: 5, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240,240,240] } },
             { content: pdfHours(subH), styles: { halign: 'right', fontStyle: 'bold', fillColor: [240,240,240] } },
             { content: pdfCurrency(subC), styles: { halign: 'right', fontStyle: 'bold', fillColor: [240,240,240] } }
         ]);
