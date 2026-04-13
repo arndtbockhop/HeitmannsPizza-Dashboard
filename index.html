@@ -561,20 +561,44 @@
 </div>
 
 <div class="modal-overlay" id="timesheet-modal">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="timesheet-modal-title">
+    <div class="modal admin-only" role="dialog" aria-modal="true" aria-labelledby="timesheet-modal-title">
         <div class="modal-title" id="timesheet-modal-title">Zeiterfassung</div>
         <div class="modal-body">
             <div class="form-grid">
-                <div class="form-group" style="grid-column: span 2;"><label for="ts-event-id">Event</label><select id="ts-event-id"></select></div>
-                <div class="form-group" style="grid-column: span 2;"><label for="ts-user-id">Mitarbeiter</label><select id="ts-user-id"></select></div>
-                <div class="form-group"><label for="ts-date">Datum</label><input type="date" id="ts-date"></div>
-                <div class="form-group"><label for="ts-bonus">Zuschlag (h)</label><input type="number" id="ts-bonus" step="0.25" value="0"></div>
-                <div class="form-group"><label for="ts-start">Start</label><input type="time" id="ts-start"></div>
-                <div class="form-group"><label for="ts-end">Ende</label><input type="time" id="ts-end"></div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label for="ts-event-id">Event</label>
+                    <select id="ts-event-id" onchange="updateTimesheetModalDays()"></select>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label for="ts-user-id">Mitarbeiter</label>
+                    <select id="ts-user-id" onchange="updateTimesheetLivePreview()"></select>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label for="ts-date">Tag</label>
+                    <select id="ts-date"></select>
+                </div>
+                <div class="form-group">
+                    <label for="ts-start">Start</label>
+                    <span id="ts-start-wrap"></span>
+                </div>
+                <div class="form-group">
+                    <label for="ts-end">Ende</label>
+                    <span id="ts-end-wrap"></span>
+                </div>
+                <div class="form-group">
+                    <label for="ts-break">Pause</label>
+                    <span id="ts-break-wrap"></span>
+                </div>
+                <div class="form-group">
+                    <label for="ts-bonus">Bonus</label>
+                    <span id="ts-bonus-wrap"></span>
+                </div>
+                <div id="ts-preview" style="grid-column: span 2; margin:10px 0; padding:10px; background:#f8fafc; border-radius:6px; font-size:14px;"></div>
             </div>
         </div>
         <div class="modal-footer">
             <button onclick="closeModal('timesheet-modal')">Abbrechen</button>
+            <button onclick="saveTimesheet(true)">Speichern &amp; nächster Tag</button>
             <button class="btn-primary" onclick="saveTimesheet()">Speichern</button>
         </div>
     </div>
@@ -1655,50 +1679,143 @@ function renderTimesheets() {
 }
 
 function openTimesheetModal(id) {
-    if (id && typeof id === 'object') id = null; 
+    if (id && typeof id === 'object') id = null;
     state.editTimesheetId = id || null;
     const ts = id ? find(state.timesheets, id) : null;
+
     $('ts-event-id').innerHTML = '<option value="">-- Event wählen --</option>' +
         state.events.map(e => `<option value="${esc(e.id)}">${esc(e.date)} - ${esc(e.title)}</option>`).join('');
     $('ts-user-id').innerHTML = '<option value="">-- Mitarbeiter wählen --</option>' +
         state.users.map(u => `<option value="${esc(u.uid)}">${esc(u.name || u.email)}</option>`).join('');
+
+    $('ts-start-wrap').innerHTML = timeSelectHTML('ts-start', ts ? ts.start : '');
+    $('ts-end-wrap').innerHTML   = timeSelectHTML('ts-end',   ts ? ts.end   : '');
+    $('ts-break-wrap').innerHTML = breakSelectHTML('ts-break', ts ? (ts.breakMinutes || 0) : 0);
+    $('ts-bonus-wrap').innerHTML = bonusSelectHTML('ts-bonus', ts ? (ts.bonus || 0) : 0);
+
+    ['ts-start','ts-end','ts-break','ts-bonus','ts-user-id','ts-date'].forEach(eid => {
+        const el = $(eid);
+        if (el) el.onchange = updateTimesheetLivePreview;
+    });
+
     if (ts) {
         $('ts-event-id').value = ts.eventId;
-        $('ts-user-id').value = ts.userId;
+        updateTimesheetModalDays();
         $('ts-date').value = ts.date;
-        $('ts-start').value = ts.start;
-        $('ts-end').value = ts.end;
-        $('ts-bonus').value = ts.bonus || 0;
+        $('ts-user-id').value = ts.userId;
     } else {
-        $('ts-date').value = today();
-        $('ts-start').value = ''; $('ts-end').value = '';
-        $('ts-bonus').value = 0; $('ts-event-id').value = ''; $('ts-user-id').value = '';
+        $('ts-event-id').value = '';
+        updateTimesheetModalDays();
     }
+    updateTimesheetLivePreview();
     openModal('timesheet-modal');
 }
 
-function saveTimesheet() {
+function updateTimesheetModalDays() {
+    const evId = $('ts-event-id').value;
+    const ev = find(state.events, evId);
+    const days = ev ? eventDateRange(ev) : [];
+    $('ts-date').innerHTML = days.length
+        ? days.map(d => `<option value="${esc(d)}">${esc(fmtDate(d))}</option>`).join('')
+        : `<option value="${esc(today())}">${esc(fmtDate(today()))}</option>`;
+    updateTimesheetLivePreview();
+}
+
+function updateTimesheetLivePreview() {
+    const start = $('ts-start')?.value, end = $('ts-end')?.value;
+    const brk = Number($('ts-break')?.value || 0);
+    const bonus = Number($('ts-bonus')?.value || 0);
+    const uid = $('ts-user-id')?.value;
+    const date = $('ts-date')?.value;
+    const user = find(state.users, uid, 'uid');
+    const wage = user ? Number(user.wage) || 14 : 14;
+    const evId = $('ts-event-id')?.value;
+    const ev = find(state.events, evId);
+    const evStart = ev ? ev.date : date;
+    const evEnd = ev ? (ev.endDate || ev.date) : date;
+    const work = calculateHours(start, end, evStart, evEnd, brk);
+    const total = work + bonus;
+    const cost = total * wage;
+    let warn = '';
+    if (uid && date) {
+        const daily = getDailyHours(uid, date, state.editTimesheetId) + total;
+        if (daily > 10) {
+            warn = `<div style="color:#b91c1c; font-weight:bold; margin-top:6px;">
+                ACHTUNG: ${esc(user?.name || 'Mitarbeiter')} käme am ${esc(fmtDate(date))} auf ${daily.toFixed(2)} h (&gt;10 h).
+            </div>`;
+        }
+    }
+    const preview = $('ts-preview');
+    if (preview) {
+        preview.innerHTML = `
+            <div>Arbeitszeit: <b>${work.toFixed(2)} h</b></div>
+            <div>Gesamt inkl. Bonus: <b>${total.toFixed(2)} h</b> × ${fmt(wage)} = <b>${fmt(cost)}</b></div>
+            ${warn}
+        `;
+    }
+}
+
+async function saveTimesheet(nextDay = false) {
+    if (nextDay && nextDay.target) nextDay = true;
     const id = state.editTimesheetId || 'ts_' + Date.now();
     const eventId = $('ts-event-id').value, userId = $('ts-user-id').value;
     const date = $('ts-date').value, start = $('ts-start').value, end = $('ts-end').value;
-    const bonus = parseFloat($('ts-bonus').value) || 0;
-    if (!eventId || !userId || !date || !start || !end) return alert("Bitte alle Pflichtfelder ausfüllen!");
+    const breakMinutes = Number($('ts-break').value) || 0;
+    const bonus = Number($('ts-bonus').value) || 0;
+    if (!eventId || !userId || !date || !start || !end)
+        return showToast('Bitte alle Pflichtfelder ausfüllen!', 'error');
     const user = find(state.users, userId, 'uid');
     const wage = user ? (Number(user.wage) || 14) : 14;
     const ev = find(state.events, eventId);
-    const evStartDate = ev ? ev.date : date;
-    const evEndDate = ev ? (ev.endDate || ev.date) : date;
-    const workHours = calculateHours(start, end, evStartDate, evEndDate);
+    const evStart = ev ? ev.date : date;
+    const evEnd = ev ? (ev.endDate || ev.date) : date;
+    const workHours = calculateHours(start, end, evStart, evEnd, breakMinutes);
+    if (workHours <= 0)
+        return showToast('Arbeitszeit ist 0 oder negativ (Pause zu lang?).', 'error');
     const totalHours = workHours + bonus;
+    const daily = getDailyHours(userId, date, id) + totalHours;
+    if (daily > 10) {
+        const ok = confirm(
+            `ACHTUNG: ${user?.name || 'Mitarbeiter'} käme an ${fmtDate(date)} auf ${daily.toFixed(2)} h.\n` +
+            `Das überschreitet die gesetzliche Höchstarbeitszeit von 10 h pro Tag.\n\n` +
+            `Trotzdem speichern?`
+        );
+        if (!ok) return;
+    }
     const ts = {
-        id, eventId, userId, date, start, end, bonus,
+        id, eventId, userId, date, start, end,
+        breakMinutes: Number(breakMinutes),
+        bonus: Number(bonus),
         workHours: Number(workHours.toFixed(2)),
         totalHours: Number(totalHours.toFixed(2)),
         wage: Number(wage),
         totalCost: Number((totalHours * wage).toFixed(2))
     };
-    dbAction(set(ref(db, 'timesheets/' + id), ts), 'Zeiterfassung gespeichert!')
-        .then(() => closeModal('timesheet-modal'));
+    try {
+        await set(ref(db, 'timesheets/' + id), ts);
+        showToast('Zeiterfassung gespeichert!', 'success');
+        if (nextDay === true) {
+            state.editTimesheetId = null;
+            const days = ev ? eventDateRange(ev) : [];
+            const idx = days.indexOf(date);
+            if (idx >= 0 && idx < days.length - 1) {
+                $('ts-date').value = days[idx + 1];
+            }
+            $('ts-start-wrap').innerHTML = timeSelectHTML('ts-start', '');
+            $('ts-end-wrap').innerHTML   = timeSelectHTML('ts-end', '');
+            $('ts-break-wrap').innerHTML = breakSelectHTML('ts-break', 0);
+            $('ts-bonus-wrap').innerHTML = bonusSelectHTML('ts-bonus', 0);
+            ['ts-start','ts-end','ts-break','ts-bonus'].forEach(eid => {
+                const el = $(eid);
+                if (el) el.onchange = updateTimesheetLivePreview;
+            });
+            updateTimesheetLivePreview();
+        } else {
+            closeModal('timesheet-modal');
+        }
+    } catch (e) {
+        showToast('Fehler beim Speichern.', 'error');
+    }
 }
 
 function deleteTimesheet(id) {
@@ -2468,7 +2585,7 @@ Object.assign(window, {
     openEventModal, saveEvent, showEventDetail, deleteEvent,
     toggleAvail, saveAvailDays, toggleEventCrewVisibility,
     markCleaningDone, logHours,
-    openTimesheetModal, saveTimesheet, deleteTimesheet, printReceipt,
+    openTimesheetModal, updateTimesheetModalDays, updateTimesheetLivePreview, saveTimesheet, deleteTimesheet, printReceipt,
     changePizza, changeDip, resetPizza, saveToEinkauf,
     calcCatering,
     clearEinkauf,
