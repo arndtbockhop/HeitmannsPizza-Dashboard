@@ -1262,20 +1262,7 @@ function renderEventList() {
         const isPastEvent = today() >= e.date;
         let timeEntryHtml = '';
         if (e.status === 'Secured' && isPastEvent) {
-            const userTs = state.timesheets.find(t => eq(t.eventId, e.id) && eq(t.userId, uid));
-            const isEdit = !!userTs;
-            const titleText = isEdit ? `MEINE ZEITEN BEARBEITEN (${userTs.totalHours}h erfasst):` : `MEINE ZEITEN ERFASSEN:`;
-            const btnText = isEdit ? `Aktualisieren` : `Speichern`;
-            timeEntryHtml = `
-                <div style="width:100%; margin-top:12px; display:flex; align-items:center; gap:8px; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid var(--border); flex-wrap:wrap;">
-                    <div style="font-size:11px; font-weight:700; color:var(--blue); width:100%;">${titleText}</div>
-                    <div style="display:flex; flex:1; gap:6px; align-items:center;">
-                        <input type="time" id="ts-start-${esc(e.id)}" value="${esc(userTs ? userTs.start : (e.time || ''))}" style="padding:8px; background:#fff; border:1px solid var(--border);">
-                        <span class="muted" style="font-size:12px;">bis</span>
-                        <input type="time" id="ts-end-${esc(e.id)}" value="${esc(userTs ? userTs.end : (e.timeEnd || ''))}" style="padding:8px; background:#fff; border:1px solid var(--border);">
-                    </div>
-                    <button class="btn-sm btn-primary" style="height:36px;" onclick="logHours('${escJs(e.id)}')">${btnText}</button>
-                </div>`;
+            timeEntryHtml = renderEventTimesheetBlock(e, uid);
         }
         return `
             <div class="event-card">
@@ -1605,29 +1592,76 @@ function resetCleaningRanking() {
     }
 }
 
-function logHours(eid) {
-    const startEl = $('ts-start-' + eid), endEl = $('ts-end-' + eid);
-    if (!startEl || !endEl) return;
-    const startVal = startEl.value, endVal = endEl.value;
-    if (!startVal || !endVal) return showToast("Bitte Start- und Endzeit angeben!", 'error');
+function renderEventTimesheetBlock(ev, uid) {
+    const days = eventDateRange(ev);
+    if (!days.length) return '';
+    const existingByDate = {};
+    state.timesheets
+        .filter(t => eq(t.eventId, ev.id) && eq(t.userId, uid))
+        .forEach(t => { existingByDate[t.date] = t; });
+
+    const rows = days.map(d => {
+        const ts = existingByDate[d] || {};
+        const startSel = timeSelectHTML(`ts-d-${ev.id}-${d}-start`, ts.start || '');
+        const endSel   = timeSelectHTML(`ts-d-${ev.id}-${d}-end`,   ts.end   || '');
+        const brkSel   = breakSelectHTML(`ts-d-${ev.id}-${d}-break`, ts.breakMinutes || 0);
+        const bonusSel = bonusSelectHTML(`ts-d-${ev.id}-${d}-bonus`, ts.bonus || 0);
+        const existingInfo = ts.id
+            ? `<span class="muted">${Number(ts.totalHours).toFixed(2)} h · ${fmt(ts.totalCost)}</span>
+               <button class="btn-sm btn-danger" onclick="deleteTimesheet('${escJs(ts.id)}')">Löschen</button>`
+            : '';
+        return `
+          <div class="ts-day-row" style="display:grid; grid-template-columns: auto 1fr 1fr 1fr 1fr auto auto; gap:6px; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
+            <b>${esc(fmtDate(d))}</b>
+            ${startSel} ${endSel} ${brkSel} ${bonusSel}
+            <button class="btn-sm btn-primary"
+                onclick="saveInlineTimesheet('${escJs(ev.id)}','${escJs(d)}','${escJs(ts.id || '')}')">Speichern</button>
+            ${existingInfo}
+          </div>`;
+    }).join('');
+
+    const open = days.length <= 1 || new Date(ev.date) <= new Date(Date.now() + 7*86400000);
+    return `
+      <details ${open ? 'open' : ''} style="margin-top:8px;">
+        <summary>Zeiterfassung (${days.length} Tag${days.length>1?'e':''})</summary>
+        <div style="padding:6px 0;">${rows}</div>
+      </details>`;
+}
+
+async function saveInlineTimesheet(eventId, date, existingTsId) {
     const uid = auth.currentUser.uid;
-    const ev = find(state.events, eid);
+    const start = $(`ts-d-${eventId}-${date}-start`).value;
+    const end   = $(`ts-d-${eventId}-${date}-end`).value;
+    const breakMinutes = Number($(`ts-d-${eventId}-${date}-break`).value) || 0;
+    const bonus = Number($(`ts-d-${eventId}-${date}-bonus`).value) || 0;
+    if (!start || !end) return showToast('Bitte Start und Ende auswählen!', 'error');
+    const ev = find(state.events, eventId);
     if (!ev) return;
+    const evEnd = ev.endDate || ev.date;
     const user = find(state.users, uid, 'uid');
     const wage = user ? (Number(user.wage) || 14) : 14;
-    const h = calculateHours(startVal, endVal, ev.date, ev.endDate || ev.date);
-    if (h <= 0) return showToast("Zeitraum ist ungültig oder 0 Stunden.", 'error');
-    const existingTs = state.timesheets.find(t => eq(t.eventId, eid) && eq(t.userId, uid));
-    const tsId = existingTs ? existingTs.id : 'ts_' + Date.now() + '_' + uid;
-    const bonus = existingTs ? existingTs.bonus : 0;
-    const totalHours = h + bonus;
+    const workHours = calculateHours(start, end, ev.date, evEnd, breakMinutes);
+    if (workHours <= 0) return showToast('Arbeitszeit ist 0 oder negativ.', 'error');
+    const totalHours = workHours + bonus;
+    const daily = getDailyHours(uid, date, existingTsId || null) + totalHours;
+    if (daily > 10) {
+        if (!confirm(`ACHTUNG: Du kommst am ${fmtDate(date)} auf ${daily.toFixed(2)} h (>10 h). Trotzdem speichern?`)) return;
+    }
+    const id = existingTsId || ('ts_' + Date.now() + '_' + uid);
     const ts = {
-        id: tsId, eventId: eid, userId: uid, date: ev.date,
-        start: startVal, end: endVal, bonus,
-        workHours: Number(h.toFixed(2)), totalHours: Number(totalHours.toFixed(2)),
-        wage: Number(wage), totalCost: Number((totalHours * wage).toFixed(2))
+        id, eventId, userId: uid, date, start, end,
+        breakMinutes, bonus,
+        workHours: Number(workHours.toFixed(2)),
+        totalHours: Number(totalHours.toFixed(2)),
+        wage: Number(wage),
+        totalCost: Number((totalHours * wage).toFixed(2))
     };
-    dbAction(set(ref(db, 'timesheets/' + tsId), ts), 'Zeiten erfasst!');
+    try {
+        await set(ref(db, 'timesheets/' + id), ts);
+        showToast('Zeit gespeichert', 'success');
+    } catch (e) {
+        showToast('Fehler beim Speichern.', 'error');
+    }
 }
 
 // ============================================================================
@@ -2584,7 +2618,8 @@ Object.assign(window, {
     changeMonth, openDayEventsModal,
     openEventModal, saveEvent, showEventDetail, deleteEvent,
     toggleAvail, saveAvailDays, toggleEventCrewVisibility,
-    markCleaningDone, logHours,
+    markCleaningDone,
+    renderEventTimesheetBlock, saveInlineTimesheet,
     openTimesheetModal, updateTimesheetModalDays, updateTimesheetLivePreview, saveTimesheet, deleteTimesheet, printReceipt,
     changePizza, changeDip, resetPizza, saveToEinkauf,
     calcCatering,
