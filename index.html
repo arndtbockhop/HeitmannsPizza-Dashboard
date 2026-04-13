@@ -2043,13 +2043,65 @@ function loadPrepForEvent(eid) {
 function renderPrepList() {
     const container = $('prep-list-container');
     if (!container) return;
-    container.innerHTML = '<div class="muted">Lade…</div>';
+    if (!prepCurrentEventId) { container.innerHTML = '<div class="muted">Bitte zuerst ein Event wählen.</div>'; return; }
+    const ev = find(state.events, prepCurrentEventId);
+    if (!ev) { container.innerHTML = '<div class="muted">Event nicht gefunden.</div>'; return; }
+    const items = calcPrepItems({ pizzas: ev.pizzas || {}, dips: ev.dips || {} });
+    const keys = Object.keys(items).sort((a, b) => (items[a].name || '').localeCompare(items[b].name || ''));
+    if (keys.length === 0) { container.innerHTML = '<div class="muted">Keine Prep-Items für dieses Event. Pizza/Dip-Mengen im Pizza-Tab (Event-Modus) setzen.</div>'; return; }
+    const rows = keys.map(k => {
+        const it = items[k];
+        const status = prepStatusCache[k];
+        const done = !!(status && status.done);
+        const amountDisp = it.amount >= 1000 ? (it.amount / 1000).toFixed(2) + ' kg' : Math.round(it.amount) + ' g';
+        const doneLabel = done && status.doneAt ? new Date(status.doneAt).toLocaleString('de-DE') : '';
+        const doneBy = done && status.doneBy ? ((find(state.users, status.doneBy, 'uid') || {}).name || '') : '';
+        return `<div class="row-list" style="display:flex; align-items:center; gap:12px; padding:8px 12px; border-bottom:1px solid var(--border);">
+            <input type="checkbox" ${done ? 'checked' : ''} onchange="togglePrep('${escJs(prepCurrentEventId)}','${escJs(k)}', this.checked)" style="width:22px; height:22px;">
+            <div style="flex:1;">
+                <div style="font-weight:600; ${done ? 'text-decoration:line-through; color:var(--muted);' : ''}">${esc(it.name)}</div>
+                <div class="muted" style="font-size:12px;">${esc(amountDisp)}${done && doneBy ? ' · erledigt von ' + esc(doneBy) : ''}${done && doneLabel ? ' · ' + esc(doneLabel) : ''}</div>
+            </div>
+            <button class="btn-sm" onclick="openPrepDetail('${escJs(k)}', ${Number(it.amount) || 0})">Details</button>
+        </div>`;
+    });
+    container.innerHTML = rows.join('');
 }
 
 function togglePrep(eid, itemId, done) {
+    if (!auth.currentUser) { showToast('Nicht angemeldet', 'error'); return; }
+    const path = `events/${eid}/prepStatus/${itemId}`;
+    if (done) {
+        set(ref(db, path), { done: true, doneBy: auth.currentUser.uid, doneAt: Date.now() })
+            .catch(() => showToast('Speichern fehlgeschlagen', 'error'));
+    } else {
+        remove(ref(db, path)).catch(() => showToast('Speichern fehlgeschlagen', 'error'));
+    }
 }
 
 function openPrepDetail(itemId, amount) {
+    const expanded = expandFully(itemId, Number(amount) || 0);
+    const keys = Object.keys(expanded).sort((a, b) => (expanded[a].name || '').localeCompare(expanded[b].name || ''));
+    const listEl = $('prep-detail-list');
+    if (!listEl) return;
+    if (keys.length === 0) {
+        listEl.innerHTML = '<div class="muted">Keine Zutaten gefunden.</div>';
+    } else {
+        const rows = keys.map(k => {
+            const it = expanded[k];
+            const amountDisp = it.amount >= 1000 ? (it.amount / 1000).toFixed(2) + ' kg' : it.amount.toFixed(0) + ' g';
+            return `<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f1f5f9;">
+                <span>${esc(it.name)}</span><b>${esc(amountDisp)}</b>
+            </div>`;
+        });
+        listEl.innerHTML = rows.join('');
+    }
+    const titleEl = $('prep-detail-title');
+    const headerName = (find(state.recipes, (itemId || '').replace(/^rec_/, '')) || {}).name
+        || (find(state.ingredients, (itemId || '').replace(/^ing_/, '')) || {}).name
+        || 'Details';
+    if (titleEl) titleEl.textContent = 'Prep-Details – ' + headerName;
+    openModal('prep-detail-modal');
 }
 
 function expandFully(refKey, multiplierGrams) {
