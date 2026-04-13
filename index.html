@@ -707,6 +707,7 @@ let LOGO_DATAURL = null;
 async function loadLogoDataURL() {
     try {
         const res = await fetch('assets/logo-heitmanns.png');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const blob = await res.blob();
         LOGO_DATAURL = await new Promise((resolve, reject) => {
             const fr = new FileReader();
