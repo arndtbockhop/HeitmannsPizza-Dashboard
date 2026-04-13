@@ -605,6 +605,14 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
+const COMPANY_INFO = Object.freeze({
+    name: "Heitmanns Pizza GbR",
+    street: "Lindenstraße 3",
+    zipCity: "21435 Stelle",
+    email: "Heitmanns-pizza@heitmanns-pizza.de",
+    taxId: "50/230/21307"
+});
+
 // ============================================================================
 // HELPERS
 // ============================================================================
