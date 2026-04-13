@@ -1,0 +1,48 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "users": {
+      "$uid": {
+        "role": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'superadmin'",
+          ".validate": "newData.isString() && (newData.val() === 'admin' || newData.val() === 'superadmin' || newData.val() === 'helfer')"
+        },
+        "cleaningPoints": {
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')",
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999"
+        }
+      }
+    },
+    "timesheets": {
+      "$tsid": {
+        ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')",
+        ".validate": "newData.hasChildren(['eventId','userId','date'])"
+      }
+    },
+    "events": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "ingredients": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "recipes": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "pizzas": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "kontakte": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "einkauf": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}
