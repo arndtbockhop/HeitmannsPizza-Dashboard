@@ -611,6 +611,29 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="user-edit-modal">
+    <div class="modal admin-only" role="dialog" aria-modal="true" aria-labelledby="user-edit-modal-title">
+        <div class="modal-title" id="user-edit-modal-title">Mitarbeiter bearbeiten</div>
+        <div class="modal-body">
+            <input type="hidden" id="ue-uid">
+            <div class="form-grid">
+                <div class="form-group"><label for="ue-name">Name*</label><input type="text" id="ue-name" required></div>
+                <div class="form-group"><label for="ue-email">Email</label><input type="email" id="ue-email" readonly style="opacity:0.6;cursor:not-allowed;"></div>
+                <div class="form-group"><label for="ue-phone">Telefon</label><input type="tel" id="ue-phone"></div>
+                <div class="form-group"><label for="ue-address">Adresse</label><input type="text" id="ue-address"></div>
+                <div class="form-group"><label for="ue-birthdate">Geburtsdatum</label><input type="date" id="ue-birthdate"></div>
+                <div class="form-group"><label for="ue-hiredate">Eintrittsdatum</label><input type="date" id="ue-hiredate"></div>
+                <div class="form-group" style="grid-column: span 2;"><label for="ue-notes">Notiz</label><textarea id="ue-notes" rows="2"></textarea></div>
+                <div class="form-group" style="grid-column: span 2;"><label><input type="checkbox" id="ue-canlogin"> Kann sich einloggen</label></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('user-edit-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="saveUserEdit()">Speichern</button>
+        </div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="detail-modal">
     <div class="modal" id="detail-content" role="dialog" aria-modal="true"></div>
 </div>
@@ -2269,7 +2292,11 @@ function renderSettings() {
             </select>
         </td>
         <td><input type="number" id="wage-${esc(u.uid)}" value="${esc(u.wage || 14)}" style="width:70px; padding:6px;"></td>
-        <td><button class="btn-primary btn-sm" onclick="updateUser('${escJs(u.uid)}')">Speichern</button></td>
+        <td style="white-space:nowrap;">
+            <button class="btn-primary btn-sm" onclick="updateUser('${escJs(u.uid)}')">Speichern</button>
+            <button class="btn-sm" onclick="openUserEditModal('${escJs(u.uid)}')" style="margin-left:4px;" title="Stammdaten bearbeiten">Bearbeiten</button>
+            ${(u.createdByAdmin && u.canLogin) ? `<button class="btn-sm" onclick="sendCredentials('${escJs(u.email)}','${escJs(u.name)}')" style="margin-left:4px;" title="Zugangsdaten senden">Mail</button>` : ''}
+        </td>
     </tr>`);
     const tc = $('team-list-container');
     if (tc) tc.innerHTML = createBtn + buildTable(['Name', 'Rolle', 'Lohn (€)', 'Aktion'], teamRows, 'Keine User vorhanden.');
@@ -2343,6 +2370,54 @@ function updateUser(uid) {
     }), 'Mitarbeiterdaten aktualisiert!');
 }
 
+function openUserEditModal(uid) {
+    const u = state.users.find(x => x.uid === uid);
+    if (!u) return showToast('Mitarbeiter nicht gefunden.', 'error');
+    $('ue-uid').value       = uid;
+    $('ue-name').value      = u.name    ?? '';
+    $('ue-email').value     = u.email   ?? '';
+    $('ue-phone').value     = u.phone   ?? '';
+    $('ue-address').value   = u.address ?? '';
+    $('ue-birthdate').value = u.birthDate ?? '';
+    $('ue-hiredate').value  = u.hireDate  ?? '';
+    $('ue-notes').value     = u.notes     ?? '';
+    $('ue-canlogin').checked = u.canLogin !== false;
+    openModal('user-edit-modal');
+}
+
+function saveUserEdit() {
+    const uid = $('ue-uid').value;
+    if (!uid) return;
+    const name = $('ue-name').value.trim();
+    if (!name) return showToast('Name ist Pflicht.', 'error');
+    dbAction(update(ref(db, `users/${uid}`), {
+        name,
+        phone:     $('ue-phone').value.trim(),
+        address:   $('ue-address').value.trim(),
+        birthDate: $('ue-birthdate').value,
+        hireDate:  $('ue-hiredate').value,
+        notes:     $('ue-notes').value.trim(),
+        canLogin:  $('ue-canlogin').checked
+    }), 'Stammdaten aktualisiert!');
+    closeModal('user-edit-modal');
+}
+
+function sendCredentials(email, name) {
+    const subject = encodeURIComponent('Zugang HeitmannsPizza-Dashboard');
+    const body = encodeURIComponent(
+`Hi ${name || ''},
+
+Du kannst Dich ab sofort im Dashboard einloggen:
+https://arndtbockhop.github.io/HeitmannsPizza-Dashboard/
+
+Email: ${email}
+PIN: Beim ersten Login waehlst Du eine 4-stellige PIN.
+
+Viele Gruesse
+Heitmanns Pizza`);
+    location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+}
+
 async function saveNewUser() {
     if (state.role !== 'superadmin') return showToast('Keine Berechtigung.', 'error');
     const name = $('uc-name').value.trim();
@@ -2401,7 +2476,8 @@ Object.assign(window, {
     openIngredientModal, saveNewIngredient,
     openRecipeModal, openPizzaModal, saveBuilder, addBuilderItemRow,
     deleteRecipe, deletePizza, deleteIngredient,
-    saveSettingsART, saveCateringSettings, updateUser, saveNewUser,
+    saveSettingsART, saveCateringSettings, updateUser, saveNewUser, sendCredentials,
+    openUserEditModal, saveUserEdit,
     addScenarioRow, saveScenarios,
     confirmAction,
     openPlannerModal, plannerMove, savePlanner,
