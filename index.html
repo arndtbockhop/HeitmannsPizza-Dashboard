@@ -880,7 +880,7 @@ function initGranularListeners() {
         renderEventList(); renderCalendar(); updateDashboard();
         if (isAdminRole()) renderPlanner();
         applyPizzaModeUI();
-        if (typeof populatePrepEventSelect === 'function') populatePrepEventSelect();
+        populatePrepEventSelect();
     }));
 
     unsubscribers.push(onValue(ref(db, 'users'), snap => {
