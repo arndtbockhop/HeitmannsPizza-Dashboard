@@ -2069,10 +2069,11 @@ function renderSettings() {
         <td>${esc(i.supplier)}<br><span style="font-size:10px;" class="muted">Art: ${esc(i.articleNumber || '-')}</span></td>
         <td><input type="number" step="0.01" data-ing-net="${esc(i.id)}" value="${esc(i.priceNet)}" style="width:70px; padding:6px;"></td>
         <td><input type="number" step="0.01" data-ing-gross="${esc(i.id)}" value="${esc(i.priceGross)}" style="width:70px; padding:6px;"></td>
+        <td style="text-align:center;"><input type="checkbox" data-ing-prep="${esc(i.id)}" ${i.needsPrep ? 'checked' : ''} style="width:20px; height:20px;"></td>
         <td><button class="btn-danger btn-sm" onclick="deleteIngredient('${escJs(i.id)}')">Löschen</button></td>
     </tr>`);
     const sa = $('settings-art-list');
-    if (sa) sa.innerHTML = buildTable(['Zutat', 'Lieferant / Art-Nr', 'Netto', 'Brutto', 'Aktion'], ingRows, 'Keine Zutaten angelegt.');
+    if (sa) sa.innerHTML = buildTable(['Zutat', 'Lieferant / Art-Nr', 'Netto', 'Brutto', 'Prep', 'Aktion'], ingRows, 'Keine Zutaten angelegt.');
 
     const recRows = (state.recipes || []).map(r => `<tr>
         <td><b>${esc(r.name)}</b></td><td>${esc(r.yieldGrams)}g</td>
@@ -2165,6 +2166,9 @@ function saveSettingsART() {
     });
     document.querySelectorAll('[data-ing-gross]').forEach(el => {
         updates[`ingredients/${el.dataset.ingGross}/priceGross`] = parseFloat(el.value) || 0;
+    });
+    document.querySelectorAll('[data-ing-prep]').forEach(el => {
+        updates[`ingredients/${el.dataset.ingPrep}/needsPrep`] = !!el.checked;
     });
     dbAction(update(ref(db), updates), 'Preise aktualisiert!');
 }
