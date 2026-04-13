@@ -658,6 +658,31 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="user-detail-modal">
+    <div class="modal admin-only" role="dialog" aria-modal="true" aria-labelledby="ud-title">
+        <div class="modal-title" id="ud-title">Mitarbeiter-Detail</div>
+        <div class="modal-body">
+            <div id="ud-meta" class="muted" style="margin-bottom:14px;"></div>
+            <div class="form-grid" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+                <label>Zeitraum:</label>
+                <input type="month" id="ud-month">
+                <span>oder</span>
+                <input type="date" id="ud-from">
+                bis
+                <input type="date" id="ud-to">
+                <button class="btn btn-sm" onclick="refreshUserDetail()">Übernehmen</button>
+            </div>
+            <div id="ud-body"></div>
+            <div id="ud-summary" style="margin-top:12px; padding:10px; background:#f8fafc; border-radius:6px;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-primary" onclick="exportUserMonthFromDetail()">PDF Monat</button>
+            <button class="btn-primary" onclick="exportUserRangeFromDetail()">PDF Zeitraum</button>
+            <button onclick="closeModal('user-detail-modal')">Schließen</button>
+        </div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="detail-modal">
     <div class="modal" id="detail-content" role="dialog" aria-modal="true"></div>
 </div>
@@ -1532,6 +1557,62 @@ function showEventDetail(id) {
             html += `<div style="text-align:center; padding:10px; background:var(--green-light); color:var(--green); border-radius:8px; font-weight:600;">Putzdienst erledigt von: ${esc(cleaner ? cleaner.name : 'Ein Admin')}.</div>`;
         }
     }
+    const eventId = id;
+    const tsList = timesheetsByEvent(eventId);
+    let tsHtml = '';
+    if (tsList.length) {
+        let totalH = 0, totalC = 0;
+        const daySet = new Set();
+        const uidSet = new Set();
+        const rows = tsList.map(t => {
+            const u = find(state.users, t.userId, 'uid') || { name: 'Gelöscht' };
+            const over = getDailyHours(t.userId, t.date) > 10;
+            totalH += Number(t.totalHours) || 0;
+            totalC += Number(t.totalCost) || 0;
+            daySet.add(t.date);
+            uidSet.add(t.userId);
+            return `<tr class="${over ? 'over-10h' : ''}">
+                <td>${esc(fmtDate(t.date))}</td>
+                <td>${esc(u.name)}${over ? '<span class="over-10h-badge">!</span>' : ''}</td>
+                <td>${esc(t.start)}&#8211;${esc(t.end)}</td>
+                <td>${Number(t.breakMinutes||0)} min</td>
+                <td>${Number(t.workHours||0).toFixed(2)} h</td>
+                <td>${Number(t.bonus||0).toLocaleString('de-DE')}</td>
+                <td>${Number(t.totalHours||0).toFixed(2)} h</td>
+                <td>${fmt(t.wage)}</td>
+                <td><b>${fmt(t.totalCost)}</b></td>
+                <td>
+                  <button class="btn-sm" onclick="openTimesheetModal('${escJs(t.id)}')">Bearbeiten</button>
+                  <button class="btn-sm btn-danger" onclick="deleteTimesheet('${escJs(t.id)}')">Löschen</button>
+                </td>
+            </tr>`;
+        }).join('');
+        tsHtml = `
+          <h3 style="margin-top:20px;">Zeiterfassung &amp; Kosten</h3>
+          <table>
+            <thead><tr>
+              <th>Datum</th><th>Mitarbeiter</th><th>Start&#8211;Ende</th><th>Pause</th>
+              <th>Arbeit</th><th>Bonus</th><th>Gesamt</th><th>Lohn</th><th>Kosten</th><th></th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div style="margin-top:10px; padding:10px; background:#f8fafc; border-radius:6px;">
+            <b>Gesamtstunden:</b> ${totalH.toFixed(2)} h &nbsp;|&nbsp;
+            <b>Gesamtkosten:</b> ${fmt(totalC)} &nbsp;|&nbsp;
+            <b>Einsatztage:</b> ${daySet.size} &nbsp;|&nbsp;
+            <b>Crew:</b> ${uidSet.size} Personen &nbsp;|&nbsp;
+            <b>&#216;/Tag:</b> ${fmt(totalC / Math.max(1, daySet.size))}
+          </div>
+          <div style="margin-top:10px;">
+            <button class="btn btn-primary" onclick="exportEvent('${escJs(eventId)}')">PDF Event-Export</button>
+            <button class="btn" onclick="openTimesheetModalForEvent('${escJs(eventId)}')">+ Zeiterfassung hinzufügen</button>
+          </div>
+        `;
+    } else {
+        tsHtml = `<p class="muted" style="margin-top:20px;">Noch keine Zeiten erfasst.</p>
+          <button class="btn btn-primary" onclick="openTimesheetModalForEvent('${escJs(eventId)}')">+ Zeiterfassung hinzufügen</button>`;
+    }
+    html += tsHtml;
     html += `</div>
         <div class="modal-footer">
             ${isAdminRole() ? `<button class="btn-danger" onclick="deleteEvent('${escJs(id)}')">Event löschen</button>
@@ -1541,6 +1622,15 @@ function showEventDetail(id) {
     $('detail-content').innerHTML = html;
     openModal('detail-modal');
 }
+
+function openTimesheetModalForEvent(eventId) {
+    openTimesheetModal(null);
+    $('ts-event-id').value = eventId;
+    updateTimesheetModalDays();
+    updateTimesheetLivePreview();
+}
+window.openTimesheetModalForEvent = openTimesheetModalForEvent;
+window.exportEvent = window.exportEvent || function(id){ showToast('PDF-Export folgt', 'info'); };
 
 function deleteEvent(id) {
     if (!confirm("Möchtest du dieses Event und alle zugehörigen Daten wirklich löschen?")) return;
@@ -1677,40 +1767,52 @@ function renderTimesheets() {
         const ev = find(state.events, ts.eventId) || { title: 'Gelöschtes Event' };
         const tHours = Number(ts.totalHours) || 0;
         const tCost = Number(ts.totalCost) || 0;
-        if (!eventStats[ts.eventId]) eventStats[ts.eventId] = { title: ev.title, totalHours: 0, totalCost: 0 };
+        const over = getDailyHours(ts.userId, ts.date) > 10;
+        if (!eventStats[ts.eventId]) eventStats[ts.eventId] = { id: ts.eventId, title: ev.title, totalHours: 0, totalCost: 0 };
         eventStats[ts.eventId].totalHours += tHours;
         eventStats[ts.eventId].totalCost += tCost;
-        if (!userStats[ts.userId]) userStats[ts.userId] = { name: user.name, totalHours: 0, totalCost: 0, events: new Set() };
+        if (!userStats[ts.userId]) userStats[ts.userId] = { id: ts.userId, name: user.name, totalHours: 0, totalCost: 0, events: new Set() };
         userStats[ts.userId].totalHours += tHours;
         userStats[ts.userId].totalCost += tCost;
         userStats[ts.userId].events.add(ev.title);
-        tsRows.push(`<tr>
+        tsRows.push(`<tr class="${over ? 'over-10h' : ''}">
             <td><b>${esc(ev.title)}</b></td>
-            <td>${esc(user.name)}</td>
+            <td>${esc(user.name)}${over ? '<span class="over-10h-badge">!</span>' : ''}</td>
             <td>${esc(ts.date || '-')}</td>
             <td>${esc(ts.start || '-')} - ${esc(ts.end || '-')}</td>
+            <td>${Number(ts.breakMinutes || 0)} min</td>
             <td>${tHours.toFixed(2)}h ${Number(ts.bonus) > 0 ? `(+${esc(ts.bonus)}h)` : ''}</td>
             <td>${fmt(tCost)}</td>
             <td>
-                <button class="btn-sm" onclick="openTimesheetModal('${escJs(ts.id)}')">✏️</button>
-                <button class="btn-sm btn-danger" onclick="deleteTimesheet('${escJs(ts.id)}')">🗑️</button>
-                <button class="btn-sm btn-primary" onclick="printReceipt('${escJs(ts.id)}')">PDF</button>
+                <button class="btn-sm" onclick="openTimesheetModal('${escJs(ts.id)}')">Bearbeiten</button>
+                <button class="btn-sm btn-danger" onclick="deleteTimesheet('${escJs(ts.id)}')">Löschen</button>
+                <button class="btn-sm btn-primary" onclick="exportSingleShift('${escJs(ts.id)}')">PDF</button>
             </td>
         </tr>`);
     });
     const lc = $('timesheet-list-container');
-    if (lc) lc.innerHTML = buildTable(['Event', 'Mitarbeiter', 'Datum', 'Zeit', 'Std', 'Lohn', 'Aktion'], tsRows, 'Keine erfassten Zeiten.');
+    if (lc) lc.innerHTML = buildTable(
+        ['Event', 'Mitarbeiter', 'Datum', 'Zeit', 'Pause', 'Std', 'Lohn', 'Aktion'],
+        tsRows, 'Keine erfassten Zeiten.');
     const evRows = Object.values(eventStats).map(es =>
-        `<tr><td><b>${esc(es.title)}</b></td><td>${es.totalHours.toFixed(2)}h</td><td><b style="color:var(--red)">${fmt(es.totalCost)}</b></td></tr>`
-    );
+        `<tr class="clickable-row" onclick="showEventDetail('${escJs(es.id)}')">
+           <td><b>${esc(es.title)}</b></td>
+           <td>${es.totalHours.toFixed(2)}h</td>
+           <td><b style="color:var(--red)">${fmt(es.totalCost)}</b></td>
+         </tr>`);
     const ec = $('timesheet-events-container');
     if (ec) ec.innerHTML = buildTable(['Event', 'Gesamtstunden', 'Gesamtkosten'], evRows, 'Keine Event-Daten.');
     const usrRows = Object.values(userStats).map(us =>
-        `<tr><td><b>${esc(us.name)}</b></td><td>${us.totalHours.toFixed(2)}h</td><td><b style="color:var(--green)">${fmt(us.totalCost)}</b></td><td>${esc(Array.from(us.events).join(', '))}</td></tr>`
-    );
+        `<tr class="clickable-row" onclick="showUserDetail('${escJs(us.id)}')">
+           <td><b>${esc(us.name)}</b></td>
+           <td>${us.totalHours.toFixed(2)}h</td>
+           <td><b style="color:var(--green)">${fmt(us.totalCost)}</b></td>
+           <td>${esc(Array.from(us.events).join(', '))}</td>
+         </tr>`);
     const uc = $('timesheet-users-container');
     if (uc) uc.innerHTML = buildTable(['Mitarbeiter', 'Gesamtstunden', 'Gesamtlohn', 'Eingesetzt bei'], usrRows, 'Keine Mitarbeiter-Daten.');
 }
+window.exportSingleShift = window.exportSingleShift || function(id){ showToast('PDF-Export folgt', 'info'); };
 
 function openTimesheetModal(id) {
     if (id && typeof id === 'object') id = null;
@@ -2609,6 +2711,109 @@ async function saveNewUser() {
 }
 
 // ============================================================================
+// USER DETAIL MODAL (Task 16)
+// ============================================================================
+let _udCurrentUid = null;
+
+function showUserDetail(uid) {
+    _udCurrentUid = uid;
+    const u = find(state.users, uid, 'uid');
+    if (!u) return showToast('Mitarbeiter nicht gefunden', 'error');
+    $('ud-title').textContent = u.name || u.email || 'Mitarbeiter';
+    $('ud-meta').innerHTML = `${esc(u.email || '')} · ${esc(u.phone || '')} · ${fmt(u.wage || 0)}/h`;
+    const d = new Date();
+    $('ud-month').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    $('ud-from').value = '';
+    $('ud-to').value = '';
+    refreshUserDetail();
+    openModal('user-detail-modal');
+}
+
+function getUserDetailRange() {
+    const from = $('ud-from').value;
+    const to   = $('ud-to').value;
+    if (from && to) return { from, to };
+    const m = $('ud-month').value;
+    if (m) {
+        const [y, mo] = m.split('-').map(Number);
+        const last = new Date(y, mo, 0).getDate();
+        return {
+            from: `${y}-${String(mo).padStart(2,'0')}-01`,
+            to:   `${y}-${String(mo).padStart(2,'0')}-${String(last).padStart(2,'0')}`
+        };
+    }
+    return { from: null, to: null };
+}
+
+function refreshUserDetail() {
+    const uid = _udCurrentUid;
+    if (!uid) return;
+    const { from, to } = getUserDetailRange();
+    const list = timesheetsByUser(uid, from, to);
+    const groups = {};
+    list.forEach(t => {
+        if (!groups[t.eventId]) groups[t.eventId] = [];
+        groups[t.eventId].push(t);
+    });
+    let html = '';
+    let totalH = 0, totalC = 0;
+    const violationDays = new Set();
+    Object.entries(groups).forEach(([eid, arr]) => {
+        const ev = find(state.events, eid) || { title: 'Gelöschtes Event' };
+        let evH = 0, evC = 0;
+        const rows = arr.map(t => {
+            const over = getDailyHours(t.userId, t.date) > 10;
+            if (over) violationDays.add(t.date);
+            evH += Number(t.totalHours) || 0;
+            evC += Number(t.totalCost)  || 0;
+            totalH += Number(t.totalHours) || 0;
+            totalC += Number(t.totalCost) || 0;
+            return `<tr class="clickable-row ${over ? 'over-10h' : ''}" onclick="openTimesheetModal('${escJs(t.id)}')">
+                <td>${esc(fmtDate(t.date))}</td>
+                <td>${esc(t.start)}&#8211;${esc(t.end)}</td>
+                <td>${Number(t.breakMinutes||0)} min</td>
+                <td>${Number(t.totalHours||0).toFixed(2)} h${over ? '<span class="over-10h-badge">!</span>' : ''}</td>
+                <td>${fmt(t.totalCost)}</td>
+            </tr>`;
+        }).join('');
+        html += `
+          <details open style="margin-top:10px;">
+            <summary><b>${esc(ev.title)}</b> · ${esc(ev.date || '')}${ev.endDate && ev.endDate !== ev.date ? '&#8211;' + esc(ev.endDate) : ''}</summary>
+            <table>
+              <thead><tr><th>Datum</th><th>Zeit</th><th>Pause</th><th>Gesamt</th><th>Kosten</th></tr></thead>
+              <tbody>${rows}</tbody>
+              <tfoot><tr><td colspan="3"><b>Event-Sigma</b></td><td><b>${evH.toFixed(2)} h</b></td><td><b>${fmt(evC)}</b></td></tr></tfoot>
+            </table>
+          </details>`;
+    });
+    if (!list.length) html = `<p class="muted">Keine Einträge im Zeitraum.</p>`;
+    $('ud-body').innerHTML = html;
+    $('ud-summary').innerHTML = `
+        <b>Gesamt:</b> ${totalH.toFixed(2)} h &nbsp;|&nbsp;
+        <b>${fmt(totalC)}</b>
+        ${violationDays.size ? ` &nbsp;|&nbsp; <span style="color:#b91c1c;"><b>10h-Verstoesse:</b> ${violationDays.size} Tag${violationDays.size>1?'e':''}</span>` : ''}
+    `;
+}
+
+function exportUserMonthFromDetail() {
+    const uid = _udCurrentUid;
+    const m = $('ud-month').value;
+    if (!uid || !m) return showToast('Kein Monat ausgewählt', 'error');
+    const [y, mo] = m.split('-').map(Number);
+    exportUserMonth(uid, y, mo);
+}
+
+function exportUserRangeFromDetail() {
+    const uid = _udCurrentUid;
+    const { from, to } = getUserDetailRange();
+    if (!uid || !from || !to) return showToast('Kein Zeitraum', 'error');
+    exportRange({ from, to, uid });
+}
+
+window.exportUserMonth = window.exportUserMonth || function(){ showToast('PDF-Export folgt','info'); };
+window.exportRange     = window.exportRange     || function(){ showToast('PDF-Export folgt','info'); };
+
+// ============================================================================
 // EXPORT TO WINDOW
 // ============================================================================
 Object.assign(window, {
@@ -2633,7 +2838,8 @@ Object.assign(window, {
     addScenarioRow, saveScenarios,
     confirmAction,
     openPlannerModal, plannerMove, savePlanner,
-    changeCleaningPoints, resetCleaningRanking
+    changeCleaningPoints, resetCleaningRanking,
+    showUserDetail, refreshUserDetail, exportUserMonthFromDetail, exportUserRangeFromDetail
 });
 </script>
 </body>
