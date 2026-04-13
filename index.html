@@ -699,21 +699,22 @@
     </div>
 </div>
 
-<div id="range-export-modal" class="modal">
-  <div class="modal-content admin-only">
-    <span class="close" onclick="closeModal('range-export-modal')">&times;</span>
-    <h2>Zeitraum-Export</h2>
-    <div class="form-row"><label>Von</label><input type="date" id="re-from"></div>
-    <div class="form-row"><label>Bis</label><input type="date" id="re-to"></div>
-    <div class="form-row"><label>Mitarbeiter (optional)</label>
-      <select id="re-user"><option value="">Alle</option></select></div>
-    <div class="form-row"><label>Event (optional)</label>
-      <select id="re-event"><option value="">Alle</option></select></div>
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="runRangeExport()">Exportieren</button>
-      <button class="btn" onclick="closeModal('range-export-modal')">Abbrechen</button>
+<div class="modal-overlay" id="range-export-modal">
+    <div class="modal admin-only" role="dialog" aria-modal="true" aria-labelledby="range-export-modal-title">
+        <div class="modal-title" id="range-export-modal-title">Zeitraum-Export</div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group"><label for="re-from">Von</label><input type="date" id="re-from"></div>
+                <div class="form-group"><label for="re-to">Bis</label><input type="date" id="re-to"></div>
+                <div class="form-group" style="grid-column: span 2;"><label for="re-user">Mitarbeiter (optional)</label><select id="re-user"><option value="">Alle</option></select></div>
+                <div class="form-group" style="grid-column: span 2;"><label for="re-event">Event (optional)</label><select id="re-event"><option value="">Alle</option></select></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('range-export-modal')">Abbrechen</button>
+            <button class="btn-primary" onclick="runRangeExport()">Exportieren</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <div id="toast-wrap"></div>
