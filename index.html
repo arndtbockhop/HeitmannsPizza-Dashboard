@@ -1050,6 +1050,18 @@ function openDayEventsModal(dateStr) {
 // ============================================================================
 // EVENTS LISTE
 // ============================================================================
+function eventDays(ev) {
+    if (!ev || !ev.date) return [];
+    const start = new Date(ev.date);
+    const end = new Date(ev.endDate || ev.date);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return [];
+    const days = [];
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        days.push(d.toISOString().split('T')[0]);
+    }
+    return days;
+}
+
 function renderEventList() {
     const c = $('all-events-list');
     if (!c) return;
@@ -1058,23 +1070,32 @@ function renderEventList() {
     c.innerHTML = filtered.map(e => {
         const isAvail = e.availUIDs.includes(uid);
         const isUnavail = e.unavailUIDs.includes(uid);
-        const isPastEvent = today() >= e.date;
+        const todayStr = today();
         let timeEntryHtml = '';
-        if (e.status === 'Secured' && isPastEvent) {
-            const userTs = state.timesheets.find(t => eq(t.eventId, e.id) && eq(t.userId, uid));
-            const isEdit = !!userTs;
-            const titleText = isEdit ? `MEINE ZEITEN BEARBEITEN (${userTs.totalHours}h erfasst):` : `MEINE ZEITEN ERFASSEN:`;
-            const btnText = isEdit ? `Aktualisieren` : `Speichern`;
-            timeEntryHtml = `
-                <div style="width:100%; margin-top:12px; display:flex; align-items:center; gap:8px; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid var(--border); flex-wrap:wrap;">
-                    <div style="font-size:11px; font-weight:700; color:var(--blue); width:100%;">${titleText}</div>
-                    <div style="display:flex; flex:1; gap:6px; align-items:center;">
-                        <input type="time" id="ts-start-${esc(e.id)}" value="${esc(userTs ? userTs.start : (e.time || ''))}" style="padding:8px; background:#fff; border:1px solid var(--border);">
-                        <span class="muted" style="font-size:12px;">bis</span>
-                        <input type="time" id="ts-end-${esc(e.id)}" value="${esc(userTs ? userTs.end : (e.timeEnd || ''))}" style="padding:8px; background:#fff; border:1px solid var(--border);">
-                    </div>
-                    <button class="btn-sm btn-primary" style="height:36px;" onclick="logHours('${escJs(e.id)}')">${btnText}</button>
-                </div>`;
+        if (e.status === 'Secured') {
+            const days = eventDays(e).filter(d => d <= todayStr);
+            if (days.length > 0) {
+                const rowsHtml = days.map(dStr => {
+                    const ts = state.timesheets.find(t => eq(t.eventId, e.id) && eq(t.userId, uid) && eq(t.date, dStr));
+                    const dispDate = new Date(dStr).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+                    const startVal = ts ? ts.start : (e.time || '');
+                    const endVal = ts ? ts.end : (e.timeEnd || '');
+                    const btnText = ts ? 'Aktualisieren' : 'Speichern';
+                    return `
+                        <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px; flex-wrap:wrap;">
+                            <div style="font-size:12px; font-weight:600; min-width:90px;">${esc(dispDate)}</div>
+                            <input type="time" id="ts-start-${esc(e.id)}-${esc(dStr)}" value="${esc(startVal)}" style="padding:6px; background:#fff; border:1px solid var(--border);">
+                            <span class="muted" style="font-size:12px;">bis</span>
+                            <input type="time" id="ts-end-${esc(e.id)}-${esc(dStr)}" value="${esc(endVal)}" style="padding:6px; background:#fff; border:1px solid var(--border);">
+                            <button class="btn-sm btn-primary" style="height:32px;" onclick="logHours('${escJs(e.id)}', '${escJs(dStr)}')">${btnText}</button>
+                        </div>`;
+                }).join('');
+                timeEntryHtml = `
+                    <div style="width:100%; margin-top:12px; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid var(--border);">
+                        <div style="font-size:11px; font-weight:700; color:var(--blue); margin-bottom:8px;">MEINE ZEITEN ERFASSEN (pro Tag):</div>
+                        ${rowsHtml}
+                    </div>`;
+            }
         }
         return `
             <div class="event-card">
