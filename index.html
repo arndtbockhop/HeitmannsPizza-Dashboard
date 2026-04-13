@@ -150,6 +150,8 @@
             .modal { max-width: 95%; max-height: 85vh; margin: auto; }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.3/dist/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body data-role="staff">
 
@@ -697,6 +699,26 @@ let state = {
     editEventId: null, editKontaktId: null, editTimesheetId: null,
     pinnwand: '', currentUserName: ''
 };
+
+// ============================================================================
+// PDF Logo (als DataURL beim Laden cachen)
+// ============================================================================
+let LOGO_DATAURL = null;
+async function loadLogoDataURL() {
+    try {
+        const res = await fetch('assets/logo-heitmanns.png');
+        const blob = await res.blob();
+        LOGO_DATAURL = await new Promise((resolve, reject) => {
+            const fr = new FileReader();
+            fr.onload = () => resolve(fr.result);
+            fr.onerror = reject;
+            fr.readAsDataURL(blob);
+        });
+    } catch (e) {
+        console.warn('Logo konnte nicht geladen werden:', e);
+    }
+}
+loadLogoDataURL();
 
 let pizzaMengen = {};
 let dipMengen = { aioli: 0, hothoney: 0 };
