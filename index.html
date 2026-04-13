@@ -664,7 +664,7 @@ function confirmAction(type, url) {
     if (confirm(msgs[type])) window.open(url, type === 'map' ? '_blank' : '_self');
 }
 
-function calculateHours(startStr, endStr, startDateStr, endDateStr) {
+function calculateHours(startStr, endStr, startDateStr, endDateStr, breakMinutes = 0) {
     if (!startStr || !endStr) return 0;
     const [sH, sM] = startStr.split(':').map(Number);
     const [eH, eM] = endStr.split(':').map(Number);
@@ -674,7 +674,85 @@ function calculateHours(startStr, endStr, startDateStr, endDateStr) {
     eDate.setHours(eH, eM, 0, 0);
     if (!endDateStr && eDate < sDate) eDate.setDate(eDate.getDate() + 1);
     const diff = (eDate - sDate) / (1000 * 60 * 60);
-    return diff > 0 ? diff : 0;
+    const net = diff - (Number(breakMinutes) || 0) / 60;
+    return net > 0 ? net : 0;
+}
+
+// ============================================================================
+// TIMESHEET CONSTANTS AND HELPERS
+// ============================================================================
+const TIME_SLOTS = (() => {
+    const arr = [];
+    for (let h = 0; h < 24; h++)
+        for (let m = 0; m < 60; m += 15)
+            arr.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+    return arr; // 96 Eintraege
+})();
+const BREAK_OPTIONS = [0, 15, 30, 45, 60, 75, 90, 120];
+const BONUS_OPTIONS = [0, 0.25, 0.5, 0.75, 1];
+
+function timeSelectHTML(id, selected = '') {
+    const opts = ['<option value="">--:--</option>'].concat(
+        TIME_SLOTS.map(t => `<option value="${t}"${t === selected ? ' selected' : ''}>${t}</option>`)
+    ).join('');
+    return `<select id="${id}">${opts}</select>`;
+}
+function breakSelectHTML(id, selected = 0) {
+    return `<select id="${id}">` + BREAK_OPTIONS.map(m =>
+        `<option value="${m}"${m === Number(selected) ? ' selected' : ''}>${m} min</option>`
+    ).join('') + '</select>';
+}
+function bonusSelectHTML(id, selected = 0) {
+    return `<select id="${id}">` + BONUS_OPTIONS.map(b =>
+        `<option value="${b}"${b === Number(selected) ? ' selected' : ''}>${b.toLocaleString('de-DE')} h</option>`
+    ).join('') + '</select>';
+}
+
+function eventDateRange(ev) {
+    if (!ev || !ev.date) return [];
+    const start = new Date(ev.date);
+    const end = new Date(ev.endDate || ev.date);
+    if (end < start) return [ev.date];
+    const days = [];
+    const cur = new Date(start);
+    while (cur <= end) {
+        days.push(cur.toISOString().slice(0, 10));
+        cur.setDate(cur.getDate() + 1);
+    }
+    return days;
+}
+
+function getDailyHours(uid, dateStr, excludeTsId = null) {
+    return state.timesheets
+        .filter(t => t && eq(t.userId, uid) && t.date === dateStr && t.id !== excludeTsId)
+        .reduce((sum, t) => sum + (Number(t.totalHours) || 0), 0);
+}
+
+function isOver10h(uid, dateStr, excludeTsId = null) {
+    return getDailyHours(uid, dateStr, excludeTsId) > 10;
+}
+
+function timesheetsByEvent(eventId) {
+    return state.timesheets
+        .filter(t => t && eq(t.eventId, eventId))
+        .sort((a, b) => {
+            const c = (a.date || '').localeCompare(b.date || '');
+            if (c !== 0) return c;
+            const ua = (find(state.users, a.userId, 'uid') || {}).name || '';
+            const ub = (find(state.users, b.userId, 'uid') || {}).name || '';
+            return ua.localeCompare(ub);
+        });
+}
+
+function timesheetsByUser(uid, fromDate = null, toDate = null) {
+    return state.timesheets
+        .filter(t => {
+            if (!t || !eq(t.userId, uid)) return false;
+            if (fromDate && t.date < fromDate) return false;
+            if (toDate && t.date > toDate) return false;
+            return true;
+        })
+        .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 }
 
 const getIngredient = id => find(state.ingredients, id);
