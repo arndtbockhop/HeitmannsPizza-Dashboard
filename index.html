@@ -1564,31 +1564,190 @@ function deleteTimesheet(id) {
     }
 }
 
-function printReceipt(tsId) {
-    const ts = find(state.timesheets, tsId);
-    if (!ts) return;
-    const ev = find(state.events, ts.eventId) || { title: 'Unbekannt', type: '-', date: ts.date };
-    const user = find(state.users, ts.userId, 'uid') || { name: 'Unbekannt' };
-    const html = `
-        <html><head><title>Abrechnung - ${esc(user.name)}</title>
-        <style>body{font-family:sans-serif; padding:40px; color:#111827;} .box{border:1px solid #e5e7eb; padding:30px; border-radius:10px; max-width:600px; margin:0 auto;} h1{color:#2563eb; margin-bottom:5px;} .row{display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #f1f5f9; padding-bottom:5px;}</style>
-        </head><body>
-        <div class="box">
-            <h1>Heitmanns Pizza</h1>
-            <p style="color:#6b7280; margin-bottom:30px;">Abrechnung Event-Personal</p>
-            <div class="row"><b>Mitarbeiter:</b> <span>${esc(user.name)}</span></div>
-            <div class="row"><b>Event:</b> <span>${esc(ev.title)} (${esc(ev.type)})</span></div>
-            <div class="row"><b>Datum:</b> <span>${esc(ts.date)}</span></div>
-            <div class="row"><b>Arbeitszeit:</b> <span>${esc(ts.start)} - ${esc(ts.end)} (${Number(ts.workHours).toFixed(2)}h)</span></div>
-            ${Number(ts.bonus) > 0 ? `<div class="row"><b>Zuschlag:</b> <span>+${esc(ts.bonus)}h</span></div>` : ''}
-            <div class="row" style="margin-top:30px;"><b>Gesamtstunden:</b> <span>${Number(ts.totalHours).toFixed(2)} Stunden</span></div>
-            <div class="row"><b>Stundenlohn:</b> <span>${fmt(ts.wage)}</span></div>
-            <div class="row" style="margin-top:20px; font-size:20px; border-bottom:none;"><b>Auszahlungsbetrag:</b> <b style="color:#2563eb;">${fmt(ts.totalCost)}</b></div>
-        </div>
-        <script>window.print();<\/script>
-        </body></html>`;
+function formatHM(hours) {
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+}
+
+function printReceipt(eventId, userId) {
+    const ev = find(state.events, eventId);
+    if (!ev) { showToast('Event nicht gefunden', 'error'); return; }
+    const user = find(state.users, userId, 'uid') || { name: 'Unbekannt' };
+    const lines = state.timesheets
+        .filter(t => eq(t.eventId, eventId) && eq(t.userId, userId))
+        .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    if (lines.length === 0) { showToast('Keine Zeiten erfasst', 'error'); return; }
+
     const w = window.open('', '_blank');
-    if (w) { w.document.write(html); w.document.close(); }
+    if (!w) { showToast('Pop-up blockiert – bitte erlauben', 'error'); return; }
+    const doc = w.document;
+    doc.title = 'Quittung ' + (ev.title || '') + ' – ' + (user.name || '');
+
+    const style = doc.createElement('style');
+    style.textContent = '@page{size:A4;margin:18mm 14mm 48mm 14mm;}' +
+        '*{box-sizing:border-box;}' +
+        'body{font-family:Arial,sans-serif;color:#111;margin:0;padding:0;font-size:12px;}' +
+        '.wrap{padding:10px 20px;}' +
+        'h1{font-size:18px;text-align:center;margin:0 0 20px 0;letter-spacing:1px;}' +
+        '.meta{margin-bottom:18px;}' +
+        '.meta div{margin-bottom:4px;}' +
+        'table{width:100%;border-collapse:collapse;margin-bottom:16px;}' +
+        'th,td{border:1px solid #444;padding:6px 8px;font-size:11px;text-align:left;}' +
+        'th{background:#f1f5f9;font-weight:700;}' +
+        'td.num,th.num{text-align:right;}' +
+        'tfoot td{font-weight:700;background:#f8fafc;}' +
+        '.pay{text-align:right;font-size:14px;margin:18px 0;font-weight:700;}' +
+        '.sig{margin-top:48px;border-top:1px solid #444;padding-top:6px;width:60%;font-size:11px;}' +
+        '.footer{position:fixed;left:14mm;right:14mm;bottom:8mm;display:flex;justify-content:space-between;align-items:flex-end;}' +
+        '.briefkopf{font-size:10px;line-height:1.4;color:#444;}' +
+        '.logo{width:60px;height:60px;}';
+    doc.head.appendChild(style);
+
+    const wrap = doc.createElement('div');
+    wrap.className = 'wrap';
+    doc.body.appendChild(wrap);
+
+    const h1 = doc.createElement('h1');
+    h1.textContent = 'QUITTUNG – Selbstständige Tätigkeit';
+    wrap.appendChild(h1);
+
+    const meta = doc.createElement('div');
+    meta.className = 'meta';
+    const addMeta = (label, value) => {
+        const row = doc.createElement('div');
+        const b = doc.createElement('b');
+        b.textContent = label + ' ';
+        row.appendChild(b);
+        row.appendChild(doc.createTextNode(String(value)));
+        meta.appendChild(row);
+    };
+    addMeta('Mitarbeiter:', user.name || 'Unbekannt');
+    addMeta('Event:', (ev.title || '') + ' (' + (ev.type || '') + ')');
+    addMeta('Ort:', ev.ort || '-');
+    const zeitraum = ev.date + (ev.endDate && ev.endDate !== ev.date ? ' bis ' + ev.endDate : '');
+    addMeta('Zeitraum:', zeitraum);
+    wrap.appendChild(meta);
+
+    const table = doc.createElement('table');
+    const thead = doc.createElement('thead');
+    const trh = doc.createElement('tr');
+    const headers = ['Datum', 'Beginn', 'Ende', 'Arbeitszeit', 'Trinkgeld-Zuschlag', 'Stunden gesamt', 'Stundenlohn', 'Lohnkosten'];
+    headers.forEach((label, i) => {
+        const th = doc.createElement('th');
+        if (i >= 3) th.className = 'num';
+        th.textContent = label;
+        trh.appendChild(th);
+    });
+    thead.appendChild(trh);
+    table.appendChild(thead);
+
+    let totalWork = 0, totalBonus = 0, totalHoursEff = 0, totalCost = 0;
+    const tbody = doc.createElement('tbody');
+    lines.forEach(ts => {
+        const workH = Number(ts.workHours) || 0;
+        const bonus = Number(ts.bonus) || 0;
+        const tsWage = Number(ts.wage) || 14;
+        const totH = Number(ts.totalHours) || (workH + (tsWage > 0 ? bonus / tsWage : 0));
+        const cost = Number(ts.totalCost) || (totH * tsWage);
+        totalWork += workH;
+        totalBonus += bonus;
+        totalHoursEff += totH;
+        totalCost += cost;
+        const cells = [
+            String(ts.date || '-'),
+            String(ts.start || '-'),
+            String(ts.end || '-'),
+            formatHM(workH),
+            fmt(bonus),
+            formatHM(totH),
+            fmt(tsWage),
+            fmt(cost),
+        ];
+        const tr = doc.createElement('tr');
+        cells.forEach((val, i) => {
+            const td = doc.createElement('td');
+            if (i >= 3) td.className = 'num';
+            td.textContent = val;
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    const tfoot = doc.createElement('tfoot');
+    const trf = doc.createElement('tr');
+    const footCells = [
+        'Summe', '', '',
+        formatHM(totalWork),
+        fmt(totalBonus),
+        formatHM(totalHoursEff),
+        '',
+        fmt(totalCost),
+    ];
+    footCells.forEach((val, i) => {
+        const td = doc.createElement('td');
+        if (i >= 3) td.className = 'num';
+        td.textContent = val;
+        trf.appendChild(td);
+    });
+    tfoot.appendChild(trf);
+    table.appendChild(tfoot);
+    wrap.appendChild(table);
+
+    const pay = doc.createElement('div');
+    pay.className = 'pay';
+    pay.textContent = 'Zu zahlen: ' + fmt(totalCost);
+    wrap.appendChild(pay);
+
+    const sig = doc.createElement('div');
+    sig.className = 'sig';
+    sig.textContent = 'Unterschrift Mitarbeiter';
+    wrap.appendChild(sig);
+
+    const footer = doc.createElement('div');
+    footer.className = 'footer';
+    const bk = doc.createElement('div');
+    bk.className = 'briefkopf';
+    [
+        COMPANY_INFO.name,
+        COMPANY_INFO.street,
+        COMPANY_INFO.zipCity,
+        COMPANY_INFO.email,
+        'Steuernr.: ' + COMPANY_INFO.taxId,
+    ].forEach(line => {
+        const d = doc.createElement('div');
+        d.textContent = line;
+        bk.appendChild(d);
+    });
+    footer.appendChild(bk);
+
+    const svgNs = 'http://www.w3.org/2000/svg';
+    const svg = doc.createElementNS(svgNs, 'svg');
+    svg.setAttribute('class', 'logo');
+    svg.setAttribute('width', '60');
+    svg.setAttribute('height', '60');
+    svg.setAttribute('viewBox', '0 0 60 60');
+    const circle = doc.createElementNS(svgNs, 'circle');
+    circle.setAttribute('cx', '30');
+    circle.setAttribute('cy', '30');
+    circle.setAttribute('r', '28');
+    circle.setAttribute('fill', '#f4c884');
+    circle.setAttribute('stroke', '#8b4513');
+    circle.setAttribute('stroke-width', '2');
+    svg.appendChild(circle);
+    [[20, 20], [40, 22], [25, 38], [42, 40], [30, 28]].forEach(([cx, cy]) => {
+        const t = doc.createElementNS(svgNs, 'circle');
+        t.setAttribute('cx', String(cx));
+        t.setAttribute('cy', String(cy));
+        t.setAttribute('r', '3');
+        t.setAttribute('fill', '#c0392b');
+        svg.appendChild(t);
+    });
+    footer.appendChild(svg);
+    doc.body.appendChild(footer);
+
+    setTimeout(() => w.print(), 250);
 }
 
 // ============================================================================
