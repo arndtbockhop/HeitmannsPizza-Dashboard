@@ -788,6 +788,10 @@
                     <div id="planner-assigned-list" style="display:flex; flex-direction:column; gap:8px;"></div>
                 </div>
             </div>
+            <details style="margin-top:16px;">
+                <summary style="cursor:pointer; font-weight:600; color:var(--muted);">Weitere Mitarbeiter (ohne Rückmeldung)</summary>
+                <div id="planner-others-list" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;"></div>
+            </details>
         </div>
         <div class="modal-footer">
             <button onclick="closeModal('planner-modal')">Abbrechen</button>
@@ -2158,11 +2162,22 @@ function renderPlannerUI() {
             <button class="btn-sm ${cls}" onclick="plannerMove('${escJs(uid)}', '${action}')">${sym}</button>
         </div>`;
     };
-    const availPool = (ev.availUIDs || []).filter(uid => !plannerAssigned.includes(uid));
+    const availUIDs = ev.availUIDs || [];
+    const unavailUIDs = ev.unavailUIDs || [];
+    const availPool = availUIDs.filter(uid => !plannerAssigned.includes(uid));
+    const otherPool = state.users
+        .filter(u => u.role !== 'superadmin')
+        .map(u => u.uid)
+        .filter(uid => !availUIDs.includes(uid)
+                    && !unavailUIDs.includes(uid)
+                    && !plannerAssigned.includes(uid));
     const availHtml = availPool.map(uid => buildItem(uid, 'btn-green', '+', 'add')).join('');
     const assignedHtml = plannerAssigned.map(uid => buildItem(uid, 'btn-danger', '-', 'remove')).join('');
+    const othersHtml = otherPool.map(uid => buildItem(uid, '', '+', 'add')).join('');
     $('planner-avail-list').innerHTML = availHtml || '<div class="muted-empty" style="padding:10px;">Alle Zusagen verplant.</div>';
     $('planner-assigned-list').innerHTML = assignedHtml || '<div class="muted-empty" style="padding:10px;">Noch niemand eingeteilt.</div>';
+    const others = $('planner-others-list');
+    if (others) others.innerHTML = othersHtml || '<div class="muted-empty" style="padding:10px;">Keine weiteren Mitarbeiter.</div>';
 }
 
 function plannerMove(uid, action) {
