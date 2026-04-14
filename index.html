@@ -2422,6 +2422,21 @@ function renderMeineVerfuegbarkeit() {
     listEl[['inner', 'HTML'].join('')] = cardsHtml;
 }
 
+function staffAvailStatusText(ev, stateKey, uid) {
+    if (stateKey === 'pending') return '❓ Noch keine Rückmeldung';
+    if (stateKey === 'no') return '❌ Abgesagt';
+    const start = new Date(ev.date);
+    const end = new Date(ev.endDate || ev.date);
+    const daysDiff = Math.round((end - start) / (1000 * 60 * 60 * 24));
+    const total = daysDiff + 1;
+    if (total <= 1) return '✅ Zugesagt';
+    const details = (ev.availDetails && ev.availDetails[uid]) || [];
+    const selected = details.length;
+    if (selected === 0) return '✅ Zugesagt';
+    if (selected >= total) return '✅ Zugesagt für alle Tage';
+    return `✅ Zugesagt für ${selected} von ${total} Tagen`;
+}
+
 function renderStaffAvailCard(ev, stateKey, uid) {
     const dateDisp = fmtDateShort(ev.date);
     const endDateDisp = (ev.endDate && ev.endDate !== ev.date) ? ` – ${fmtDateShort(ev.endDate)}` : '';
@@ -2432,6 +2447,9 @@ function renderStaffAvailCard(ev, stateKey, uid) {
         : stateKey === 'yes'
             ? '<span class="staff-avail-badge is-yes">Zugesagt</span>'
             : '<span class="staff-avail-badge is-no">Abgesagt</span>';
+    const yesCls = stateKey === 'yes' ? 'is-active-yes' : '';
+    const noCls = stateKey === 'no' ? 'is-active-no' : '';
+    const statusText = staffAvailStatusText(ev, stateKey, uid);
     return `<div class="staff-avail-card ${pendingCls}">
         <div class="staff-avail-card-header">
             <div>
@@ -2440,7 +2458,11 @@ function renderStaffAvailCard(ev, stateKey, uid) {
             </div>
             ${badgeHtml}
         </div>
-        <div class="staff-avail-status">${stateKey === 'pending' ? '❓ Noch keine Rückmeldung' : stateKey === 'no' ? '❌ Abgesagt' : '✅ Zugesagt'}</div>
+        <div class="staff-avail-buttons">
+            <button class="${yesCls}" onclick="toggleAvail('${escJs(ev.id)}', true)">✅ Ich habe Zeit</button>
+            <button class="${noCls}" onclick="toggleAvail('${escJs(ev.id)}', false)">❌ Keine Zeit</button>
+        </div>
+        <div class="staff-avail-status">${esc(statusText)}</div>
     </div>`;
 }
 
