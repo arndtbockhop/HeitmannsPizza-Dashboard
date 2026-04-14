@@ -1310,20 +1310,17 @@ function pdfHeader(doc, title, subtitle = '') {
     doc.text('Heitmanns Pizza', 40, 18);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.setTextColor(120);
-    doc.text('Event-Catering · Hamburg', 40, 24);
     doc.setTextColor(0);
+    doc.text('Event-Catering · Hamburg', 40, 24);
     doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
     doc.text(title, 15, 40);
     if (subtitle) {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
-        doc.setTextColor(80);
         doc.text(subtitle, 15, 46);
-        doc.setTextColor(0);
     }
-    doc.setDrawColor(200);
+    doc.setDrawColor(0);
     doc.line(15, 50, 195, 50);
     return 56;
 }
@@ -1333,17 +1330,16 @@ function pdfFooter(doc) {
     const pageH = doc.internal.pageSize.getHeight();
     for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
-        doc.setDrawColor(200);
+        doc.setDrawColor(0);
         doc.line(15, pageH - 18, 195, pageH - 18);
         doc.setFontSize(7);
-        doc.setTextColor(110);
+        doc.setTextColor(0);
         doc.text('Heitmanns Pizza GbR  ·  Lindenstraße 3  ·  21435 Stelle', 15, pageH - 14);
         doc.text('E-Mail: Heitmanns-pizza@heitmanns-pizza.de  ·  Steuernummer: 50/230/21307', 15, pageH - 11);
         doc.setFontSize(8);
         doc.text(`Seite ${i} / ${pageCount}`, 15, pageH - 5);
         const now = new Date().toLocaleDateString('de-DE');
         doc.text(`Erstellt: ${now}`, 195, pageH - 5, { align: 'right' });
-        doc.setTextColor(0);
     }
 }
 
@@ -1368,10 +1364,8 @@ function pdfSignatureBlock(doc, startY, opts = {}) {
     doc.setTextColor(0);
     doc.text('_______________________', 15, y);
     doc.text('Mitarbeiter', 15, y + 5);
-    doc.text('_______________________', 80, y);
-    doc.text('Arbeitgeber', 80, y + 5);
-    doc.text('_______________________', 145, y);
-    doc.text('Datum', 145, y + 5);
+    doc.text('_______________________', 110, y);
+    doc.text('Datum', 110, y + 5);
 }
 
 function pdfCurrency(n) {
@@ -1388,7 +1382,7 @@ function pdfFilename(prefix, parts) {
     return `heitmanns-${prefix}-${parts.map(slug).filter(Boolean).join('-')}.pdf`;
 }
 
-const PDF_HEAD_STYLES = { fillColor: [200, 30, 30], textColor: 255, fontStyle: 'bold' };
+const PDF_HEAD_STYLES = { fillColor: [0, 0, 0], textColor: 255, fontStyle: 'bold' };
 const PDF_STYLES = { fontSize: 9, cellPadding: 2 };
 
 // ============================================================================
@@ -1449,7 +1443,7 @@ function exportUserMonth(uid, year, month) {
         },
         didParseCell(data) {
             if (data.section === 'body' && data.row.raw && data.row.raw._over) {
-                data.cell.styles.fillColor = [255, 230, 230];
+                data.cell.styles.fillColor = [220, 220, 220];
             }
         },
         foot: [[
@@ -1523,7 +1517,7 @@ function exportEvent(eventId) {
         styles: PDF_STYLES,
         didParseCell(data) {
             if (data.section === 'body' && data.row.raw && data.row.raw._over) {
-                data.cell.styles.fillColor = [255, 230, 230];
+                data.cell.styles.fillColor = [220, 220, 220];
             }
         },
         foot: [[
@@ -1583,7 +1577,7 @@ function exportRange({ from, to, uid = null, eventId = null }) {
         styles: PDF_STYLES,
         didParseCell(data) {
             if (data.section === 'body' && data.row.raw && data.row.raw._over) {
-                data.cell.styles.fillColor = [255, 230, 230];
+                data.cell.styles.fillColor = [220, 220, 220];
             }
         },
         foot: [[
