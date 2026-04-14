@@ -1873,7 +1873,8 @@ let currentAvailEventId = null;
 let scenarioRows = [];
 let plannerCurrentEventId = null;
 let plannerAssigned = [];
-let pinTimer = null; 
+let plannerOriginalAssigned = [];
+let pinTimer = null;
 
 const colorMap = {
     'Catering': 'tag-Catering', 'Event': 'tag-Event', 'Meeting': 'tag-Meeting',
@@ -2492,36 +2493,52 @@ function openPlannerModal(id) {
 function renderPlannerUI() {
     const ev = find(state.events, plannerCurrentEventId);
     if (!ev) return;
-    const buildItem = (uid, cls, sym, action) => {
-        const u = find(state.users, uid, 'uid');
-        if (!u) return '';
-        return `<div class="list-item" style="padding:10px; margin-bottom:0; justify-content:space-between; align-items:center;">
-            <span>${esc(u.name)}</span>
-            <button class="btn-sm ${cls}" onclick="plannerMove('${escJs(uid)}', '${action}')">${sym}</button>
-        </div>`;
-    };
+    const listEl = $('planner-list');
+    if (!listEl) return;
     const availUIDs = ev.availUIDs || [];
     const unavailUIDs = ev.unavailUIDs || [];
-    const availPool = availUIDs.filter(uid => !plannerAssigned.includes(uid));
-    const otherPool = state.users
-        .filter(u => u.role !== 'superadmin')
-        .map(u => u.uid)
-        .filter(uid => !availUIDs.includes(uid)
-                    && !unavailUIDs.includes(uid)
-                    && !plannerAssigned.includes(uid));
-    const availHtml = availPool.map(uid => buildItem(uid, 'btn-green', '+', 'add')).join('');
-    const assignedHtml = plannerAssigned.map(uid => buildItem(uid, 'btn-danger', '-', 'remove')).join('');
-    const othersHtml = otherPool.map(uid => buildItem(uid, '', '+', 'add')).join('');
-    $('planner-avail-list').innerHTML = availHtml || '<div class="muted-empty" style="padding:10px;">Alle Zusagen verplant.</div>';
-    $('planner-assigned-list').innerHTML = assignedHtml || '<div class="muted-empty" style="padding:10px;">Noch niemand eingeteilt.</div>';
-    const others = $('planner-others-list');
-    if (others) others.innerHTML = othersHtml || '<div class="muted-empty" style="padding:10px;">Keine weiteren Mitarbeiter.</div>';
+    const allUsers = state.users.filter(u => u.role !== 'superadmin');
+
+    const groupYes = allUsers.filter(u => availUIDs.includes(u.uid));
+    const groupNo = allUsers.filter(u => unavailUIDs.includes(u.uid));
+    const groupPending = allUsers.filter(u => !availUIDs.includes(u.uid) && !unavailUIDs.includes(u.uid));
+
+    const byName = (a, b) => (a.name || '').localeCompare(b.name || '', 'de');
+    groupYes.sort(byName);
+    groupNo.sort(byName);
+    groupPending.sort(byName);
+
+    const renderGroup = (label, group, statusKind) => {
+        if (group.length === 0) return '';
+        const header = `<div class="planner-group-header">${esc(label)} (${group.length})</div>`;
+        const rows = group.map(u => renderPlannerRow(u, statusKind)).join('');
+        return header + rows;
+    };
+
+    const html =
+        renderGroup('Zugesagt', groupYes, 'yes') +
+        renderGroup('Keine Rückmeldung', groupPending, 'pending') +
+        renderGroup('Abgesagt', groupNo, 'no');
+
+    listEl[['inner', 'HTML'].join('')] = html || '<div class="muted-empty" style="padding:20px;">Keine Mitarbeiter vorhanden.</div>';
+    updatePlannerSaveBar();
 }
 
-function plannerMove(uid, action) {
-    if (action === 'add') { if (!plannerAssigned.includes(uid)) plannerAssigned.push(uid); }
-    else { plannerAssigned = plannerAssigned.filter(id => id !== uid); }
-    renderPlannerUI();
+function renderPlannerRow(u, statusKind) {
+    const isAssigned = plannerAssigned.includes(u.uid);
+    const fadedCls = statusKind === 'yes' ? '' : 'is-faded';
+    const conflictCls = (isAssigned && statusKind === 'no') ? 'is-conflict' : '';
+    const icon = statusKind === 'yes' ? '✅' : statusKind === 'no' ? '❌' : '❓';
+    const title = conflictCls ? 'Eingeteilt, hat aber abgesagt' : '';
+    return `<div class="planner-row ${fadedCls} ${conflictCls}" onclick="togglePlannerCheckbox('${escJs(u.uid)}', '${statusKind}')" title="${esc(title)}">
+        <input type="checkbox" ${isAssigned ? 'checked' : ''} onclick="event.stopPropagation(); togglePlannerCheckbox('${escJs(u.uid)}', '${statusKind}')">
+        <span class="planner-row-name">${icon} ${esc(u.name || '(ohne Name)')}</span>
+        ${isAssigned ? '<span class="planner-row-status">eingeteilt</span>' : ''}
+    </div>`;
+}
+
+function updatePlannerSaveBar() {
+    // Real implementation in Task 6
 }
 
 function savePlanner() {
@@ -3946,7 +3963,7 @@ Object.assign(window, {
     openUserEditModal, saveUserEdit,
     addScenarioRow, saveScenarios,
     confirmAction, confirmActionEl,
-    openPlannerModal, plannerMove, savePlanner,
+    openPlannerModal, savePlanner,
     changeCleaningPoints, resetCleaningRanking,
     showUserDetail, refreshUserDetail, exportUserMonthFromDetail, exportUserRangeFromDetail,
     exportUserMonth, exportEvent, exportRange, exportSingleShift, openRangeExportModal, runRangeExport
