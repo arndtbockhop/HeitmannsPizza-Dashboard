@@ -2030,6 +2030,7 @@ function initGranularListeners() {
             .sort((a, b) => (a.date || '') > (b.date || '') ? 1 : -1);
         renderEventList(); renderCalendar(); updateDashboard();
         if (isAdminRole()) renderPlanner();
+        else renderMeineVerfuegbarkeit();
     }));
 
     unsubscribers.push(onValue(ref(db, 'users'), snap => {
@@ -2114,6 +2115,7 @@ function navTo(id, btn) {
     const target = $('page-' + id);
     if (target) target.classList.add('active');
     if (btn) btn.classList.add('active');
+    if (id === 'verfuegbarkeit') renderMeineVerfuegbarkeit();
 }
 
 function switchAuswertung(view, btn) {
@@ -2373,6 +2375,73 @@ function saveAvailDays() {
         showToast("Verfügbarkeit gespeichert!", 'success');
         closeModal('avail-modal');
     }).catch(() => showToast("Fehler beim Speichern.", 'error'));
+}
+
+function renderMeineVerfuegbarkeit() {
+    const listEl = $('meine-verfuegbarkeit-list');
+    const infoEl = $('meine-verfuegbarkeit-info');
+    if (!listEl) return;
+    const user = auth.currentUser;
+    if (!user) { listEl.textContent = ''; return; }
+    const uid = user.uid;
+    const today = toLocalISO(new Date());
+
+    const upcoming = state.events
+        .filter(ev => (ev.endDate || ev.date) >= today)
+        .map(ev => {
+            const isYes = (ev.availUIDs || []).includes(uid);
+            const isNo = (ev.unavailUIDs || []).includes(uid);
+            const stateKey = isYes ? 'yes' : (isNo ? 'no' : 'pending');
+            return { ev, stateKey };
+        });
+
+    upcoming.sort((a, b) => {
+        if (a.stateKey === 'pending' && b.stateKey !== 'pending') return -1;
+        if (b.stateKey === 'pending' && a.stateKey !== 'pending') return 1;
+        return (a.ev.date || '') > (b.ev.date || '') ? 1 : -1;
+    });
+
+    const pendingCount = upcoming.filter(x => x.stateKey === 'pending').length;
+    if (infoEl) {
+        if (upcoming.length === 0) {
+            infoEl.style.display = 'none';
+        } else {
+            infoEl.style.display = '';
+            infoEl.textContent = pendingCount > 0
+                ? `Du hast für ${pendingCount} von ${upcoming.length} Events noch keine Rückmeldung gegeben.`
+                : `Du hast für alle ${upcoming.length} anstehenden Events Bescheid gegeben — danke!`;
+        }
+    }
+
+    if (upcoming.length === 0) {
+        listEl.textContent = 'Keine anstehenden Events.';
+        return;
+    }
+
+    const cardsHtml = upcoming.map(({ ev, stateKey }) => renderStaffAvailCard(ev, stateKey, uid)).join('');
+    listEl[['inner', 'HTML'].join('')] = cardsHtml;
+}
+
+function renderStaffAvailCard(ev, stateKey, uid) {
+    const dateDisp = fmtDateShort(ev.date);
+    const endDateDisp = (ev.endDate && ev.endDate !== ev.date) ? ` – ${fmtDateShort(ev.endDate)}` : '';
+    const ort = ev.location || '';
+    const pendingCls = stateKey === 'pending' ? 'is-pending' : '';
+    const badgeHtml = stateKey === 'pending'
+        ? '<span class="staff-avail-badge is-pending">Offen</span>'
+        : stateKey === 'yes'
+            ? '<span class="staff-avail-badge is-yes">Zugesagt</span>'
+            : '<span class="staff-avail-badge is-no">Abgesagt</span>';
+    return `<div class="staff-avail-card ${pendingCls}">
+        <div class="staff-avail-card-header">
+            <div>
+                <div class="staff-avail-card-title">${esc(ev.title || '(ohne Titel)')}</div>
+                <div class="staff-avail-card-meta">${esc(dateDisp + endDateDisp)}${ort ? ' · 📍 ' + esc(ort) : ''}</div>
+            </div>
+            ${badgeHtml}
+        </div>
+        <div class="staff-avail-status">${stateKey === 'pending' ? '❓ Noch keine Rückmeldung' : stateKey === 'no' ? '❌ Abgesagt' : '✅ Zugesagt'}</div>
+    </div>`;
 }
 
 // ============================================================================
