@@ -2537,8 +2537,51 @@ function renderPlannerRow(u, statusKind) {
     </div>`;
 }
 
+function plannerChangeCount() {
+    const a = new Set(plannerOriginalAssigned);
+    const b = new Set(plannerAssigned);
+    let count = 0;
+    a.forEach(uid => { if (!b.has(uid)) count++; });
+    b.forEach(uid => { if (!a.has(uid)) count++; });
+    return count;
+}
+
+function isPlannerDirty() {
+    return plannerChangeCount() > 0;
+}
+
 function updatePlannerSaveBar() {
-    // Real implementation in Task 6
+    const btn = $('planner-save-btn');
+    const counts = $('planner-counts');
+    if (!btn || !counts) return;
+    const changes = plannerChangeCount();
+    btn.disabled = (changes === 0);
+    btn.textContent = changes === 0
+        ? '💾 Keine Änderungen'
+        : `💾 Speichern (${changes} Änderung${changes === 1 ? '' : 'en'})`;
+    const ev = find(state.events, plannerCurrentEventId);
+    if (!ev) { counts.textContent = '–'; return; }
+    const yes = (ev.availUIDs || []).length;
+    const no = (ev.unavailUIDs || []).length;
+    const total = state.users.filter(u => u.role !== 'superadmin').length;
+    const pending = Math.max(0, total - yes - no);
+    const assigned = plannerAssigned.length;
+    counts.textContent = `${yes} zugesagt · ${no} abgesagt · ${pending} ohne Antwort · ${assigned} eingeteilt`;
+}
+
+function togglePlannerCheckbox(uid, statusKind) {
+    const wasAssigned = plannerAssigned.includes(uid);
+    if (wasAssigned) {
+        plannerAssigned = plannerAssigned.filter(id => id !== uid);
+    } else {
+        plannerAssigned.push(uid);
+        if (statusKind === 'no') {
+            const u = find(state.users, uid, 'uid');
+            const name = (u && u.name) || 'Mitarbeiter';
+            showToast(`${name} hat abgesagt — trotzdem einteilen?`, 'info');
+        }
+    }
+    renderPlannerUI();
 }
 
 function savePlanner() {
@@ -3963,7 +4006,7 @@ Object.assign(window, {
     openUserEditModal, saveUserEdit,
     addScenarioRow, saveScenarios,
     confirmAction, confirmActionEl,
-    openPlannerModal, savePlanner,
+    openPlannerModal, savePlanner, togglePlannerCheckbox,
     changeCleaningPoints, resetCleaningRanking,
     showUserDetail, refreshUserDetail, exportUserMonthFromDetail, exportUserRangeFromDetail,
     exportUserMonth, exportEvent, exportRange, exportSingleShift, openRangeExportModal, runRangeExport
