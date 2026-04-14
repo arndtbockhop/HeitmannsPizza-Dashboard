@@ -1144,6 +1144,9 @@ const fmt = n => Number(n || 0).toLocaleString('de-DE', { style: 'currency', cur
 const fmtKG = g => (g / 1000).toLocaleString('de-DE', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + ' kg';
 const fmtDate = (d, opts = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) =>
     new Date(d).toLocaleDateString('de-DE', opts);
+const fmtDateShort = d => d
+    ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : '';
 
 function showToast(message, type = '') {
     const wrap = $('toast-wrap'); if (!wrap) return;
@@ -1614,7 +1617,7 @@ function openRangeExportModal() {
     $('re-user').innerHTML = '<option value="">Alle</option>' +
         state.users.map(u => `<option value="${esc(u.uid)}">${esc(u.name || u.email)}</option>`).join('');
     $('re-event').innerHTML = '<option value="">Alle</option>' +
-        state.events.map(e => `<option value="${esc(e.id)}">${esc(e.date)} · ${esc(e.title)}</option>`).join('');
+        state.events.map(e => `<option value="${esc(e.id)}">${esc(fmtDateShort(e.date))} · ${esc(e.title)}</option>`).join('');
     const now = new Date();
     const first = new Date(now.getFullYear(), now.getMonth(), 1);
     $('re-from').value = first.toISOString().slice(0, 10);
@@ -1964,7 +1967,7 @@ function updateDashboard() {
         <div class="row-between" style="padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer;" onclick="showEventDetail('${escJs(e.id)}')">
             <div>
                 <b style="font-size:14px;">${esc(e.title)}</b><br>
-                <div class="muted" style="font-size:12px; margin-top:2px;">${esc(e.date)}${e.endDate && e.endDate !== e.date ? ' - ' + esc(e.endDate) : ''} · ${esc(e.type)}</div>
+                <div class="muted" style="font-size:12px; margin-top:2px;">${esc(fmtDateShort(e.date))}${e.endDate && e.endDate !== e.date ? ' - ' + esc(fmtDateShort(e.endDate)) : ''} · ${esc(e.type)}</div>
             </div>
             ${statusBadge(e.status)}
         </div>`).join('');
@@ -2061,7 +2064,7 @@ function renderEventList() {
         return `
             <div class="event-card">
                 <div class="event-card-header" onclick="showEventDetail('${escJs(e.id)}')">
-                    <div class="label-tag">${esc(e.type)} · ${esc(e.date)}${e.endDate && e.endDate !== e.date ? ' bis ' + esc(e.endDate) : ''}</div>
+                    <div class="label-tag">${esc(e.type)} · ${esc(fmtDateShort(e.date))}${e.endDate && e.endDate !== e.date ? ' bis ' + esc(fmtDateShort(e.endDate)) : ''}</div>
                     ${statusBadge(e.status)}
                 </div>
                 <div class="event-card-body" onclick="showEventDetail('${escJs(e.id)}')">
@@ -2162,7 +2165,7 @@ function renderPlanner() {
             <div class="list-item" style="flex-direction:column; align-items:stretch;">
                 <div class="row-between" style="margin-bottom:8px;">
                     <b style="font-size:16px;">${esc(e.title)}</b>
-                    <span class="badge badge-blue">${esc(e.date)}</span>
+                    <span class="badge badge-blue">${esc(fmtDateShort(e.date))}</span>
                 </div>
                 <div class="muted" style="font-size:13px; margin-bottom:12px;">
                     Zusagen: <b style="color:var(--green)">${availCount}</b> | Eingeteilt: <b style="color:var(--blue)">${assignedCount}</b>
@@ -2321,7 +2324,7 @@ function showEventDetail(id) {
             <div style="background:#f1f5f9; padding:16px; border-radius:10px; margin-bottom:16px;">
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:14px;">
                     <div><span class="label-tag">Typ</span><br><b>${esc(ev.type)}</b></div>
-                    <div><span class="label-tag">Zeitraum</span><br><b>${esc(ev.date)}${ev.endDate && ev.endDate !== ev.date ? ' bis ' + esc(ev.endDate) : ''} <br>${esc(ev.time || '')}${ev.timeEnd ? ' - ' + esc(ev.timeEnd) : ''}</b></div>
+                    <div><span class="label-tag">Zeitraum</span><br><b>${esc(fmtDateShort(ev.date))}${ev.endDate && ev.endDate !== ev.date ? ' bis ' + esc(fmtDateShort(ev.endDate)) : ''} <br>${esc(ev.time || '')}${ev.timeEnd ? ' - ' + esc(ev.timeEnd) : ''}</b></div>
                     <div style="grid-column:span 2;"><span class="label-tag">Ort</span><br><b>${mapLink}</b></div>
                     <div><span class="label-tag">Gäste</span><br><b>${esc(ev.personen || '–')}</b></div>
                     ${customerStr}
@@ -2558,7 +2561,7 @@ function renderTimesheets() {
         tsRows.push(`<tr class="${over ? 'over-10h' : ''}">
             <td><b>${esc(ev.title)}</b></td>
             <td>${esc(user.name)}${over ? '<span class="over-10h-badge">!</span>' : ''}</td>
-            <td>${esc(ts.date || '-')}</td>
+            <td>${ts.date ? esc(fmtDateShort(ts.date)) : '-'}</td>
             <td>${esc(ts.start || '-')} - ${esc(ts.end || '-')}</td>
             <td>${Number(ts.breakMinutes || 0)} min</td>
             <td>${tHours.toFixed(2)}h ${Number(ts.bonus) > 0 ? `(+${esc(ts.bonus)}h)` : ''}</td>
@@ -2599,7 +2602,7 @@ function openTimesheetModal(id) {
     const ts = id ? find(state.timesheets, id) : null;
 
     $('ts-event-id').innerHTML = '<option value="">-- Event wählen --</option>' +
-        state.events.map(e => `<option value="${esc(e.id)}">${esc(e.date)} - ${esc(e.title)}</option>`).join('');
+        state.events.map(e => `<option value="${esc(e.id)}">${esc(fmtDateShort(e.date))} - ${esc(e.title)}</option>`).join('');
     $('ts-user-id').innerHTML = '<option value="">-- Mitarbeiter wählen --</option>' +
         state.users.map(u => `<option value="${esc(u.uid)}">${esc(u.name || u.email)}</option>`).join('');
 
@@ -3536,7 +3539,7 @@ function refreshUserDetail() {
         }).join('');
         html += `
           <details open style="margin-top:10px;">
-            <summary><b>${esc(ev.title)}</b> · ${esc(ev.date || '')}${ev.endDate && ev.endDate !== ev.date ? '&#8211;' + esc(ev.endDate) : ''}</summary>
+            <summary><b>${esc(ev.title)}</b> · ${esc(fmtDateShort(ev.date))}${ev.endDate && ev.endDate !== ev.date ? '&#8211;' + esc(fmtDateShort(ev.endDate)) : ''}</summary>
             <table>
               <thead><tr><th>Datum</th><th>Zeit</th><th>Pause</th><th>Gesamt</th><th>Kosten</th></tr></thead>
               <tbody>${rows}</tbody>
