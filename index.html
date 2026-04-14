@@ -970,6 +970,9 @@
             </div>
             <div id="planner-list"></div>
         </div>
+        <div class="modal-footer">
+            <button onclick="plannerClose()">Schließen</button>
+        </div>
     </div>
 </div>
 
@@ -2486,6 +2489,7 @@ function openPlannerModal(id) {
     if (!ev) return;
     $('planner-modal-title').textContent = `Personal für: ${ev.title}`;
     plannerAssigned = [...(ev.assignedCrew || [])];
+    plannerOriginalAssigned = [...plannerAssigned];
     renderPlannerUI();
     openModal('planner-modal');
 }
@@ -2584,6 +2588,16 @@ function togglePlannerCheckbox(uid, statusKind) {
     renderPlannerUI();
 }
 
+function plannerClose() {
+    if (!isPlannerDirty()) {
+        closeModal('planner-modal');
+        return;
+    }
+    if (confirm('Du hast ungespeicherte Änderungen. Trotzdem schließen?')) {
+        closeModal('planner-modal');
+    }
+}
+
 function savePlanner() {
     if (!plannerCurrentEventId) return;
     const ev = find(state.events, plannerCurrentEventId);
@@ -2602,6 +2616,8 @@ function savePlanner() {
                     return list.slice(-50);
                 });
             });
+            plannerOriginalAssigned = [...plannerAssigned];
+            updatePlannerSaveBar();
             closeModal('planner-modal');
             showToast('Einteilung gespeichert!', 'success');
         })
@@ -4006,7 +4022,7 @@ Object.assign(window, {
     openUserEditModal, saveUserEdit,
     addScenarioRow, saveScenarios,
     confirmAction, confirmActionEl,
-    openPlannerModal, savePlanner, togglePlannerCheckbox,
+    openPlannerModal, savePlanner, togglePlannerCheckbox, plannerClose,
     changeCleaningPoints, resetCleaningRanking,
     showUserDetail, refreshUserDetail, exportUserMonthFromDetail, exportUserRangeFromDetail,
     exportUserMonth, exportEvent, exportRange, exportSingleShift, openRangeExportModal, runRangeExport
