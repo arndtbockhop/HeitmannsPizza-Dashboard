@@ -3414,6 +3414,13 @@ async function saveNewUser() {
     };
     try {
         await set(ref(db, 'users/' + newId), data);
+        const verifySnap = await get(ref(db, 'users/' + newId));
+        if (!verifySnap.exists()) {
+            throw new Error('Datensatz nach Speichern nicht auffindbar (Firebase-Rules?).');
+        }
+        if (!state.users.some(u => u.uid === newId)) {
+            state.users.push({ ...data });
+        }
         showToast(`${name} angelegt.`, 'success');
         closeModal('user-create-modal');
         ['uc-name','uc-email','uc-phone','uc-address','uc-birthdate','uc-hiredate','uc-notes']
@@ -3421,9 +3428,11 @@ async function saveNewUser() {
         $('uc-wage').value = 14;
         $('uc-role').value = 'staff';
         $('uc-canlogin').checked = true;
+        renderSettings();
+        if (isAdminRole()) { renderTimesheets(); renderPlanner(); }
     } catch (e) {
         console.error('saveNewUser:', e);
-        showToast('Fehler beim Speichern.', 'error');
+        showToast('Fehler beim Speichern: ' + (e && e.message ? e.message : 'unbekannt'), 'error');
     }
 }
 
