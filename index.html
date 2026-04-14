@@ -1306,15 +1306,48 @@ function pdfHeader(doc, title, subtitle = '') {
 
 function pdfFooter(doc) {
     const pageCount = doc.internal.getNumberOfPages();
+    const pageH = doc.internal.pageSize.getHeight();
     for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
+        doc.setDrawColor(200);
+        doc.line(15, pageH - 18, 195, pageH - 18);
+        doc.setFontSize(7);
+        doc.setTextColor(110);
+        doc.text('Heitmanns Pizza GbR  ·  Lindenstraße 3  ·  21435 Stelle', 15, pageH - 14);
+        doc.text('E-Mail: Heitmanns-pizza@heitmanns-pizza.de  ·  Steuernummer: 50/230/21307', 15, pageH - 11);
         doc.setFontSize(8);
-        doc.setTextColor(120);
-        doc.text(`Seite ${i} / ${pageCount}`, 15, 287);
+        doc.text(`Seite ${i} / ${pageCount}`, 15, pageH - 5);
         const now = new Date().toLocaleDateString('de-DE');
-        doc.text(`Erstellt: ${now}`, 195, 287, { align: 'right' });
+        doc.text(`Erstellt: ${now}`, 195, pageH - 5, { align: 'right' });
         doc.setTextColor(0);
     }
+}
+
+function pdfSignatureBlock(doc, startY, opts = {}) {
+    const pageH = doc.internal.pageSize.getHeight();
+    const needed = opts.withDisclaimer ? 55 : 30;
+    let y = startY;
+    if (y + needed > pageH - 25) {
+        doc.addPage();
+        y = 30;
+    }
+    if (opts.withDisclaimer) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(0);
+        const txt = 'Die Aushilfe bestätigt hiermit, dass sie auf eigenen Namen und Rechnung handelt und noch andere Arbeitgeber hat.';
+        const lines = doc.splitTextToSize(txt, 180);
+        doc.text(lines, 15, y);
+        y += lines.length * 5 + 12;
+    }
+    doc.setFontSize(9);
+    doc.setTextColor(0);
+    doc.text('_______________________', 15, y);
+    doc.text('Mitarbeiter', 15, y + 5);
+    doc.text('_______________________', 80, y);
+    doc.text('Arbeitgeber', 80, y + 5);
+    doc.text('_______________________', 145, y);
+    doc.text('Datum', 145, y + 5);
 }
 
 function pdfCurrency(n) {
@@ -1376,6 +1409,7 @@ function exportUserMonth(uid, year, month) {
     });
     doc.autoTable({
         startY: startY + 16,
+        margin: { bottom: 25 },
         head: [['Datum','Event','Start','Ende','Pause','Arbeit','Bonus','Gesamt','Lohn','Kosten']],
         body,
         theme: 'grid',
@@ -1401,14 +1435,7 @@ function exportUserMonth(uid, year, month) {
             { content: pdfCurrency(totalC), styles: { halign: 'right', fontStyle: 'bold' } }
         ]]
     });
-    const y = doc.lastAutoTable.finalY + 20;
-    doc.setFontSize(9);
-    doc.text('_______________________', 15, y + 10);
-    doc.text('Mitarbeiter', 15, y + 15);
-    doc.text('_______________________', 80, y + 10);
-    doc.text('Arbeitgeber', 80, y + 15);
-    doc.text('_______________________', 145, y + 10);
-    doc.text('Datum', 145, y + 15);
+    pdfSignatureBlock(doc, doc.lastAutoTable.finalY + 15, { withDisclaimer: true });
     pdfFooter(doc);
     doc.save(pdfFilename('ma', [user.name || uid, `${year}-${mm}`]));
 }
@@ -1464,6 +1491,7 @@ function exportEvent(eventId) {
     });
     doc.autoTable({
         startY: startY + 18,
+        margin: { bottom: 25 },
         head: [['Mitarbeiter','Datum','Zeit','Pause','Arbeit','Gesamt','Kosten']],
         body,
         theme: 'grid',
@@ -1523,6 +1551,7 @@ function exportRange({ from, to, uid = null, eventId = null }) {
     });
     doc.autoTable({
         startY: startY + 6,
+        margin: { bottom: 25 },
         head: [['Datum','Mitarbeiter','Event','Zeit','Pause','Gesamt','Kosten']],
         body,
         theme: 'grid',
@@ -1539,6 +1568,7 @@ function exportRange({ from, to, uid = null, eventId = null }) {
             { content: pdfCurrency(totalC), styles: { halign: 'right', fontStyle: 'bold' } }
         ]]
     });
+    pdfSignatureBlock(doc, doc.lastAutoTable.finalY + 15, { withDisclaimer: true });
     pdfFooter(doc);
     doc.save(pdfFilename('range', [from, to]));
 }
@@ -1572,6 +1602,7 @@ function exportSingleShift(tsId) {
         doc.text(v, 70, y);
         y += 7;
     });
+    pdfSignatureBlock(doc, y + 10, { withDisclaimer: true });
     pdfFooter(doc);
     doc.save(pdfFilename('schicht', [u.name || '', ts.date || '']));
 }
