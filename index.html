@@ -1377,10 +1377,18 @@ function pdfSignatureBlock(doc, startY, opts = {}) {
     }
     doc.setFontSize(9);
     doc.setTextColor(0);
+    const leftLabel = opts.leftLabel || 'Mitarbeiter';
     doc.text('_______________________', 15, y);
-    doc.text('Mitarbeiter', 15, y + 5);
-    doc.text('_______________________', 110, y);
-    doc.text('Datum', 110, y + 5);
+    doc.text(leftLabel, 15, y + 5);
+    if (opts.withOrt) {
+        doc.text('_______________________', 80, y);
+        doc.text('Ort', 80, y + 5);
+        doc.text('_______________________', 145, y);
+        doc.text('Datum', 145, y + 5);
+    } else {
+        doc.text('_______________________', 110, y);
+        doc.text('Datum', 110, y + 5);
+    }
 }
 
 function pdfCurrency(n) {
@@ -1613,10 +1621,10 @@ function exportSingleShift(tsId) {
     const u  = find(state.users, ts.userId, 'uid') || { name: '?' };
     const doc = pdfDoc();
     if (!doc) return;
-    const startY = pdfHeader(doc, `Einzel-Schicht`, `${u.name} · ${fmtDateShort(ts.date)}`);
+    const startY = pdfHeader(doc, `Quittung selbständige Tätigkeit`, `${u.name} · ${fmtDateShort(ts.date)}`);
     doc.setFontSize(11);
     const lines = [
-        ['Mitarbeiter:',       u.name || ''],
+        ['Aushilfe:',          u.name || ''],
         ['Event:',             `${ev.title} (${ev.type || '-'})`],
         ['Datum:',             fmtDateShort(ts.date)],
         ['Start–Ende:',        `${ts.start || '-'} – ${ts.end || '-'}`],
@@ -1635,9 +1643,9 @@ function exportSingleShift(tsId) {
         doc.text(v, 70, y);
         y += 7;
     });
-    pdfSignatureBlock(doc, y + 10, { withDisclaimer: true });
+    pdfSignatureBlock(doc, y + 10, { withDisclaimer: true, leftLabel: 'Aushilfe', withOrt: true });
     pdfFooter(doc);
-    doc.save(pdfFilename('schicht', [u.name || '', ts.date || '']));
+    doc.save(pdfFilename('quittung', [u.name || '', ts.date || '']));
 }
 
 // printReceipt als Alias behalten
