@@ -664,14 +664,14 @@
         <div class="modal-title" id="ud-title">Mitarbeiter-Detail</div>
         <div class="modal-body">
             <div id="ud-meta" class="muted" style="margin-bottom:14px;"></div>
-            <div class="form-grid" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
-                <label>Zeitraum:</label>
-                <input type="month" id="ud-month">
-                <span>oder</span>
-                <input type="date" id="ud-from">
-                bis
-                <input type="date" id="ud-to">
-                <button class="btn btn-sm" onclick="refreshUserDetail()">Übernehmen</button>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+                <label style="font-weight:600;">Zeitraum:</label>
+                <input type="month" id="ud-month" style="width:auto;">
+                <span class="muted">oder</span>
+                <input type="date" id="ud-from" style="width:auto;">
+                <span class="muted">bis</span>
+                <input type="date" id="ud-to" style="width:auto;">
+                <button class="btn-sm" onclick="refreshUserDetail()">Übernehmen</button>
             </div>
             <div id="ud-body"></div>
             <div id="ud-summary" style="margin-top:12px; padding:10px; background:#f8fafc; border-radius:6px;"></div>
@@ -2039,6 +2039,7 @@ function renderEventTimesheetBlock(ev, uid) {
     const existingByDate = {};
     state.timesheets
         .filter(t => eq(t.eventId, ev.id) && eq(t.userId, uid))
+        .sort((a, b) => (a.id || '').localeCompare(b.id || ''))
         .forEach(t => { existingByDate[t.date] = t; });
 
     const rows = days.map(d => {
@@ -2100,6 +2101,7 @@ async function saveInlineTimesheet(eventId, date, existingTsId) {
         await set(ref(db, 'timesheets/' + id), ts);
         showToast('Zeit gespeichert', 'success');
     } catch (e) {
+        console.error('saveInlineTimesheet:', e);
         showToast('Fehler beim Speichern.', 'error');
     }
 }
@@ -2293,6 +2295,7 @@ async function saveTimesheet(nextDay = false) {
             closeModal('timesheet-modal');
         }
     } catch (e) {
+        console.error('saveTimesheet:', e);
         showToast('Fehler beim Speichern.', 'error');
     }
 }
@@ -3022,6 +3025,7 @@ async function saveNewUser() {
         $('uc-role').value = 'staff';
         $('uc-canlogin').checked = true;
     } catch (e) {
+        console.error('saveNewUser:', e);
         showToast('Fehler beim Speichern.', 'error');
     }
 }
@@ -3068,6 +3072,7 @@ function refreshUserDetail() {
     const list = timesheetsByUser(uid, from, to);
     const groups = {};
     list.forEach(t => {
+        if (!t || !t.eventId) return;
         if (!groups[t.eventId]) groups[t.eventId] = [];
         groups[t.eventId].push(t);
     });
@@ -3098,7 +3103,7 @@ function refreshUserDetail() {
             <table>
               <thead><tr><th>Datum</th><th>Zeit</th><th>Pause</th><th>Gesamt</th><th>Kosten</th></tr></thead>
               <tbody>${rows}</tbody>
-              <tfoot><tr><td colspan="3"><b>Event-Sigma</b></td><td><b>${evH.toFixed(2)} h</b></td><td><b>${fmt(evC)}</b></td></tr></tfoot>
+              <tfoot><tr><td colspan="3"><b>Event-Summe</b></td><td><b>${evH.toFixed(2)} h</b></td><td><b>${fmt(evC)}</b></td></tr></tfoot>
             </table>
           </details>`;
     });
