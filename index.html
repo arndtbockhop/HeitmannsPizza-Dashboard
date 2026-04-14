@@ -474,7 +474,154 @@
         }
 
         body:not([data-role="superadmin"]):not([data-role="admin"]) .admin-only,
-        body:not([data-role="superadmin"]) .superadmin-only { display: none !important; }
+        body:not([data-role="superadmin"]) .superadmin-only,
+        body[data-role="superadmin"] .staff-only,
+        body[data-role="admin"] .staff-only { display: none !important; }
+
+        .staff-avail-info {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--blue);
+            font-size: 15px;
+            color: var(--text);
+        }
+        .staff-avail-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .staff-avail-card.is-pending {
+            border-left: 4px solid #f59e0b;
+        }
+        .staff-avail-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .staff-avail-card-title {
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--text);
+        }
+        .staff-avail-card-meta {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+        .staff-avail-badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .staff-avail-badge.is-pending { background: #fef3c7; color: #92400e; }
+        .staff-avail-badge.is-yes { background: #d1fae5; color: #065f46; }
+        .staff-avail-badge.is-no { background: #fee2e2; color: #991b1b; }
+        .staff-avail-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .staff-avail-buttons button {
+            flex: 1;
+            min-height: 52px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: #fff;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.15s var(--ease-out);
+        }
+        .staff-avail-buttons button.is-active-yes {
+            background: #10b981;
+            color: #fff;
+            border-color: #10b981;
+        }
+        .staff-avail-buttons button.is-active-no {
+            background: #ef4444;
+            color: #fff;
+            border-color: #ef4444;
+        }
+        .staff-avail-status {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+        .planner-sticky-bar {
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 16px;
+            margin: -16px -16px 16px -16px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+        .planner-sticky-bar button {
+            width: 100%;
+            min-height: 48px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .planner-sticky-bar button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .planner-sticky-counts {
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .planner-group-header {
+            margin: 18px 0 8px 0;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .planner-group-header:first-of-type { margin-top: 4px; }
+        .planner-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            background: #fff;
+            transition: background 0.1s;
+        }
+        .planner-row:hover { background: #f8fafc; }
+        .planner-row.is-faded { opacity: 0.55; }
+        .planner-row.is-conflict { border-left: 3px solid #ef4444; }
+        .planner-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .planner-row-name { flex: 1; font-weight: 500; }
+        .planner-row-status {
+            font-size: 12px;
+            color: var(--muted);
+        }
 
         .mobile-bottom-nav { display: none; }
 
@@ -579,6 +726,7 @@
         <button class="nav-item admin-only" onclick="navTo('catering', this)">Catering-Kalkulator</button>
         <button class="nav-item admin-only" onclick="navTo('pizza', this)">Pizza-Kalkulation</button>
         <button class="nav-item admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
+        <button class="nav-item staff-only" onclick="navTo('verfuegbarkeit', this)">Meine Verfügbarkeit</button>
         <button class="nav-item admin-only" onclick="navTo('team', this)">Mitarbeiter</button>
         <button class="nav-item superadmin-only" onclick="navTo('settings', this)">Einstellungen</button>
         <button class="nav-item" style="margin-top: auto; color: var(--red);" onclick="authSignOut()">Logout</button>
@@ -738,6 +886,17 @@
             <div id="kontakt-list"></div>
         </div>
 
+        <div class="page staff-only" id="page-verfuegbarkeit">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Meine Verfügbarkeit</div>
+                    <div class="page-subtitle">Trage dich für kommende Events ein</div>
+                </div>
+            </div>
+            <div id="meine-verfuegbarkeit-info" class="staff-avail-info" style="display:none;"></div>
+            <div id="meine-verfuegbarkeit-list"></div>
+        </div>
+
         <div class="page admin-only" id="page-team">
             <div class="page-header">
                 <div><div class="page-title">Mitarbeiter</div><div class="page-subtitle">Benutzer, Rollen & Stundenlohn</div></div>
@@ -791,6 +950,7 @@
     <nav class="mobile-bottom-nav">
         <button onclick="navTo('dashboard', this)" class="active">Dash</button>
         <button onclick="navTo('termine', this)">Termine</button>
+        <button class="staff-only" onclick="navTo('verfuegbarkeit', this)">Zeit?</button>
         <button class="admin-only" onclick="navTo('timesheet', this)">Zeiten</button>
         <button class="admin-only" onclick="navTo('pizza', this)">Pizza</button>
         <button class="admin-only" onclick="navTo('catering', this)">Catering</button>
