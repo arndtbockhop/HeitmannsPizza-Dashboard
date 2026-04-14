@@ -382,6 +382,16 @@
         }
         .settings-tab:hover { color: var(--text); background: rgba(37, 99, 235, 0.05); }
         .settings-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+        .auswertung-tab {
+            padding: 12px 18px; cursor: pointer;
+            color: var(--muted); font-weight: 600;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            transition: all .25s var(--ease);
+            border-radius: 8px 8px 0 0;
+        }
+        .auswertung-tab:hover { color: var(--text); background: rgba(37, 99, 235, 0.05); }
+        .auswertung-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
         .settings-panel { display: none; }
         .settings-panel.active { display: block; animation: pageFadeIn 0.35s var(--ease-out); }
 
@@ -564,12 +574,10 @@
     <aside class="sidebar">
         <div class="sidebar-logo">Heitmanns Pizza</div>
         <button class="nav-item active" onclick="navTo('dashboard', this)">Dashboard</button>
-        <button class="nav-item" onclick="navTo('kalender', this)">Kalender</button>
-        <button class="nav-item" onclick="navTo('events', this)">Events</button>
+        <button class="nav-item" onclick="navTo('termine', this)">Termine</button>
         <button class="nav-item admin-only" onclick="navTo('timesheet', this)">Personal & Zeiten</button>
         <button class="nav-item admin-only" onclick="navTo('catering', this)">Catering-Kalkulator</button>
-        <button class="nav-item admin-only" onclick="navTo('pizza', this)">Pizza</button>
-        <button class="nav-item admin-only" onclick="navTo('einkauf', this)">Einkaufsliste</button>
+        <button class="nav-item admin-only" onclick="navTo('pizza', this)">Pizza-Kalkulation</button>
         <button class="nav-item admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
         <button class="nav-item superadmin-only" onclick="navTo('settings', this)">Einstellungen</button>
         <button class="nav-item" style="margin-top: auto; color: var(--red);" onclick="authSignOut()">Logout</button>
@@ -602,33 +610,31 @@
             </div>
         </div>
 
-        <div class="page" id="page-kalender">
+        <div class="page" id="page-termine">
             <div class="page-header">
                 <div>
-                    <div class="page-title">Terminkalender</div>
+                    <div class="page-title">Termine</div>
                     <div class="page-subtitle" id="cal-title" style="font-weight: 600; font-size: 16px; color: var(--blue); margin-top: 8px;"></div>
                 </div>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button onclick="changeMonth(-1)">Vorheriger</button>
-                    <button onclick="changeMonth(1)">Nächster</button>
+                    <button id="termine-nav-prev" onclick="changeMonth(-1)">Vorheriger</button>
+                    <button id="termine-nav-next" onclick="changeMonth(1)">Nächster</button>
                     <button class="btn-primary admin-only" onclick="openEventModal()">Neuer Termin</button>
                 </div>
             </div>
-            <div class="card">
-                <div class="cal-grid" id="cal-headers"></div>
-                <div class="cal-grid" id="cal-body"></div>
+            <div class="settings-tabs">
+                <div class="settings-tab active" onclick="switchTermineView('kalender', this)">Kalender</div>
+                <div class="settings-tab" onclick="switchTermineView('liste', this)">Liste</div>
             </div>
-        </div>
-
-        <div class="page" id="page-events">
-            <div class="page-header">
-                <div>
-                    <div class="page-title">Events</div>
-                    <div class="page-subtitle">Verfügbarkeiten prüfen und ansehen</div>
+            <div id="termine-view-kalender">
+                <div class="card">
+                    <div class="cal-grid" id="cal-headers"></div>
+                    <div class="cal-grid" id="cal-body"></div>
                 </div>
-                <button class="btn-primary admin-only" onclick="openEventModal()">Neues Event anlegen</button>
             </div>
-            <div id="all-events-list" class="event-grid"></div>
+            <div id="termine-view-liste" style="display:none;">
+                <div id="all-events-list" class="event-grid"></div>
+            </div>
         </div>
 
         <div class="page admin-only" id="page-timesheet">
@@ -643,21 +649,29 @@
             <div class="settings-tabs">
                 <div class="settings-tab active" onclick="switchSettingsTab('ts-planner', this)">Event Planer</div>
                 <div class="settings-tab" onclick="switchSettingsTab('ts-list', this)">Erfasste Zeiten</div>
-                <div class="settings-tab" onclick="switchSettingsTab('ts-events', this)">Event-Auswertung</div>
-                <div class="settings-tab" onclick="switchSettingsTab('ts-users', this)">Mitarbeiter-Auswertung</div>
+                <div class="settings-tab" onclick="switchSettingsTab('ts-auswertung', this)">Auswertung</div>
             </div>
             <div id="panel-ts-planner" class="settings-panel active">
                 <div class="card"><div class="card-title">Event Planer (Anstehende Events)</div><div id="planner-events-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;"></div></div>
             </div>
             <div id="panel-ts-list" class="settings-panel"><div class="card"><div class="card-title">Alle erfassten Schichten</div><div class="table-wrap" id="timesheet-list-container"></div></div></div>
-            <div id="panel-ts-events" class="settings-panel"><div class="card"><div class="card-title">Kosten pro Event</div><div class="table-wrap" id="timesheet-events-container"></div></div></div>
-            <div id="panel-ts-users" class="settings-panel"><div class="card"><div class="card-title">Stunden pro Mitarbeiter</div><div class="table-wrap" id="timesheet-users-container"></div></div></div>
+            <div id="panel-ts-auswertung" class="settings-panel">
+                <div class="auswertung-tabs settings-tabs" style="margin-bottom:16px;">
+                    <div class="auswertung-tab active" onclick="switchAuswertung('event', this)">Pro Event</div>
+                    <div class="auswertung-tab" onclick="switchAuswertung('user', this)">Pro Mitarbeiter</div>
+                </div>
+                <div id="auswertung-event"><div class="card"><div class="card-title">Kosten pro Event</div><div class="table-wrap" id="timesheet-events-container"></div></div></div>
+                <div id="auswertung-user" style="display:none;"><div class="card"><div class="card-title">Stunden pro Mitarbeiter</div><div class="table-wrap" id="timesheet-users-container"></div></div></div>
+            </div>
         </div>
 
         <div class="page admin-only" id="page-pizza">
             <div class="page-header">
-                <div><div class="page-title">Pizza</div><div class="page-subtitle">Verbrauchskalkulation und Warenkorb-Generierung</div></div>
-                <button class="btn-danger" onclick="resetPizza()">Kalkulation zurücksetzen</button>
+                <div><div class="page-title">Pizza-Kalkulation</div><div class="page-subtitle">Verbrauch berechnen, Warenkorb erstellen und Einkaufsliste verwalten</div></div>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <button class="btn-danger" onclick="resetPizza()">Kalkulation zurücksetzen</button>
+                    <button class="btn-danger" onclick="clearEinkauf()">Einkaufsliste leeren</button>
+                </div>
             </div>
             <div class="card" style="margin-bottom: 24px;">
                 <div class="card-title">Pizza Mengen</div>
@@ -684,9 +698,13 @@
                     </div>
                 </div>
             </div>
-            <div class="card">
+            <div class="card" style="margin-bottom: 24px;">
                 <div class="card-title">Bedarf & Warenkorb <button class="btn-primary" onclick="saveToEinkauf()">In Einkaufsliste pushen</button></div>
                 <div id="ingredient-result"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Zentrale Einkaufsliste</div>
+                <div id="einkauf-kategorien"></div>
             </div>
         </div>
 
@@ -705,11 +723,6 @@
                     <div class="summary-bar" style="margin-top: 16px;">Brutto Zielpreis: <span id="cat-brutto-total">0,00 €</span></div>
                 </div>
             </div>
-        </div>
-
-        <div class="page admin-only" id="page-einkauf">
-            <div class="page-header"><div><div class="page-title">Zentrale Einkaufsliste</div><div class="page-subtitle">Alle gepushten Bedarfe</div></div><button class="btn-danger" onclick="clearEinkauf()">Komplette Liste leeren</button></div>
-            <div id="einkauf-kategorien"></div>
         </div>
 
         <div class="page admin-only" id="page-kontakte">
@@ -763,11 +776,9 @@
     </main>
     <nav class="mobile-bottom-nav">
         <button onclick="navTo('dashboard', this)" class="active">Dash</button>
-        <button onclick="navTo('kalender', this)">Kalender</button>
-        <button onclick="navTo('events', this)">Events</button>
+        <button onclick="navTo('termine', this)">Termine</button>
         <button class="admin-only" onclick="navTo('timesheet', this)">Zeiten</button>
         <button class="admin-only" onclick="navTo('pizza', this)">Pizza</button>
-        <button class="admin-only" onclick="navTo('einkauf', this)">Einkauf</button>
         <button class="admin-only" onclick="navTo('catering', this)">Catering</button>
         <button class="admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
         <button class="superadmin-only" onclick="navTo('settings', this)">Settings</button>
@@ -1907,6 +1918,27 @@ function navTo(id, btn) {
     const target = $('page-' + id);
     if (target) target.classList.add('active');
     if (btn) btn.classList.add('active');
+}
+
+function switchAuswertung(view, btn) {
+    const panel = $('panel-ts-auswertung');
+    if (!panel) return;
+    panel.querySelectorAll('.auswertung-tab').forEach(t => t.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    $('auswertung-event').style.display = view === 'event' ? '' : 'none';
+    $('auswertung-user').style.display  = view === 'user'  ? '' : 'none';
+}
+
+function switchTermineView(view, btn) {
+    const page = $('page-termine');
+    if (!page) return;
+    page.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const isKal = view === 'kalender';
+    $('termine-view-kalender').style.display = isKal ? '' : 'none';
+    $('termine-view-liste').style.display    = isKal ? 'none' : '';
+    $('termine-nav-prev').style.display      = isKal ? '' : 'none';
+    $('termine-nav-next').style.display      = isKal ? '' : 'none';
 }
 
 function switchSettingsTab(id, btn) {
@@ -3575,7 +3607,7 @@ function exportUserRangeFromDetail() {
 // EXPORT TO WINDOW
 // ============================================================================
 Object.assign(window, {
-    doLogin, authSignOut, navTo, switchSettingsTab,
+    doLogin, authSignOut, navTo, switchSettingsTab, switchTermineView, switchAuswertung,
     openModal, closeModal,
     clearNotifications, savePin, openRankingModal,
     changeMonth, openDayEventsModal,
