@@ -579,6 +579,7 @@
         <button class="nav-item admin-only" onclick="navTo('catering', this)">Catering-Kalkulator</button>
         <button class="nav-item admin-only" onclick="navTo('pizza', this)">Pizza-Kalkulation</button>
         <button class="nav-item admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
+        <button class="nav-item admin-only" onclick="navTo('team', this)">Mitarbeiter</button>
         <button class="nav-item superadmin-only" onclick="navTo('settings', this)">Einstellungen</button>
         <button class="nav-item" style="margin-top: auto; color: var(--red);" onclick="authSignOut()">Logout</button>
     </aside>
@@ -727,7 +728,22 @@
 
         <div class="page admin-only" id="page-kontakte">
             <div class="page-header"><div><div class="page-title">Kontakte & Adressbuch</div><div class="page-subtitle">Kunden, Lieferanten, Mitarbeiter und Partner</div></div><button class="btn-primary" onclick="openKontaktModal()">Neuen Kontakt anlegen</button></div>
+            <div class="settings-tabs" id="kontakt-filters" style="margin-bottom:16px;">
+                <div class="settings-tab active" onclick="setKontaktFilter('all', this)">Alle</div>
+                <div class="settings-tab" onclick="setKontaktFilter('Kunde', this)">Kunden</div>
+                <div class="settings-tab" onclick="setKontaktFilter('Mitarbeiter', this)">Mitarbeiter</div>
+                <div class="settings-tab" onclick="setKontaktFilter('CEO', this)">CEO</div>
+                <div class="settings-tab" onclick="setKontaktFilter('Lieferant', this)">Lieferanten</div>
+            </div>
             <div id="kontakt-list"></div>
+        </div>
+
+        <div class="page admin-only" id="page-team">
+            <div class="page-header">
+                <div><div class="page-title">Mitarbeiter</div><div class="page-subtitle">Benutzer, Rollen & Stundenlohn</div></div>
+                <button class="btn-primary superadmin-only" onclick="openModal('user-create-modal')">Neuer Mitarbeiter</button>
+            </div>
+            <div class="card"><div class="table-wrap" id="team-list-container"></div></div>
         </div>
 
         <div class="page superadmin-only" id="page-settings">
@@ -738,7 +754,6 @@
                 <div class="settings-tab" onclick="switchSettingsTab('pizzas', this)">Pizzen</div>
                 <div class="settings-tab" onclick="switchSettingsTab('catering', this)">Catering Parameter</div>
                 <div class="settings-tab" onclick="switchSettingsTab('scenarios', this)">Catering Staffeln</div>
-                <div class="settings-tab" onclick="switchSettingsTab('team', this)">Mitarbeiter Handling</div>
             </div>
             <div id="panel-zutaten" class="settings-panel active">
                 <div class="card">
@@ -771,7 +786,6 @@
                     <button class="btn-primary" style="margin-top: 16px; width: 100%;" onclick="saveScenarios()">Staffeln speichern</button>
                 </div>
             </div>
-            <div id="panel-team" class="settings-panel"><div class="card"><div class="card-title">Benutzer, Rollen & Stundenlohn</div><div class="table-wrap" id="team-list-container"></div></div></div>
         </div>
     </main>
     <nav class="mobile-bottom-nav">
@@ -781,6 +795,7 @@
         <button class="admin-only" onclick="navTo('pizza', this)">Pizza</button>
         <button class="admin-only" onclick="navTo('catering', this)">Catering</button>
         <button class="admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
+        <button class="admin-only" onclick="navTo('team', this)">MA</button>
         <button class="superadmin-only" onclick="navTo('settings', this)">Settings</button>
     </nav>
 </div>
@@ -1662,6 +1677,8 @@ function buildTable(headers, rows, emptyMsg = 'Keine Daten.') {
 // ============================================================================
 // STATE
 // ============================================================================
+let kontaktFilter = 'all';
+
 let state = {
     role: 'staff',
     events: [], kontakte: [], einkauf: [], recipes: [], pizzas: [],
@@ -1851,7 +1868,7 @@ function initGranularListeners() {
         const d = snap.val() || {};
         state.users = Object.entries(d).map(([uid, data]) => ({ uid, ...data }));
         updateDashboard();
-        if (isAdminRole()) { renderTimesheets(); renderPlanner(); }
+        if (isAdminRole()) { renderTimesheets(); renderPlanner(); renderTeam(); }
         if (state.role === 'superadmin') renderSettings();
     }));
 
@@ -3063,6 +3080,14 @@ function deleteKontakt(id) {
     dbAction(remove(ref(db, `kontakte/${id}`)), 'Kontakt gelöscht');
 }
 
+function setKontaktFilter(f, btn) {
+    kontaktFilter = f;
+    const box = $('kontakt-filters');
+    if (box) box.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderKontakte();
+}
+
 function renderKontakte() {
     const c = $('kontakt-list');
     if (!c) return;
@@ -3071,18 +3096,27 @@ function renderKontakte() {
     const grouped = {};
     state.kontakte.forEach(k => {
         const cat = k.kategorie || 'Kunde';
+        if (kontaktFilter !== 'all' && cat !== kontaktFilter) return;
         (grouped[cat] = grouped[cat] || []).push(k);
     });
+    const visible = Object.values(grouped).reduce((s, l) => s + l.length, 0);
+    if (!visible) { c.innerHTML = '<div class="card muted">Keine Kontakte in dieser Kategorie.</div>'; return; }
     let html = '';
     cats.forEach(cat => {
         const list = grouped[cat];
         if (!list || !list.length) return;
         html += `<h3 style="margin: 16px 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted);">${cat} (${list.length})</h3>`;
-        html += `<div class="cards-grid" style="margin-bottom: 24px;">${list.map(k => `
+        html += `<div class="cards-grid" style="margin-bottom: 24px;">${list.map(k => {
+            const linked = k.linkedUid;
+            const actions = linked
+                ? `<button class="btn-sm" onclick="openUserEditModal('${escJs(linked)}')" title="Im Mitarbeiter-Tab bearbeiten">Bearbeiten</button>`
+                : `<button class="btn-sm" onclick="openKontaktModal('${escJs(k.id)}')">Bearbeiten</button>
+                   <button class="btn-danger btn-sm" onclick="deleteKontakt('${escJs(k.id)}')">Löschen</button>`;
+            return `
             <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; gap: 12px;">
                 <div class="row-between" style="align-items: flex-start; flex-wrap: wrap; gap: 12px;">
                     <div>
-                        <div style="font-size: 18px; font-weight: 700;">${esc(k.name)}</div>
+                        <div style="font-size: 18px; font-weight: 700;">${esc(k.name)}${linked ? ' <span class="muted" style="font-size:11px; font-weight:500;">· aus Mitarbeiter</span>' : ''}</div>
                         ${k.firma ? `<div class="muted" style="font-size: 13px; margin-top: 4px;">🏢 ${esc(k.firma)}</div>` : ''}
                         <div style="display:flex; flex-direction:column; gap:4px; margin-top: 12px; font-size:13px;">
                             ${k.tel ? `<div>📞 <a href="javascript:void(0)" data-confirm-type="tel" data-confirm-url="tel:${esc(k.tel)}" onclick="confirmActionEl(this)" style="color:var(--text); text-decoration:none;">${esc(k.tel)}</a></div>` : ''}
@@ -3090,14 +3124,28 @@ function renderKontakte() {
                             ${k.adresse ? `<div>📍 <a href="javascript:void(0)" data-confirm-type="map" data-confirm-url="${esc(mapsUrl(k.adresse))}" onclick="confirmActionEl(this)" style="color:var(--text); text-decoration:none;">${esc(k.adresse)}</a></div>` : ''}
                         </div>
                     </div>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button class="btn-sm" onclick="openKontaktModal('${escJs(k.id)}')">Bearbeiten</button>
-                        <button class="btn-danger btn-sm" onclick="deleteKontakt('${escJs(k.id)}')">Löschen</button>
-                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">${actions}</div>
                 </div>
-            </div>`).join('')}</div>`;
+            </div>`;
+        }).join('')}</div>`;
     });
     c.innerHTML = html;
+}
+
+function syncEmployeeContact(user) {
+    if (!user || !user.uid) return Promise.resolve();
+    const cid = `ku_${user.uid}`;
+    return set(ref(db, `kontakte/${cid}`), {
+        id: cid,
+        kategorie: 'Mitarbeiter',
+        name: user.name || '',
+        firma: '',
+        tel: user.phone || '',
+        email: user.email || '',
+        adresse: user.address || '',
+        linkedUid: user.uid,
+        auto: true
+    }).catch(err => console.error('syncEmployeeContact:', err));
 }
 
 // ============================================================================
@@ -3331,10 +3379,11 @@ function renderSettings() {
     });
 
     renderScenarios();
+}
 
-    const createBtn = state.role === 'superadmin'
-        ? `<button class="btn-primary" style="margin-bottom:12px;" onclick="openModal('user-create-modal')">Neuer Mitarbeiter</button>`
-        : '';
+function renderTeam() {
+    const tc = $('team-list-container');
+    if (!tc) return;
     const teamRows = state.users.map(u => `<tr>
         <td><b>${esc(u.name || u.email)}</b><br><span style="font-size:10px;" class="muted">${esc(u.email)}</span></td>
         <td>
@@ -3351,8 +3400,7 @@ function renderSettings() {
             ${(u.createdByAdmin && u.canLogin) ? `<button class="btn-sm" onclick="sendCredentials('${escJs(u.email)}','${escJs(u.name)}')" style="margin-left:4px;" title="Zugangsdaten senden">Mail</button>` : ''}
         </td>
     </tr>`);
-    const tc = $('team-list-container');
-    if (tc) tc.innerHTML = createBtn + buildTable(['Name', 'Rolle', 'Lohn (€)', 'Aktion'], teamRows, 'Keine User vorhanden.');
+    tc.innerHTML = buildTable(['Name', 'Rolle', 'Lohn (€)', 'Aktion'], teamRows, 'Keine User vorhanden.');
 }
 
 function renderScenarios() {
@@ -3443,7 +3491,7 @@ function saveUserEdit() {
     if (!uid) return;
     const name = $('ue-name').value.trim();
     if (!name) return showToast('Name ist Pflicht.', 'error');
-    dbAction(update(ref(db, `users/${uid}`), {
+    const fields = {
         name,
         phone:     $('ue-phone').value.trim(),
         address:   $('ue-address').value.trim(),
@@ -3451,7 +3499,13 @@ function saveUserEdit() {
         hireDate:  $('ue-hiredate').value,
         notes:     $('ue-notes').value.trim(),
         canLogin:  $('ue-canlogin').checked
-    }), 'Stammdaten aktualisiert!');
+    };
+    dbAction(update(ref(db, `users/${uid}`), fields), 'Stammdaten aktualisiert!')
+        .then(ok => {
+            if (ok === false) return;
+            const existing = find(state.users, uid, 'uid') || {};
+            syncEmployeeContact({ ...existing, ...fields, uid });
+        });
     closeModal('user-edit-modal');
 }
 
@@ -3502,6 +3556,7 @@ async function saveNewUser() {
         if (!verifySnap.exists()) {
             throw new Error('Datensatz nach Speichern nicht auffindbar (Firebase-Rules?).');
         }
+        await syncEmployeeContact(data);
         if (!state.users.some(u => u.uid === newId)) {
             state.users.push({ ...data });
         }
@@ -3637,7 +3692,7 @@ Object.assign(window, {
     changePizza, changeDip, resetPizza, saveToEinkauf,
     calcCatering,
     clearEinkauf,
-    openKontaktModal, saveKontakt, deleteKontakt,
+    openKontaktModal, saveKontakt, deleteKontakt, setKontaktFilter,
     openIngredientModal, saveNewIngredient,
     openRecipeModal, openPizzaModal, saveBuilder, addBuilderItemRow,
     deleteRecipe, deletePizza, deleteIngredient,
