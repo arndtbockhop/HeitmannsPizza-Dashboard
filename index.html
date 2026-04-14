@@ -1148,7 +1148,11 @@ const esc = (str) => {
 };
 const escJs = (str) => String(str || '').replace(/['"\\]/g, '\\$&');
 
-const today = () => new Date().toISOString().split('T')[0];
+const pad2 = n => String(n).padStart(2, '0');
+const toLocalISO = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const today = () => toLocalISO(new Date());
+const asArray = v => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []);
+const DEFAULT_WAGE = 14;
 const find = (arr, id, key = 'id') => (arr || []).find(x => String(x[key]) === String(id));
 const eq = (a, b) => String(a) === String(b);
 const fmt = n => Number(n || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -1173,8 +1177,8 @@ const closeModal = id => { const m = $(id); if (m) m.classList.remove('open'); }
 
 function dbAction(promise, okMsg, errMsg = 'Fehler beim Speichern.') {
     return promise
-        .then(() => { if (okMsg) showToast(okMsg, 'success'); })
-        .catch(() => showToast(errMsg, 'error'));
+        .then(() => { if (okMsg) showToast(okMsg, 'success'); return true; })
+        .catch(err => { console.error(errMsg, err); showToast(errMsg, 'error'); return false; });
 }
 
 function statusBadge(s) {
@@ -1189,6 +1193,12 @@ function confirmAction(type, url) {
         map: "Möchtest du die Adresse in Google Maps öffnen?"
     };
     if (confirm(msgs[type])) window.open(url, type === 'map' ? '_blank' : '_self');
+}
+
+function confirmActionEl(el) {
+    const t = el.getAttribute('data-confirm-type');
+    const u = el.getAttribute('data-confirm-url');
+    if (t && u) confirmAction(t, u);
 }
 
 function calculateHours(startStr, endStr, startDateStr, endDateStr, breakMinutes = 0) {
@@ -1243,7 +1253,7 @@ function eventDateRange(ev) {
     const days = [];
     const cur = new Date(start);
     while (cur <= end) {
-        days.push(cur.toISOString().slice(0, 10));
+        days.push(toLocalISO(cur));
         cur.setDate(cur.getDate() + 1);
     }
     return days;
@@ -1400,7 +1410,7 @@ function exportUserMonth(uid, year, month) {
     doc.setFontSize(9);
     doc.text(`Email: ${user.email || ''}`, 15, startY);
     doc.text(`Telefon: ${user.phone || '-'}`, 15, startY + 5);
-    doc.text(`Stundenlohn: ${pdfCurrency(user.wage || 14)}`, 15, startY + 10);
+    doc.text(`Stundenlohn: ${pdfCurrency(user.wage || DEFAULT_WAGE)}`, 15, startY + 10);
 
     let totalH = 0, totalC = 0;
     const body = list.map(t => {
@@ -1409,9 +1419,9 @@ function exportUserMonth(uid, year, month) {
         const ev = find(state.events, t.eventId) || { title: '?' };
         const over = getDailyHours(t.userId, t.date) > 10;
         const row = [
-            fmtDate(t.date), ev.title || '',
+            fmtDateShort(t.date), ev.title || '',
             t.start || '', t.end || '',
-            `${Number(t.breakMinutes || 0)}`,
+            `${Number(t.breakMinutes || 0)} min`,
             pdfHours(t.workHours),
             Number(t.bonus || 0).toLocaleString('de-DE'),
             pdfHours(t.totalHours),
@@ -1461,8 +1471,8 @@ function exportEvent(eventId) {
     const doc = pdfDoc();
     if (!doc) return;
     const subtitle = ev.endDate && ev.endDate !== ev.date
-        ? `${fmtDate(ev.date)} – ${fmtDate(ev.endDate)}`
-        : fmtDate(ev.date || '');
+        ? `${fmtDateShort(ev.date)} – ${fmtDateShort(ev.endDate)}`
+        : fmtDateShort(ev.date || '');
     const startY = pdfHeader(doc, `Event: ${ev.title || ''}`, subtitle);
     doc.setFontSize(9);
     doc.text(`Typ: ${ev.type || '-'}`, 15, startY);
@@ -1487,8 +1497,8 @@ function exportEvent(eventId) {
             const over = getDailyHours(t.userId, t.date) > 10;
             const row = [
                 u.name || '',
-                fmtDate(t.date),
-                `${t.start}–${t.end}`,
+                fmtDateShort(t.date),
+                `${t.start || '-'}–${t.end || '-'}`,
                 `${Number(t.breakMinutes || 0)} min`,
                 pdfHours(t.workHours),
                 pdfHours(t.totalHours),
@@ -1552,11 +1562,11 @@ function exportRange({ from, to, uid = null, eventId = null }) {
         const ev = find(state.events, t.eventId) || { title: '?' };
         const over = getDailyHours(t.userId, t.date) > 10;
         const row = [
-            fmtDate(t.date),
+            fmtDateShort(t.date),
             u.name || '',
             ev.title || '',
-            `${t.start}–${t.end}`,
-            `${Number(t.breakMinutes || 0)}`,
+            `${t.start || '-'}–${t.end || '-'}`,
+            `${Number(t.breakMinutes || 0)} min`,
             pdfHours(t.totalHours),
             pdfCurrency(t.totalCost)
         ];
@@ -1594,13 +1604,13 @@ function exportSingleShift(tsId) {
     const u  = find(state.users, ts.userId, 'uid') || { name: '?' };
     const doc = pdfDoc();
     if (!doc) return;
-    const startY = pdfHeader(doc, `Einzel-Schicht`, `${u.name} · ${fmtDate(ts.date)}`);
+    const startY = pdfHeader(doc, `Einzel-Schicht`, `${u.name} · ${fmtDateShort(ts.date)}`);
     doc.setFontSize(11);
     const lines = [
         ['Mitarbeiter:',       u.name || ''],
         ['Event:',             `${ev.title} (${ev.type || '-'})`],
-        ['Datum:',             fmtDate(ts.date)],
-        ['Start–Ende:',        `${ts.start} – ${ts.end}`],
+        ['Datum:',             fmtDateShort(ts.date)],
+        ['Start–Ende:',        `${ts.start || '-'} – ${ts.end || '-'}`],
         ['Pause:',             `${Number(ts.breakMinutes || 0)} min`],
         ['Arbeitszeit:',       pdfHours(ts.workHours)],
         ['Bonus:',             `${Number(ts.bonus || 0).toLocaleString('de-DE')} h`],
@@ -1631,8 +1641,8 @@ function openRangeExportModal() {
         state.events.map(e => `<option value="${esc(e.id)}">${esc(fmtDateShort(e.date))} · ${esc(e.title)}</option>`).join('');
     const now = new Date();
     const first = new Date(now.getFullYear(), now.getMonth(), 1);
-    $('re-from').value = first.toISOString().slice(0, 10);
-    $('re-to').value   = now.toISOString().slice(0, 10);
+    $('re-from').value = toLocalISO(first);
+    $('re-to').value   = toLocalISO(now);
     openModal('range-export-modal');
 }
 function runRangeExport() {
@@ -1710,35 +1720,42 @@ let unsubscribers = [];
 // ============================================================================
 // AUTH HELPERS
 // ============================================================================
+let userRecordEnsuring = false;
 async function ensureUserRecord(authUser) {
-    const uid = authUser.uid;
-    const email = (authUser.email || '').toLowerCase();
-    const ownSnap = await get(ref(db, 'users/' + uid));
-    if (ownSnap.exists()) return;
+    if (userRecordEnsuring) return;
+    userRecordEnsuring = true;
+    try {
+        const uid = authUser.uid;
+        const email = (authUser.email || '').toLowerCase();
+        const ownSnap = await get(ref(db, 'users/' + uid));
+        if (ownSnap.exists()) return;
 
-    const allSnap = await get(ref(db, 'users'));
-    const all = allSnap.val() || {};
-    const match = Object.entries(all).find(([id, u]) =>
-        u && u.createdByAdmin === true &&
-        (u.email || '').toLowerCase() === email
-    );
-    if (match) {
-        const [oldId, oldData] = match;
-        const merged = { ...oldData, uid, createdByAdmin: false };
-        await update(ref(db), {
-            ['users/' + uid]: merged,
-            ['users/' + oldId]: null
+        const allSnap = await get(ref(db, 'users'));
+        const all = allSnap.val() || {};
+        const match = Object.entries(all).find(([id, u]) =>
+            u && u.createdByAdmin === true &&
+            (u.email || '').toLowerCase() === email
+        );
+        if (match) {
+            const [oldId, oldData] = match;
+            const merged = { ...oldData, uid, createdByAdmin: false };
+            await update(ref(db), {
+                ['users/' + uid]: merged,
+                ['users/' + oldId]: null
+            });
+            return;
+        }
+        await set(ref(db, 'users/' + uid), {
+            uid,
+            email,
+            name: authUser.displayName || email.split('@')[0],
+            role: 'staff',
+            wage: DEFAULT_WAGE,
+            cleaningPoints: 0
         });
-        return;
+    } finally {
+        userRecordEnsuring = false;
     }
-    await set(ref(db, 'users/' + uid), {
-        uid,
-        email,
-        name: authUser.displayName || email.split('@')[0],
-        role: 'staff',
-        wage: 14,
-        cleaningPoints: 0
-    });
 }
 
 // ============================================================================
@@ -1813,8 +1830,7 @@ function doLogin() {
 }
 
 function enforceRBAC() {
-    if (!isAdminRole()) document.querySelectorAll('.admin-only').forEach(el => el.remove());
-    if (state.role !== 'superadmin') document.querySelectorAll('.superadmin-only').forEach(el => el.remove());
+    document.body.setAttribute('data-role', state.role || 'staff');
 }
 
 // ============================================================================
@@ -1827,8 +1843,9 @@ function initGranularListeners() {
             .filter(([k, ev]) => ev !== null && typeof ev === 'object')
             .map(([k, ev]) => Object.assign({}, ev, {
                 id: k, endDate: ev.endDate || ev.date,
-                assignedCrew: ev.assignedCrew || [],
-                availUIDs: ev.availUIDs || [], unavailUIDs: ev.unavailUIDs || [],
+                assignedCrew: asArray(ev.assignedCrew),
+                availUIDs: asArray(ev.availUIDs),
+                unavailUIDs: asArray(ev.unavailUIDs),
                 availDetails: ev.availDetails || {}
             }))
             .sort((a, b) => (a.date || '') > (b.date || '') ? 1 : -1);
@@ -1863,8 +1880,8 @@ function initGranularListeners() {
     }));
 
     unsubscribers.push(onValue(ref(db, 'cateringDefaults'), snap => {
-        state.cateringDefaults = snap.val() || { gas: 10, entsorgung: 15, miete: 45, kmsatz: 0.8, waren: 3.5, ust: 1.19, stundensatz: 14 };
-        if (state.cateringDefaults.stundensatz === undefined) state.cateringDefaults.stundensatz = 14;
+        state.cateringDefaults = snap.val() || { gas: 10, entsorgung: 15, miete: 45, kmsatz: 0.8, waren: 3.5, ust: 1.19, stundensatz: DEFAULT_WAGE };
+        if (state.cateringDefaults.stundensatz === undefined) state.cateringDefaults.stundensatz = DEFAULT_WAGE;
         if (state.role === 'superadmin') renderSettings();
         calcCatering();
     }));
@@ -2006,10 +2023,8 @@ function updateDashboard() {
 }
 
 function clearNotifications() {
-    if (auth.currentUser) {
-        remove(ref(db, `users/${auth.currentUser.uid}/notifications`));
-        showToast("Postfach geleert", 'success');
-    }
+    if (!auth.currentUser) return;
+    dbAction(remove(ref(db, `users/${auth.currentUser.uid}/notifications`)), 'Postfach geleert');
 }
 
 function savePin() {
@@ -2125,7 +2140,7 @@ function toggleAvail(eid, isAvailable) {
             let html = '';
             for (let i = 0; i <= daysDiff; i++) {
                 const d = new Date(start); d.setDate(d.getDate() + i);
-                const dStr = d.toISOString().split('T')[0];
+                const dStr = toLocalISO(d);
                 const dDisp = d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
                 const isChecked = (ev.availDetails && ev.availDetails[uid] && ev.availDetails[uid].includes(dStr)) ? 'checked' : '';
                 html += `<label style="display:flex; align-items:center; gap:12px; padding:12px; border-bottom:1px solid #f1f5f9; cursor:pointer;">
@@ -2256,15 +2271,18 @@ function savePlanner() {
     if (!plannerCurrentEventId) return;
     const ev = find(state.events, plannerCurrentEventId);
     if (!ev) return;
-    runTransaction(ref(db, `events/${plannerCurrentEventId}/assignedCrew`), () => plannerAssigned)
+    let oldAssigned = [];
+    runTransaction(ref(db, `events/${plannerCurrentEventId}/assignedCrew`), prev => {
+        oldAssigned = asArray(prev);
+        return plannerAssigned;
+    })
         .then(() => {
-            const oldAssigned = (ev.assignedCrew || []);
             const newlyAssigned = plannerAssigned.filter(uid => !oldAssigned.includes(uid));
             newlyAssigned.forEach(uid => {
                 runTransaction(ref(db, `users/${uid}/notifications`), arr => {
-                    const list = arr || [];
-                    list.push(`Du wurdest für das Event "${ev.title}" am ${ev.date} fest eingeteilt!`);
-                    return list.slice(-50); 
+                    const list = asArray(arr);
+                    list.push(`Du wurdest für das Event "${ev.title}" am ${fmtDateShort(ev.date)} fest eingeteilt!`);
+                    return list.slice(-50);
                 });
             });
             closeModal('planner-modal');
@@ -2308,35 +2326,37 @@ function openEventModal(id, dateStr) {
 
 function saveEvent() {
     const id = state.editEventId || 'ev_' + Date.now();
-    const oldEv = find(state.events, id);
+    const isNew = !state.editEventId;
     const newStatus = $('ev-status').value;
     const startDate = $('ev-date').value;
     const endDateVal = $('ev-endDate').value || startDate;
     if (!$('ev-title').value.trim()) return alert("Bitte einen Titel eingeben!");
     if (!startDate) return alert("Bitte ein Start-Datum eingeben!");
     if (endDateVal < startDate) return alert("Das End-Datum darf nicht vor dem Start-Datum liegen!");
-    const updates = {
+    const fields = {
         id, title: $('ev-title').value, type: $('ev-type').value, date: startDate, endDate: endDateVal,
         time: $('ev-time').value, timeEnd: $('ev-time-end').value, ort: $('ev-ort').value,
         personen: parseInt($('ev-personen').value) || 0, status: newStatus,
         notizen: $('ev-notizen').value, customerContactId: $('ev-customer-select').value
     };
-    if (oldEv) {
-        updates.assignedCrew = oldEv.assignedCrew || [];
-        updates.availUIDs = oldEv.availUIDs || [];
-        updates.unavailUIDs = oldEv.unavailUIDs || [];
-        updates.availDetails = oldEv.availDetails || {};
-        if (oldEv.cleaningDoneBy) updates.cleaningDoneBy = oldEv.cleaningDoneBy;
-        if (oldEv.loggedHours) updates.loggedHours = oldEv.loggedHours;
+    let writePromise;
+    if (isNew) {
+        writePromise = set(ref(db, 'events/' + id), {
+            ...fields, assignedCrew: [], availUIDs: [], unavailUIDs: [], availDetails: {}
+        });
+    } else {
+        const updates = {};
+        Object.keys(fields).forEach(k => { updates[`events/${id}/${k}`] = fields[k]; });
+        writePromise = update(ref(db), updates);
     }
-    dbAction(set(ref(db, 'events/' + id), updates), 'Event gespeichert')
-        .then(() => closeModal('event-modal'));
+    dbAction(writePromise, 'Event gespeichert')
+        .then(ok => { if (ok !== false) closeModal('event-modal'); });
 }
 
 function showEventDetail(id) {
     const ev = find(state.events, id);
     if (!ev) return;
-    const mapLink = ev.ort ? `<a href="javascript:void(0)" onclick="confirmAction('map', '${escJs(mapsUrl(ev.ort))}')">📍 ${esc(ev.ort)}</a>` : '–';
+    const mapLink = ev.ort ? `<a href="javascript:void(0)" data-confirm-type="map" data-confirm-url="${esc(mapsUrl(ev.ort))}" onclick="confirmActionEl(this)">📍 ${esc(ev.ort)}</a>` : '–';
     let customerStr = '';
     if (ev.type === 'Catering' && ev.customerContactId) {
         const cust = find(state.kontakte, ev.customerContactId);
@@ -2460,15 +2480,19 @@ function deleteEvent(id) {
 function markCleaningDone(eid) {
     const ev = find(state.events, eid);
     if (!ev) return;
+    if (ev.cleaningDoneBy) return showToast('Bereits erledigt.', 'error');
     const pts = ev.personen > 100 ? 3 : (ev.personen > 50 ? 2 : 1);
     const uid = auth.currentUser.uid;
-    runTransaction(ref(db, `users/${uid}/cleaningPoints`), cur => (cur || 0) + pts)
-        .then(() => set(ref(db, `events/${eid}/cleaningDoneBy`), uid))
+    runTransaction(ref(db, `events/${eid}/cleaningDoneBy`), cur => cur ? undefined : uid)
+        .then(result => {
+            if (!result.committed) throw new Error('Bereits markiert');
+            return runTransaction(ref(db, `users/${uid}/cleaningPoints`), cur => (cur || 0) + pts);
+        })
         .then(() => {
             showToast(`${pts} Putz-Punkte gesammelt!`, 'success');
             closeModal('detail-modal');
         })
-        .catch(() => showToast('Fehler beim Speichern.', 'error'));
+        .catch(err => showToast(err && err.message === 'Bereits markiert' ? 'Bereits erledigt.' : 'Fehler beim Speichern.', 'error'));
 }
 
 function changeCleaningPoints(uid, delta) {
@@ -2543,7 +2567,7 @@ async function saveInlineTimesheet(eventId, date, existingTsId) {
     const ev = find(state.events, eventId);
     if (!ev) return;
     const user = find(state.users, uid, 'uid');
-    const wage = user ? (Number(user.wage) || 14) : 14;
+    const wage = user ? (Number(user.wage) || DEFAULT_WAGE) : DEFAULT_WAGE;
     const workHours = calculateHours(start, end, date, null, breakMinutes);
     if (workHours <= 0) return showToast('Arbeitszeit ist 0 oder negativ.', 'error');
     const totalHours = workHours + bonus;
@@ -2678,7 +2702,7 @@ function updateTimesheetLivePreview() {
     const uid = $('ts-user-id')?.value;
     const date = $('ts-date')?.value;
     const user = find(state.users, uid, 'uid');
-    const wage = user ? Number(user.wage) || 14 : 14;
+    const wage = user ? Number(user.wage) || DEFAULT_WAGE : DEFAULT_WAGE;
     const work = calculateHours(start, end, date, null, brk);
     const total = work + bonus;
     const cost = total * wage;
@@ -2711,7 +2735,7 @@ async function saveTimesheet(nextDay = false) {
     if (!eventId || !userId || !date || !start || !end)
         return showToast('Bitte alle Pflichtfelder ausfüllen!', 'error');
     const user = find(state.users, userId, 'uid');
-    const wage = user ? (Number(user.wage) || 14) : 14;
+    const wage = user ? (Number(user.wage) || DEFAULT_WAGE) : DEFAULT_WAGE;
     const ev = find(state.events, eventId);
     const workHours = calculateHours(start, end, date, null, breakMinutes);
     if (workHours <= 0)
@@ -2764,10 +2788,8 @@ async function saveTimesheet(nextDay = false) {
 }
 
 function deleteTimesheet(id) {
-    if (confirm("Diese Zeiterfassung wirklich löschen?")) {
-        remove(ref(db, 'timesheets/' + id));
-        showToast("Erfassung gelöscht!", 'success');
-    }
+    if (!confirm("Diese Zeiterfassung wirklich löschen?")) return;
+    dbAction(remove(ref(db, 'timesheets/' + id)), 'Erfassung gelöscht!');
 }
 
 // ============================================================================
@@ -2831,12 +2853,17 @@ function resetPizza() {
 function calcIngredients() {
     const raw = {};
     const addGrams = (key, grams) => { raw[key] = (raw[key] || 0) + grams; };
-    const expand = (recipeId, qty) => {
+    const expand = (recipeId, qty, seen = new Set()) => {
+        if (seen.has(recipeId)) {
+            console.warn('Rezept-Zyklus erkannt:', recipeId);
+            return;
+        }
         const recipe = find(state.recipes, recipeId);
         if (!recipe) return;
+        const next = new Set(seen); next.add(recipeId);
         const ratio = recipe.yieldGrams ? (qty / recipe.yieldGrams) : qty;
         (recipe.items || []).forEach(item => {
-            if (item.recipeId) expand(item.recipeId, item.grams * ratio);
+            if (item.recipeId) expand(item.recipeId, item.grams * ratio, next);
             else if (item.ingredientId) addGrams(item.ingredientId, item.grams * ratio);
         });
     };
@@ -2933,7 +2960,7 @@ function calcCatering() {
         $('cat-marge-display').value = '-';
         return;
     }
-    const defs = state.cateringDefaults || { gas: 10, entsorgung: 15, miete: 45, kmsatz: 0.8, waren: 3.5, ust: 1.19, stundensatz: 14 };
+    const defs = state.cateringDefaults || { gas: 10, entsorgung: 15, miete: 45, kmsatz: 0.8, waren: 3.5, ust: 1.19, stundensatz: DEFAULT_WAGE };
     const stundensatz = Number(defs.stundensatz) || 14;
     const sortedScenarios = [...(state.cateringScenarios || [])].sort((a, b) => Number(a.max) - Number(b.max));
     let sz = sortedScenarios.find(s => gaeste >= Number(s.min) && gaeste <= Number(s.max));
@@ -3004,8 +3031,7 @@ function renderEinkauf() {
 
 function clearEinkauf() {
     if (!confirm('Möchtest du die Liste wirklich komplett leeren?')) return;
-    set(ref(db, 'einkauf'), []);
-    showToast("Liste geleert!", 'success');
+    dbAction(set(ref(db, 'einkauf'), []), 'Liste geleert!');
 }
 
 // ============================================================================
@@ -3039,10 +3065,8 @@ function saveKontakt() {
 }
 
 function deleteKontakt(id) {
-    if (confirm("Diesen Kontakt wirklich löschen?")) {
-        remove(ref(db, `kontakte/${id}`));
-        showToast('Kontakt gelöscht', 'success');
-    }
+    if (!confirm("Diesen Kontakt wirklich löschen?")) return;
+    dbAction(remove(ref(db, `kontakte/${id}`)), 'Kontakt gelöscht');
 }
 
 function renderKontakte() {
@@ -3067,9 +3091,9 @@ function renderKontakte() {
                         <div style="font-size: 18px; font-weight: 700;">${esc(k.name)}</div>
                         ${k.firma ? `<div class="muted" style="font-size: 13px; margin-top: 4px;">🏢 ${esc(k.firma)}</div>` : ''}
                         <div style="display:flex; flex-direction:column; gap:4px; margin-top: 12px; font-size:13px;">
-                            ${k.tel ? `<div>📞 <a href="javascript:void(0)" onclick="confirmAction('tel', 'tel:${escJs(k.tel)}')" style="color:var(--text); text-decoration:none;">${esc(k.tel)}</a></div>` : ''}
-                            ${k.email ? `<div>✉️ <a href="javascript:void(0)" onclick="confirmAction('mail', 'mailto:${escJs(k.email)}')" style="color:var(--text); text-decoration:none;">${esc(k.email)}</a></div>` : ''}
-                            ${k.adresse ? `<div>📍 <a href="javascript:void(0)" onclick="confirmAction('map', '${escJs(mapsUrl(k.adresse))}')" style="color:var(--text); text-decoration:none;">${esc(k.adresse)}</a></div>` : ''}
+                            ${k.tel ? `<div>📞 <a href="javascript:void(0)" data-confirm-type="tel" data-confirm-url="tel:${esc(k.tel)}" onclick="confirmActionEl(this)" style="color:var(--text); text-decoration:none;">${esc(k.tel)}</a></div>` : ''}
+                            ${k.email ? `<div>✉️ <a href="javascript:void(0)" data-confirm-type="mail" data-confirm-url="mailto:${esc(k.email)}" onclick="confirmActionEl(this)" style="color:var(--text); text-decoration:none;">${esc(k.email)}</a></div>` : ''}
+                            ${k.adresse ? `<div>📍 <a href="javascript:void(0)" data-confirm-type="map" data-confirm-url="${esc(mapsUrl(k.adresse))}" onclick="confirmActionEl(this)" style="color:var(--text); text-decoration:none;">${esc(k.adresse)}</a></div>` : ''}
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -3326,7 +3350,7 @@ function renderSettings() {
                 <option value="superadmin" ${u.role === 'superadmin' ? 'selected' : ''}>Superadmin</option>
             </select>
         </td>
-        <td><input type="number" id="wage-${esc(u.uid)}" value="${esc(u.wage || 14)}" style="width:70px; padding:6px;"></td>
+        <td><input type="number" id="wage-${esc(u.uid)}" value="${esc(u.wage || DEFAULT_WAGE)}" style="width:70px; padding:6px;"></td>
         <td style="white-space:nowrap;">
             <button class="btn-primary btn-sm" onclick="updateUser('${escJs(u.uid)}')">Speichern</button>
             <button class="btn-sm" onclick="openUserEditModal('${escJs(u.uid)}')" style="margin-left:4px;" title="Stammdaten bearbeiten">Bearbeiten</button>
@@ -3401,7 +3425,7 @@ function updateUser(uid) {
     if (!roleEl || !wageEl) return;
     dbAction(update(ref(db, `users/${uid}`), {
         role: roleEl.value,
-        wage: parseFloat(wageEl.value) || 14
+        wage: parseFloat(wageEl.value) || DEFAULT_WAGE
     }), 'Mitarbeiterdaten aktualisiert!');
 }
 
@@ -3472,7 +3496,7 @@ async function saveNewUser() {
         birthDate: $('uc-birthdate').value,
         hireDate: $('uc-hiredate').value,
         role: $('uc-role').value || 'staff',
-        wage: Number($('uc-wage').value) || 14,
+        wage: Number($('uc-wage').value) || DEFAULT_WAGE,
         notes: $('uc-notes').value.trim(),
         canLogin: $('uc-canlogin').checked,
         createdByAdmin: true,
@@ -3626,7 +3650,7 @@ Object.assign(window, {
     saveSettingsART, saveCateringSettings, updateUser, saveNewUser, sendCredentials,
     openUserEditModal, saveUserEdit,
     addScenarioRow, saveScenarios,
-    confirmAction,
+    confirmAction, confirmActionEl,
     openPlannerModal, plannerMove, savePlanner,
     changeCleaningPoints, resetCleaningRanking,
     showUserDetail, refreshUserDetail, exportUserMonthFromDetail, exportUserRangeFromDetail,
