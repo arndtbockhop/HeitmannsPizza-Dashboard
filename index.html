@@ -964,24 +964,11 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="planner-modal-title">
         <div class="modal-title" id="planner-modal-title">Personal einteilen</div>
         <div class="modal-body">
-            <div class="form-grid">
-                <div>
-                    <h4 style="margin-bottom: 10px; color: var(--green);">Verfügbar (Zugesagt)</h4>
-                    <div id="planner-avail-list" style="display:flex; flex-direction:column; gap:8px;"></div>
-                </div>
-                <div>
-                    <h4 style="margin-bottom: 10px; color: var(--blue);">Eingeteilt</h4>
-                    <div id="planner-assigned-list" style="display:flex; flex-direction:column; gap:8px;"></div>
-                </div>
+            <div class="planner-sticky-bar">
+                <button class="btn-primary" id="planner-save-btn" onclick="savePlanner()" disabled>💾 Keine Änderungen</button>
+                <div class="planner-sticky-counts" id="planner-counts">–</div>
             </div>
-            <details style="margin-top:16px;">
-                <summary style="cursor:pointer; font-weight:600; color:var(--muted);">Weitere Mitarbeiter (ohne Rückmeldung)</summary>
-                <div id="planner-others-list" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;"></div>
-            </details>
-        </div>
-        <div class="modal-footer">
-            <button onclick="closeModal('planner-modal')">Abbrechen</button>
-            <button class="btn-primary" onclick="savePlanner()">Speichern & Benachrichtigen</button>
+            <div id="planner-list"></div>
         </div>
     </div>
 </div>
