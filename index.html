@@ -2757,7 +2757,7 @@ function showEventDetail(id) {
                 <td>${esc(fmtDate(t.date))}</td>
                 <td>${esc(u.name)}${over ? '<span class="over-10h-badge">!</span>' : ''}</td>
                 <td>${esc(t.start)}&#8211;${esc(t.end)}</td>
-                <td>${Number(t.breakMinutes||0)} min</td>
+                <td>${Number(t.breakMinutes||0)} min${missingLegalBreak(t) ? ` <span title="Gesetzliche Mindestpause: ${suggestedBreakMinutes(t.start,t.end,t.date,null)} min" style="color:var(--amber); font-weight:700;">⚠️</span>` : ''}</td>
                 <td>${Number(t.workHours||0).toFixed(2)} h</td>
                 <td>${Number(t.bonus||0).toLocaleString('de-DE')}</td>
                 <td>${Number(t.totalHours||0).toFixed(2)} h</td>
