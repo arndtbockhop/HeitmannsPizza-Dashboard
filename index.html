@@ -1311,7 +1311,15 @@ const esc = (str) => {
         '"': '&quot;'
     }[tag] || tag));
 };
-const escJs = (str) => String(str || '').replace(/['"\\]/g, '\\$&');
+const escJs = (str) => String(str || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029')
+    .replace(/</g, '\\x3c');
 
 const pad2 = n => String(n).padStart(2, '0');
 const toLocalISO = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
@@ -1442,10 +1450,6 @@ function getDailyHours(uid, dateStr, excludeTsId = null) {
     return state.timesheets
         .filter(t => t && eq(t.userId, uid) && t.date === dateStr && t.id !== excludeTsId)
         .reduce((sum, t) => sum + (Number(t.totalHours) || 0), 0);
-}
-
-function isOver10h(uid, dateStr, excludeTsId = null) {
-    return getDailyHours(uid, dateStr, excludeTsId) > 10;
 }
 
 function timesheetsByEvent(eventId) {
@@ -2016,15 +2020,17 @@ onAuthStateChanged(auth, u => {
                 await ensureUserRecord(u);
                 return;
             }
-            if (!user.name || user.name.trim() === '') {
-                const defaultName = u.email.split('@')[0];
+            const nameStr = typeof user.name === 'string' ? user.name.trim() : '';
+            if (!nameStr) {
+                const defaultName = (u.email || '').split('@')[0] || 'Mitarbeiter';
                 set(ref(db, `users/${u.uid}/name`), defaultName);
                 user.name = defaultName;
             }
             state.role = user.role || 'staff';
             state.currentUserName = user.name;
             document.body.setAttribute('data-role', state.role);
-            $('dash-greeting').textContent = `Willkommen, ${user.name.split(' ')[0]}!`;
+            const firstName = String(user.name || '').split(' ')[0] || 'Mitarbeiter';
+            $('dash-greeting').textContent = `Willkommen, ${firstName}!`;
             enforceRBAC();
             if (!listenersInitialized) {
                 listenersInitialized = true;
@@ -2505,7 +2511,7 @@ function staffAvailStatusText(ev, stateKey, uid) {
 function renderStaffAvailCard(ev, stateKey, uid) {
     const dateDisp = fmtDateShort(ev.date);
     const endDateDisp = (ev.endDate && ev.endDate !== ev.date) ? ` – ${fmtDateShort(ev.endDate)}` : '';
-    const ort = ev.location || '';
+    const ort = ev.ort || '';
     const pendingCls = stateKey === 'pending' ? 'is-pending' : '';
     const badgeHtml = stateKey === 'pending'
         ? '<span class="staff-avail-badge is-pending">Offen</span>'
@@ -3076,13 +3082,16 @@ function openTimesheetModal(id) {
     $('ts-break-wrap').innerHTML = breakSelectHTML('ts-break', ts ? (ts.breakMinutes || 0) : 0);
     $('ts-bonus-wrap').innerHTML = bonusSelectHTML('ts-bonus', ts ? (ts.bonus || 0) : 0);
 
-    ['ts-start','ts-end','ts-break','ts-bonus','ts-user-id','ts-date'].forEach(eid => {
+    ['ts-start','ts-end','ts-bonus','ts-user-id','ts-date'].forEach(eid => {
         const el = $(eid);
         if (el) el.onchange = updateTimesheetLivePreview;
     });
     const breakEl = $('ts-break');
     if (breakEl) {
-        breakEl.addEventListener('change', () => { tsBreakManuallyTouched = true; });
+        breakEl.onchange = () => {
+            tsBreakManuallyTouched = true;
+            updateTimesheetLivePreview();
+        };
     }
 
     if (ts) {
@@ -3635,14 +3644,19 @@ function addBuilderItemRow() {
 
 function calculateBuilderTotal() {
     let totalCostGross = 0, totalCostNet = 0;
-    const expandCost = (rId, qty) => {
+    const expandCost = (rId, qty, seen = new Set()) => {
+        if (seen.has(rId)) {
+            console.warn('Rezept-Zyklus erkannt:', rId);
+            return { gross: 0, net: 0 };
+        }
         const r = find(state.recipes, rId);
         if (!r) return { gross: 0, net: 0 };
+        const nextSeen = new Set(seen); nextSeen.add(rId);
         const ratio = r.yieldGrams ? (qty / r.yieldGrams) : qty;
         let cGross = 0, cNet = 0;
         (r.items || []).forEach(i => {
             if (i.recipeId) {
-                const sub = expandCost(i.recipeId, i.grams * ratio);
+                const sub = expandCost(i.recipeId, i.grams * ratio, nextSeen);
                 cGross += sub.gross; cNet += sub.net;
             } else if (i.ingredientId) {
                 const ing = getIngredient(i.ingredientId);
@@ -3915,8 +3929,8 @@ function saveUserEdit() {
             if (ok === false) return;
             const existing = find(state.users, uid, 'uid') || {};
             syncEmployeeContact({ ...existing, ...fields, uid });
+            closeModal('user-edit-modal');
         });
-    closeModal('user-edit-modal');
 }
 
 function sendCredentials(email, name) {
