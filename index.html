@@ -1524,7 +1524,7 @@ function pdfFooter(doc) {
 
 function pdfSignatureBlock(doc, startY, opts = {}) {
     const pageH = doc.internal.pageSize.getHeight();
-    const needed = opts.withDisclaimer ? 55 : 30;
+    const needed = opts.withDisclaimer ? (opts.withOrt ? 75 : 55) : (opts.withOrt ? 50 : 30);
     let y = startY;
     if (y + needed > pageH - 25) {
         doc.addPage();
@@ -1542,14 +1542,17 @@ function pdfSignatureBlock(doc, startY, opts = {}) {
     doc.setFontSize(9);
     doc.setTextColor(0);
     const leftLabel = opts.leftLabel || 'Mitarbeiter';
-    doc.text('_______________________', 15, y);
-    doc.text(leftLabel, 15, y + 5);
     if (opts.withOrt) {
-        doc.text('_______________________', 80, y);
-        doc.text('Ort', 80, y + 5);
-        doc.text('_______________________', 145, y);
-        doc.text('Datum', 145, y + 5);
+        doc.text('_______________', 15, y);
+        doc.text('Ort', 15, y + 5);
+        doc.text('_______________', 55, y);
+        doc.text('Datum', 55, y + 5);
+        y += 18;
+        doc.text('_______________________', 15, y);
+        doc.text(leftLabel, 15, y + 5);
     } else {
+        doc.text('_______________________', 15, y);
+        doc.text(leftLabel, 15, y + 5);
         doc.text('_______________________', 110, y);
         doc.text('Datum', 110, y + 5);
     }
