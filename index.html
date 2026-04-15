@@ -1486,11 +1486,11 @@ function pdfHeader(doc, title, subtitle = '') {
     }
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
+    doc.setTextColor(0);
     doc.text('Heitmanns Pizza', 40, 18);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(0);
-    doc.text('Event-Catering · Hamburg', 40, 24);
+    doc.setFontSize(10);
+    doc.text('Heitmanns Pizza GbR', 195, 18, { align: 'right' });
     doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
     doc.text(title, 15, 40);
@@ -1524,7 +1524,7 @@ function pdfFooter(doc) {
 
 function pdfSignatureBlock(doc, startY, opts = {}) {
     const pageH = doc.internal.pageSize.getHeight();
-    const needed = opts.withDisclaimer ? (opts.withOrt ? 75 : 55) : (opts.withOrt ? 50 : 30);
+    const needed = opts.withDisclaimer ? (opts.withOrt ? 65 : 55) : (opts.withOrt ? 40 : 30);
     let y = startY;
     if (y + needed > pageH - 25) {
         doc.addPage();
@@ -1541,12 +1541,10 @@ function pdfSignatureBlock(doc, startY, opts = {}) {
     }
     doc.setFontSize(9);
     doc.setTextColor(0);
-    const leftLabel = opts.leftLabel || 'Mitarbeiter';
+    const leftLabel = opts.leftLabel || 'Aushilfe';
     if (opts.withOrt) {
-        doc.text('_______________', 15, y);
-        doc.text('Ort', 15, y + 5);
-        doc.text('_______________', 55, y);
-        doc.text('Datum', 55, y + 5);
+        doc.text('_______________________', 15, y);
+        doc.text('Ort, Datum', 15, y + 5);
         y += 18;
         doc.text('_______________________', 15, y);
         doc.text(leftLabel, 15, y + 5);
@@ -1659,10 +1657,10 @@ function exportEvent(eventId) {
     const list = timesheetsByEvent(eventId);
     const doc = pdfDoc();
     if (!doc) return;
-    const subtitle = ev.endDate && ev.endDate !== ev.date
+    const dateRange = ev.endDate && ev.endDate !== ev.date
         ? `${fmtDateShort(ev.date)} – ${fmtDateShort(ev.endDate)}`
         : fmtDateShort(ev.date || '');
-    const startY = pdfHeader(doc, `Event: ${ev.title || ''}`, subtitle);
+    const startY = pdfHeader(doc, 'Tätigkeit aus selbständiger Arbeit', `${ev.title || ''} · ${dateRange}`);
     doc.setFontSize(9);
     doc.text(`Typ: ${ev.type || '-'}`, 15, startY);
     doc.text(`Ort: ${ev.ort || '-'}`, 15, startY + 5);
@@ -1731,7 +1729,9 @@ function exportEvent(eventId) {
             head: [['Datum','Zeit','Pause','Arbeit','Gesamt','Kosten']],
             body,
             theme: 'grid',
-            headStyles: PDF_HEAD_STYLES,
+            headStyles: PDF_BW_HEAD_STYLES,
+            footStyles: PDF_BW_FOOT_STYLES,
+            bodyStyles: PDF_BW_BODY_STYLES,
             styles: PDF_STYLES,
             columnStyles: {
                 0: { halign: 'center' },
@@ -1741,13 +1741,13 @@ function exportEvent(eventId) {
             },
             didParseCell(data) {
                 if (data.section === 'body' && data.row.raw && data.row.raw._over) {
-                    data.cell.styles.fillColor = [220, 220, 220];
+                    data.cell.styles.fontStyle = 'bold';
                 }
             },
             foot: [[
-                { content: `Summe ${u.name}`, colSpan: 4, styles: { halign: 'right', fontStyle: 'bold', fillColor: [240,240,240] } },
-                { content: pdfHours(subH), styles: { halign: 'right', fontStyle: 'bold', fillColor: [240,240,240] } },
-                { content: pdfCurrency(subC), styles: { halign: 'right', fontStyle: 'bold', fillColor: [240,240,240] } }
+                { content: `Summe ${u.name}`, colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
+                { content: pdfHours(subH), styles: { halign: 'right', fontStyle: 'bold' } },
+                { content: pdfCurrency(subC), styles: { halign: 'right', fontStyle: 'bold' } }
             ]]
         });
         currentY = doc.lastAutoTable.finalY + 8;
@@ -1761,11 +1761,12 @@ function exportEvent(eventId) {
         startY: currentY + 4,
         margin: { bottom: 25 },
         body: [[
-            { content: 'Event-Summe', colSpan: 4, styles: { halign: 'right', fontStyle: 'bold', fillColor: [0,0,0], textColor: 255 } },
-            { content: pdfHours(totalH), styles: { halign: 'right', fontStyle: 'bold', fillColor: [0,0,0], textColor: 255 } },
-            { content: pdfCurrency(totalC), styles: { halign: 'right', fontStyle: 'bold', fillColor: [0,0,0], textColor: 255 } }
+            { content: 'Event-Summe', colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
+            { content: pdfHours(totalH), styles: { halign: 'right', fontStyle: 'bold' } },
+            { content: pdfCurrency(totalC), styles: { halign: 'right', fontStyle: 'bold' } }
         ]],
         theme: 'grid',
+        bodyStyles: PDF_BW_BODY_STYLES,
         styles: PDF_STYLES
     });
 
@@ -1791,7 +1792,7 @@ function exportRange({ from, to, uid = null, eventId = null }) {
         const ev = find(state.events, eventId);
         subtitleParts.push(`Event: ${ev ? ev.title : eventId}`);
     }
-    const startY = pdfHeader(doc, 'Zeiterfassung Zeitraum', subtitleParts.join(' · '));
+    const startY = pdfHeader(doc, 'Tätigkeit aus selbständiger Arbeit', subtitleParts.join(' · '));
     let totalH = 0, totalC = 0;
     const body = list.map(t => {
         totalH += Number(t.totalHours) || 0;
@@ -1832,7 +1833,7 @@ function exportRange({ from, to, uid = null, eventId = null }) {
             { content: pdfCurrency(totalC), styles: { halign: 'right', fontStyle: 'bold' } }
         ]]
     });
-    pdfSignatureBlock(doc, doc.lastAutoTable.finalY + 15, { withDisclaimer: true });
+    pdfSignatureBlock(doc, doc.lastAutoTable.finalY + 15, { withDisclaimer: true, withOrt: true, leftLabel: 'Aushilfe' });
     pdfFooter(doc);
     doc.save(pdfFilename('range', [from, to]));
 }
@@ -1844,7 +1845,7 @@ function exportSingleShift(tsId) {
     const u  = find(state.users, ts.userId, 'uid') || { name: '?' };
     const doc = pdfDoc();
     if (!doc) return;
-    const startY = pdfHeader(doc, `Quittung selbständige Tätigkeit`, `${u.name} · ${fmtDateShort(ts.date)}`);
+    const startY = pdfHeader(doc, 'Tätigkeit aus selbständiger Arbeit', `${u.name} · ${fmtDateShort(ts.date)}`);
     doc.setFontSize(11);
     const lines = [
         ['Aushilfe:',          u.name || ''],
