@@ -1573,6 +1573,9 @@ function pdfFilename(prefix, parts) {
 }
 
 const PDF_HEAD_STYLES = { fillColor: [0, 0, 0], textColor: 255, fontStyle: 'bold' };
+const PDF_BW_HEAD_STYLES = { fillColor: [255, 255, 255], textColor: 0, fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.3 };
+const PDF_BW_FOOT_STYLES = { fillColor: [255, 255, 255], textColor: 0, fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.3 };
+const PDF_BW_BODY_STYLES = { fillColor: [255, 255, 255], textColor: 0, lineColor: [0, 0, 0], lineWidth: 0.2 };
 const PDF_STYLES = { fontSize: 9, cellPadding: 2 };
 
 // ============================================================================
@@ -1590,7 +1593,7 @@ function exportUserMonth(uid, year, month) {
         .toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
     const doc = pdfDoc();
     if (!doc) return;
-    const startY = pdfHeader(doc, `Zeiterfassung ${user.name || user.email}`, monthName);
+    const startY = pdfHeader(doc, `Tätigkeit aus selbständiger Arbeit`, `${user.name || user.email} · ${monthName}`);
     doc.setFontSize(9);
     doc.text(`Email: ${user.email || ''}`, 15, startY);
     doc.text(`Telefon: ${user.phone || '-'}`, 15, startY + 5);
@@ -1621,7 +1624,9 @@ function exportUserMonth(uid, year, month) {
         head: [['Datum','Event','Start','Ende','Pause','Arbeit','Bonus','Gesamt','Lohn','Kosten']],
         body,
         theme: 'grid',
-        headStyles: PDF_HEAD_STYLES,
+        headStyles: PDF_BW_HEAD_STYLES,
+        footStyles: PDF_BW_FOOT_STYLES,
+        bodyStyles: PDF_BW_BODY_STYLES,
         styles: PDF_STYLES,
         columnStyles: {
             0: { halign: 'center' },
@@ -1633,7 +1638,7 @@ function exportUserMonth(uid, year, month) {
         },
         didParseCell(data) {
             if (data.section === 'body' && data.row.raw && data.row.raw._over) {
-                data.cell.styles.fillColor = [220, 220, 220];
+                data.cell.styles.fontStyle = 'bold';
             }
         },
         foot: [[
@@ -1812,11 +1817,13 @@ function exportRange({ from, to, uid = null, eventId = null }) {
         head: [['Datum','Mitarbeiter','Event','Zeit','Pause','Gesamt','Kosten']],
         body,
         theme: 'grid',
-        headStyles: PDF_HEAD_STYLES,
+        headStyles: PDF_BW_HEAD_STYLES,
+        footStyles: PDF_BW_FOOT_STYLES,
+        bodyStyles: PDF_BW_BODY_STYLES,
         styles: PDF_STYLES,
         didParseCell(data) {
             if (data.section === 'body' && data.row.raw && data.row.raw._over) {
-                data.cell.styles.fillColor = [220, 220, 220];
+                data.cell.styles.fontStyle = 'bold';
             }
         },
         foot: [[
