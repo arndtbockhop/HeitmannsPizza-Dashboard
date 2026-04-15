@@ -2999,10 +2999,12 @@ function renderTimesheets() {
     if (uc) uc.innerHTML = buildTable(['Mitarbeiter', 'Gesamtstunden', 'Gesamtlohn', 'Eingesetzt bei'], usrRows, 'Keine Mitarbeiter-Daten.');
 }
 
+let tsBreakManuallyTouched = false;
 function openTimesheetModal(id) {
     if (id && typeof id === 'object') id = null;
     state.editTimesheetId = id || null;
     const ts = id ? find(state.timesheets, id) : null;
+    tsBreakManuallyTouched = !!ts;
 
     $('ts-event-id').innerHTML = '<option value="">-- Event wählen --</option>' +
         state.events.map(e => `<option value="${esc(e.id)}">${esc(fmtDateShort(e.date))} - ${esc(e.title)}</option>`).join('');
@@ -3018,6 +3020,10 @@ function openTimesheetModal(id) {
         const el = $(eid);
         if (el) el.onchange = updateTimesheetLivePreview;
     });
+    const breakEl = $('ts-break');
+    if (breakEl) {
+        breakEl.addEventListener('change', () => { tsBreakManuallyTouched = true; });
+    }
 
     if (ts) {
         $('ts-event-id').value = ts.eventId;
@@ -3044,10 +3050,17 @@ function updateTimesheetModalDays() {
 
 function updateTimesheetLivePreview() {
     const start = $('ts-start')?.value, end = $('ts-end')?.value;
-    const brk = Number($('ts-break')?.value || 0);
     const bonus = Number($('ts-bonus')?.value || 0);
     const uid = $('ts-user-id')?.value;
     const date = $('ts-date')?.value;
+    if (!tsBreakManuallyTouched && start && end) {
+        const suggested = suggestedBreakMinutes(start, end, date, null);
+        const breakEl = $('ts-break');
+        if (breakEl && Number(breakEl.value) !== suggested) {
+            breakEl.value = String(suggested);
+        }
+    }
+    const brk = Number($('ts-break')?.value || 0);
     const user = find(state.users, uid, 'uid');
     const wage = user ? Number(user.wage) || DEFAULT_WAGE : DEFAULT_WAGE;
     const work = calculateHours(start, end, date, null, brk);
@@ -3120,6 +3133,7 @@ async function saveTimesheet(nextDay = false) {
             $('ts-end-wrap').innerHTML   = timeSelectHTML('ts-end', '');
             $('ts-break-wrap').innerHTML = breakSelectHTML('ts-break', 0);
             $('ts-bonus-wrap').innerHTML = bonusSelectHTML('ts-bonus', 0);
+            tsBreakManuallyTouched = false;
             ['ts-start','ts-end','ts-break','ts-bonus'].forEach(eid => {
                 const el = $(eid);
                 if (el) el.onchange = updateTimesheetLivePreview;
