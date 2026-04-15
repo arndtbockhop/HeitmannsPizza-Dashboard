@@ -625,47 +625,54 @@
 
         .mobile-bottom-nav { display: none; }
 
-        @media (max-width: 900px) {
-            .sidebar { display: none !important; }
-            .main { padding: 16px 14px 100px; }
-            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-            .page-title { font-size: 24px; }
-            .form-grid, .event-grid, .cards-grid { grid-template-columns: 1fr; }
-            input, select, textarea { font-size: 16px; min-height: 44px; }
-            button { min-height: 44px; }
-            .mobile-bottom-nav {
-                display: flex; position: fixed;
-                bottom: 0; left: 0; right: 0;
-                background: rgba(255, 255, 255, 0.78);
-                backdrop-filter: blur(24px) saturate(180%);
-                -webkit-backdrop-filter: blur(24px) saturate(180%);
-                border-top: 1px solid var(--border);
-                padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-                gap: 8px; z-index: 1000;
-                justify-content: flex-start;
-                overflow-x: auto; -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
-            }
-            .mobile-bottom-nav::-webkit-scrollbar { display: none; }
-            .mobile-bottom-nav button {
-                flex: 0 0 auto; min-width: 75px;
-                font-size: 13px; font-weight: 600;
-                padding: 10px 18px;
-                border: none;
-                background: rgba(10, 37, 64, 0.06);
-                color: var(--muted);
-                border-radius: 999px;
-                white-space: nowrap;
-                transition: all 0.25s var(--ease);
-                box-shadow: none;
-            }
-            .mobile-bottom-nav button.active {
-                background: linear-gradient(135deg, var(--blue), var(--navy-soft));
-                color: #fff;
-                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
-            }
-            .cal-day { min-height: 64px; padding: 6px; }
-            .modal { max-width: 95%; max-height: 88vh; margin: auto; }
+        html.is-mobile .sidebar { display: none !important; }
+        html.is-mobile .main { padding: 16px 14px 100px; }
+        html.is-mobile .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+        html.is-mobile .page-title { font-size: 24px; }
+        html.is-mobile .form-grid,
+        html.is-mobile .event-grid,
+        html.is-mobile .cards-grid { grid-template-columns: 1fr; }
+        html.is-mobile input,
+        html.is-mobile select,
+        html.is-mobile textarea { font-size: 16px; min-height: 44px; }
+        html.is-mobile button { min-height: 44px; }
+        html.is-mobile .mobile-bottom-nav {
+            display: flex; position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-top: 1px solid var(--border);
+            padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+            gap: 8px; z-index: 1000;
+            justify-content: flex-start;
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        html.is-mobile .mobile-bottom-nav::-webkit-scrollbar { display: none; }
+        html.is-mobile .mobile-bottom-nav button {
+            flex: 0 0 auto; min-width: 75px;
+            font-size: 13px; font-weight: 600;
+            padding: 10px 18px;
+            border: none;
+            background: rgba(10, 37, 64, 0.06);
+            color: var(--muted);
+            border-radius: 999px;
+            white-space: nowrap;
+            transition: all 0.25s var(--ease);
+            box-shadow: none;
+        }
+        html.is-mobile .mobile-bottom-nav button.active {
+            background: linear-gradient(135deg, var(--blue), var(--navy-soft));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+        html.is-mobile .cal-day { min-height: 64px; padding: 6px; }
+        html.is-mobile .modal { max-width: 95%; max-height: 88vh; margin: auto; }
+
+        .view-mode-toggle {
+            display: flex; align-items: center; justify-content: center;
+            gap: 6px; font-size: 13px; font-weight: 600;
         }
         /* 10h-Überschreitung Markierung */
         .over-10h { background: rgba(220, 38, 38, 0.08) !important; }
@@ -696,6 +703,17 @@
     </style>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.3/dist/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        (function() {
+            try {
+                var mode = localStorage.getItem('hp_viewMode') || 'auto';
+                if (mode !== 'auto' && mode !== 'mobile' && mode !== 'desktop') mode = 'auto';
+                document.documentElement.setAttribute('data-view-mode', mode);
+                var isMobile = mode === 'mobile' || (mode === 'auto' && window.matchMedia('(max-width: 900px)').matches);
+                if (isMobile) document.documentElement.classList.add('is-mobile');
+            } catch (e) {}
+        })();
+    </script>
 </head>
 <body data-role="staff">
 
@@ -729,7 +747,8 @@
         <button class="nav-item staff-only" onclick="navTo('verfuegbarkeit', this)">Meine Verfügbarkeit</button>
         <button class="nav-item admin-only" onclick="navTo('team', this)">Mitarbeiter</button>
         <button class="nav-item superadmin-only" onclick="navTo('settings', this)">Einstellungen</button>
-        <button class="nav-item" style="margin-top: auto; color: var(--red);" onclick="authSignOut()">Logout</button>
+        <button class="nav-item" id="view-mode-btn-sidebar" style="margin-top: auto;" onclick="cycleViewMode()" title="Ansicht umschalten">Ansicht: Auto</button>
+        <button class="nav-item" style="color: var(--red);" onclick="authSignOut()">Logout</button>
     </aside>
     <main class="main">
         <div class="page active" id="page-dashboard">
@@ -957,6 +976,7 @@
         <button class="admin-only" onclick="navTo('kontakte', this)">Kontakte</button>
         <button class="admin-only" onclick="navTo('team', this)">MA</button>
         <button class="superadmin-only" onclick="navTo('settings', this)">Settings</button>
+        <button id="view-mode-btn-mobile" onclick="cycleViewMode()" title="Ansicht umschalten">Auto</button>
     </nav>
 </div>
 
@@ -2176,6 +2196,39 @@ function initGranularListeners() {
         }));
     }
 }
+
+// ============================================================================
+// VIEW MODE (auto / mobile / desktop)
+// ============================================================================
+const VIEW_MODES = ['auto', 'mobile', 'desktop'];
+const VIEW_MODE_LABELS = { auto: 'Auto', mobile: 'Mobil', desktop: 'Desktop' };
+const VIEW_MODE_ICONS = { auto: '🔄', mobile: '📱', desktop: '💻' };
+const viewModeMql = window.matchMedia('(max-width: 900px)');
+
+function applyViewMode() {
+    let mode = localStorage.getItem('hp_viewMode') || 'auto';
+    if (!VIEW_MODES.includes(mode)) mode = 'auto';
+    const isMobile = mode === 'mobile' || (mode === 'auto' && viewModeMql.matches);
+    document.documentElement.setAttribute('data-view-mode', mode);
+    document.documentElement.classList.toggle('is-mobile', isMobile);
+    const sidebarBtn = $('view-mode-btn-sidebar');
+    if (sidebarBtn) sidebarBtn.textContent = `${VIEW_MODE_ICONS[mode]} Ansicht: ${VIEW_MODE_LABELS[mode]}`;
+    const mobileBtn = $('view-mode-btn-mobile');
+    if (mobileBtn) mobileBtn.textContent = `${VIEW_MODE_ICONS[mode]} ${VIEW_MODE_LABELS[mode]}`;
+}
+
+function cycleViewMode() {
+    const current = localStorage.getItem('hp_viewMode') || 'auto';
+    const idx = VIEW_MODES.indexOf(current);
+    const next = VIEW_MODES[(idx + 1) % VIEW_MODES.length] || 'auto';
+    try { localStorage.setItem('hp_viewMode', next); } catch (e) {}
+    applyViewMode();
+}
+
+viewModeMql.addEventListener('change', () => {
+    const mode = localStorage.getItem('hp_viewMode') || 'auto';
+    if (mode === 'auto') applyViewMode();
+});
 
 // ============================================================================
 // NAVIGATION
@@ -4100,11 +4153,14 @@ function exportUserRangeFromDetail() {
     exportRange({ from, to, uid });
 }
 
+applyViewMode();
+
 // ============================================================================
 // EXPORT TO WINDOW
 // ============================================================================
 Object.assign(window, {
     doLogin, authSignOut, navTo, switchSettingsTab, switchTermineView, switchAuswertung,
+    cycleViewMode, applyViewMode,
     openModal, closeModal,
     clearNotifications, savePin, openRankingModal,
     changeMonth, openDayEventsModal,
