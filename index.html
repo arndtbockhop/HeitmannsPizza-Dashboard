@@ -1380,6 +1380,20 @@ function calculateHours(startStr, endStr, startDateStr, endDateStr, breakMinutes
     return net > 0 ? net : 0;
 }
 
+function suggestedBreakMinutes(startStr, endStr, startDateStr, endDateStr) {
+    if (!startStr || !endStr) return 0;
+    const gross = calculateHours(startStr, endStr, startDateStr, endDateStr, 0);
+    if (gross > 9) return 45;
+    if (gross > 6) return 30;
+    return 0;
+}
+
+function missingLegalBreak(ts) {
+    if (!ts || !ts.start || !ts.end) return false;
+    const required = suggestedBreakMinutes(ts.start, ts.end, ts.date, null);
+    return Number(ts.breakMinutes || 0) < required;
+}
+
 // ============================================================================
 // TIMESHEET CONSTANTS AND HELPERS
 // ============================================================================
