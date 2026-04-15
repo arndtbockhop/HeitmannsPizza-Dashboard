@@ -1643,7 +1643,7 @@ function exportUserMonth(uid, year, month) {
             { content: pdfCurrency(totalC), styles: { halign: 'right', fontStyle: 'bold' } }
         ]]
     });
-    pdfSignatureBlock(doc, doc.lastAutoTable.finalY + 15, { withDisclaimer: true });
+    pdfSignatureBlock(doc, doc.lastAutoTable.finalY + 15, { withDisclaimer: true, withOrt: true, leftLabel: 'Aushilfe' });
     pdfFooter(doc);
     doc.save(pdfFilename('ma', [user.name || uid, `${year}-${mm}`]));
 }
